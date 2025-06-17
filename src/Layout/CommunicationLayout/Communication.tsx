@@ -35,7 +35,7 @@ export const Communication = () => {
     const showTabButtons = !location.pathname.includes('/recognition');
 
     return (
-        <div className="md:p-6 mx-3">
+        <div className="md:p-6 mx-2">
             <h1 className="text-2xl font-bold mb-6">Communication</h1>
 
             {/* Conditionally render tab buttons */}

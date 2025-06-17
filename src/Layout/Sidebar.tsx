@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         const isSubmenuItemActive = item.submenu ? isSubmenuActive(item.submenu) : false;
 
         return (
-            <div key={item.name}>
+            <div key={item.name} className='' >
                 {item.hasSubmenu ? (
                     <button
                         onClick={() => toggleSubmenu(item.name)}
@@ -234,16 +234,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return (
         <>
             {/* Desktop sidebar */}
-            <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-30">
+            <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-30 py-14">
                 <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
-                    <div className="flex items-center h-16 flex-shrink-0 px-6 border-b border-gray-200">
-                        <div className="flex items-center">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                                <LayoutDashboard className="h-5 w-5 text-white" />
-                            </div>
-                            <span className="ml-3 text-xl font-bold text-gray-900">WorkSpace</span>
-                        </div>
-                    </div>
+
 
                     <nav className="flex-grow mt-6 pb-4 overflow-y-auto">
                         <div className="px-3 space-y-1">
@@ -269,20 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
             >
-                <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                    <div className="flex items-center">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                            <LayoutDashboard className="h-5 w-5 text-white" />
-                        </div>
-                        <span className="ml-3 text-xl font-bold text-gray-900">WorkSpace</span>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
-                </div>
+
 
                 <nav className="mt-6 pb-20 overflow-y-auto h-full">
                     <div className="px-3 space-y-1">
