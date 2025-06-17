@@ -6,13 +6,13 @@ export const Chat = () => {
     <div>
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h2 className="text-xl font-semibold mb-3 text-primary">Chat</h2>
+          <h2 className="text-2xl font-semibold mb-3 text-primary">Chat</h2>
           <p className="text-gray-700">
             This is where your team chat messages will appear.
           </p>
         </div>
 
-        <button className="bg-primary p-2 px-4 flex items-center gap-2 rounded-lg text-white">
+        <button className="bg-primary hover:bg-primary/90 transition-colors p-3 cursor-pointer px-4 flex items-center gap-2 rounded-lg text-white">
           <PenLine /> Create New
         </button>
       </div>
