@@ -41,7 +41,7 @@ export const UserLayout = () => {
 
             {/* Conditionally render tab buttons and the "Add +" section */}
             {showTabButtons && (
-                <div className="flex justify-between items-center mb-6"> {/* Added items-center for vertical alignment */}
+                <div className="flex  items-center mb-6"> {/* Added items-center for vertical alignment */}
                     <div className='flex gap-4'>
                         {/* User Tab Button */}
                         <button
@@ -66,13 +66,7 @@ export const UserLayout = () => {
                         </button>
                     </div>
 
-                    <div>
-                        <h1 className='text-xl font-bold'>Employee Directory</h1>
-                        {/* You can put an "Add +" button or icon here */}
-                        <button className="bg-green-500 text-white py-1 px-3 rounded-md hover:bg-green-600 transition-colors duration-200 ml-4">
-                            Add +
-                        </button>
-                    </div>
+
                 </div>
             )}
 
