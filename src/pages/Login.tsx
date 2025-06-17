@@ -1,5 +1,5 @@
 // src/pages/LoginPage.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Step1PhoneNumber from '../components/Step1PhoneNumber';
 import Step2VerifyCode from '../components/Step2VerifyCode';
 import Step3ProjectSelection from '../components/Step3ProjectSelection';

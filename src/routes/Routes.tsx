@@ -12,7 +12,10 @@ import { Chat } from "@/pages/Chats";
 import Recognition from "@/pages/Recognition";
 
 import { Communication } from "@/Layout/CommunicationLayout/Communication";
-import User from "@/Layout/UserLayout/UserLayout";
+
+import UserProfile from "@/pages/UserProfile";
+import { UserLayout } from "@/Layout/UserLayout/UserLayout";
+import User from "@/pages/User";
 
 
 const routes = createBrowserRouter([
@@ -46,8 +49,26 @@ const routes = createBrowserRouter([
         ]
       },
       {
+
+      },
+
+      {
         path: "/user",
-        element: <User></User>
+        element: <UserLayout></UserLayout>,
+        children: [
+          {
+            index: true,
+            element: <User></User>
+          },
+          {
+            path: "user",
+            element: <Chat />
+          },
+          {
+            path: "user-profile",
+            element: <UserProfile></UserProfile>
+          },
+        ]
       },
 
     ],

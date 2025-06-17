@@ -52,10 +52,17 @@ const navigation: NavigationItem[] = [
         ]
     },
     {
-        name: 'Users',
-        icon: Users,
-        path: '/user'
+        name: 'User',
+        path: '/user',
+
+        icon: MessageSquare,
+        hasSubmenu: true,
+        submenu: [
+            { name: 'User', icon: Award, path: '/user/user' },
+            { name: 'User Profile', icon: Mail, path: '/user/user-profile' }
+        ]
     },
+
     {
         name: 'Survey & Poll',
         icon: BarChart3,
@@ -106,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     const renderNavigationItem = (item: NavigationItem) => {
         const isExpanded = expandedMenus.includes(item.name);
-        const isActive = item.path ? location.pathname === item.path : false;
+        // const isActive = item.path ? location.pathname === item.path : false;
         const isSubmenuItemActive = item.submenu ? isSubmenuActive(item.submenu) : false;
 
         return (
