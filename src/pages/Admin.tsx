@@ -176,7 +176,7 @@ const Admin: React.FC = () => {
   // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Close filter modal
+     
       if (
         filterModalRef.current &&
         !filterModalRef.current.contains(event.target as Node) &&
