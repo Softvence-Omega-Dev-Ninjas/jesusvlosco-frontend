@@ -35,16 +35,16 @@ export const Communication = () => {
     const showTabButtons = !location.pathname.includes('/recognition');
 
     return (
-        <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">Communication</h1>
+        <div className="md:p-6 mx-3">
+            <h1 className="text-2xl font-bold mb-6">Communication</h1>
 
             {/* Conditionally render tab buttons */}
             {showTabButtons && (
-                <div className="flex justify-between space-x-4 mb-6">
+                <div className="flex flex-col md:flex-row justify-between space-x-2 mb-6">
                     <div className='flex gap-4'>
                         <button
                             onClick={() => setActiveTab('chat')}
-                            className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'chat'
+                            className={`md:py-2 md:px-4 whitespace-nowrap  text-lg rounded-md transition duration-200 ${activeTab === 'chat'
                                 ? 'bg-purple-700 text-white shadow-md'
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                 }`}
@@ -54,7 +54,7 @@ export const Communication = () => {
 
                         <button
                             onClick={() => setActiveTab('community')}
-                            className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'community'
+                            className={`md:py-2 md:px-4 whitespace-nowrap text-lg rounded-md transition duration-200 ${activeTab === 'community'
                                 ? 'bg-purple-700 text-white shadow-md'
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                 }`}
