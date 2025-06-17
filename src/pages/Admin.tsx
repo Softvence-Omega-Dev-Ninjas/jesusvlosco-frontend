@@ -171,7 +171,7 @@ const Admin: React.FC = () => {
   const actionModalRef = useRef<HTMLDivElement>(null);
   const tableFilterButtonRef = useRef<HTMLButtonElement>(null);
   const threeDotsButtonRef = useRef<HTMLButtonElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null); // New ref for the main container
+  const mainContainerRef = useRef<HTMLDivElement>(null); 
 
   // Close modals when clicking outside
   useEffect(() => {
@@ -396,7 +396,7 @@ const Admin: React.FC = () => {
 
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        {/* Search Input */}
+       
         <div className="relative w-full sm:max-w-md">
           <input
             type="text"
