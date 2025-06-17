@@ -158,7 +158,7 @@ const initialUsers: User[] = [
   },
 ];
 
-const App: React.FC = () => {
+const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
@@ -674,4 +674,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default Admin ;
