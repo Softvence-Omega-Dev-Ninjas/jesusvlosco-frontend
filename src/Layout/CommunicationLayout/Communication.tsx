@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom'; // Import useLocation
-import { Chat } from './Chats'; // Assuming this is correct
-import { CompanyUpdate } from './CompanyUpdate'; // Assuming this is correct
+import { Chat } from '../../pages/Chats'; // Assuming this is correct
+import { CompanyUpdate } from '../../pages/CompanyUpdate'; // Assuming this is correct
 
 export const Communication = () => {
     const [activeTab, setActiveTab] = useState('chat'); // Default to 'chat'
