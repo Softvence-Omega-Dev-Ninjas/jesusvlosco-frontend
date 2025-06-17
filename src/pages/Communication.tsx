@@ -1,0 +1,83 @@
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom'; // Import useLocation
+import { Chat } from './Chats'; // Assuming this is correct
+import { CompanyUpdate } from './CompanyUpdate'; // Assuming this is correct
+
+export const Communication = () => {
+    const [activeTab, setActiveTab] = useState('chat'); // Default to 'chat'
+    const location = useLocation(); // Get the current location object
+
+    const renderContent = () => {
+        // Check if the current path includes 'recognition'
+        // This will allow rendering Recognition specific content when the URL is /communication/recognition
+        if (location.pathname.includes('/recognition')) {
+            return (
+                <div className="p-4 bg-white rounded-lg shadow">
+                    <h2 className="text-xl font-semibold mb-3">Recognition Content</h2>
+                    <p className="text-gray-700">
+                        This section displays content specific to Recognition.
+                        The tab-switching UI is hidden for this specific route.
+                    </p>
+                </div>
+            );
+        }
+
+        // If not on the /recognition path, proceed with tab-switching logic
+        if (activeTab === 'chat') {
+            return <Chat />;
+        } else if (activeTab === 'community') {
+            return <CompanyUpdate />;
+        }
+        return null; // Fallback
+    };
+
+    // Determine if the tab buttons should be displayed
+    const showTabButtons = !location.pathname.includes('/recognition');
+
+    return (
+        <div className="p-6">
+            <h1 className="text-3xl font-bold mb-6">Communication</h1>
+
+            {/* Conditionally render tab buttons */}
+            {showTabButtons && (
+                <div className="flex justify-between space-x-4 mb-6">
+                    <div className='flex gap-4'>
+                        <button
+                            onClick={() => setActiveTab('chat')}
+                            className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'chat'
+                                ? 'bg-purple-700 text-white shadow-md'
+                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                }`}
+                        >
+                            Team Chat
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('community')}
+                            className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'community'
+                                ? 'bg-purple-700 text-white shadow-md'
+                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                }`}
+                        >
+                            Company Update & announcement
+                        </button>
+                    </div>
+
+                    <div>
+                        <h1 className='text-xl font-bold'>Employee Directory</h1>
+                        <div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+            )}
+
+            {/* Conditionally render content based on activeTab or location */}
+            <div>
+                {renderContent()}
+            </div>
+        </div>
+    );
+};
