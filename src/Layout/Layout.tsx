@@ -31,7 +31,6 @@ export const Layout: React.FC<LayoutProps> = () => {
         {/* Main content area */}
         <div className="flex-1 flex flex-col lg:ml-64 md:mx-4">
           <Header onMenuClick={() => setSidebarOpen(true)} />
-
           <main className="flex-1 mx-4 ">
             <Outlet></Outlet>
           </main>
