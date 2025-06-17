@@ -35,7 +35,7 @@ export const UserLayout = () => {
     const showTabButtons = !location.pathname.includes('/user-profile');
 
     return (
-        <div className="p-6">
+        <div className="md:p-6 mx-3">
             {/* The h1 was 'Communication' previously, assuming you want 'User Management' here */}
             <h1 className="text-3xl font-bold mb-6">User Management</h1>
 
