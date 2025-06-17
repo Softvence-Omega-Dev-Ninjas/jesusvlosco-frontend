@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2">
       <div className="flex items-center justify-between">
         {/* Mobile menu button */}
         <button
@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
         {/* Page title */}
         <div className="flex-1 lg:flex-none">
-          <h1 className="text-2xl font-semibold text-gray-900 ml-4 lg:ml-0">Dashboard</h1>
+          <h1 className="md:text-2xl font-semibold text-gray-900 md:ml-4 lg:ml-0">Dashboard</h1>
         </div>
 
         {/* Search and user section */}
@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </div>
 
           {/* Mobile search button */}
-          <button className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+          <button className="hidden md:block p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
             <Search className="h-5 w-5" />
           </button>
 
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </button>
 
           {/* Settings */}
-          <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+          <button className="p-2 hidden md:block rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
             <Settings className="h-5 w-5" />
           </button>
 
