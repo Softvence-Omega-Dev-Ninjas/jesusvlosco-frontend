@@ -625,7 +625,7 @@ const Admin: React.FC = () => {
       {showFilterModal && filterModalTopPosition !== null && (
         <div
           ref={filterModalRef}
-          className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-4"
+          className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-2"
           style={{ top: filterModalTopPosition }}
         >
           <div className="px-4 py-2">
