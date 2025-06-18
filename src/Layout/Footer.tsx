@@ -10,17 +10,7 @@ export const Footer: React.FC = () => {
           © {currentYear} <span className="font-medium">Company Name.com</span> All rights reserved.
         </div>
 
-        <div className="flex items-center space-x-6 text-sm text-gray-500">
-          <a href="#" className="hover:text-gray-700 transition-colors duration-200">
-            Privacy Policy
-          </a>
-          <a href="#" className="hover:text-gray-700 transition-colors duration-200">
-            Terms of Service
-          </a>
-          <a href="#" className="hover:text-gray-700 transition-colors duration-200">
-            Support
-          </a>
-        </div>
+
       </div>
     </footer>
   );

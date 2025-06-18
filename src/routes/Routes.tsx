@@ -4,14 +4,18 @@ import App from "../App";
 import NotFound from "../pages/NotFound";
 
 import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
+
 import Dashboard from "@/pages/Dashboard";
 
-import User from "@/pages/User";
+
 import { Chat } from "@/pages/Chats";
 import Recognition from "@/pages/Recognition";
-import { CompanyUpdate } from "@/pages/CompanyUpdate";
-import { Communication } from "@/pages/Communication";
+
+import { Communication } from "@/Layout/CommunicationLayout/Communication";
+
+import UserProfile from "@/pages/UserProfile";
+import { UserLayout } from "@/Layout/UserLayout/UserLayout";
+import User from "@/pages/User";
 
 
 const routes = createBrowserRouter([
@@ -28,25 +32,43 @@ const routes = createBrowserRouter([
       },
       {
         path: "/communication",
-        element: <Communication />, // Parent layout component for Chat & Community
+        element: <Communication />,
         children: [
           {
-            index: true, // Default child route for /communication (e.g., show chat by default)
+            index: true,
             element: <Chat />
           },
           {
-            path: "chat", // Full path: /communication/chat
+            path: "chat",
             element: <Chat />
           },
           {
-            path: "recognition", // Full path: /communication/community
+            path: "recognition",
             element: <Recognition></Recognition>
           }
         ]
       },
       {
+
+      },
+
+      {
         path: "/user",
-        element: <User></User>
+        element: <UserLayout></UserLayout>,
+        children: [
+          {
+            index: true,
+            element: <User></User>
+          },
+          {
+            path: "user",
+            element: <Chat />
+          },
+          {
+            path: "user-profile",
+            element: <UserProfile></UserProfile>
+          },
+        ]
       },
 
     ],

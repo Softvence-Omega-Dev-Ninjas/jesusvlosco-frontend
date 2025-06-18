@@ -9,7 +9,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC<LayoutProps> = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -17,20 +17,21 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40  lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <div className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className='mt-4'>
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        </div>
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col lg:ml-64">
+        <div className="flex-1 flex flex-col lg:ml-64 md:mx-4">
           <Header onMenuClick={() => setSidebarOpen(true)} />
-
-          <main className="flex-1 p-6">
+          <main className="flex-1 mx-4 ">
             <Outlet></Outlet>
           </main>
 
