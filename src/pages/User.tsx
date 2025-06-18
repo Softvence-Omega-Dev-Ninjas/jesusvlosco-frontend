@@ -22,7 +22,10 @@ interface User {
 
 const initialUsers: User[] = [
   {
+
+
     id: "213891",
+
     avatar: user1,
     name: "Cody Fisher",
     email: "nevaeh.simmons@example.com",
@@ -31,7 +34,9 @@ const initialUsers: User[] = [
     lastLogin: "2/11/12",
   },
   {
+
     id: "213892",
+
     avatar: user2,
     name: "Leslie Alexander",
     email: "kenzi.lawson@example.com",
@@ -40,7 +45,9 @@ const initialUsers: User[] = [
     lastLogin: "4/4/18",
   },
   {
+
     id: "213893",
+
     avatar: user3,
     name: "Kristin Watson",
     email: "georgia.young@example.com",
@@ -49,7 +56,9 @@ const initialUsers: User[] = [
     lastLogin: "7/18/17",
   },
   {
+
     id: "213894",
+
     avatar: user4,
     name: "Robert Fox",
     email: "sara.cruz@example.com",
@@ -58,7 +67,9 @@ const initialUsers: User[] = [
     lastLogin: "6/21/19",
   },
   {
+
     id: "213895",
+
     avatar: user5,
     name: "Jacob Jones",
     email: "nathan.roberts@example.com",
@@ -67,7 +78,9 @@ const initialUsers: User[] = [
     lastLogin: "1/28/17",
   },
   {
+
     id: "213896",
+
     avatar: user6,
     name: "Theresa Webb",
     email: "deanna.curtis@example.com",
@@ -76,7 +89,9 @@ const initialUsers: User[] = [
     lastLogin: "8/21/15",
   },
   {
+
     id: "213897",
+
     avatar: user1,
     name: "Guy Hawkins",
     email: "bill.sanders@example.com",
@@ -85,7 +100,9 @@ const initialUsers: User[] = [
     lastLogin: "8/30/14",
   },
   {
+
     id: "213898",
+
     avatar: user2,
     name: "Kathryn Murphy",
     email: "debra.holt@example.com",
@@ -94,7 +111,9 @@ const initialUsers: User[] = [
     lastLogin: "8/15/17",
   },
   {
+
     id: "213810",
+
     avatar: user3,
     name: "Devon Lane",
     email: "michelle.rivera@example.com",
@@ -103,7 +122,9 @@ const initialUsers: User[] = [
     lastLogin: "5/7/16",
   },
   {
+
     id: "213811",
+
     avatar: user4,
     name: "Esther Howard",
     email: "tanya.hill@example.com",
@@ -112,7 +133,9 @@ const initialUsers: User[] = [
     lastLogin: "1/31/14",
   },
   {
+
     id: "213812",
+
     avatar: user5,
     name: "Arlene McCoy",
     email: "willie.jennings@example.com",
@@ -121,7 +144,9 @@ const initialUsers: User[] = [
     lastLogin: "9/4/12",
   },
   {
+
     id: "213813",
+
     avatar: user6,
     name: "Dianne Russell",
     email: "jessica.hanson@example.com",
@@ -130,7 +155,9 @@ const initialUsers: User[] = [
     lastLogin: "6/19/14",
   },
   {
+
     id: "21313",
+
     avatar: user1,
     name: "Marvin McKinney",
     email: "debbie.baker@example.com",
@@ -139,7 +166,9 @@ const initialUsers: User[] = [
     lastLogin: "5/30/14",
   },
   {
+
     id: "213814",
+
     avatar: user2,
     name: "Savannah Nguyen",
     email: "tim.jennings@example.com",
@@ -148,7 +177,9 @@ const initialUsers: User[] = [
     lastLogin: "11/7/16",
   },
   {
+
     id: "213815",
+
     avatar: user3,
     name: "Wade Warren",
     email: "curtis.weaver@example.com",
@@ -159,9 +190,11 @@ const initialUsers: User[] = [
 ];
 //testing component
 const User: React.FC = () => {
+
   const [users] = useState<User[]>(initialUsers);
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
+
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
     useState<boolean>(false);
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
@@ -280,6 +313,7 @@ const User: React.FC = () => {
     }
     if (showActionModal) setShowActionModal(false);
   };
+
 
   // --- Search filter logic ---
   const filteredUsers = users.filter((user) => {
@@ -517,8 +551,10 @@ const User: React.FC = () => {
           <input
             type="text"
             placeholder="Search names, roles, department..."
+
             value={searchTerm}
             onChange={handleSearchChange}
+
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -717,6 +753,7 @@ const User: React.FC = () => {
                 <input
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+
                   checked={isHeaderCheckboxChecked}
                   onChange={handleHeaderCheckboxChange}
                   ref={(input) => {
@@ -724,6 +761,7 @@ const User: React.FC = () => {
                       input.indeterminate = isHeaderCheckboxIndeterminate;
                     }
                   }}
+
                 />
               </th>
               <th
@@ -796,14 +834,18 @@ const User: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
+
             {filteredUsers.map((user) => (
+
               <tr key={user.email} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+
                     checked={selectedUserIds.includes(user.id)} // Control checked state
                     onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
+
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -31,7 +31,11 @@ const initialUsers: User[] = [
     lastLogin: "2/11/12",
   },
   {
+
+
     id: "21390",
+
+
     avatar: user2,
     name: "Leslie Alexander",
     email: "kenzi.lawson@example.com",
@@ -40,7 +44,11 @@ const initialUsers: User[] = [
     lastLogin: "4/4/18",
   },
   {
+
+
     id: "21391",
+
+
     avatar: user3,
     name: "Kristin Watson",
     email: "georgia.young@example.com",
@@ -49,7 +57,11 @@ const initialUsers: User[] = [
     lastLogin: "7/18/17",
   },
   {
+
+
     id: "21392",
+
+
     avatar: user4,
     name: "Robert Fox",
     email: "sara.cruz@example.com",
@@ -58,7 +70,11 @@ const initialUsers: User[] = [
     lastLogin: "6/21/19",
   },
   {
+
+
     id: "21393",
+
+
     avatar: user5,
     name: "Jacob Jones",
     email: "nathan.roberts@example.com",
@@ -67,7 +83,11 @@ const initialUsers: User[] = [
     lastLogin: "1/28/17",
   },
   {
+
+
     id: "21394",
+
+
     avatar: user6,
     name: "Theresa Webb",
     email: "deanna.curtis@example.com",
@@ -76,7 +96,11 @@ const initialUsers: User[] = [
     lastLogin: "8/21/15",
   },
   {
+
+
     id: "21395",
+
+
     avatar: user1,
     name: "Guy Hawkins",
     email: "bill.sanders@example.com",
@@ -85,7 +109,11 @@ const initialUsers: User[] = [
     lastLogin: "8/30/14",
   },
   {
+
+
     id: "21396",
+
+
     avatar: user2,
     name: "Kathryn Murphy",
     email: "debra.holt@example.com",
@@ -94,7 +122,11 @@ const initialUsers: User[] = [
     lastLogin: "8/15/17",
   },
   {
+
+
     id: "21397",
+
+
     avatar: user3,
     name: "Devon Lane",
     email: "michelle.rivera@example.com",
@@ -103,7 +135,11 @@ const initialUsers: User[] = [
     lastLogin: "5/7/16",
   },
   {
+
+
     id: "21398",
+
+
     avatar: user4,
     name: "Esther Howard",
     email: "tanya.hill@example.com",
@@ -112,7 +148,11 @@ const initialUsers: User[] = [
     lastLogin: "1/31/14",
   },
   {
+
+
     id: "21399",
+
+
     avatar: user5,
     name: "Arlene McCoy",
     email: "willie.jennings@example.com",
@@ -121,7 +161,11 @@ const initialUsers: User[] = [
     lastLogin: "9/4/12",
   },
   {
+
+
     id: "213100",
+
+
     avatar: user6,
     name: "Dianne Russell",
     email: "jessica.hanson@example.com",
@@ -130,7 +174,11 @@ const initialUsers: User[] = [
     lastLogin: "6/19/14",
   },
   {
+
+
     id: "213101",
+
+
     avatar: user1,
     name: "Marvin McKinney",
     email: "debbie.baker@example.com",
@@ -139,7 +187,11 @@ const initialUsers: User[] = [
     lastLogin: "5/30/14",
   },
   {
+
+
     id: "213102",
+
+
     avatar: user2,
     name: "Savannah Nguyen",
     email: "tim.jennings@example.com",
@@ -148,7 +200,11 @@ const initialUsers: User[] = [
     lastLogin: "11/7/16",
   },
   {
+
+
     id: "213103",
+
+
     avatar: user3,
     name: "Wade Warren",
     email: "curtis.weaver@example.com",
@@ -159,16 +215,19 @@ const initialUsers: User[] = [
 ];
 
 const Admin: React.FC = () => {
+
+
+
   const [users,] = useState<User[]>(initialUsers);
 
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewModal, setShowFilterModal] = useState<boolean>(false);
-  
+
 
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState<boolean>(false);
-  const [filterModalTopPosition, setFilterModalTopPosition] = useState<
+  const [viewModalTopPosition, setFilterModalTopPosition] = useState<
     number | null
   >(null);
 
@@ -176,12 +235,11 @@ const Admin: React.FC = () => {
   const actionModalRef = useRef<HTMLDivElement>(null);
   const tableFilterButtonRef = useRef<HTMLButtonElement>(null);
   const threeDotsButtonRef = useRef<HTMLButtonElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null); 
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-     
       if (
         filterModalRef.current &&
         !filterModalRef.current.contains(event.target as Node) &&
@@ -238,6 +296,8 @@ const Admin: React.FC = () => {
 
 
 
+
+
   // --- Search filter logic ---
   const filteredUsers = users.filter((user) => {
     const lowerSearch = searchTerm.toLowerCase();
@@ -254,13 +314,15 @@ const Admin: React.FC = () => {
 
   // --- Checkbox selection logic ---
 
-const handleHeaderCheckboxChange = (
+  const handleHeaderCheckboxChange = (
+
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
       // If header checkbox is checked, select all users in the *filtered* list
       const allFilteredUserIds = filteredUsers.map((user) => user.id);
       setSelectedUserIds(allFilteredUserIds);
+
     } else {
       // If header checkbox is unchecked, deselect all users
       setSelectedUserIds([]);
@@ -282,6 +344,7 @@ const handleHeaderCheckboxChange = (
     }
   };
 
+
   // Determine if the header checkbox should be checked (all filtered users selected)
   const isHeaderCheckboxChecked =
     filteredUsers.length > 0 && // Ensure there are users to select
@@ -293,6 +356,7 @@ const handleHeaderCheckboxChange = (
     selectedUserIds.length > 0 &&
     selectedUserIds.length < filteredUsers.length &&
     filteredUsers.some(user => selectedUserIds.includes(user.id)); // Ensure at least one currently filtered user is selected
+
 
 
 
@@ -427,6 +491,10 @@ const handleHeaderCheckboxChange = (
     },
   ];
 
+  function handleSearchChange(event: ChangeEvent<HTMLInputElement>): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div
       ref={mainContainerRef}
@@ -461,13 +529,16 @@ const handleHeaderCheckboxChange = (
 
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-       
         <div className="relative w-full sm:max-w-md">
           <input
             type="text"
             placeholder="Search names, roles, department..."
             value={searchTerm}
-        onChange={handleSearchChange}
+
+
+            onChange={handleSearchChange}
+
+
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -549,9 +620,8 @@ const handleHeaderCheckboxChange = (
 
       {/* Users Table */}
       <div
-        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${
-          isAnyModalOpen ? "opacity-50" : "opacity-100"
-        }`}
+        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${isAnyModalOpen ? "opacity-50" : "opacity-100"
+          }`}
       >
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -643,113 +713,212 @@ const handleHeaderCheckboxChange = (
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
 
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
 
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
-                     checked={selectedUserIds.includes(user.id)} // Control checked state
-                    onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {user.id}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={user.avatar}
-                        alt={`Avatar of ${user.name}`}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).onerror = null;
-                          (
-                            e.target as HTMLImageElement
-                          ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
-                            .charAt(0)
-                            .toUpperCase()}`;
-                        }}
-                      />
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name}
+            {
+              users.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+
+                      checked={selectedUserIds.includes(user.id)} // Control checked state
+
+                      onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img
+                          className="h-10 w-10 rounded-full"
+                          src={user.avatar}
+                          alt={`Avatar of ${user.name}`}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).onerror = null;
+                            (
+                              e.target as HTMLImageElement
+                            ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                              .charAt(0)
+                              .toUpperCase()}`;
+                          }}
+                        />
+
                       </div>
-                    </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
+
+
+                        {filteredUsers.map((user) => (
+                          <tr key={user.id} className="hover:bg-gray-50">
+
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+                                checked={selectedUserIds.includes(user.id)} // Control checked state
+                                onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {user.id}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  <img
+                                    className="h-10 w-10 rounded-full"
+                                    src={user.avatar}
+                                    alt={`Avatar of ${user.name}`}
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).onerror = null;
+                                      (
+                                        e.target as HTMLImageElement
+                                      ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                                        .charAt(0)
+                                        .toUpperCase()}`;
+                                    }}
+                                  />
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {user.name}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.email}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.phone}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.department}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.lastLogin}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.phone}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.department}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.lastLogin}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+                  {/* Filter Modal - now a direct child of the main container, right-aligned */}
+                  {showViewModal && filterModalTopPosition !== null && (
+                    <div
+                      ref={filterModalRef}
+                      className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-2"
+                      style={{ top: filterModalTopPosition }}
+                    >
+                      <div className="px-4 py-2">
+                        <div className="relative mb-2">
+                          <input
+                            type="text"
+                            placeholder="Search members"
+                            className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                          <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                            <svg
+                              className="w-4 h-4 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                              ></path>
+                            </svg>
+
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.phone}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.department}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.lastLogin}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+        </table >
+      </div >
 
       {/* Filter Modal - now a direct child of the main container, right-aligned */}
-      {showViewModal && filterModalTopPosition !== null && (
-        <div
-          ref={filterModalRef}
-          className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-2"
-          style={{ top: filterModalTopPosition }}
-        >
-          <div className="px-4 py-2">
-            <div className="relative mb-2">
-              <input
-                type="text"
-                placeholder="Search members"
-                className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-              <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
+
+
+      {
+        showViewModal && viewModalTopPosition !== null && (
+
+          <div
+            ref={filterModalRef}
+            className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-2"
+            style={{ top: viewModalTopPosition }}
+          >
+            <div className="px-4 py-2">
+              <div className="relative mb-2">
+                <input
+                  type="text"
+                  placeholder="Search members"
+                  className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div className="max-h-80 overflow-y-auto pr-2">
+                {filterOptions.map((option) => (
+                  <label
+                    key={option.label}
+                    className="flex items-center text-sm text-gray-700 py-1"
+                  >
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2"
+                      defaultChecked={option.checked}
+                    />
+                    {option.label}
+                  </label>
+                ))}
+
               </div>
             </div>
-            <div className="max-h-80 overflow-y-auto pr-2">
-              {filterOptions.map((option) => (
-                <label
-                  key={option.label}
-                  className="flex items-center text-sm text-gray-700 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2"
-                    defaultChecked={option.checked}
-                  />
-                  {option.label}
-                </label>
-              ))}
-            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 
-export default Admin ;
+export default Admin;
