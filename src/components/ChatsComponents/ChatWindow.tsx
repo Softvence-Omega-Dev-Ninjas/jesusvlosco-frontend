@@ -161,8 +161,8 @@ export default function ChatWindow() {
               <button
                 onClick={() => setActiveChatTab(tab)}
                 className={`flex-1 py-2 px-3 text-sm cursor-pointer rounded-full duration-200 ${activeChatTab === tab
-                    ? "font-medium text-white bg-primary"
-                    : "bg-secondary hover:bg-primary/20"
+                  ? "font-medium text-white bg-primary"
+                  : "bg-secondary hover:bg-primary/20"
                   }`}
               >
                 {tab}
@@ -239,12 +239,13 @@ export default function ChatWindow() {
               </svg>
             </button>
             <div className="relative">
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+
+              <button
+                className="p-2 hover:bg-gray-100 rounded-full"
+              // className="w-5 h-5 text-gray-600"
+              >
+                <svg fill="currentColor" viewBox="0 0 20 20">
+
                   <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                 </svg>
               </button>
@@ -264,8 +265,8 @@ export default function ChatWindow() {
             <div
               key={message.id}
               className={`flex items-start space-x-3 ${message.sender === "me"
-                  ? "flex-row-reverse space-x-reverse"
-                  : ""
+                ? "flex-row-reverse space-x-reverse"
+                : ""
                 }`}
             >
               <img
@@ -275,8 +276,8 @@ export default function ChatWindow() {
               />
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${message.sender === "me"
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-900"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-900"
                   }`}
               >
                 <p className="text-sm">{message.text}</p>
