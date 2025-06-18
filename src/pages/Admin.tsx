@@ -31,7 +31,7 @@ const initialUsers: User[] = [
     lastLogin: "2/11/12",
   },
   {
-    id: "21389",
+    id: "21390", // Changed ID to be unique for demonstration
     avatar: user2,
     name: "Leslie Alexander",
     email: "kenzi.lawson@example.com",
@@ -40,7 +40,7 @@ const initialUsers: User[] = [
     lastLogin: "4/4/18",
   },
   {
-    id: "21389",
+    id: "21391", // Changed ID to be unique for demonstration
     avatar: user3,
     name: "Kristin Watson",
     email: "georgia.young@example.com",
@@ -49,7 +49,7 @@ const initialUsers: User[] = [
     lastLogin: "7/18/17",
   },
   {
-    id: "21389",
+    id: "21392", // Changed ID to be unique for demonstration
     avatar: user4,
     name: "Robert Fox",
     email: "sara.cruz@example.com",
@@ -58,7 +58,7 @@ const initialUsers: User[] = [
     lastLogin: "6/21/19",
   },
   {
-    id: "21389",
+    id: "21393", // Changed ID to be unique for demonstration
     avatar: user5,
     name: "Jacob Jones",
     email: "nathan.roberts@example.com",
@@ -67,7 +67,7 @@ const initialUsers: User[] = [
     lastLogin: "1/28/17",
   },
   {
-    id: "21389",
+    id: "21394", // Changed ID to be unique for demonstration
     avatar: user6,
     name: "Theresa Webb",
     email: "deanna.curtis@example.com",
@@ -76,7 +76,7 @@ const initialUsers: User[] = [
     lastLogin: "8/21/15",
   },
   {
-    id: "21389",
+    id: "21395", // Changed ID to be unique for demonstration
     avatar: user1,
     name: "Guy Hawkins",
     email: "bill.sanders@example.com",
@@ -85,7 +85,7 @@ const initialUsers: User[] = [
     lastLogin: "8/30/14",
   },
   {
-    id: "21389",
+    id: "21396", // Changed ID to be unique for demonstration
     avatar: user2,
     name: "Kathryn Murphy",
     email: "debra.holt@example.com",
@@ -94,7 +94,7 @@ const initialUsers: User[] = [
     lastLogin: "8/15/17",
   },
   {
-    id: "21389",
+    id: "21397", // Changed ID to be unique for demonstration
     avatar: user3,
     name: "Devon Lane",
     email: "michelle.rivera@example.com",
@@ -103,7 +103,7 @@ const initialUsers: User[] = [
     lastLogin: "5/7/16",
   },
   {
-    id: "21389",
+    id: "21398", // Changed ID to be unique for demonstration
     avatar: user4,
     name: "Esther Howard",
     email: "tanya.hill@example.com",
@@ -112,7 +112,7 @@ const initialUsers: User[] = [
     lastLogin: "1/31/14",
   },
   {
-    id: "21389",
+    id: "21399", // Changed ID to be unique for demonstration
     avatar: user5,
     name: "Arlene McCoy",
     email: "willie.jennings@example.com",
@@ -121,7 +121,7 @@ const initialUsers: User[] = [
     lastLogin: "9/4/12",
   },
   {
-    id: "21389",
+    id: "21400", // Changed ID to be unique for demonstration
     avatar: user6,
     name: "Dianne Russell",
     email: "jessica.hanson@example.com",
@@ -130,7 +130,7 @@ const initialUsers: User[] = [
     lastLogin: "6/19/14",
   },
   {
-    id: "21389",
+    id: "21401", // Changed ID to be unique for demonstration
     avatar: user1,
     name: "Marvin McKinney",
     email: "debbie.baker@example.com",
@@ -139,7 +139,7 @@ const initialUsers: User[] = [
     lastLogin: "5/30/14",
   },
   {
-    id: "21389",
+    id: "21402", // Changed ID to be unique for demonstration
     avatar: user2,
     name: "Savannah Nguyen",
     email: "tim.jennings@example.com",
@@ -148,7 +148,7 @@ const initialUsers: User[] = [
     lastLogin: "11/7/16",
   },
   {
-    id: "21389",
+    id: "21403", // Changed ID to be unique for demonstration
     avatar: user3,
     name: "Wade Warren",
     email: "curtis.weaver@example.com",
@@ -160,10 +160,11 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
+  const [showViewModal, setShowFilterModal] = useState<boolean>(false);
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState<boolean>(false);
-  const [filterModalTopPosition, setFilterModalTopPosition] = useState<
+  const [viewModalTopPosition, setFilterModalTopPosition] = useState<
     number | null
   >(null);
 
@@ -171,12 +172,11 @@ const Admin: React.FC = () => {
   const actionModalRef = useRef<HTMLDivElement>(null);
   const tableFilterButtonRef = useRef<HTMLButtonElement>(null);
   const threeDotsButtonRef = useRef<HTMLButtonElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null); 
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-     
       if (
         filterModalRef.current &&
         !filterModalRef.current.contains(event.target as Node) &&
@@ -204,11 +204,11 @@ const Admin: React.FC = () => {
 
   // Effect to update isAnyModalOpen whenever modal states change
   useEffect(() => {
-    setIsAnyModalOpen(showFilterModal || showActionModal);
-  }, [showFilterModal, showActionModal]);
+    setIsAnyModalOpen(showViewModal || showActionModal);
+  }, [showViewModal, showActionModal]);
 
   const toggleFilterModal = () => {
-    const newState = !showFilterModal;
+    const newState = !showViewModal;
     setShowFilterModal(newState);
     if (newState && tableFilterButtonRef.current && mainContainerRef.current) {
       const buttonRect = tableFilterButtonRef.current.getBoundingClientRect();
@@ -225,11 +225,48 @@ const Admin: React.FC = () => {
   const toggleActionModal = () => {
     setShowActionModal(!showActionModal);
     // Close other modal if open
-    if (showFilterModal) {
+    if (showViewModal) {
       setShowFilterModal(false);
       setFilterModalTopPosition(null); // Clear position when closing
     }
   };
+
+  // --- Checkbox selection logic ---
+
+  const handleHeaderCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.checked) {
+      // If header checkbox is checked, select all users
+      const allUserIds = users.map((user) => user.id);
+      setSelectedUserIds(allUserIds);
+    } else {
+      // If header checkbox is unchecked, deselect all users
+      setSelectedUserIds([]);
+    }
+  };
+
+  const handleUserCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    userId: string
+  ) => {
+    if (event.target.checked) {
+      // If user checkbox is checked, add user ID to selectedUserIds
+      setSelectedUserIds((prevSelected) => [...prevSelected, userId]);
+    } else {
+      // If user checkbox is unchecked, remove user ID from selectedUserIds
+      setSelectedUserIds((prevSelected) =>
+        prevSelected.filter((id) => id !== userId)
+      );
+    }
+  };
+
+  const isHeaderCheckboxChecked =
+    selectedUserIds.length > 0 && selectedUserIds.length === users.length;
+  const isHeaderCheckboxIndeterminate =
+    selectedUserIds.length > 0 && selectedUserIds.length < users.length;
+
+  // --- End Checkbox selection logic ---
 
   const filterOptions = [
     { label: "Name", checked: true },
@@ -396,7 +433,6 @@ const Admin: React.FC = () => {
 
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-       
         <div className="relative w-full sm:max-w-md">
           <input
             type="text"
@@ -496,6 +532,13 @@ const Admin: React.FC = () => {
                 <input
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+                  checked={isHeaderCheckboxChecked}
+                  onChange={handleHeaderCheckboxChange}
+                  ref={(input) => {
+                    if (input) {
+                      input.indeterminate = isHeaderCheckboxIndeterminate;
+                    }
+                  }}
                 />
               </th>
               <th
@@ -569,11 +612,13 @@ const Admin: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user.email} className="hover:bg-gray-50">
+              <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+                    checked={selectedUserIds.includes(user.id)} // Control checked state
+                    onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -622,11 +667,11 @@ const Admin: React.FC = () => {
       </div>
 
       {/* Filter Modal - now a direct child of the main container, right-aligned */}
-      {showFilterModal && filterModalTopPosition !== null && (
+      {showViewModal && viewModalTopPosition !== null && (
         <div
           ref={filterModalRef}
           className="absolute bg-white w-72 rounded-lg shadow-lg py-2 z-20 border border-gray-200 opacity-100 right-2"
-          style={{ top: filterModalTopPosition }}
+          style={{ top: viewModalTopPosition }}
         >
           <div className="px-4 py-2">
             <div className="relative mb-2">
@@ -674,4 +719,4 @@ const Admin: React.FC = () => {
   );
 };
 
-export default Admin ;
+export default Admin;
