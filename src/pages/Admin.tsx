@@ -423,11 +423,11 @@ const Admin: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          <button className="flex items-center px-6 py-2 bg-[#4E53B1] text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-[#3f44a0] transition">
+          <button className="flex cursor-pointer items-center px-6 py-2 bg-[#4E53B1] text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-[#3f44a0] transition">
             All Categories
           </button>
 
-          <button className="flex items-center gap-2 px-6 py-2 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none">
+          <button className="flex items-center cursor-pointer gap-2 px-6 py-2 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none">
             <IoFilterOutline className="text-xl" />
             Filter
           </button>
@@ -435,7 +435,7 @@ const Admin: React.FC = () => {
           <div className="relative">
             <button
               ref={threeDotsButtonRef}
-              className="flex items-center px-2 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none"
+              className="flex items-center px-2 py-2 cursor-pointer bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none"
               onClick={toggleActionModal}
             >
               <svg
