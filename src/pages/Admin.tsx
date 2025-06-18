@@ -32,7 +32,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21390",
+
 
     avatar: user2,
     name: "Leslie Alexander",
@@ -43,7 +45,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21391",
+
 
     avatar: user3,
     name: "Kristin Watson",
@@ -54,7 +58,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21392",
+
 
     avatar: user4,
     name: "Robert Fox",
@@ -65,7 +71,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21393",
+
 
     avatar: user5,
     name: "Jacob Jones",
@@ -76,7 +84,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21394",
+
 
     avatar: user6,
     name: "Theresa Webb",
@@ -87,7 +97,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21395",
+
 
     avatar: user1,
     name: "Guy Hawkins",
@@ -98,7 +110,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21396",
+
 
     avatar: user2,
     name: "Kathryn Murphy",
@@ -109,7 +123,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21397",
+
 
     avatar: user3,
     name: "Devon Lane",
@@ -120,7 +136,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21398",
+
 
     avatar: user4,
     name: "Esther Howard",
@@ -131,7 +149,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "21399",
+
 
     avatar: user5,
     name: "Arlene McCoy",
@@ -142,7 +162,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "213100",
+
 
     avatar: user6,
     name: "Dianne Russell",
@@ -153,7 +175,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "213101",
+
 
     avatar: user1,
     name: "Marvin McKinney",
@@ -164,7 +188,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "213102",
+
 
     avatar: user2,
     name: "Savannah Nguyen",
@@ -175,7 +201,9 @@ const initialUsers: User[] = [
   },
   {
 
+
     id: "213103",
+
 
     avatar: user3,
     name: "Wade Warren",
@@ -188,12 +216,13 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
 
+
+
   const [users,] = useState<User[]>(initialUsers);
 
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewModal, setShowFilterModal] = useState<boolean>(false);
-
 
 
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
@@ -268,6 +297,7 @@ const Admin: React.FC = () => {
 
 
 
+
   // --- Search filter logic ---
   const filteredUsers = users.filter((user) => {
     const lowerSearch = searchTerm.toLowerCase();
@@ -285,6 +315,7 @@ const Admin: React.FC = () => {
   // --- Checkbox selection logic ---
 
   const handleHeaderCheckboxChange = (
+
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
@@ -504,7 +535,9 @@ const Admin: React.FC = () => {
             placeholder="Search names, roles, department..."
             value={searchTerm}
 
+
             onChange={handleSearchChange}
+
 
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
@@ -680,6 +713,7 @@ const Admin: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
 
+
             {
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
@@ -713,6 +747,7 @@ const Admin: React.FC = () => {
                               .toUpperCase()}`;
                           }}
                         />
+
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
@@ -829,6 +864,7 @@ const Admin: React.FC = () => {
 
       {/* Filter Modal - now a direct child of the main container, right-aligned */}
 
+
       {
         showViewModal && viewModalTopPosition !== null && (
 
@@ -875,6 +911,7 @@ const Admin: React.FC = () => {
                     {option.label}
                   </label>
                 ))}
+
               </div>
             </div>
           </div>
