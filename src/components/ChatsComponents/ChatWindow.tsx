@@ -32,7 +32,7 @@ export default function ChatWindow() {
   const [selectedChatId, setSelectedChatId] = useState<number>(1);
   const [showChatInfo, setShowChatInfo] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showAddMemberModal, setShowMemberModal] = useState(true);
+  const [showAddMemberModal, setShowMemberModal] = useState(false);
 
   // Replace the static chats array with state
   const [chats, setChats] = useState<Chat[]>([
