@@ -23,7 +23,6 @@ interface User {
 const initialUsers: User[] = [
   {
     id: "213891",
-
     avatar: user1,
     name: "Cody Fisher",
     email: "nevaeh.simmons@example.com",
@@ -33,7 +32,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213892",
-
     avatar: user2,
     name: "Leslie Alexander",
     email: "kenzi.lawson@example.com",
@@ -43,7 +41,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213893",
-
     avatar: user3,
     name: "Kristin Watson",
     email: "georgia.young@example.com",
@@ -53,7 +50,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213894",
-
     avatar: user4,
     name: "Robert Fox",
     email: "sara.cruz@example.com",
@@ -63,7 +59,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213895",
-
     avatar: user5,
     name: "Jacob Jones",
     email: "nathan.roberts@example.com",
@@ -73,7 +68,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213896",
-
     avatar: user6,
     name: "Theresa Webb",
     email: "deanna.curtis@example.com",
@@ -83,7 +77,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213897",
-
     avatar: user1,
     name: "Guy Hawkins",
     email: "bill.sanders@example.com",
@@ -93,7 +86,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213898",
-
     avatar: user2,
     name: "Kathryn Murphy",
     email: "debra.holt@example.com",
@@ -103,7 +95,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213810",
-
     avatar: user3,
     name: "Devon Lane",
     email: "michelle.rivera@example.com",
@@ -113,7 +104,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213811",
-
     avatar: user4,
     name: "Esther Howard",
     email: "tanya.hill@example.com",
@@ -123,7 +113,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213812",
-
     avatar: user5,
     name: "Arlene McCoy",
     email: "willie.jennings@example.com",
@@ -133,7 +122,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213813",
-
     avatar: user6,
     name: "Dianne Russell",
     email: "jessica.hanson@example.com",
@@ -143,7 +131,6 @@ const initialUsers: User[] = [
   },
   {
     id: "21313",
-
     avatar: user1,
     name: "Marvin McKinney",
     email: "debbie.baker@example.com",
@@ -153,7 +140,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213814",
-
     avatar: user2,
     name: "Savannah Nguyen",
     email: "tim.jennings@example.com",
@@ -163,7 +149,6 @@ const initialUsers: User[] = [
   },
   {
     id: "213815",
-
     avatar: user3,
     name: "Wade Warren",
     email: "curtis.weaver@example.com",
@@ -177,7 +162,6 @@ const User: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
-
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
     useState<boolean>(false);
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
