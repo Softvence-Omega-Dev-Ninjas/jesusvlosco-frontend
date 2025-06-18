@@ -33,7 +33,11 @@ export const Communication = () => {
   const showTabButtons = !location.pathname.includes("/recognition");
 
   return (
+
+
     <div className="py-4">
+
+
       {/* Conditionally render tab buttons */}
       <div>
         {showTabButtons && (
@@ -41,22 +45,20 @@ export const Communication = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab("chat")}
-                className={`md:py-2 md:px-4 whitespace-nowrap  text-lg rounded-md transition duration-200 ${
-                  activeTab === "chat"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                }`}
+                className={`md:py-2 md:px-4 whitespace-nowrap  text-lg rounded-md transition duration-200 ${activeTab === "chat"
+                  ? "bg-primary text-white shadow-md"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                  }`}
               >
                 Team Chat
               </button>
 
               <button
                 onClick={() => setActiveTab("community")}
-                className={`md:py-2 md:px-4 whitespace-nowrap text-lg rounded-md transition duration-200 ${
-                  activeTab === "community"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                }`}
+                className={`md:py-2 md:px-4 whitespace-nowrap text-lg rounded-md transition duration-200 ${activeTab === "community"
+                  ? "bg-primary text-white shadow-md"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                  }`}
               >
                 Company Update & announcement
               </button>

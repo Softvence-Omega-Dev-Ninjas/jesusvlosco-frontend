@@ -16,6 +16,13 @@ import { Communication } from "@/Layout/CommunicationLayout/Communication";
 import UserProfile from "@/pages/UserProfile";
 import { UserLayout } from "@/Layout/UserLayout/UserLayout";
 import User from "@/pages/User";
+import Schedule from "@/pages/Schedule";
+import ShiftScheduling from "@/pages/ShiftScheduling";
+import TimeClock from "@/pages/TimeClock";
+import TimeSheet from "@/pages/TimeSheet";
+import TimeOffRequest from "@/pages/TimeOffRequest";
+import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
+import OverviewProject from "@/pages/OverviewProject";
 
 
 const routes = createBrowserRouter([
@@ -47,6 +54,37 @@ const routes = createBrowserRouter([
             element: <Recognition></Recognition>
           }
         ]
+      },
+      {
+        path: "/schedule",
+        element: <Schedule></Schedule>,
+        children: [
+          {
+            path: "shiftschedule",
+            element: <ShiftScheduling></ShiftScheduling>,
+          },
+          {
+            path: "jobschedulelobby",
+            element: <JobSchedulingLobby></JobSchedulingLobby>,
+          },
+          {
+            path: "overviewProjects",
+            element: <OverviewProject></OverviewProject>,
+          },
+          {
+            path: "timeclock",
+            element: <TimeClock></TimeClock>,
+          },
+          {
+            path: "timesheet",
+            element: <TimeSheet></TimeSheet>,
+          },
+          {
+            path: "timeoffrequest",
+            element: <TimeOffRequest></TimeOffRequest>,
+          },
+        ]
+
       },
       {
 

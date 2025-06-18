@@ -70,8 +70,15 @@ const navigation: NavigationItem[] = [
     },
     {
         name: 'Scheduling',
+        path: '/schedule',
         icon: Calendar,
-        path: '/scheduling'
+        hasSubmenu: true,
+        submenu: [
+            { name: 'Shift Scheduling', icon: Calendar, path: '/schedule/shiftschedule' },
+            { name: 'Time Clock', icon: Calendar, path: '/schedule/timeclock' },
+            { name: 'Time Sheets', icon: Calendar, path: '/schedule/timesheet' },
+            { name: 'TimeOff Request', icon: Calendar, path: '/schedule/timeoffrequest' },
+        ]
     },
     {
         name: 'Tasks & Projects',
