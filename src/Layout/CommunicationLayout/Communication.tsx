@@ -33,7 +33,7 @@ export const Communication = () => {
   const showTabButtons = !location.pathname.includes("/recognition");
 
   return (
-    <div>
+    <div className="py-4">
       {/* Conditionally render tab buttons */}
       <div>
         {showTabButtons && (
