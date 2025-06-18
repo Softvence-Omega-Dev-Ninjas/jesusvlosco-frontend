@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Chat } from "../../pages/Chats";
 import { CompanyUpdate } from "../../pages/CompanyUpdate";
-import EmployeeDirectory from "@/components/ChatsComponents/EmployeeDirectory";
 
 export const Communication = () => {
   const [activeTab, setActiveTab] = useState("chat");
@@ -34,9 +33,9 @@ export const Communication = () => {
   const showTabButtons = !location.pathname.includes("/recognition");
 
   return (
-    <div className="md:p-6 mx-2 flex">
+    <div>
       {/* Conditionally render tab buttons */}
-      <div className="w-[80%] pr-4 border-r border-website-color-border">
+      <div>
         {showTabButtons && (
           <div className="flex flex-col md:flex-row justify-between space-x-2 mb-6">
             <div className="flex gap-4">
@@ -64,15 +63,9 @@ export const Communication = () => {
             </div>
           </div>
         )}
-
-        {/* Conditionally render content based on activeTab or location */}
-        <div>{renderContent()}</div>
       </div>
-
-      {/* Right side section - Employee Directory */}
-      <div className="pl-4 pt-3">
-        <EmployeeDirectory />
-      </div>
+      {/* Conditionally render content based on activeTab or location */}
+      <div>{renderContent()}</div>
     </div>
   );
 };
