@@ -159,12 +159,11 @@ const initialUsers: User[] = [
 ];
 
 const Admin: React.FC = () => {
-  const [users,] = useState<User[]>(initialUsers);
+  const [users] = useState<User[]>(initialUsers);
 
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewModal, setShowFilterModal] = useState<boolean>(false);
-  
 
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState<boolean>(false);
@@ -176,12 +175,11 @@ const Admin: React.FC = () => {
   const actionModalRef = useRef<HTMLDivElement>(null);
   const tableFilterButtonRef = useRef<HTMLButtonElement>(null);
   const threeDotsButtonRef = useRef<HTMLButtonElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null); 
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-     
       if (
         filterModalRef.current &&
         !filterModalRef.current.contains(event.target as Node) &&
@@ -236,8 +234,6 @@ const Admin: React.FC = () => {
     }
   };
 
-
-
   // --- Search filter logic ---
   const filteredUsers = users.filter((user) => {
     const lowerSearch = searchTerm.toLowerCase();
@@ -254,7 +250,7 @@ const Admin: React.FC = () => {
 
   // --- Checkbox selection logic ---
 
-const handleHeaderCheckboxChange = (
+  const handleHeaderCheckboxChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
@@ -286,15 +282,13 @@ const handleHeaderCheckboxChange = (
   const isHeaderCheckboxChecked =
     filteredUsers.length > 0 && // Ensure there are users to select
     selectedUserIds.length === filteredUsers.length &&
-    filteredUsers.every(user => selectedUserIds.includes(user.id)); // Ensure all currently filtered users are selected
+    filteredUsers.every((user) => selectedUserIds.includes(user.id)); // Ensure all currently filtered users are selected
 
   // Determine if the header checkbox should be indeterminate (some filtered users selected)
   const isHeaderCheckboxIndeterminate =
     selectedUserIds.length > 0 &&
     selectedUserIds.length < filteredUsers.length &&
-    filteredUsers.some(user => selectedUserIds.includes(user.id)); // Ensure at least one currently filtered user is selected
-
-
+    filteredUsers.some((user) => selectedUserIds.includes(user.id)); // Ensure at least one currently filtered user is selected
 
   const filterOptions = [
     { label: "Name", checked: true },
@@ -461,13 +455,12 @@ const handleHeaderCheckboxChange = (
 
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-       
         <div className="relative w-full sm:max-w-md">
           <input
             type="text"
             placeholder="Search names, roles, department..."
             value={searchTerm}
-        onChange={handleSearchChange}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -642,15 +635,13 @@ const handleHeaderCheckboxChange = (
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-
             {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
-                     checked={selectedUserIds.includes(user.id)} // Control checked state
+                    checked={selectedUserIds.includes(user.id)} // Control checked state
                     onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
                   />
                 </td>
@@ -752,4 +743,4 @@ const handleHeaderCheckboxChange = (
   );
 };
 
-export default Admin ;
+export default Admin;
