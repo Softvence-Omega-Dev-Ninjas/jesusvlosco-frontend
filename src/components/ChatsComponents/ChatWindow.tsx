@@ -239,15 +239,23 @@ export default function ChatWindow() {
                 />
               </svg>
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-            </button>
+            <div className="relative">
+              <button className="p-2 hover:bg-gray-100 rounded-full">
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+
+              <div className="absolute top-full right-0 *:py-4 *:px-4 bg-white *:hover:bg-gray-100 rounded-2xl *:block w-max overflow-hidden shadow-md *:transition-colors *:duration-200 *:cursor-pointer">
+                <span>Chat Information</span>
+                <span>Add Member</span>
+                <span>Delete Chat</span>
+              </div>
+            </div>
           </div>
         </div>
 
