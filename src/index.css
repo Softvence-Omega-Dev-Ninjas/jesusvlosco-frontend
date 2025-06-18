@@ -1,4 +1,11 @@
 @import "tailwindcss";
+@import "react-datepicker/dist/react-datepicker.css";
+
+/* You can add custom styling for the datepicker if needed */
+/* Example: Adjusting z-index if it appears behind other elements */
+.react-datepicker-popper {
+  z-index: 9999; /* Ensure it's on top of other content */
+}
 
 @theme {
   --color-primary: #4e53b1;

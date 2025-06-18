@@ -1,9 +1,28 @@
-// src/components/UserProfile/UserProfileTabs.tsx
 import React, { useState } from "react";
-import PersonalInformationTab from "./PersonalInformationTab"; // Adjust path
+import PersonalInformationTab from "./PersonalInformationTab";
+import RecognitionAchievementsTab from "./RecognitionAchievementsTab";
+import SkillsCertificationsTab from "./SkillsCertificationsTab";
+
+// Re-using the PersonalInfoFormData interface for consistency
+interface PersonalInfoFormData {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth: Date | null; // Changed to Date | null
+  email: string;
+  phoneNumber: string;
+  address: string;
+  state: string;
+  country: string;
+  pinCode: string;
+  nationality: string;
+}
 
 interface UserProfileTabsProps {
-  user: any; // Pass user data for tab content
+  user: PersonalInfoFormData;
+  isEditing: boolean;
+  onSavePersonalInformation: (updatedUser: PersonalInfoFormData) => void;
+  onCancelEdit: () => void;
 }
 
 type TabKey =
@@ -11,33 +30,29 @@ type TabKey =
   | "recognitionAchievements"
   | "skillsCertifications";
 
-const UserProfileTabs: React.FC<UserProfileTabsProps> = ({ user }) => {
+const UserProfileTabs: React.FC<UserProfileTabsProps> = ({
+  user,
+  isEditing,
+  onSavePersonalInformation,
+  onCancelEdit,
+}) => {
   const [activeTab, setActiveTab] = useState<TabKey>("personalInformation");
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "personalInformation":
-        return <PersonalInformationTab user={user} />;
+        return (
+          <PersonalInformationTab
+            user={user}
+            isEditing={isEditing}
+            onSave={onSavePersonalInformation}
+            onCancelEdit={onCancelEdit}
+          />
+        );
       case "recognitionAchievements":
-        return (
-          <div className="p-6 text-gray-600">
-            <h3 className="text-xl font-semibold mb-4">
-              Recognition & Achievements
-            </h3>
-            <p>Content for Recognition & Achievements will go here.</p>
-            {/* Add relevant components/data here later */}
-          </div>
-        );
+        return <RecognitionAchievementsTab />;
       case "skillsCertifications":
-        return (
-          <div className="p-6 text-gray-600">
-            <h3 className="text-xl font-semibold mb-4">
-              Skills & Certifications
-            </h3>
-            <p>Content for Skills & Certifications will go here.</p>
-            {/* Add relevant components/data here later */}
-          </div>
-        );
+        return <SkillsCertificationsTab />;
       default:
         return null;
     }
@@ -51,7 +66,7 @@ const UserProfileTabs: React.FC<UserProfileTabsProps> = ({ user }) => {
       className={`py-3 px-6 text-center font-medium text-lg relative transition-colors duration-200
         ${
           activeTab === tabKey
-            ? "text-indigo-600 before:absolute before:bottom-0 before:left-0 before:w-full before:h-1 before:bg-indigo-600"
+            ? "text-[#4E53B1] before:absolute before:bottom-0 before:left-0 before:w-full before:h-1 before:bg-[#4E53B1]"
             : "text-gray-600 hover:text-gray-900"
         }
       `}
