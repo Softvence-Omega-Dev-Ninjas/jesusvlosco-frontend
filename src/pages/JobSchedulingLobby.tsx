@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Plus, MoreHorizontal, Search, X } from 'lucide-react'; // Added X icon for close button
+import { Plus, MoreHorizontal, Search, X } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -7,45 +7,6 @@ interface Project {
   assigned: string[];
   admins: string[];
 }
-
-const projects: Project[] = [
-  {
-    id: 1,
-    name: "Project 1",
-    assigned: [
-      "https://randomuser.me/api/portraits/men/10.jpg",
-      "https://randomuser.me/api/portraits/women/11.jpg",
-    ],
-    admins: ["https://randomuser.me/api/portraits/men/30.jpg"],
-  },
-  {
-    id: 2,
-    name: "Project 2",
-    assigned: [
-      "https://randomuser.me/api/portraits/men/15.jpg",
-      "https://randomuser.me/api/portraits/women/16.jpg",
-    ],
-    admins: ["https://randomuser.me/api/portraits/men/25.jpg"],
-  },
-  {
-    id: 3,
-    name: "Project 3",
-    assigned: [
-      "https://randomuser.me/api/portraits/women/18.jpg",
-      "https://randomuser.me/api/portraits/men/20.jpg",
-    ],
-    admins: ["https://randomuser.me/api/portraits/men/35.jpg"],
-  },
-  {
-    id: 4,
-    name: "Project 4",
-    assigned: [
-      "https://randomuser.me/api/portraits/women/21.jpg",
-      "https://randomuser.me/api/portraits/men/22.jpg",
-    ],
-    admins: ["https://randomuser.me/api/portraits/men/40.jpg"],
-  },
-];
 
 // Dummy data for members, mimicking your screenshot
 const allMembers = [
@@ -63,52 +24,83 @@ const allMembers = [
   { id: 'm12', name: 'Jocelyn Lubin', role: 'Safety Engineer', avatar: 'https://randomuser.me/api/portraits/women/12.jpg' },
 ];
 
-
 const JobSchedulingLobby: React.FC = () => {
-  // State for the 'More' (three dots) modal
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      id: 1,
+      name: "Project 1",
+      assigned: [
+        "https://randomuser.me/api/portraits/men/10.jpg",
+        "https://randomuser.me/api/portraits/women/11.jpg",
+      ],
+      admins: ["https://randomuser.me/api/portraits/men/30.jpg"],
+    },
+    {
+      id: 2,
+      name: "Project 2",
+      assigned: [
+        "https://randomuser.me/api/portraits/men/15.jpg",
+        "https://randomuser.me/api/portraits/women/16.jpg",
+      ],
+      admins: ["https://randomuser.me/api/portraits/men/25.jpg"],
+    },
+    {
+      id: 3,
+      name: "Project 3",
+      assigned: [
+        "https://randomuser.me/api/portraits/women/18.jpg",
+        "https://randomuser.me/api/portraits/men/20.jpg",
+      ],
+      admins: ["https://randomuser.me/api/portraits/men/35.jpg"],
+    },
+    {
+      id: 4,
+      name: "Project 4",
+      assigned: [
+        "https://randomuser.me/api/portraits/women/21.jpg",
+        "https://randomuser.me/api/portraits/men/22.jpg",
+      ],
+      admins: ["https://randomuser.me/api/portraits/men/40.jpg"],
+    },
+  ]);
+
+  // New state for search query
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
   const [openMoreModalId, setOpenMoreModalId] = useState<number | null>(null);
   const [moreModalPosition, setMoreModalPosition] = useState<{ top: number; left: number } | null>(null);
 
-  // State for the new 'Edit Scheduler' modal
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editModalProjectName, setEditModalProjectName] = useState<string>('');
   const [selectedProjectIdForEdit, setSelectedProjectIdForEdit] = useState<number | null>(null);
 
-  // State for the new 'Delete Confirmation' modal
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [projectIdToDelete, setProjectIdToDelete] = useState<number | null>(null);
 
-  // New state for 'Create New' modal
   const [showCreateNewModal, setShowCreateNewModal] = useState<boolean>(false);
   const [newProjectName, setNewProjectName] = useState<string>('');
   const [selectedCreateProject, setSelectedCreateProject] = useState<string>('');
-  const [selectedCreateMembers, setSelectedCreateMembers] = useState<string[]>([]); // Changed to array for multiple selections
+  const [selectedCreateMembers, setSelectedCreateMembers] = useState<string[]>([]);
 
-  // State for controlling the custom dropdown visibility
   const [showProjectDropdown, setShowProjectDropdown] = useState<boolean>(false);
-  const [showMembersDropdown, setShowMembersDropdown] = useState<boolean>(false); // New state for members dropdown
+  const [showMembersDropdown, setShowMembersDropdown] = useState<boolean>(false);
 
-  // Refs for modals and buttons
   const moreModalRef = useRef<HTMLDivElement | null>(null);
   const moreButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const editModalRef = useRef<HTMLDivElement | null>(null);
   const deleteConfirmModalRef = useRef<HTMLDivElement | null>(null);
-  const createNewModalRef = useRef<HTMLDivElement | null>(null); // Ref for new modal
-  const projectDropdownRef = useRef<HTMLDivElement | null>(null); // Ref for the custom project dropdown
-  const projectDropdownButtonRef = useRef<HTMLButtonElement | null>(null); // Ref for the button that opens project dropdown
-  const membersDropdownRef = useRef<HTMLDivElement | null>(null); // New ref for custom members dropdown
-  const membersDropdownButtonRef = useRef<HTMLButtonElement | null>(null); // New ref for the button that opens members dropdown
+  const createNewModalRef = useRef<HTMLDivElement | null>(null);
+  const projectDropdownRef = useRef<HTMLDivElement | null>(null);
+  const projectDropdownButtonRef = useRef<HTMLButtonElement | null>(null);
+  const membersDropdownRef = useRef<HTMLDivElement | null>(null);
+  const membersDropdownButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // Declaring mainContentWrapperRef
-  const mainContentWrapperRef = useRef<HTMLDivElement>(null); 
+  const mainContentWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Determine if any modal is open for background dimming
   const isAnyModalOpen = openMoreModalId !== null || showEditModal || showDeleteConfirmModal || showCreateNewModal;
 
-  // Close modals and dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      // Close 'More' modal
       if (
         openMoreModalId !== null &&
         moreModalRef.current &&
@@ -120,7 +112,6 @@ const JobSchedulingLobby: React.FC = () => {
         setMoreModalPosition(null);
       }
 
-      // Close 'Edit Scheduler' modal
       if (
         showEditModal &&
         editModalRef.current &&
@@ -131,7 +122,6 @@ const JobSchedulingLobby: React.FC = () => {
         setSelectedProjectIdForEdit(null);
       }
 
-      // Close 'Delete Confirmation' modal
       if (
         showDeleteConfirmModal &&
         deleteConfirmModalRef.current &&
@@ -141,7 +131,6 @@ const JobSchedulingLobby: React.FC = () => {
         setProjectIdToDelete(null);
       }
 
-      // Close 'Create New' modal and its internal dropdowns
       if (
         showCreateNewModal &&
         createNewModalRef.current &&
@@ -150,10 +139,10 @@ const JobSchedulingLobby: React.FC = () => {
         setShowCreateNewModal(false);
         setNewProjectName('');
         setSelectedCreateProject('');
-        setSelectedCreateMembers([]); // Clear selected members
+        setSelectedCreateMembers([]);
         setShowProjectDropdown(false);
-        setShowMembersDropdown(false); // Close members dropdown
-      } else { // Specifically close dropdowns if they are the only thing clicked outside
+        setShowMembersDropdown(false);
+      } else {
         if (
           showProjectDropdown &&
           projectDropdownRef.current &&
@@ -177,9 +166,8 @@ const JobSchedulingLobby: React.FC = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openMoreModalId, showEditModal, showDeleteConfirmModal, showCreateNewModal, showProjectDropdown, showMembersDropdown]); // Added new modal and all dropdowns to dependencies
+  }, [openMoreModalId, showEditModal, showDeleteConfirmModal, showCreateNewModal, showProjectDropdown, showMembersDropdown]);
 
-  // Helper to close all other modals and dropdowns
   const closeAllOtherModals = () => {
     setOpenMoreModalId(null);
     setMoreModalPosition(null);
@@ -191,12 +179,11 @@ const JobSchedulingLobby: React.FC = () => {
     setShowCreateNewModal(false);
     setNewProjectName('');
     setSelectedCreateProject('');
-    setSelectedCreateMembers([]); // Clear selected members
+    setSelectedCreateMembers([]);
     setShowProjectDropdown(false);
-    setShowMembersDropdown(false); // Close members dropdown
+    setShowMembersDropdown(false);
   };
 
-  // Toggle 'More' modal visibility and position
   const toggleMoreModal = (id: number) => {
     closeAllOtherModals();
     if (openMoreModalId !== id) {
@@ -212,7 +199,6 @@ const JobSchedulingLobby: React.FC = () => {
     }
   };
 
-  // Handle click on 'Edit' option within the 'More' modal
   const handleEditClick = (projectId: number) => {
     closeAllOtherModals();
     const projectToEdit = projects.find(p => p.id === projectId);
@@ -223,56 +209,75 @@ const JobSchedulingLobby: React.FC = () => {
     }
   };
 
-  // Handle confirm action in the 'Edit Scheduler' modal
   const handleConfirmEdit = () => {
-    console.log(`Updating project ${selectedProjectIdForEdit} with new name: ${editModalProjectName}`);
+    if (selectedProjectIdForEdit !== null) {
+      setProjects(prevProjects =>
+        prevProjects.map(project =>
+          project.id === selectedProjectIdForEdit
+            ? { ...project, name: editModalProjectName }
+            : project
+        )
+      );
+    }
     closeAllOtherModals();
   };
 
-  // Handle click on 'Delete' option within the 'More' modal
   const handleDeleteClick = (projectId: number) => {
     closeAllOtherModals();
     setProjectIdToDelete(projectId);
     setShowDeleteConfirmModal(true);
   };
 
-  // Handle confirmation of deletion in the 'Delete Confirmation' modal
   const handleConfirmDelete = () => {
-    console.log(`Deleting project with ID: ${projectIdToDelete}`);
+    if (projectIdToDelete !== null) {
+      setProjects(prevProjects =>
+        prevProjects.filter(project => project.id !== projectIdToDelete)
+      );
+    }
     closeAllOtherModals();
   };
 
-  // Handle click on the 'Add New' button
   const handleAddNewClick = () => {
     closeAllOtherModals();
     setShowCreateNewModal(true);
   };
 
-  // Handle selection of a member in the custom dropdown
   const handleSelectMember = (memberId: string) => {
     setSelectedCreateMembers(prevSelected => {
       if (prevSelected.includes(memberId)) {
-        return prevSelected.filter(id => id !== memberId); // Deselect if already selected
+        return prevSelected.filter(id => id !== memberId);
       } else {
-        return [...prevSelected, memberId]; // Select if not selected
+        return [...prevSelected, memberId];
       }
     });
   };
 
-  // Handle confirm action in the 'Create New' modal
   const handleCreateNewConfirm = () => {
-    console.log("Creating new project:", {
-      name: newProjectName,
-      project: selectedCreateProject,
-      members: selectedCreateMembers
+    const newId = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+
+    const assignedAvatars = selectedCreateMembers.map(memberId => {
+      const member = allMembers.find(m => m.id === memberId);
+      return member ? member.avatar : `https://placehold.co/40x40/cccccc/000000?text=${memberId.charAt(0).toUpperCase()}`;
     });
-    // Add logic to create new project (e.g., add to projects state, call API)
+
+    const newProject: Project = {
+      id: newId,
+      name: newProjectName,
+      assigned: assignedAvatars,
+      admins: assignedAvatars.length > 0 ? [assignedAvatars[0]] : ["https://placehold.co/40x40/cccccc/000000?text=A"],
+    };
+
+    setProjects(prevProjects => [...prevProjects, newProject]);
     closeAllOtherModals();
   };
 
+  // Filtered projects based on search query
+  const filteredProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen  relative">
-      {/* Main Content Area: Its opacity and pointer events are controlled based on any modal being open */}
+    <div className="min-h-screen relative">
       <div
         ref={mainContentWrapperRef}
         className={`p-8 relative transition-opacity duration-300 ${
@@ -285,7 +290,7 @@ const JobSchedulingLobby: React.FC = () => {
             Job Scheduling Lobby
           </h2>
           <button
-            className="flex items-center bg-primary text-white px-4 py-2 rounded-lg font-medium text-sm  cursor-pointer"
+            className="flex items-center bg-primary text-white px-4 py-2 rounded-lg font-medium text-sm cursor-pointer"
             onClick={handleAddNewClick}
           >
             <Plus size={16} className="mr-2" /> Add New
@@ -301,6 +306,8 @@ const JobSchedulingLobby: React.FC = () => {
             <input
               type="text"
               placeholder="Search"
+              value={searchQuery} // Bind value to searchQuery state
+              onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery on change
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
             />
             <Search
@@ -311,7 +318,8 @@ const JobSchedulingLobby: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {projects.map((project) => (
+          {/* Render filtered projects instead of original projects */}
+          {filteredProjects.map((project) => (
             <div
               key={project.id}
               className="bg-white border border-gray-300 rounded-xl p-5 shadow-sm flex flex-col justify-between"
@@ -330,14 +338,14 @@ const JobSchedulingLobby: React.FC = () => {
                         key={idx}
                         src={url}
                         alt="assigned"
-                        className="w-10 h-10 rounded-full   object-cover"
+                        className="w-10 h-10 rounded-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).onerror = null;
                           (e.target as HTMLImageElement).src = `https://placehold.co/40x40/cccccc/000000?text=${'User'.charAt(0).toUpperCase()}`;
                         }}
                       />
                     ))}
-                    <button className="w-10 h-10 rounded-full  border border-gray-500  text-black flex items-center justify-center text-sm ">
+                    <button className="w-10 h-10 rounded-full border border-gray-500 text-black flex items-center justify-center text-sm cursor-pointer">
                       <Plus size={14} />
                     </button>
                   </div>
@@ -368,20 +376,26 @@ const JobSchedulingLobby: React.FC = () => {
                     moreButtonRefs.current[project.id] = el;
                   }}
                   onClick={() => toggleMoreModal(project.id)}
-                  className="w-10 h-10 border border-gray-300 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100"
+                  className="w-10 h-10 border border-gray-300 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
                 >
                   <MoreHorizontal size={20} />
                 </button>
-                <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium ">
+                <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer ">
                   Access Schedule
                 </button>
               </div>
             </div>
           ))}
+          {/* Optional: Message if no projects match the search */}
+          {filteredProjects.length === 0 && (
+            <div className="col-span-full text-center text-gray-500 text-lg py-10">
+              No projects found matching your search.
+            </div>
+          )}
         </div>
       </div>
 
-      {/* More (three dots) Modal: Renders conditionally above the dimmed content */}
+      {/* Modals remain the same as in your previous code */}
       {openMoreModalId !== null && moreModalPosition && (
         <div
           ref={moreModalRef}
@@ -389,13 +403,13 @@ const JobSchedulingLobby: React.FC = () => {
           style={{ top: moreModalPosition.top, left: moreModalPosition.left }}
         >
           <button
-            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
+            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm cursor-pointer"
             onClick={() => handleEditClick(openMoreModalId)}
           >
             Edit
           </button>
           <button
-            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-red-600"
+            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-red-600 cursor-pointer"
             onClick={() => handleDeleteClick(openMoreModalId)}
           >
             Delete
@@ -403,18 +417,16 @@ const JobSchedulingLobby: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Scheduler Modal: Renders conditionally and highest z-index */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center z-40 p-4">
           <div ref={editModalRef} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border border-gray-200 relative">
-            {/* Close button */}
             <button
               onClick={() => {
                 setShowEditModal(false);
                 setEditModalProjectName('');
                 setSelectedProjectIdForEdit(null);
               }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -433,7 +445,7 @@ const JobSchedulingLobby: React.FC = () => {
 
             <button
               onClick={handleConfirmEdit}
-              className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg  transition-colors focus:outline-none"
+              className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg transition-colors focus:outline-none cursor-pointer"
             >
               Confirm
             </button>
@@ -441,11 +453,9 @@ const JobSchedulingLobby: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal: New modal, renders conditionally and highest z-index */}
       {showDeleteConfirmModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div ref={deleteConfirmModalRef} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border border-gray-200 relative text-center">
-            {/* Red X icon */}
             <div className="flex justify-center mb-4">
               <div className="bg-red-100 rounded-full p-3">
                 <X className="text-red-500" size={36} strokeWidth={2} />
@@ -462,7 +472,7 @@ const JobSchedulingLobby: React.FC = () => {
             <div className="flex justify-center space-x-4">
               <button
                 onClick={handleConfirmDelete}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="cursor-pointer px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
                 Delete
               </button>
@@ -471,7 +481,7 @@ const JobSchedulingLobby: React.FC = () => {
                   setShowDeleteConfirmModal(false);
                   setProjectIdToDelete(null);
                 }}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                className="cursor-pointer px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               >
                 Cancel
               </button>
@@ -480,11 +490,9 @@ const JobSchedulingLobby: React.FC = () => {
         </div>
       )}
 
-      {/* Create New Project Modal: New modal */}
       {showCreateNewModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-          <div ref={createNewModalRef} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-200 relative">
-            {/* Close button */}
+          <div ref={createNewModalRef} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-200 relative cursor-pointer">
             <button
               onClick={() => {
                 setShowCreateNewModal(false);
@@ -501,7 +509,6 @@ const JobSchedulingLobby: React.FC = () => {
               Create Project Name
             </h3>
 
-            {/* Input for Project Name */}
             <input
               type="text"
               placeholder="Enter project name here"
@@ -510,7 +517,6 @@ const JobSchedulingLobby: React.FC = () => {
               className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-lg"
             />
 
-            {/* Choose Projects Dropdown - Custom dropdown simulation */}
             <h4 className="text-md font-semibold text-gray-700 mb-2">Choose Projects</h4>
             <div className="relative mb-4">
               <button
@@ -542,7 +548,6 @@ const JobSchedulingLobby: React.FC = () => {
               )}
             </div>
 
-            {/* Choose Specific Members Dropdown - Custom dropdown simulation */}
             <h4 className="text-md font-semibold text-gray-700 mb-2">Choose Specific Members</h4>
             <div className="relative mb-6">
               <button
@@ -590,7 +595,7 @@ const JobSchedulingLobby: React.FC = () => {
 
             <button
               onClick={handleCreateNewConfirm}
-              className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg  transition-colors focus:outline-none flex items-center justify-center"
+              className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
             >
               <Plus size={20} className="mr-2" /> Create New
             </button>
