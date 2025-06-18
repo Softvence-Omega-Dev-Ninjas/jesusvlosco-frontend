@@ -160,7 +160,11 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
+
+  const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
+  const [showViewModal, setShowFilterModal] = useState<boolean>(false);
+
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
   const [isAnyModalOpen, setIsAnyModalOpen] = useState<boolean>(false);
   const [filterModalTopPosition, setFilterModalTopPosition] = useState<
@@ -230,6 +234,60 @@ const Admin: React.FC = () => {
       setFilterModalTopPosition(null); // Clear position when closing
     }
   };
+
+
+
+  // --- Search filter logic ---
+  const filteredUsers = users.filter((user) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(lowerSearch) ||
+      user.department.toLowerCase().includes(lowerSearch) ||
+      user.email.toLowerCase().includes(lowerSearch) // can be used as "role" or similar
+    );
+  });
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // --- Checkbox selection logic ---
+
+  const handleHeaderCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.checked) {
+      // If header checkbox is checked, select all users
+      const allUserIds = users.map((user) => user.id);
+      setSelectedUserIds(allUserIds);
+    } else {
+      // If header checkbox is unchecked, deselect all users
+      setSelectedUserIds([]);
+    }
+  };
+
+  const handleUserCheckboxChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    userId: string
+  ) => {
+    if (event.target.checked) {
+      // If user checkbox is checked, add user ID to selectedUserIds
+      setSelectedUserIds((prevSelected) => [...prevSelected, userId]);
+    } else {
+      // If user checkbox is unchecked, remove user ID from selectedUserIds
+      setSelectedUserIds((prevSelected) =>
+        prevSelected.filter((id) => id !== userId)
+      );
+    }
+  };
+
+  const isHeaderCheckboxChecked =
+    selectedUserIds.length > 0 && selectedUserIds.length === users.length;
+  const isHeaderCheckboxIndeterminate =
+    selectedUserIds.length > 0 && selectedUserIds.length < users.length;
+
+  // --- End Checkbox selection logic ---
+
 
   const filterOptions = [
     { label: "Name", checked: true },
@@ -401,6 +459,8 @@ const Admin: React.FC = () => {
           <input
             type="text"
             placeholder="Search names, roles, department..."
+            value={searchTerm}
+        onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -568,8 +628,10 @@ const Admin: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.email} className="hover:bg-gray-50">
+
+            {filteredUsers.map((user) => (
+              <tr key={user.id} className="hover:bg-gray-50">
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
