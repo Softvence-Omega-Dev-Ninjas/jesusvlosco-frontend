@@ -1,7 +1,3 @@
-
-
 export default function UserProfile() {
-    return (
-        <div>UserProfile</div>
-    )
+  return <div>mizan</div>;
 }
