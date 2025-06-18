@@ -24,7 +24,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
         <img
           src={user.avatar}
           alt={user.name}
-          className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
+          className="w-24 h-24 rounded-full  shadow-md object-cover"
           onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             // Provide a fallback image or text if the avatar fails to load
             (e.target as HTMLImageElement).onerror = null;

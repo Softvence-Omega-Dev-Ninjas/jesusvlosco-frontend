@@ -78,7 +78,7 @@ const UserProfileTabs: React.FC<UserProfileTabsProps> = ({
 
   return (
     <div className="mt-6 border-t border-gray-200">
-      <div className="flex justify-start border-b border-gray-200">
+      <div className="flex justify-between px-10 ">
         <TabButton tabKey="personalInformation" label="Personal Information" />
         <TabButton
           tabKey="recognitionAchievements"

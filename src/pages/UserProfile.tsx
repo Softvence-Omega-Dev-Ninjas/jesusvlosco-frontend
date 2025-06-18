@@ -40,6 +40,19 @@ const initialUser: UserProfileData = {
   pinCode: "1203",
   nationality: "American",
 };
+interface PersonalInfoFormData {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth: Date | null;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  state: string;
+  country: string;
+  pinCode: string;
+  nationality: string;
+}
 
 const UserProfile: React.FC = () => {
   const [user, setUser] = useState<UserProfileData>(initialUser);
@@ -56,20 +69,16 @@ const UserProfile: React.FC = () => {
     setUser(initialUser);
   };
 
-  const handleSavePersonalInformation = (updatedData: UserProfileData) => {
-    // Before saving, ensure the dateOfBirth is stored as a Date object in the main user state.
-    // If you need to send it to a backend as a string, perform that conversion here.
+  const handleSavePersonalInformation = (updatedData: PersonalInfoFormData) => {
     const userToSave: UserProfileData = {
+      ...user, // retain existing fields like avatar, title, etc.
       ...updatedData,
-      // For the name in the header, update it based on the form's first/last name
       name: `${updatedData.firstName} ${updatedData.lastName}`,
     };
 
     setUser(userToSave);
     setIsEditing(false);
     console.log("Updated User Data for Saving:", userToSave);
-    // console.log("Date of Birth as string for API:", userToSave.dateOfBirth ? format(userToSave.dateOfBirth, 'yyyy-MM-dd') : '');
-    // Here you would typically send userToSave (or a modified version for API) to a backend.
   };
 
   const headerUser = {

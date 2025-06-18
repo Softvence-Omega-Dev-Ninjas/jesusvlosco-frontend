@@ -7,12 +7,7 @@ import {
   SkillItem,
 } from "./skillsCertificationsData"; // Adjust path if necessary
 
-interface SkillsCertificationsTabProps {
-  // If skills and certifications were part of the user object,
-  // you would pass them as props here. For now, we use dummy data.
-}
-
-const SkillsCertificationsTab: React.FC<SkillsCertificationsTabProps> = () => {
+const SkillsCertificationsTab: React.FC = () => {
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Skills</h2>
