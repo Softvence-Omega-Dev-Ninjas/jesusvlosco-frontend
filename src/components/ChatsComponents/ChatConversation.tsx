@@ -6,10 +6,12 @@ const ChatConversation = ({
   selectedChat,
   setShowChatInfo,
   setShowDeleteModal,
+  setShowMemberModal,
 }: {
   selectedChat: Chat;
   setShowChatInfo: (arg0: boolean) => void;
   setShowDeleteModal: (arg0: boolean) => void;
+  setShowMemberModal: (arg0: boolean) => void;
 }) => {
   const [messageInput, setMessageInput] = useState("");
 
@@ -65,14 +67,17 @@ const ChatConversation = ({
               <EllipsisVertical className="size-5 text-gray-600" />
             </button>
 
-            <div className="absolute top-full right-0 hidden group-hover:block bg-white rounded-2xl overflow-hidden shadow-md w-48 z-10">
+            <div className="absolute top-full *:cursor-pointer right-0 hidden group-hover:block bg-white rounded-2xl overflow-hidden shadow-md w-48 z-10">
               <button
                 onClick={() => setShowChatInfo(true)}
                 className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
               >
                 Chat Information
               </button>
-              <button className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200">
+              <button
+                onClick={() => setShowMemberModal(true)}
+                className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
+              >
                 Add Member
               </button>
               <button

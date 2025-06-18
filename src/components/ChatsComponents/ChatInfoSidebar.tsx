@@ -1,5 +1,6 @@
 import personImg from "@/assets/chat-person.jpg";
 import { Chat } from "./ChatWindow";
+import mediaImgPlaceholder from "@/assets/media-img-placeholder.jpg";
 
 const ChatInfoSidebar = ({
   setShowChatInfo,
@@ -9,7 +10,7 @@ const ChatInfoSidebar = ({
   selectedChat: Chat;
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+    <div className="fixed inset-0 bg-white/50 drop-shadow-xl bg-opacity-50 z-50 flex justify-end">
       <div className="w-96 bg-white h-full overflow-y-auto">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
@@ -101,13 +102,13 @@ const ChatInfoSidebar = ({
               </button>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {mediaFiles.slice(0, 12).map((media, index) => (
+              {mediaFiles.slice(0, 12).map((_, index) => (
                 <img
                   key={index}
-                  src={media || "/placeholder.svg"}
+                  src={mediaImgPlaceholder}
                   alt={`Media ${index + 1}`}
                   className="w-full h-16 object-cover rounded-lg"
-                />
+                /> 
               ))}
             </div>
           </div>

@@ -3,6 +3,7 @@ import personImg from "@/assets/chat-person.jpg";
 import ChatInfoSidebar from "./ChatInfoSidebar";
 import ChatDeleteModal from "./ChatDeleteModal";
 import ChatConversation from "./ChatConversation";
+import MemberSelectorModal from "./MemberSelectorModal";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -29,9 +30,9 @@ export default function ChatWindow() {
   const chatTabs = ["All", "Unread", "Team"];
   const [activeChatTab, setActiveChatTab] = useState("All");
   const [selectedChatId, setSelectedChatId] = useState<number>(1);
-
   const [showChatInfo, setShowChatInfo] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAddMemberModal, setShowMemberModal] = useState(true);
 
   // Replace the static chats array with state
   const [chats, setChats] = useState<Chat[]>([
@@ -325,7 +326,7 @@ export default function ChatWindow() {
             <div
               key={chat.id}
               className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-200 ${
-                selectedChatId === chat.id ? "bg-indigo-50" : ""
+                selectedChatId === chat.id && "bg-indigo-50 hover:bg-indigo-50"
               }`}
               onClick={() => setSelectedChatId(chat.id)}
             >
@@ -360,6 +361,7 @@ export default function ChatWindow() {
         selectedChat={selectedChat}
         setShowChatInfo={setShowChatInfo}
         setShowDeleteModal={setShowDeleteModal}
+        setShowMemberModal={setShowMemberModal}
       />
 
       {/* Chat Info Sidebar */}
@@ -377,6 +379,10 @@ export default function ChatWindow() {
           setShowDeleteModal={setShowDeleteModal}
           handleDeleteChat={handleDeleteChat}
         />
+      )}
+
+      {showAddMemberModal && (
+        <MemberSelectorModal setShowMemberModal={setShowMemberModal} />
       )}
     </div>
   );
