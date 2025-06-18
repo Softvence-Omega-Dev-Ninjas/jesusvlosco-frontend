@@ -21,6 +21,8 @@ import ShiftScheduling from "@/pages/ShiftScheduling";
 import TimeClock from "@/pages/TimeClock";
 import TimeSheet from "@/pages/TimeSheet";
 import TimeOffRequest from "@/pages/TimeOffRequest";
+import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
+import OverviewProject from "@/pages/OverviewProject";
 
 
 const routes = createBrowserRouter([
@@ -60,6 +62,14 @@ const routes = createBrowserRouter([
           {
             path: "shiftschedule",
             element: <ShiftScheduling></ShiftScheduling>,
+          },
+          {
+            path: "jobschedulelobby",
+            element: <JobSchedulingLobby></JobSchedulingLobby>,
+          },
+          {
+            path: "overviewProjects",
+            element: <OverviewProject></OverviewProject>,
           },
           {
             path: "timeclock",

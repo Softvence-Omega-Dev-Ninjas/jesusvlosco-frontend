@@ -22,7 +22,7 @@ export const UserLayout = () => {
         if (activeTab === 'user') {
             return <User />;
         } else if (activeTab === 'admin') {
-            return <Admin />;
+            return <Admin />
         }
         return null; // Fallback
     };
