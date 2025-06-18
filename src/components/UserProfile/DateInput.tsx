@@ -1,11 +1,10 @@
-import { parseISO } from "date-fns"; // For date formatting
-import { CalendarDays } from "lucide-react"; // Icon
+import { CalendarDays } from "lucide-react";
 import React from "react";
 import DatePicker from "react-datepicker";
 
 interface DateInputProps {
   label: string;
-  value: Date | null; // Value is now a Date object or null
+  value: Date | null; // Can extend to Date | string | null if needed
   onChange: (date: Date | null) => void;
   readOnly?: boolean;
   className?: string;
@@ -20,13 +19,15 @@ const DateInput: React.FC<DateInputProps> = ({
   className = "",
   name,
 }) => {
-  // Custom input for DatePicker to apply Tailwind styles consistently
-  const CustomInput = React.forwardRef<HTMLInputElement, any>(
-    ({ value, onClick, readOnly, ...props }, ref) => (
-      <div className="relative w-full">
-        <input
-          {...props}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700
+  // Properly type the forwarded ref and props for the custom input
+  const CustomInput = React.forwardRef<
+    HTMLInputElement,
+    { value?: string; onClick?: () => void; readOnly?: boolean }
+  >(({ value, onClick, readOnly, ...props }, ref) => (
+    <div className="relative w-full">
+      <input
+        {...props}
+        className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700
           ${
             readOnly
               ? "bg-gray-50 cursor-default"
@@ -34,21 +35,20 @@ const DateInput: React.FC<DateInputProps> = ({
           }
           pr-10
         `}
-          value={value}
-          onClick={onClick}
-          readOnly={readOnly}
-          ref={ref}
-        />
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-          <CalendarDays className="h-5 w-5 text-gray-400" />
-        </div>
+        value={value}
+        onClick={onClick}
+        readOnly={readOnly}
+        ref={ref}
+      />
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <CalendarDays className="h-5 w-5 text-gray-400" />
       </div>
-    )
-  );
+    </div>
+  ));
+  CustomInput.displayName = "CustomInput";
 
-  // DatePicker requires a Date object, so we ensure the value is of that type
-  const selectedDate =
-    value instanceof Date ? value : value ? parseISO(value.toString()) : null;
+  // Use Date or null only. If you expect string, update prop and parse accordingly.
+  const selectedDate = value instanceof Date ? value : null;
 
   return (
     <div className={`flex flex-col ${className}`}>
@@ -60,13 +60,13 @@ const DateInput: React.FC<DateInputProps> = ({
         name={name}
         selected={selectedDate}
         onChange={onChange}
-        dateFormat="dd, MMMM yyyy" // Display format
+        dateFormat="dd, MMMM yyyy"
         showYearDropdown
         showMonthDropdown
         dropdownMode="select"
-        popperPlacement="bottom-start" // Adjust placement if needed
+        popperPlacement="bottom-start"
         customInput={<CustomInput readOnly={readOnly} />}
-        readOnly={readOnly} // Disable date picker interaction when readOnly
+        readOnly={readOnly}
       />
     </div>
   );

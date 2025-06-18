@@ -1,18 +1,10 @@
-// src/components/UserProfile/RecognitionAchievementsTab.tsx
 import React from "react";
 import {
   RecognitionItem,
   dummyRecognitionAchievements,
 } from "./recognitionAchievementsData"; // Adjust path if necessary
 
-interface RecognitionAchievementsTabProps {
-  // You might pass 'user' data here if recognitions were part of the user object,
-  // but for now, we'll use dummy data directly.
-}
-
-const RecognitionAchievementsTab: React.FC<
-  RecognitionAchievementsTabProps
-> = () => {
+const RecognitionAchievementsTab: React.FC = () => {
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {dummyRecognitionAchievements.map((item: RecognitionItem) => (

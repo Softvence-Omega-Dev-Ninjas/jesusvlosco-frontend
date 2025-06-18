@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns"; // For converting Date to string for saving
+import { parseISO } from "date-fns"; // For converting Date to string for saving
 import { MapPin } from "lucide-react"; // Only MapPin now, CalendarDays is in DateInput
 import React, { useEffect, useState } from "react";
 import DateInput from "./DateInput"; // Import the new DateInput
@@ -39,10 +39,10 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
     setFormData({
       ...user,
       dateOfBirth:
-        user.dateOfBirth instanceof Date
+        typeof user.dateOfBirth === "string"
+          ? parseISO(user.dateOfBirth)
+          : user.dateOfBirth instanceof Date
           ? user.dateOfBirth
-          : user.dateOfBirth
-          ? parseISO(user.dateOfBirth.toString())
           : null,
     });
   }, [user]);
@@ -67,14 +67,7 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
 
   const handleSave = () => {
     if (onSave) {
-      // Before saving, convert Date objects back to ISO strings if your backend expects it
-      const dataToSave = {
-        ...formData,
-        dateOfBirth: formData.dateOfBirth
-          ? format(formData.dateOfBirth, "yyyy-MM-dd")
-          : "",
-      };
-      onSave(dataToSave);
+      onSave(formData);
     }
   };
 
@@ -83,10 +76,10 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
     setFormData({
       ...user,
       dateOfBirth:
-        user.dateOfBirth instanceof Date
+        typeof user.dateOfBirth === "string"
+          ? parseISO(user.dateOfBirth)
+          : user.dateOfBirth instanceof Date
           ? user.dateOfBirth
-          : user.dateOfBirth
-          ? parseISO(user.dateOfBirth.toString())
           : null,
     });
     if (onCancelEdit) {
