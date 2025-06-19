@@ -345,14 +345,14 @@ const ShiftScheduling = () => {
                   className="grid items-center"
                   style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
                 >
-                  <div className="text-sm font-medium text-gray-600">
+                  <div className="text-sm font-medium text-primary">
                     Employee
                   </div>
-                  <div className="text-sm font-medium text-gray-600">
+                  <div className="text-sm font-medium text-primary">
                     Project Name
                   </div>
-                  <div className="text-sm font-medium text-gray-600">Shift</div>
-                  <div className="text-sm font-medium text-gray-600">Date</div>
+                  <div className="text-sm font-medium text-primary">Shift</div>
+                  <div className="text-sm font-medium text-primary">Date</div>
                 </div>
               </div>
 
@@ -382,7 +382,7 @@ const ShiftScheduling = () => {
                             />
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-primary">
                               {employee.name}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -402,7 +402,7 @@ const ShiftScheduling = () => {
                       {/* Shift */}
                       <div>
                         <div className="space-y-1">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-500">
                             {employee.shift}
                           </div>
                           <div className="text-xs text-gray-500">
@@ -463,10 +463,10 @@ const ShiftScheduling = () => {
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           request.status === "Pending"
-                            ? "bg-orange-100 text-orange-800"
+                            ? "bg-orange-200 text-orange-800"
                             : request.status === "Approved"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-green-500 text-white"
+                            : "bg-red-500 text-white"
                         }`}
                       >
                         {request.status}
@@ -496,7 +496,7 @@ const ShiftScheduling = () => {
                             </span>
                             Deadline
                           </button>
-                          <button className="bg-green-600 flex gap-2 p-2 rounded-md text-white">
+                          <button className="bg-green-500 flex gap-2 p-2 rounded-md text-white">
                             <span>
                               <LucideCheck />
                             </span>
@@ -510,7 +510,7 @@ const ShiftScheduling = () => {
               ))}
 
               <div className="text-center pt-2">
-                <button className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                <button className="text-sm text-primary font-medium">
                   End of Requests
                 </button>
               </div>
@@ -522,11 +522,11 @@ const ShiftScheduling = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4 px-3">
               Shift Notification
             </h3>
-            <div className="space-y-4 p-2">
+            <div className="space-y-4 p-2 ">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="p-3 bg-gray-50 rounded-lg"
+                  className="p-3 bg-gray-100 rounded-lg"
                 >
                   <p className="text-sm font-medium text-gray-900 mb-1">
                     {notification.message}
@@ -536,7 +536,7 @@ const ShiftScheduling = () => {
               ))}
 
               <div className="text-center pt-2">
-                <button className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                <button className="text-sm text-primary font-medium">
                   End of notification
                 </button>
               </div>
@@ -547,7 +547,7 @@ const ShiftScheduling = () => {
 
       {/* Shift Calendar Modal */}
       {isCalendarModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 mt-14  lg:left-48">
+        <div className="fixed inset-0 flex items-center justify-center z-50 mt-10  lg:left-48">
           {/* Modal Content */}
           <div className="bg-white rounded-lg shadow-xl lg:w-[500px] p-6 right-0 relative z-10">
             {/* Modal Header */}
