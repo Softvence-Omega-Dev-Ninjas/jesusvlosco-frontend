@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Plus, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Define the Project interface here, as ProjectCard directly uses it
 interface Project {
@@ -80,9 +81,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, toggleMoreModal, isM
         >
           <MoreHorizontal size={20} />
         </button>
-        <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">
+
+        <Link to="/schedule/shiftschedule">
+          <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">
           Access Schedule
         </button>
+        </Link>
+      
       </div>
     </div>
   );
