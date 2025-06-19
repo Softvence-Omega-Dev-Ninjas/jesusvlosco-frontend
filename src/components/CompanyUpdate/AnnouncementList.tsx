@@ -338,7 +338,8 @@ import ResponsePanel from './ResponsePanel';
 const announcementsData = [
    {
         id: 1,
-        time: "02:00",
+        time: "02:0",
+
         title: "New Leave Policy Effective July 2025",
         description:
             "We’ve updated our leave policy to provide more flexible options for parental leave and personal days. Please review the detailed policy...",
