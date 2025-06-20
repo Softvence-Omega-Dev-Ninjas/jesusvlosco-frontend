@@ -72,9 +72,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, toggleMoreModal, isM
         <button
           ref={moreButtonRef}
           onClick={() => {
-            // The check `if (moreButtonRef.current)` is good practice
-            // to ensure you're working with a defined element,
-            // but the primary type error is resolved by the Prop's type definition.
+          
             toggleMoreModal(project.id, moreButtonRef);
           }}
           className={`w-10 h-10 border border-gray-300 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100 cursor-pointer ${isMoreModalOpen ? 'bg-gray-100' : ''}`}

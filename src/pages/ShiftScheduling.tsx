@@ -18,6 +18,7 @@ import user3 from "../assets/user3.png";
 import user4 from "../assets/user4.png";
 import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
+import { Link } from "react-router-dom";
 
 interface Employee {
   id: number;
@@ -440,73 +441,70 @@ const ShiftScheduling = () => {
 
             <div className="space-y-4 p-2">
               {timeOffRequests.map((request) => (
-                <div
+                <Link
+                  to="/schedule/timeoffrequest"
                   key={request.id}
-                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  className="block transition-transform hover:scale-[1.01]"
                 >
-                  {/* Avatar for Time-off Requests */}
-                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                    <img
-                      src={request.avatar}
-                      alt={request.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Content (Name, Status, Date, Type, Deadline, Approve) */}
-                  <div className="flex-1 min-w-0">
-                    {/* Name and Status */}
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        {request.name}
-                      </p>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          request.status === "Pending"
-                            ? "bg-orange-200 text-orange-800"
-                            : request.status === "Approved"
-                            ? "bg-green-500 text-white"
-                            : "bg-red-500 text-white"
-                        }`}
-                      >
-                        {request.status}
-                      </span>
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img
+                        src={request.avatar}
+                        alt={request.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    {/* New container for Date, Type, Deadline, Approve - Aligned with the avatar */}
-                    <div className="-ml-10 mt-5">
-                      {request.date && (
-                        <p className="text-sm text-gray-600 mb-1">
-                          <LucideCalendarDays
-                            size={14}
-                            className="inline-block mr-1"
-                          />
-                          {request.date}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {request.name}
                         </p>
-                      )}
-                      <p className="text-sm font-medium text-gray-900 mb-2">
-                        {request.type}
-                      </p>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            request.status === "Pending"
+                              ? "bg-orange-200 text-orange-800"
+                              : request.status === "Approved"
+                              ? "bg-green-500 text-white"
+                              : "bg-red-500 text-white"
+                          }`}
+                        >
+                          {request.status}
+                        </span>
+                      </div>
 
-                      {request.status === "Pending" && (
-                        <div className="flex items-center justify-between pt-2">
-                          <button className="flex gap-2 border border-gray-200 p-2 rounded-md">
-                            <span>
+                      <div className="-ml-10 mt-5">
+                        {request.date && (
+                          <p className="text-sm text-gray-600 mb-1">
+                            <LucideCalendarDays
+                              size={14}
+                              className="inline-block mr-1"
+                            />
+                            {request.date}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-gray-900 mb-2">
+                          {request.type}
+                        </p>
+
+                        {request.status === "Pending" && (
+                          <div className="flex items-center justify-between pt-2">
+                            <button className="flex gap-2 border border-gray-200 p-2 rounded-md">
                               <LucideCalendarDays />
-                            </span>
-                            Deadline
-                          </button>
-                          <button className="bg-green-500 flex gap-2 p-2 rounded-md text-white">
-                            <span>
+                              Deadline
+                            </button>
+                            <button className="bg-green-500 flex gap-2 p-2 rounded-md text-white">
                               <LucideCheck />
-                            </span>
-                            Approve
-                          </button>
-                        </div>
-                      )}
+                              Approve
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
 
               <div className="text-center pt-2">
