@@ -320,18 +320,17 @@ const ShiftScheduling = () => {
               </h2>
               <div className="flex items-center gap-2">
                 <button
-                  className="flex items-center gap-1 px-4 py-3 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors  cursor-pointer"
+                  className="flex items-center gap-1 lg:px-4 lg:py-3 px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors  cursor-pointer"
                   onClick={() => setIsCalendarModalOpen(true)} // Open modal on click
                 >
-                  <LucideCalendarDays></LucideCalendarDays>{" "}
-                  {/* Changed size to 14 for consistency */}
-                  <Tally1 /> {/* Added size for consistency */}
+                  <LucideCalendarDays></LucideCalendarDays>
+                  <Tally1 /> 
                   <span>
                     <ChevronDown />
                   </span>{" "}
                   {/* Added size for consistency */}
                 </button>
-                <button className="flex items-center gap-2 px-5 py-3  bg-primary text-white  font-medium rounded-lg  transition-colors  cursor-pointer">
+                <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2  bg-primary text-white  font-medium rounded-lg  transition-colors  cursor-pointer">
                   <UserPlus />
                   Assign
                 </button>
