@@ -46,7 +46,7 @@ interface ShiftNotification {
   time: string;
   type: "schedule" | "assignment";
 }
-
+// bug fixing
 const ShiftScheduling = () => {
   const [employees] = useState<Employee[]>([
     {
