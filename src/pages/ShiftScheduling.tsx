@@ -1,6 +1,5 @@
 
-import ProjectHeader from "@/components/ShiftScheduling/ProjectHeader";
-import ShiftScheduler from "@/components/ShiftScheduling/ShiftScheduler";
+
 
 export default function ShiftScheduling() {
   return (
@@ -10,3 +9,11 @@ export default function ShiftScheduling() {
     </div>
   )
 };
+
+
+const ShiftScheduling = () => {
+ return <div>shift</div>
+}
+export default ShiftScheduling;
+
+
