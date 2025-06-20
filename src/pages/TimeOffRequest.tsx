@@ -1,6 +1,234 @@
+// TimeOffRequest.tsx
+import { mockEmployeeLeaveData } from "@/assets/mockData";
+import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // Adjust the import path as needed
+import { EmployeeLeave } from "@/types";
+import React, { useEffect, useState } from "react";
 
-export default function TimeOffRequest() {
+const TimeOffRequest: React.FC = () => {
+  const [employeeData, setEmployeeData] = useState<EmployeeLeave[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeLeave | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
+        setEmployeeData(mockEmployeeLeaveData);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleRefresh = () => {
+    setLoading(true);
+    setError(null);
+    setTimeout(() => {
+      setEmployeeData(mockEmployeeLeaveData);
+      setLoading(false);
+    }, 300);
+  };
+
+  const openModal = (employee: EmployeeLeave) => {
+    setSelectedEmployee(employee);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  if (loading) {
     return (
-        <div>TimeOffRequest</div>
-    )
-}
+      <div className="p-6 w-full mx-auto text-center text-gray-700">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto bg-white rounded-lg shadow-md text-center text-red-600 font-medium">
+        Error: {error}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        className={`p-6 mt-6 w-full mx-auto bg-white rounded-lg shadow-md text-gray-800 transition-opacity duration-300 ${
+          isModalOpen ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
+        {/* top header */}
+        <div className="flex justify-between items-center pb-4 mb-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-[#4E53B1]">
+            Overview Project 1
+          </h2>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center cursor-pointer gap-2 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-arrow-clockwise text-gray-500"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
+              />
+              <path d="M8 4.466V.534l2.848 2.842L8 4.466z" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Employee Name
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Time-off
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Sick leave
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Casual leave
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Unpaid leave
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Last Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {employeeData.map((employee, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div
+                      className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-md -ml-2"
+                      onClick={() => openModal(employee)}
+                    >
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img
+                          className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                          src={employee.avatar}
+                          alt={employee.employeeName}
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {employee.employeeName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {employee.jobTitle}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <div className="text-gray-600 font-medium">
+                      {employee.timeOff.total} Days
+                    </div>
+                    <div className="text-xs text-green-600 mt-0.5">
+                      Remaining: {employee.timeOff.remaining} days
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <div className="text-gray-600 font-medium">
+                      {employee.sickLeave.total} Days
+                    </div>
+                    <div
+                      className={`text-xs mt-0.5 ${
+                        employee.sickLeave.remaining === 0
+                          ? "text-red-600 font-semibold"
+                          : "text-green-600"
+                      }`}
+                    >
+                      Remaining: {employee.sickLeave.remaining} days
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <div className="text-gray-600 font-medium">
+                      {employee.casualLeave.total} Days
+                    </div>
+                    <div className="text-xs text-green-600 mt-0.5">
+                      Remaining: {employee.casualLeave.remaining} days
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <div className="text-gray-600 font-medium">
+                      {employee.unpaidLeave.total} Days
+                    </div>
+                    <div className="text-xs text-green-600 mt-0.5">
+                      Remaining: {employee.unpaidLeave.remaining} days
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span
+                      className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        employee.lastStatus === "Approved"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {employee.lastStatus}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {isModalOpen && (
+        <EmployeeDetailModal employee={selectedEmployee} onClose={closeModal} />
+      )}
+    </>
+  );
+};
+
+export default TimeOffRequest;

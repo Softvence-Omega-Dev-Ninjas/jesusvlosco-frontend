@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Plus, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Define the Project interface here, as ProjectCard directly uses it
 interface Project {
@@ -71,18 +72,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, toggleMoreModal, isM
         <button
           ref={moreButtonRef}
           onClick={() => {
-            // The check `if (moreButtonRef.current)` is good practice
-            // to ensure you're working with a defined element,
-            // but the primary type error is resolved by the Prop's type definition.
+          
             toggleMoreModal(project.id, moreButtonRef);
           }}
           className={`w-10 h-10 border border-gray-300 rounded-full text-gray-500 flex items-center justify-center hover:bg-gray-100 cursor-pointer ${isMoreModalOpen ? 'bg-gray-100' : ''}`}
         >
           <MoreHorizontal size={20} />
         </button>
-        <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">
+
+        <Link to="/schedule/shiftschedule">
+          <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">
           Access Schedule
         </button>
+        </Link>
+      
       </div>
     </div>
   );
