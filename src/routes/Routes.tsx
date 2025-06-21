@@ -23,6 +23,9 @@ import TimeSheet from "@/pages/TimeSheet";
 import TimeOffRequest from "@/pages/TimeOffRequest";
 import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
+import TimeSheets from "@/pages/TimeSheets";
+import Payroll from "@/Layout/UserLayout/Payroll";
+import UserOffDeatils from "@/Layout/UserLayout/UserOffDeatils";
 
 
 const routes = createBrowserRouter([
@@ -77,8 +80,28 @@ const routes = createBrowserRouter([
           },
           {
             path: "timesheet",
-            element: <TimeSheet></TimeSheet>,
+            element: <TimeSheet />,
+            children: [
+              {
+                index: true, // 👈 This is the default route for /timesheet
+                element: <TimeSheets />
+              },
+              {
+                path: "time",
+                element: <TimeSheets />
+              },
+              {
+                path: "payroll",
+                element: <Payroll />
+              }
+            ]
           },
+
+          {
+            path: 'useroffdetails',
+            element: <UserOffDeatils></UserOffDeatils>
+          },
+
           {
             path: "timeoffrequest",
             element: <TimeOffRequest></TimeOffRequest>,
