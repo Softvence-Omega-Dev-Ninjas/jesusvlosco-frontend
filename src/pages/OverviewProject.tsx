@@ -330,10 +330,11 @@ const OverviewProject = () => {
                   </span>{" "}
                   {/* Added size for consistency */}
                 </button>
+           <Link to="/schedule/shiftschedule">
                 <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2  bg-primary text-white  font-medium rounded-lg  transition-colors  cursor-pointer">
                   <UserPlus />
                   Assign
-                </button>
+                </button></Link>
               </div>
             </div>
 
