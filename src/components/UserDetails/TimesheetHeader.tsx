@@ -355,19 +355,21 @@ const AddTimeOffModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const userOptions = [
     { name: "Esther Howard", avatar: estherHowardAvatar },
     { name: "Robert Fox", avatar: robertFoxAvatar },
+    { name: "Esther Howard", avatar: estherHowardAvatar },
+    { name: "Robert Fox", avatar: robertFoxAvatar },
+    { name: "Esther Howard", avatar: estherHowardAvatar },
+    { name: "Robert Fox", avatar: robertFoxAvatar },
   ];
 
   const timeOffTypes = [
     "Sick leave",
-    "Vacation",
-    "Personal leave",
-    "Bereavement leave",
-    "Jury Duty",
+    "Casual leave",
+    "Unpaid leave",
   ];
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 left-2/3 -right-32">
-      <div className="absolute inset-0  bg-opacity-50 z-40" onClick={onClose}></div>
+      <div className="absolute inset-0  bg-opacity-20 z-40" onClick={onClose}></div>
 
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md relative z-50 mx-4 sm:mx-0">
         <button
@@ -470,9 +472,12 @@ const AddTimeOffModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           ></textarea>
         </div>
 
-        <div className="flex justify-start">
-          <button className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-md">
-            Save
+        <div className="flex  gap-5">
+          <button className="px-6 py-2 bg-primary text-white font-medium rounded-md transition-colors shadow-md">
+           Add
+          </button>
+          <button className="px-6 py-2   font-medium rounded-md  border">
+           cancel
           </button>
         </div>
       </div>
