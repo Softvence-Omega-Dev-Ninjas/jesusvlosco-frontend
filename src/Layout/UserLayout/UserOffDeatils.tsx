@@ -51,19 +51,7 @@ const UserOffDetails: React.FC = () => {
     setShowAddOptions((prev) => !prev);
   };
 
-  // REMOVED: This function is triggered from TimesheetHeader (via AddOptionsModal)
-  // REMOVED: const handleOpenAddShiftForm = () => {
-  // REMOVED:   setShowAddShiftForm(true);
-  // REMOVED: };
-
-  // REMOVED: This function is passed to AddShiftFormModal to close it.
-  // REMOVED: const handleCloseAddShiftForm = () => {
-  // REMOVED:   setShowAddShiftForm(false);
-  // REMOVED: };
-
-  // Determine if any overlay should be active to dim the main content
-  // This state correctly controls the opacity of the main content and the presence of the backdrop.
-  // MODIFIED: isOverlayActive now only depends on showAddOptions
+  
   const isOverlayActive = showAddOptions; // || showAddShiftForm; // Removed showAddShiftForm
 
   // Mock data (with ADDED unique IDs for each weekly group) - UNCHANGED
