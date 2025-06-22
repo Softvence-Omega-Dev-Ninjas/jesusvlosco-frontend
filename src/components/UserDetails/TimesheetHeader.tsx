@@ -179,7 +179,7 @@ const AddShiftModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="col-span-1 flex flex-col items-center justify-center bg-purple-100 p-3 rounded-md min-h-[120px] self-stretch">
+          <div className="col-span-1 flex flex-col items-center justify-center bg-purple-100 p-3  h-28 rounded-md  self-stretch">
             <span className="text-sm text-purple-800 font-medium">Total hours</span>
             <span className="text-3xl font-bold text-purple-800">08:00</span>
           </div>
