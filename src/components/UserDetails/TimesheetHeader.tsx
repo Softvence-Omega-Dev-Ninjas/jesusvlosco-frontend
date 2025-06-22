@@ -195,7 +195,7 @@ const AddShiftModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className="mt-6 flex justify-start">
-          <button className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-md">
+          <button className="px-6 py-2 bg-primary text-white  font-medium rounded-md  transition-colors shadow-md">
             Save
           </button>
         </div>
