@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { ActionIcon } from "../TimeOffRequest/Icons";
+import { Chat, ChatConversationModal } from "./ChatConversationModal"; // Import Chat as well
 import { UserIcon } from "./Icons";
 
 interface PendingRequestModalProps {
@@ -20,10 +21,48 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
   onClose,
 }) => {
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showChatConversationModal, setShowChatConversationModal] =
+    useState(false); // State for the new ChatConversation modal
   const actionBtnRef = useRef<HTMLButtonElement>(null);
   if (!isOpen) return null;
+  // Dummy chat data for demonstration. In a real app, this would be fetched or passed dynamically.
+  const dummySelectedChat: Chat = {
+    id: "chat-1",
+    name: "Robert Fox",
+    initials: "RF",
+    online: true,
+    messages: [
+      {
+        id: 1,
+        sender: "other",
+        text: "Hello, I need to discuss my shift on the 18th.",
+        avatar: "https://randomuser.me/api/portraits/men/77.jpg",
+      },
+      {
+        id: 2,
+        sender: "me",
+        text: "Sure, what changes are you looking for?",
+        avatar: "https://placehold.co/32x32/4E53B1/ffffff?text=ME",
+      },
+      {
+        id: 3,
+        sender: "other",
+        text: "I'd like to adjust my end time from 05:00 to 06:00.",
+        avatar: "https://randomuser.me/api/portraits/men/77.jpg",
+      },
+      {
+        id: 4,
+        sender: "me",
+        text: "Understood. I will check the schedule and get back to you.",
+        avatar: "https://placehold.co/32x32/4E53B1/ffffff?text=ME",
+      },
+    ],
+  };
   return (
     <div className="w-8/12 bg-white relative">
+      {/* className={`${
+          isModalOpen ? "opacity-50 pointer-events-none" : ""
+        } transition-all duration-300`} */}
       {/* Header */}
       <header className="bg-[#4E53B1]  text-white p-4 rounded-t-lg shadow-md mb-6">
         <h1 className="text-xl font-semibold text-center">Requests</h1>
@@ -137,7 +176,11 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
             Robert Fox
           </span>
           <span className="text-sm text-[#484848]">Add Shift</span>
-          <button className="flex items-center text-[#4E53B1] text-sm hover:underline">
+          {/* Add onClick handler here */}
+          <button
+            onClick={() => setShowChatConversationModal(true)}
+            className="flex items-center text-[#4E53B1] cursor-pointer text-sm hover:underline"
+          >
             <UserIcon />
             Chat with user
           </button>
@@ -183,7 +226,7 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
           <button
             ref={actionBtnRef}
             onClick={() => setShowActionMenu((prev) => !prev)}
-            className="border border-[#4E53B1] text-[#4E53B1] hover:bg-[#4E53B1] hover:text-white font-semibold py-2 px-4 rounded-full shadow-md flex items-center gap-2 transition-colors duration-200"
+            className="border border-[#4E53B1] text-[#4E53B1] cursor-pointer hover:bg-[#4E53B1] hover:text-white font-semibold py-2 px-4 rounded-full shadow-md flex items-center gap-2 transition-colors duration-200"
           >
             <ActionIcon />
             Action
@@ -200,15 +243,29 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
                 className="w-full border border-gray-300 rounded-md p-2 text-sm text-gray-700 mb-4 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
               <div className="flex justify-end gap-2">
-                <button className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 text-sm">
+                <button
+                  ref={actionBtnRef}
+                  onClick={() => setShowActionMenu((prev) => !prev)}
+                  className="bg-red-500 cursor-pointer text-white px-4 py-1 rounded hover:bg-red-600 text-sm"
+                >
                   Decline
                 </button>
-                <button className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 text-sm">
+                <button
+                  ref={actionBtnRef}
+                  onClick={() => setShowActionMenu((prev) => !prev)}
+                  className="bg-green-500 cursor-pointer text-white px-4 py-1 rounded hover:bg-green-600 text-sm"
+                >
                   Approve
                 </button>
               </div>
             </div>
           )}
+          {/* Chat Conversation Modal */}
+          <ChatConversationModal
+            isOpen={showChatConversationModal}
+            onClose={() => setShowChatConversationModal(false)}
+            selectedChat={dummySelectedChat}
+          />
         </div>
       </div>
     </div>
