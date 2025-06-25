@@ -14,7 +14,7 @@ interface BackdropProps {
 const Backdrop: React.FC<BackdropProps> = ({ onClick }) => {
   return (
     <div
-      className="fixed inset-0 bg-opacity-50 z-30" // Your current preference for transparent backdrop
+      className="fixed inset-0  bg-opacity-50 z-30" // Your current preference for transparent backdrop
       onClick={onClick}
     ></div>
   );
@@ -317,8 +317,8 @@ const UserOffDetails: React.FC = () => {
       )}
 
       <div
-        className={`shadow ${isOverlayActive ? "opacity-50 pointer-events-none" : ""}`}
-        style={{ transition: "opacity 0.3s ease-in-out" }}
+        className={`shadow ${isOverlayActive ? "opacity-50  pointer-events-none" : ""}`}
+        style={{ transition: "opacity 0.3s  ease-in-out" }}
       >
         {/* MODIFIED: Removed onOpenAddShiftForm prop */}
         <TimesheetHeader />
