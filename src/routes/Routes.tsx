@@ -26,6 +26,7 @@ import OverviewProject from "@/pages/OverviewProject";
 import TimeSheets from "@/pages/TimeSheets";
 import Payroll from "@/Layout/UserLayout/Payroll";
 import UserOffDeatils from "@/Layout/UserLayout/UserOffDeatils";
+import SidebarSetting from "@/pages/SidebarSetting";
 
 
 const routes = createBrowserRouter([
@@ -61,13 +62,14 @@ const routes = createBrowserRouter([
       {
         path: "/schedule",
         element: <Schedule></Schedule>,
+
         children: [
           {
             path: "shiftschedule",
             element: <ShiftScheduling></ShiftScheduling>,
           },
           {
-            path: "jobschedulelobby",
+            index: true, // 👈 This is the default route for /schedule
             element: <JobSchedulingLobby></JobSchedulingLobby>,
           },
           {
@@ -131,6 +133,10 @@ const routes = createBrowserRouter([
           },
         ]
       },
+      {
+        path: '/sidebar-settings',
+        element: <SidebarSetting></SidebarSetting>
+      }
 
     ],
   },
