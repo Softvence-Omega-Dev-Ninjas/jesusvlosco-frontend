@@ -27,6 +27,11 @@ import TimeSheet from "@/pages/TimeSheet";
 import TimeSheets from "@/pages/TimeSheets";
 import User from "@/pages/User";
 import UserProfile from "@/pages/UserProfile";
+import SurveyAndPoll from "@/pages/SurveyAndPoll";
+import SurveyPage from "./SurveyPage";
+import PollPage from "@/pages/PollPage";
+import PublishSurvey from "@/pages/PublishSurvey";
+import PublishPoll from "@/pages/PublishPoll";
 
 const routes = createBrowserRouter([
   {
@@ -104,9 +109,34 @@ const routes = createBrowserRouter([
             path: "timeoffrequest",
             element: <TimeOffRequest></TimeOffRequest>,
           },
+
         ],
       },
       {},
+      {
+        path: '/survey-poll',
+        element: <SurveyAndPoll></SurveyAndPoll>,
+        children: [
+          {
+            path: 'survey',
+            element: <SurveyPage></SurveyPage>
+          },
+          {
+            path: 'poll',
+            element: <PollPage></PollPage>
+          },
+        ]
+
+      },
+      {
+        path: '/publish-survey',
+        element: <PublishSurvey></PublishSurvey>
+      },
+      {
+        path: '/publish-survey',
+        element: <PublishPoll></PublishPoll>
+      },
+
 
       {
         path: "/user",
