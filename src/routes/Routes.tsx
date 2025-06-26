@@ -118,6 +118,10 @@ const routes = createBrowserRouter([
         element: <SurveyAndPoll></SurveyAndPoll>,
         children: [
           {
+            index: true,
+            element: <SurveyPage></SurveyPage>
+          },
+          {
             path: 'survey',
             element: <SurveyPage></SurveyPage>
           },
