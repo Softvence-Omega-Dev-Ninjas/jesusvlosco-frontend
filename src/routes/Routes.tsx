@@ -115,26 +115,11 @@ const routes = createBrowserRouter([
 
         ],
       },
-      {},
       {
         path: '/survey-poll',
-        element: <SurveyMainPage></SurveyMainPage>,
-        children: [
-          {
-            index: true,
-            element: <SurveyPage></SurveyPage>
-          },
-          {
-            path: 'survey',
-            element: <SurveyPage></SurveyPage>
-          },
-          {
-            path: 'poll',
-            element: <PollPage></PollPage>
-          },
-        ]
-
+        element: <SurveyMainPage></SurveyMainPage>
       },
+
       {
         path: '/survey-response',
         element: <SurveyResponse></SurveyResponse>
