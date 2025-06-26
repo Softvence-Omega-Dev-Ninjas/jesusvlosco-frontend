@@ -494,7 +494,7 @@ const User: React.FC = () => {
           </p>
         </div>
         <Link
-          to={"/user/add-user"}
+          to={"/add-user"}
           className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
         >
           <svg
@@ -707,9 +707,8 @@ const User: React.FC = () => {
 
       {/* Users Table */}
       <div
-        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${
-          isAnyModalOpen ? "opacity-50" : "opacity-100"
-        }`}
+        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${isAnyModalOpen ? "opacity-50" : "opacity-100"
+          }`}
       >
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
