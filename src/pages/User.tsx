@@ -2,6 +2,7 @@ import { Columns3 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { IoFilterOutline } from "react-icons/io5";
 
+import { Link } from "react-router-dom";
 import user1 from "../assets/user1.png";
 import user2 from "../assets/user2.png";
 import user3 from "../assets/user3.png";
@@ -492,7 +493,10 @@ const User: React.FC = () => {
             All Employee Information In One Place
           </p>
         </div>
-        <button className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer">
+        <Link
+          to={"/user/add-user"}
+          className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
+        >
           <svg
             className="w-5 h-5 mr-2"
             fill="none"
@@ -507,8 +511,8 @@ const User: React.FC = () => {
               d="M12 4v16m8-8H4"
             ></path>
           </svg>
-          Add Admin
-        </button>
+          Add User
+        </Link>
       </header>
 
       {/* Control Bar */}
