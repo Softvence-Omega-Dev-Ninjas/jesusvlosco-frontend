@@ -7,7 +7,7 @@ interface HeaderProps {
 
 const Header = ({ selectedRole, setSelectedRole }: HeaderProps) => {
   return (
-    <div className="flex justify-between items-start mb-8">
+    <div className="flex justify-between items-start mb-8 mt-4">
       <div>
         <h1 className="text-2xl font-bold text-[#4E53B1] mb-2">Add user</h1>
         <p className="text-gray-600">

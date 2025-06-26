@@ -11,8 +11,8 @@ interface TabsProps {
 
 const Tabs = ({ tabs, activeTab, setActiveTab }: TabsProps) => {
   return (
-    <div className="border-b border-gray-200 mb-8">
-      <nav className="flex space-x-8">
+    <div className="w-full mx-auto border-b border-gray-200 mb-8">
+      <nav className="flex flex-col lg:flex-row lg:space-x-8 gap-4 lg:gap-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}

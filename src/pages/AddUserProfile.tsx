@@ -62,7 +62,13 @@ const AddUserProfile = () => {
   });
 
   const payPeriodOptions = ["Hour", "Day", "Week", "Month"];
-  const casualLeaveOptions = ["5 days", "10 days", "15 days", "20 days"];
+  const casualLeaveOptions = [
+    "3 days",
+    "5 days",
+    "10 days",
+    "15 days",
+    "20 days",
+  ];
   const sickLeaveOptions = ["10 days", "15 days", "20 days", "30 days"];
   const numberOfDaysOptions = ["Select number here", "1", "2", "3"];
   const offDayOptions = [
@@ -284,7 +290,7 @@ const AddUserProfile = () => {
   };
 
   return (
-    <div className="mx-auto">
+    <div className=" w-full bg-gray-50 mx-auto">
       <Header selectedRole={selectedRole} setSelectedRole={setSelectedRole} />
       <Tabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === "personal" && (
