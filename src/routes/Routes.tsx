@@ -151,7 +151,7 @@ const routes = createBrowserRouter([
         element: <PublishSurvey></PublishSurvey>
       },
       {
-        path: '/publish-survey',
+        path: '/publish-poll',
         element: <PublishPoll></PublishPoll>
       },
 
