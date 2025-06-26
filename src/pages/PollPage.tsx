@@ -87,7 +87,7 @@ export default function PollPage() {
                     <div className="flex w-full justify-center relative flex-grow">
                         <div className="flex flex-col lg:flex-row w-full  my-8 mx-4 md:mx-auto gap-6">
                             <div className="flex-grow flex flex-col items-center gap-6">
-                                <div className="relative bg-white pt-6 pb-6 px-8 rounded shadow-lg border-t-[20px] border-blue-500 w-full max-w-5xl">
+                                <div className="relative bg-white pt-6 pb-6 px-8 rounded-2xl shadow-lg border-t-[20px] border-blue-700 w-full max-w-5xl">
                                     <div className="mb-6">
                                         <label className="block text-blue-700 text-sm font-semibold mb-2">Poll Title</label>
                                         <input
