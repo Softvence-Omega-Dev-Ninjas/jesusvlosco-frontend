@@ -2,7 +2,6 @@
 import { FC, useState } from "react";
 import { BsStopwatch } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
-import { TiEqualsOutline } from "react-icons/ti";
 import { Tab } from "@headlessui/react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import ShiftTemplateDropdown from "./ShiftTemplateDropdown";
@@ -157,7 +156,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     return (
-        <aside className="w-full rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
+        <aside className="w-full mt-18 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-indigo-700 text-lg font-bold">Employee Availability</h2>
                 <span className="text-xs text-green-600 bg-green-100 rounded-full px-2 py-0.5">
