@@ -32,6 +32,9 @@ import SurveyPage from "./SurveyPage";
 import PollPage from "@/pages/PollPage";
 import PublishSurvey from "@/pages/PublishSurvey";
 import PublishPoll from "@/pages/PublishPoll";
+import SurveyMainPage from "@/pages/SurveyMainPage";
+import SurveyResponse from "@/pages/SurveyResponse";
+import SurveyDetails from "@/pages/SurveyDetails";
 
 const routes = createBrowserRouter([
   {
@@ -115,7 +118,7 @@ const routes = createBrowserRouter([
       {},
       {
         path: '/survey-poll',
-        element: <SurveyAndPoll></SurveyAndPoll>,
+        element: <SurveyMainPage></SurveyMainPage>,
         children: [
           {
             index: true,
@@ -131,6 +134,32 @@ const routes = createBrowserRouter([
           },
         ]
 
+      },
+      {
+        path: '/survey-response',
+        element: <SurveyResponse></SurveyResponse>
+      },
+      {
+        path: '/survey-details',
+        element: <SurveyDetails></SurveyDetails>
+      },
+      {
+        path: '/survey-poll-page',
+        element: <SurveyAndPoll></SurveyAndPoll>,
+        children: [
+          {
+            index: true,
+            element: <SurveyPage></SurveyPage>
+          },
+          {
+            path: 'survey',
+            element: <SurveyPage></SurveyPage>
+          },
+          {
+            path: 'poll',
+            element: <PollPage></PollPage>
+          },
+        ]
       },
       {
         path: '/publish-survey',
