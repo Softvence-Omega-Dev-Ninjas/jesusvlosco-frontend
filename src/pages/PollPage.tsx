@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Pencil, FileText, Trash2 } from 'lucide-react';
-import ServeyTemplate from './PollComponents/ServeyTemplate';
+import { useNavigate } from 'react-router-dom';
 
-// Define interfaces for your data structures
 interface Question {
     id: number;
     text: string;
@@ -16,9 +15,9 @@ export default function PollPage() {
         { id: 1, text: '', options: ['', '', '', ''] }
     ]);
     const [showModal, setShowModal] = useState(true);
-    const [showTemplateSection, setShowTemplateSection] = useState(false);
 
-    // Lock scroll when modal is open
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (showModal) {
             document.body.style.overflow = 'hidden';
@@ -32,12 +31,11 @@ export default function PollPage() {
 
     const handleCreateNewPoll = () => {
         setShowModal(false);
-        setShowTemplateSection(false);
     };
 
     const handleUseTemplate = () => {
         setShowModal(false);
-        setShowTemplateSection(true);
+        navigate('/poll-template');
     };
 
     const handlePublishPoll = () => {
@@ -49,7 +47,6 @@ export default function PollPage() {
         setPollDescription('');
         setQuestions([{ id: 1, text: '', options: ['', '', '', ''] }]);
         setShowModal(true);
-        setShowTemplateSection(false);
     };
 
     const handleAddOption = (qIdx: number) => {
@@ -80,109 +77,98 @@ export default function PollPage() {
 
     return (
         <div className="min-h-screen relative font-inter">
-            {/* Main content (either Poll Form or Template Section) */}
+            {/* Main content */}
             <div className={`relative z-10 flex flex-col items-center min-h-screen bg-gray-100 ${blurClass} transition-all duration-300`}>
-                {!showTemplateSection ? (
-                    // ========== Poll Form ==========
-                    <div className="flex w-full justify-center relative flex-grow">
-                        <div className="flex flex-col lg:flex-row w-full  my-8 mx-4 md:mx-auto gap-6">
-                            <div className="flex-grow flex flex-col items-center gap-6">
-                                <div className="relative bg-white pt-6 pb-6 px-8 rounded-2xl shadow-lg border-t-[20px] border-blue-700 w-full max-w-5xl">
-                                    <div className="mb-6">
-                                        <label className="block text-blue-700 text-sm font-semibold mb-2">Poll Title</label>
-                                        <input
-                                            type="text"
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200"
-                                            value={pollTitle}
-                                            onChange={(e) => setPollTitle(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-blue-700 text-sm font-semibold mb-2">Description</label>
-                                        <textarea
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200 h-24 resize-none"
-                                            value={pollDescription}
-                                            onChange={(e) => setPollDescription(e.target.value)}
-                                        ></textarea>
-                                    </div>
+                <div className="flex w-full justify-center relative flex-grow">
+                    <div className="flex flex-col lg:flex-row w-full my-8 mx-4 md:mx-auto gap-6">
+                        <div className="flex-grow flex flex-col items-center gap-6">
+                            <div className="relative bg-white pt-6 pb-6 px-8 rounded-2xl shadow-lg border-t-[20px] border-blue-700 w-full max-w-5xl">
+                                <div className="mb-6">
+                                    <label className="block text-blue-700 text-sm font-semibold mb-2">Poll Title</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200"
+                                        value={pollTitle}
+                                        onChange={(e) => setPollTitle(e.target.value)}
+                                    />
                                 </div>
+                                <div>
+                                    <label className="block text-blue-700 text-sm font-semibold mb-2">Description</label>
+                                    <textarea
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200 h-24 resize-none"
+                                        value={pollDescription}
+                                        onChange={(e) => setPollDescription(e.target.value)}
+                                    ></textarea>
+                                </div>
+                            </div>
 
-                                <div className="bg-white p-6 rounded-xl relative w-full max-w-2xl">
-                                    <h3 className="text-xl font-semibold text-blue-700 mb-6 pb-4 border-b border-gray-200">Poll details</h3>
+                            <div className="bg-white p-6 rounded-xl relative w-full max-w-2xl">
+                                <h3 className="text-xl font-semibold text-blue-700 mb-6 pb-4 border-b border-gray-200">Poll details</h3>
 
-                                    {questions.map((q, qIdx) => (
-                                        <div key={q.id} className="mb-8 last:mb-0">
-                                            <div className="flex justify-between items-center mb-4">
-                                                <label className="block text-blue-700 text-base font-medium">
-                                                    {qIdx + 1}. Question
-                                                </label>
-                                                <button className="text-gray-500 hover:text-gray-700 focus:outline-none p-1">
-                                                    <Trash2 size={20} />
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="text"
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                value={q.text}
-                                                onChange={(e) => handleQuestionTextChange(qIdx, e.target.value)}
-                                                placeholder="Enter your question"
-                                            />
-                                            <div className="space-y-3">
-                                                {q.options.map((opt, oIdx) => (
-                                                    <div key={oIdx} className="flex items-center space-x-2">
-                                                        <input
-                                                            type="text"
-                                                            className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                                            value={opt}
-                                                            onChange={(e) => handleOptionChange(qIdx, oIdx, e.target.value)}
-                                                            placeholder={`Option ${oIdx + 1}`}
-                                                        />
-                                                        <button
-                                                            onClick={() => handleRemoveOption(qIdx, oIdx)}
-                                                            className="p-1 text-gray-600 hover:text-gray-800 focus:outline-none"
-                                                        >
-                                                            <X size={18} />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <button
-                                                onClick={() => handleAddOption(qIdx)}
-                                                className="mt-4 cursor-pointer flex items-center space-x-2 border text-blue-700 hover:text-purple-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg px-3 py-2 transition duration-200"
-                                            >
-                                                <Plus size={20} />
-                                                <span>Add option</span>
+                                {questions.map((q, qIdx) => (
+                                    <div key={q.id} className="mb-8 last:mb-0">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <label className="block text-blue-700 text-base font-medium">
+                                                {qIdx + 1}. Question
+                                            </label>
+                                            <button className="text-gray-500 hover:text-gray-700 focus:outline-none p-1">
+                                                <Trash2 size={20} />
                                             </button>
                                         </div>
-                                    ))}
-
-                                    <div className="flex justify-center space-x-4 mt-8">
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            value={q.text}
+                                            onChange={(e) => handleQuestionTextChange(qIdx, e.target.value)}
+                                            placeholder="Enter your question"
+                                        />
+                                        <div className="space-y-3">
+                                            {q.options.map((opt, oIdx) => (
+                                                <div key={oIdx} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                        value={opt}
+                                                        onChange={(e) => handleOptionChange(qIdx, oIdx, e.target.value)}
+                                                        placeholder={`Option ${oIdx + 1}`}
+                                                    />
+                                                    <button
+                                                        onClick={() => handleRemoveOption(qIdx, oIdx)}
+                                                        className="p-1 text-gray-600 hover:text-gray-800 focus:outline-none"
+                                                    >
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
                                         <button
-                                            onClick={handlePublishPoll}
-                                            className="px-8 py-3 bg-blue-700 cursor-pointer text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200 transform hover:scale-105"
+                                            onClick={() => handleAddOption(qIdx)}
+                                            className="mt-4 cursor-pointer flex items-center space-x-2 border text-blue-700 hover:text-purple-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg px-3 py-2 transition duration-200"
                                         >
-                                            Publish
-                                        </button>
-                                        <button
-                                            onClick={handleCancelPoll}
-                                            className="px-8 py-3 bg-white text-gray-800 cursor-pointer font-semibold rounded-lg shadow-md border border-gray-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200 transform hover:scale-105"
-                                        >
-                                            Cancel
+                                            <Plus size={20} />
+                                            <span>Add option</span>
                                         </button>
                                     </div>
+                                ))}
+
+                                <div className="flex justify-center space-x-4 mt-8">
+                                    <button
+                                        onClick={handlePublishPoll}
+                                        className="px-8 py-3 bg-blue-700 cursor-pointer text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200 transform hover:scale-105"
+                                    >
+                                        Publish
+                                    </button>
+                                    <button
+                                        onClick={handleCancelPoll}
+                                        className="px-8 py-3 bg-white text-gray-800 cursor-pointer font-semibold rounded-lg shadow-md border border-gray-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200 transform hover:scale-105"
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                ) : (
-                    // ========== Template Section ==========
-                    <div className='w-full'>
-                        <ServeyTemplate onBackToPollCreation={function (): void {
-                                throw new Error('Function not implemented.');
-                            } }/>
-                        
-                    </div>
-                )}
+                </div>
             </div>
 
             {/* Modal */}
