@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, X, Pencil, FileText, Trash2 } from 'lucide-react';
 
 // Define interfaces for your data structures
@@ -9,7 +9,6 @@ interface Question {
 }
 
 export default function PollPage() {
-    // State variables with explicit types
     const [pollTitle, setPollTitle] = useState<string>('');
     const [pollDescription, setPollDescription] = useState<string>('');
     const [questions, setQuestions] = useState<Question[]>([
@@ -19,7 +18,21 @@ export default function PollPage() {
             options: ['', '', '', ''] // Initial 4 options
         }
     ]);
-    const [showModal, setShowModal] = useState<boolean>(true); // Set to true to show modal initially
+    const [showModal, setShowModal] = useState<boolean>(true); // Show modal initially
+
+    // 🆕 Effect to control horizontal scroll
+useEffect(() => {
+  if (showModal) {
+    document.body.style.overflow = 'hidden'; // Disable vertical scrolling
+  } else {
+    document.body.style.overflow = ''; // Re-enable scrolling
+  }
+
+  return () => {
+    document.body.style.overflow = '';
+  };
+}, [showModal]);
+
 
     const handleAddOption = (questionIndex: number) => {
         const newQuestions = [...questions];
@@ -54,12 +67,10 @@ export default function PollPage() {
     };
 
     const handlePublishPoll = () => {
-        // Logic for publishing poll
         console.log('Publish Poll clicked', { pollTitle, pollDescription, questions });
     };
 
     const handleCancelPoll = () => {
-        // Logic for canceling poll creation
         console.log('Cancel Poll clicked');
         setPollTitle('');
         setPollDescription('');
@@ -70,33 +81,26 @@ export default function PollPage() {
                 options: ['', '', '', '']
             }
         ]);
-        setShowModal(true); // Show the initial modal again
+        setShowModal(true);
     };
 
     const handleCreateNewPoll = () => {
-        setShowModal(false); // Close the modal
+        setShowModal(false);
     };
 
     const handleUseTemplate = () => {
-        // Logic for using a template - for now, just closes modal
         console.log('Use a template clicked');
         setShowModal(false);
     };
 
-    // Conditional classes for blurring the content when modal is active
     const blurClass = showModal ? 'filter blur-sm pointer-events-none' : '';
 
     return (
         <div className="min-h-screen relative font-inter">
-            {/* Main content layer, which itself gets the grey background and blur */}
             <div className={`relative z-10 flex flex-col items-center min-h-screen bg-gray-100 ${blurClass} transition-all duration-300`}>
-                {/* Removed the Top Blue Bar as per previous request */}
-
                 <div className="flex w-full justify-center relative flex-grow">
                     <div className="flex flex-col lg:flex-row w-full max-w-5xl my-8 mx-4 md:mx-auto gap-6">
-                        {/* Left/Middle Section: Poll Title, Description, and Poll Details */}
                         <div className="flex-grow flex flex-col items-center gap-6">
-                            {/* Poll Title and Description Section */}
                             <div className="relative bg-white pt-6 pb-6 px-8 rounded shadow-lg border-t-[20px] border-blue-500 w-full max-w-5xl">
                                 <div className="mb-6">
                                     <label htmlFor="pollTitle" className="block text-blue-700 text-sm font-semibold mb-2">Poll Title</label>
@@ -106,7 +110,6 @@ export default function PollPage() {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200"
                                         value={pollTitle}
                                         onChange={(e) => setPollTitle(e.target.value)}
-                                        placeholder=""
                                     />
                                 </div>
                                 <div>
@@ -116,12 +119,10 @@ export default function PollPage() {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black-500 transition duration-200 h-24 resize-none"
                                         value={pollDescription}
                                         onChange={(e) => setPollDescription(e.target.value)}
-                                        placeholder=""
                                     ></textarea>
                                 </div>
                             </div>
 
-                            {/* Poll Details Section with Dotted Border */}
                             <div className="bg-white p-6 rounded-xl relative w-full max-w-2xl">
                                 <h3 className="text-xl font-semibold text-blue-700 mb-6 pb-4 border-b border-gray-200">Poll details</h3>
 
@@ -190,13 +191,11 @@ export default function PollPage() {
                     </div>
                 </div>
 
-                {/* Right Sidebar: Templates - Fixed Position (moved inside the main content wrapper now) */}
-                <div className="fixed right-0  top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-32 bg-purple-700 text-white rounded-l-xl shadow-lg transform -translate-x-0 cursor-pointer z-20">
+                <div className="fixed right-0  top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-32 bg-blue-700 text-white rounded-l-xl shadow-lg transform -translate-x-0 cursor-pointer z-20">
                     <span className="transform -rotate-90 text-sm font-semibold tracking-wider whitespace-nowrap">Templates</span>
                 </div>
             </div>
 
-            {/* Overlay and Modal for initial choice (highest z-index) */}
             {showModal && (
                 <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
                     <div className="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center space-y-6 max-w-sm w-full border border-purple-200">
