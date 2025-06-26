@@ -8,7 +8,7 @@ const SurveyAndPoll: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = e.target.value.toLowerCase();
-        navigate(`/survey-poll/${selected}`);
+        navigate(`/survey-poll-page/${selected}`);
     };
 
     return (
