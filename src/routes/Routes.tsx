@@ -131,6 +131,10 @@ const routes = createBrowserRouter([
             path: "user-profile",
             element: <UserProfile></UserProfile>
           },
+          {
+            path: '/adduser',
+
+          }
         ]
       },
       {
