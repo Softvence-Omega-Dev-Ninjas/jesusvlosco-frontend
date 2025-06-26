@@ -1,6 +1,9 @@
 import AdminProfile from "@/components/SidebarSetting/AdminProfile";
+import ApiIntregration from "@/components/SidebarSetting/ApiIntregration";
 import CompanyDetailsPage from "@/components/SidebarSetting/CompanyDetailsPage";
 import EmployeeManagement from "@/components/SidebarSetting/EmployeeManagement";
+import Notification from "@/components/SidebarSetting/Notification";
+import ProjectManagement from "@/components/SidebarSetting/ProjectManagement";
 import { useState } from "react";
 
 
@@ -15,13 +18,13 @@ const SidebarSetting: React.FC = () => {
       case 'Admin Profile':
         return <AdminProfile></AdminProfile> ;
       case 'Project Management':
-        return ;
+        return <ProjectManagement></ProjectManagement> ;
       case 'Employee Management':
         return <EmployeeManagement></EmployeeManagement>  ;
       case 'API & Integrations':
-        return ;
+        return  <ApiIntregration></ApiIntregration> ;
       case 'Notifications':
-        return ;
+        return <Notification></Notification> ;
       default:
         return <CompanyDetailsPage></CompanyDetailsPage> ;
     }
