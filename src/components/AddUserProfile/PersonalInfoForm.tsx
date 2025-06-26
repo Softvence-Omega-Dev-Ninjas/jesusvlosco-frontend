@@ -59,7 +59,7 @@ const PersonalInfoForm = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* First Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
