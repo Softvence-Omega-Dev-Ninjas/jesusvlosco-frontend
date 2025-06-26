@@ -7,39 +7,35 @@ import Login from "@/pages/Login";
 
 import Dashboard from "@/pages/Dashboard";
 
-
 import { Chat } from "@/pages/Chats";
 import Recognition from "@/pages/Recognition";
 
 import { Communication } from "@/Layout/CommunicationLayout/Communication";
 
-import UserProfile from "@/pages/UserProfile";
+import Payroll from "@/Layout/UserLayout/Payroll";
 import { UserLayout } from "@/Layout/UserLayout/UserLayout";
-import User from "@/pages/User";
-import Schedule from "@/pages/Schedule";
-import ShiftScheduling from "@/pages/ShiftScheduling";
-import TimeClock from "@/pages/TimeClock";
-import TimeSheet from "@/pages/TimeSheet";
-import TimeOffRequest from "@/pages/TimeOffRequest";
+import UserOffDeatils from "@/Layout/UserLayout/UserOffDeatils";
+import AddUserProfile from "@/pages/AddUserProfile";
 import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
-import TimeSheets from "@/pages/TimeSheets";
-import Payroll from "@/Layout/UserLayout/Payroll";
-import UserOffDeatils from "@/Layout/UserLayout/UserOffDeatils";
+import Schedule from "@/pages/Schedule";
+import ShiftScheduling from "@/pages/ShiftScheduling";
 import SidebarSetting from "@/pages/SidebarSetting";
-
+import TimeClock from "@/pages/TimeClock";
+import TimeOffRequest from "@/pages/TimeOffRequest";
+import TimeSheet from "@/pages/TimeSheet";
+import TimeSheets from "@/pages/TimeSheets";
+import User from "@/pages/User";
+import UserProfile from "@/pages/UserProfile";
 
 const routes = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-
-
-
       {
         path: "/",
-        element: <Dashboard></Dashboard>
+        element: <Dashboard></Dashboard>,
       },
       {
         path: "/communication",
@@ -47,17 +43,17 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Chat />
+            element: <Chat />,
           },
           {
             path: "chat",
-            element: <Chat />
+            element: <Chat />,
           },
           {
             path: "recognition",
-            element: <Recognition></Recognition>
-          }
-        ]
+            element: <Recognition></Recognition>,
+          },
+        ],
       },
       {
         path: "/schedule",
@@ -86,34 +82,31 @@ const routes = createBrowserRouter([
             children: [
               {
                 index: true, // 👈 This is the default route for /timesheet
-                element: <TimeSheets />
+                element: <TimeSheets />,
               },
               {
                 path: "time",
-                element: <TimeSheets />
+                element: <TimeSheets />,
               },
               {
                 path: "payroll",
-                element: <Payroll />
-              }
-            ]
+                element: <Payroll />,
+              },
+            ],
           },
 
           {
-            path: 'useroffdetails',
-            element: <UserOffDeatils></UserOffDeatils>
+            path: "useroffdetails",
+            element: <UserOffDeatils></UserOffDeatils>,
           },
 
           {
             path: "timeoffrequest",
             element: <TimeOffRequest></TimeOffRequest>,
           },
-        ]
-
+        ],
       },
-      {
-
-      },
+      {},
 
       {
         path: "/user",
@@ -121,32 +114,31 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <User></User>
+            element: <User></User>,
           },
           {
             path: "user",
-            element: <Chat />
+            element: <Chat />,
           },
           {
             path: "user-profile",
-            element: <UserProfile></UserProfile>
+            element: <UserProfile></UserProfile>,
           },
           {
-            path: '/adduser',
-
-          }
-        ]
+            path: "add-user",
+            element: <AddUserProfile></AddUserProfile>,
+          },
+        ],
       },
       {
-        path: '/sidebar-settings',
-        element: <SidebarSetting></SidebarSetting>
-      }
-
+        path: "/sidebar-settings",
+        element: <SidebarSetting></SidebarSetting>,
+      },
     ],
   },
   {
     path: "/login",
-    element: <Login></Login>
+    element: <Login></Login>,
   },
   {
     path: "*",
