@@ -69,10 +69,10 @@ const EducationForm = ({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+    <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-medium text-gray-900">Education</h2>
-        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors">
           <Edit className="h-4 w-4" />
           Edit
         </button>
@@ -82,7 +82,7 @@ const EducationForm = ({
         {educationList.map((education) => (
           <div
             key={education.id}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {/* Program */}
             <div>
@@ -91,7 +91,7 @@ const EducationForm = ({
               </label>
               <div className="relative">
                 <div
-                  className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+                  className="flex items-center justify-between px-3 py-2  border border-gray-300 rounded-lg cursor-pointer text-gray-500"
                   onClick={() => toggleDropdown(education.id, "programOpen")}
                 >
                   <span>{education.program || "Enter name here"}</span>
@@ -131,7 +131,7 @@ const EducationForm = ({
               </label>
               <div className="relative">
                 <div
-                  className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+                  className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
                   onClick={() =>
                     toggleDropdown(education.id, "institutionOpen")
                   }
@@ -173,7 +173,7 @@ const EducationForm = ({
               </label>
               <div className="relative">
                 <div
-                  className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+                  className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
                   onClick={() => toggleDropdown(education.id, "yearOpen")}
                 >
                   <span>{education.year || "Enter year here"}</span>
@@ -208,7 +208,7 @@ const EducationForm = ({
         <div className="flex justify-end">
           <button
             onClick={handleAddEducation}
-            className="flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-8 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
           >
             <span className="text-lg font-medium">+</span>
             Add Education
@@ -217,16 +217,16 @@ const EducationForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
+          onClick={() => handleSave(educationList, "education")}
+          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
+        >
+          Save
+        </button>
+        <button
           onClick={() => handleCancel("education")}
           className="cursor-pointer px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Cancel
-        </button>
-        <button
-          onClick={() => handleSave(educationList, "education")}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Next
         </button>
       </div>
     </div>

@@ -48,12 +48,12 @@ const PersonalInfoForm = ({
   const [stateOpen, setStateOpen] = useState(false);
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+    <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-medium text-gray-900">
           Personal Information
         </h2>
-        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors">
           <Edit className="h-4 w-4" />
           Edit
         </button>
@@ -123,7 +123,7 @@ const PersonalInfoForm = ({
           </label>
           <div className="relative">
             <div
-              className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setGenderOpen(!genderOpen)}
             >
               <span>{formData.gender || "Select gender"}</span>
@@ -173,7 +173,7 @@ const PersonalInfoForm = ({
           </label>
           <div className="relative">
             <div
-              className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setJobTitleOpen(!jobTitleOpen)}
             >
               <span>{formData.jobTitle || "Select job title here"}</span>
@@ -209,7 +209,7 @@ const PersonalInfoForm = ({
           </label>
           <div className="relative">
             <div
-              className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setDepartmentOpen(!departmentOpen)}
             >
               <span>{formData.department || "Select Department"}</span>
@@ -259,7 +259,7 @@ const PersonalInfoForm = ({
           </label>
           <div className="relative">
             <div
-              className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setCityOpen(!cityOpen)}
             >
               <span>{formData.city || "Select city"}</span>
@@ -295,7 +295,7 @@ const PersonalInfoForm = ({
           </label>
           <div className="relative">
             <div
-              className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setStateOpen(!stateOpen)}
             >
               <span>{formData.state || "Select state"}</span>
@@ -344,16 +344,16 @@ const PersonalInfoForm = ({
 
       <div className="flex justify-end gap-4 mt-8">
         <button
+          onClick={() => handleSave(formData, "personal")}
+          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
+        >
+          Save
+        </button>
+        <button
           onClick={() => handleCancel("personal")}
           className="cursor-pointer px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Cancel
-        </button>
-        <button
-          onClick={() => handleSave(formData, "personal")}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Next
         </button>
       </div>
     </div>

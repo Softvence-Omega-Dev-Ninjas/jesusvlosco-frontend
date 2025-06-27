@@ -11,16 +11,16 @@ interface TabsProps {
 
 const Tabs = ({ tabs, activeTab, setActiveTab }: TabsProps) => {
   return (
-    <div className="w-full mx-auto border-b border-gray-200 mb-8">
-      <nav className="flex flex-col lg:flex-row lg:space-x-8 gap-4 lg:gap-0">
+    <div className="w-full mx-auto my-8">
+      <nav className="flex flex-col lg:flex-row justify-between lg:space-x-8 gap-4 lg:gap-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+            className={`pb-4 px-1 cursor-pointer border-b-2 transition-colors ${
               activeTab === tab.id
-                ? "border-[#4E53B1] text-[#4E53B1]"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "border-[#4E53B1] text-[#4E53B1] font-normal xl:font-semibold text-lg xl:text-xl "
+                : "border-transparent text-gray-500 text-base xl:text-lg font-normal hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             {tab.label}
