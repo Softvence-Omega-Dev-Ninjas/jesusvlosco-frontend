@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import {
-  CheckCircle2 as CheckCircle2Icon,
+
   Plus as PlusIcon,
-  ChevronRight as ChevronRightIcon,
   Check, // Changed from ChevronsRight to ChevronRight for cleaner look
 } from "lucide-react";
 
