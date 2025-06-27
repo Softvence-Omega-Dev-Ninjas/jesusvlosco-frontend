@@ -66,10 +66,10 @@ const ExperienceForm = ({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+    <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-medium text-gray-900">Experience</h2>
-        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors">
           <Edit className="h-4 w-4" />
           Edit
         </button>
@@ -128,7 +128,7 @@ const ExperienceForm = ({
                 </label>
                 <div className="relative">
                   <div
-                    className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer text-gray-500"
+                    className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
                     onClick={() => toggleDropdown(experience.id, "jobTypeOpen")}
                   >
                     <span>{experience.jobType || "Select job type here"}</span>
@@ -163,7 +163,7 @@ const ExperienceForm = ({
             </div>
 
             {/* Date Range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 xl:gap-26">
               {/* Start Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -212,28 +212,27 @@ const ExperienceForm = ({
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Currently Working Checkbox */}
-            <div className="flex justify-end">
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={experience.isCurrentlyWorking}
-                  onChange={(e) => {
-                    handleExperienceChange(
-                      experience.id,
-                      "isCurrentlyWorking",
-                      e.target.checked
-                    );
-                    if (e.target.checked) {
-                      handleExperienceChange(experience.id, "endDate", "");
-                    }
-                  }}
-                  className="w-4 h-4 text-[#4E53B1] bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
-                />
-                I am currently working there
-              </label>
+              {/* Currently Working Checkbox */}
+              <div className="flex">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={experience.isCurrentlyWorking}
+                    onChange={(e) => {
+                      handleExperienceChange(
+                        experience.id,
+                        "isCurrentlyWorking",
+                        e.target.checked
+                      );
+                      if (e.target.checked) {
+                        handleExperienceChange(experience.id, "endDate", "");
+                      }
+                    }}
+                    className="w-4 h-4 text-[#4E53B1] bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
+                  />
+                  I am currently working there
+                </label>
+              </div>
             </div>
 
             {/* Description */}
@@ -267,7 +266,7 @@ const ExperienceForm = ({
         <div className="flex justify-end">
           <button
             onClick={handleAddExperience}
-            className="flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-8 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
           >
             <span className="text-lg font-medium">+</span>
             Add Experience
@@ -276,16 +275,16 @@ const ExperienceForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
+          onClick={() => handleSave(experienceList, "experience")}
+          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
+        >
+          Save
+        </button>
+        <button
           onClick={() => handleCancel("experience")}
           className="cursor-pointer px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Cancel
-        </button>
-        <button
-          onClick={() => handleSave(experienceList, "experience")}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Next
         </button>
       </div>
     </div>
