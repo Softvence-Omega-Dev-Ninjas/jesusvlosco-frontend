@@ -12,8 +12,10 @@ import {
   Tab,
 } from "@/components/AddUserProfile/types";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AddUserProfile = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [selectedRole, setSelectedRole] = useState<string>("Employee");
 
@@ -238,6 +240,7 @@ const AddUserProfile = () => {
     console.log("Final save data:", allData);
     handleCancel("all");
     setActiveTab("personal");
+    navigate("/user/user");
   };
 
   const handleCancel = (tabId: string): void => {
