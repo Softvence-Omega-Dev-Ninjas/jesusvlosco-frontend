@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
     Pencil, FileText, LayoutPanelTop, List, Star, Trash2, Type,
     PlusCircle,
+    X,
 } from 'lucide-react';
 
 import Modal from '@/components/Servey-poll/Modal';
@@ -97,7 +98,7 @@ export default function SurveyPage() {
             <div className={`relative z-10 ${showModal ? 'blur-[1px] pointer-events-none' : ''}`}>
                 <div className="max-w-8xl mx-auto py-8">
                     <div className="bg-white border border-gray-300 rounded-md shadow-sm">
-                        <div className="border-t-[6px] border-indigo-600 rounded-t-md"></div>
+                        <div className="border-t-[6px] border-[rgba(78,83,177,1)] rounded-t-md"></div>
 
                         <div className="grid grid-cols-1 max-w-2xl  sm:grid-cols-2 lg:grid-cols-1 gap-4 p-6">
                             <div className='flex gap-4'>
@@ -111,9 +112,9 @@ export default function SurveyPage() {
                         </div>
 
                         <div className="grid grid-cols-1 min-h-[600px] sm:min-h-[700px] md:min-h-[700px] lg:min-h-[800px]	 md:grid-cols-4 gap-0 border-gray-300 border-t">
-                            <div className="bg-gray-50 p-4 border-gray-300 border-r">
-                                <p className="text-sm text-center font-semibold mb-4">Add a field</p>
-                                <div className="space-y-3">
+                            <div className="bg-gray-50 p-4  border-gray-300 border-r">
+                                <p className="text-sm text-center font-semibold mt-3 mb-4">Add a field</p>
+                                <div className="space-y-3  ">
                                     <button onClick={() => addField('description')} className="flex items-center  gap-2 text-sm w-full border border-gray-300 px-3 py-4 rounded-md bg-white hover:bg-gray-100">
                                         <LayoutPanelTop size={16} /> Description
                                     </button>
@@ -125,16 +126,17 @@ export default function SurveyPage() {
                                             <Type size={16} /> Open ended
                                         </button>
                                     </div>
-                                    
+
                                     <div className='flex gap-3'>
                                         <button onClick={() => addField('rating')} className="flex items-center justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-4 rounded-md bg-white hover:bg-gray-100">
                                             <Star size={16} /> Rating
                                         </button>
-                                        <button  className="flex items-center justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-2 rounded-md bg-white hover:bg-gray-100">
+                                        <button className="flex items-center justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-2 rounded-md bg-white hover:bg-gray-100">
                                             <PlusCircle size={16} /> Poll
                                         </button>
-                                    </div>
 
+                                    </div>
+                                    <h1 className='border-b border-gray-300 mt-6'></h1>
 
                                     {showDescInput && (
                                         <div className="mt-4 space-y-2">
@@ -147,7 +149,7 @@ export default function SurveyPage() {
                                             ></textarea>
                                             <button
                                                 onClick={confirmDescription}
-                                                className="w-full bg-indigo-600 text-white text-sm py-2 rounded-md hover:bg-indigo-700"
+                                                className="w-full bg-[rgba(78,83,177,1)] text-white text-sm py-2 rounded-md hover:bg-indigo-700"
                                             >
                                                 Confirm Description
                                             </button>
@@ -156,71 +158,99 @@ export default function SurveyPage() {
                                 </div>
                             </div>
 
-                            <div className="col-span-3 border-b border-gray-300 bg-gray-50 p-4">
-                                <h1 className='mb-6 w-full'>Survey Preview</h1>
+                            <div className="col-span-3 border-b border-gray-300 bg-gray-50  p-4">
+
+                                <div className="flex items-center -mt-6 justify-between p-4 border-b border-gray-300">
+                                    <h1 className="text-lg font-medium text-gray-900">Survey title</h1>
+                                    <button
+                                        onClick={() => setShowModal(true)}
+                                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                    >
+                                        <X size={20} className="text-gray-500" />
+                                    </button>
+                                </div>
+
+
+                   {/* right side filled */}
 
                                 {fields.map((field, i) => (
-                                    <div key={i} className="bg-white p-4 rounded-md shadow-sm mb-4 flex justify-between items-center">
-                                        <p className="text-sm font-medium text-gray-700 capitalize">{field} field</p>
-                                        <button onClick={() => removeField(i)} className="text-gray-500 hover:text-red-600">
+                                   
+
+                                    <div key={i} className="bg-white mt-4 px-4 py-3 min-h-[60px] rounded-md border border-gray-300 mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-gray-700 text-sm font-medium">
+                                            <FileText size={16} className="text-gray-400" />
+                                            {field}
+                                        </div>
+                                        <button onClick={() => removeField(i)} className="text-gray-400 hover:text-red-500">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+
                                 ))}
 
                                 {dropdownFields.map((dropdown, i) => (
-                                    <div key={`dropdown-${i}`} className="bg-white p-4 rounded-md shadow-sm mb-4 flex justify-between items-start">
-                                        <div>
-                                            <p className="font-semibold text-gray-800">{dropdown.question}</p>
-                                            <p className="text-sm text-gray-500 mb-2">{dropdown.description}</p>
-                                            <ul className="list-disc list-inside text-sm text-gray-700">
-                                                {dropdown.options.map((opt, j) => <li key={j}>{opt}</li>)}
-                                            </ul>
+                                   
+
+                                    <div key={`dropdown-${i}`} className="bg-white px-4 py-3 min-h-[60px] rounded-md border border-gray-200 mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-gray-700 text-sm font-medium">
+                                            <List size={16} className="text-gray-400" />
+                                            {dropdown.question}
                                         </div>
-                                        <button onClick={() => setDropdownFields((prev) => prev.filter((_, index) => index !== i))} className="text-gray-500 hover:text-red-600 ml-4 mt-1">
+                                        <button onClick={() => setDropdownFields(prev => prev.filter((_, index) => index !== i))} className="text-gray-400 hover:text-red-500">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+
                                 ))}
 
                                 {openEndedFields.map((open, i) => (
-                                    <div key={`open-${i}`} className="bg-white p-4 rounded-md shadow-sm mb-4 flex justify-between items-start">
-                                        <div>
-                                            <p className="font-semibold text-gray-800">{open.question}</p>
-                                            <p className="text-sm text-gray-500 mb-2">{open.description}</p>
-                                            <p className="text-sm italic text-gray-400">Placeholder: {open.placeholder}</p>
+                                    
+
+                                    <div key={`open-${i}`} className="bg-white px-4 py-3 min-h-[60px] rounded-md border border-gray-200 mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-gray-700 text-sm font-medium">
+                                            <Type size={16} className="text-gray-400" />
+                                            {open.question}
                                         </div>
-                                        <button onClick={() => setOpenEndedFields((prev) => prev.filter((_, index) => index !== i))} className="text-gray-500 hover:text-red-600 ml-4 mt-1">
+                                        <button onClick={() => setOpenEndedFields(prev => prev.filter((_, index) => index !== i))} className="text-gray-400 hover:text-red-500">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+
                                 ))}
 
                                 {ratingFields.map((rating, i) => (
-                                    <div key={`rating-${i}`} className="bg-white p-4 rounded-md shadow-sm mb-4 flex justify-between items-start">
-                                        <div>
-                                            <p className="font-semibold text-gray-800">{rating.question}</p>
-                                            <p className="text-sm text-gray-500 mb-1">{rating.description}</p>
-                                            <p className="text-sm text-gray-500 italic mb-2">{rating.minLabel} → {rating.maxLabel}</p>
-                                            <div className="flex gap-1 text-yellow-500">
-                                                {[...Array(rating.scale)].map((_, index) => <Star key={index} size={16} />)}
-                                            </div>
+                                    
+                                    <div key={`rating-${i}`} className="bg-white px-4 py-3 min-h-[60px] rounded-md border border-gray-200 mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-gray-700 text-sm font-medium">
+                                            <Star size={16} className="text-yellow-400" />
+                                            {rating.question}
                                         </div>
-                                        <button onClick={() => setRatingFields((prev) => prev.filter((_, index) => index !== i))} className="text-gray-500 hover:text-red-600 ml-4 mt-1">
+                                        <button onClick={() => setRatingFields(prev => prev.filter((_, index) => index !== i))} className="text-gray-400 hover:text-red-500">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+
                                 ))}
                             </div>
                         </div>
 
                         <div className="flex justify-end gap-2 border-t border-gray-300 px-6 py-4 bg-white rounded-b-md">
                             <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button>
-                            <NavLink to={'/publish-survey'} className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Publish Survey</NavLink>
+                            <NavLink to={'/publish-survey'} className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Publish Survey</NavLink>
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
+            {/* Floating Templates tab */}
+            <div className="fixed top-160 right-0 h-34 w-10 sm:w-10 md:w-12 lg:w-14 bg-[rgba(78,83,177,1)] text-white text-[20px] font-semibold flex items-center justify-center cursor-pointer rounded-l-md">
+                <span className="transform -rotate-90 whitespace-nowrap">Templates</span>
+            </div>
+
+
 
             {/* Initial Option Modal */}
             <Modal isOpen={showModal}>

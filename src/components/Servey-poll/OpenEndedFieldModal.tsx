@@ -71,7 +71,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.question}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, question: e.target.value }))}
                                           placeholder="Question"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-500"
                                     />
                               </div>
 
@@ -82,7 +82,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.description}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, description: e.target.value }))}
                                           placeholder="Description"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-500"
                                     />
                               </div>
 
@@ -96,7 +96,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.placeholder}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, placeholder: e.target.value }))}
                                           placeholder="Type here"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-400"
                                     />
                               </div>
 
@@ -107,7 +107,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                                 type="checkbox"
                                                 checked={fieldData.required}
                                                 onChange={(e) => handleCheckboxChange('required', e.target.checked)}
-                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded "
                                           />
                                           <span className="text-sm text-gray-700">Required</span>
                                     </label>
@@ -117,7 +117,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                                 type="checkbox"
                                                 checked={fieldData.locationStampCapture}
                                                 onChange={(e) => handleCheckboxChange('locationStampCapture', e.target.checked)}
-                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded "
                                           />
                                           <span className="text-sm text-gray-700">Location stamp capture</span>
                                     </label>
@@ -128,7 +128,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                         <div className="p-6 pt-0">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>
