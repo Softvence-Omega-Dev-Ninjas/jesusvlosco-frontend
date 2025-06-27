@@ -187,7 +187,7 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
                         <div className="p-6 pt-0">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>

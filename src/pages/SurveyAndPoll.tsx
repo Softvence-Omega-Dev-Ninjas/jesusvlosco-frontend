@@ -14,7 +14,7 @@ const SurveyAndPoll: React.FC = () => {
 
     return (
         <div className="bg-[#f9f9fc] p-6 rounded-lg ">
-            <h2 className="text-xl md:text-2xl font-semibold text-[#3B3BDB] mb-2">
+            <h2 className="text-xl md:text-2xl font-semibold text-[rgba(78,83,177,1)] mb-2">
                 Create New Survey & Poll
             </h2>
             <p className="text-gray-600 mb-6 text-sm">

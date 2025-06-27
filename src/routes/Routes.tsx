@@ -150,7 +150,7 @@ const routes = createBrowserRouter([
       },
       {
         path: '/publish-survey',
-        element: <PublishSurvey onClose={() => {}} />
+        element: <PublishSurvey  />
       },
       {
               path: '/survey-template',

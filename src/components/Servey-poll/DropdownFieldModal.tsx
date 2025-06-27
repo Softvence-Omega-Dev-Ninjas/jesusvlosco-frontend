@@ -142,7 +142,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                                     {/* Add Field Button */}
                                     <button
                                           onClick={handleAddOption}
-                                          className="mt-3 flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                                          className="mt-3 flex items-center gap-2 px-4 py-2 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                                     >
                                           <Plus size={16} />
                                           Add field
@@ -156,7 +156,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                                                 type="checkbox"
                                                 checked={fieldData.required}
                                                 onChange={(e) => handleCheckboxChange('required', e.target.checked)}
-                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                className="w-4 h-4 text-[rgba(78,83,177,1)] border-gray-300 rounded focus:ring-indigo-500"
                                           />
                                           <span className="text-sm text-gray-700">Required</span>
                                     </label>
@@ -166,7 +166,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                                                 type="checkbox"
                                                 checked={fieldData.locationStampCapture}
                                                 onChange={(e) => handleCheckboxChange('locationStampCapture', e.target.checked)}
-                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                className="w-4 h-4 text-[rgba(78,83,177,1)] border-gray-300 rounded focus:ring-indigo-500"
                                           />
                                           <span className="text-sm text-gray-700">Location stamp capture</span>
                                     </label>
@@ -176,7 +176,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                                                 type="checkbox"
                                                 checked={fieldData.multipleSelection}
                                                 onChange={(e) => handleCheckboxChange('multipleSelection', e.target.checked)}
-                                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                className="w-4 h-4 text-[rgba(78,83,177,1)] border-gray-300 rounded focus:ring-indigo-500"
                                           />
                                           <span className="text-sm text-gray-700">Multiple selection</span>
                                     </label>
@@ -187,7 +187,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                         <div className="p-6 pt-0">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>
