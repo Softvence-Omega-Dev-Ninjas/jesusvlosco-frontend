@@ -153,16 +153,16 @@ const routes = createBrowserRouter([
         element: <PublishSurvey></PublishSurvey>
       },
       {
-        path: '/survey-template',
-        element: <SurveyTemplate></SurveyTemplate>
-      },
+              path: '/survey-template',
+              element: <SurveyTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
+            },
       {
         path: '/publish-poll',
         element: <PublishPoll></PublishPoll>
       },
       {
         path: '/poll-template',
-        element: <PollTemplate></PollTemplate>
+        element: <PollTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
       },
 
 
