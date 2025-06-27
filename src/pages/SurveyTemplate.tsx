@@ -90,11 +90,11 @@ const PollTemplate = ({ onBackToPollCreation }: { onBackToPollCreation: () => vo
                 ) : (
                     <div className="w-full bg-[#FAFBFF] border border-gray-200 rounded-xl px-4 sm:px-6 md:px-8 py-6">
                         {/* Top Tag Bar */}
-                        <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 text-blue-700 font-medium text-sm sm:text-base">
+                        <div className="flex items-center  border-b  p-3 mb-6  font-medium text-sm sm:text-base">
                             <span>Survey Template</span>
                             <button
                                 onClick={onBackToPollCreation}
-                                className="ml-auto text-blue-600 hover:text-blue-800 focus:outline-none"
+                                className="ml-auto  hover:text-blue-800 focus:outline-none"
                             >
                                 <X size={20} />
                             </button>
