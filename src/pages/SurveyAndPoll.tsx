@@ -3,6 +3,7 @@ import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Eye, Pencil } from "lucide-react";
 
+
 const SurveyAndPoll: React.FC = () => {
     const navigate = useNavigate();
 
@@ -44,8 +45,10 @@ const SurveyAndPoll: React.FC = () => {
                         <Pencil size={18} />
                     </button>
                 </div>
+                
             </div>
             <div className="mt-6">
+                
                 <Outlet></Outlet>
             </div>
         </div>
