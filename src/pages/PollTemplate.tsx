@@ -83,7 +83,7 @@ const PollTemplate = ({ onBackToPollCreation }: { onBackToPollCreation: () => vo
           <div className="w-full bg-[#FAFBFF] border border-gray-200 rounded-xl px-4 sm:px-6 md:px-8 py-6">
             {/* Top Tag Bar */}
             <div className="flex items-center  p-3 mb-6 font-medium text-sm sm:text-base">
-              <span className='border-b w-full py-2 border-gray-300'>Survey Template</span>
+              <span className='border-b w-full py-2 mt-10 border-gray-300'>Survey Template</span>
               
               <button
                 onClick={onBackToPollCreation}
