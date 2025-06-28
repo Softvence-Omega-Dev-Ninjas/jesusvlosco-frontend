@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Chat } from "../../pages/Chats";
 import { CompanyUpdate } from "../../pages/CompanyUpdate";
+import RecognitionTable from "@/pages/RecognitionTable";
 
 export const Communication = () => {
   const [activeTab, setActiveTab] = useState("chat");
@@ -10,13 +11,7 @@ export const Communication = () => {
   const renderContent = () => {
     if (location.pathname.includes("/recognition")) {
       return (
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Recognition Content</h2>
-          <p className="text-gray-700">
-            This section displays content specific to Recognition. The
-            tab-switching UI is hidden for this specific route.
-          </p>
-        </div>
+        <RecognitionTable></RecognitionTable>
       );
     }
 

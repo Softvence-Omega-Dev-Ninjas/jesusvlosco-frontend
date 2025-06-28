@@ -37,6 +37,11 @@ import SurveyResponse from "@/pages/SurveyResponse";
 import SurveyDetails from "@/pages/SurveyDetails";
 import PollTemplate from "@/pages/PollTemplate";
 import SurveyTemplate from "@/pages/SurveyTemplate";
+import RecognitionTable from "@/pages/RecognitionTable";
+import CreateRecognition from "@/pages/CreateRecognition";
+import BadgeLibrary from "@/pages/BadgeLibrary";
+import EditBadge from "@/pages/EditBadge";
+import CreateBadge from "@/pages/CreateBadge";
 
 const routes = createBrowserRouter([
   {
@@ -61,9 +66,31 @@ const routes = createBrowserRouter([
           },
           {
             path: "recognition",
-            element: <Recognition></Recognition>,
+            element: <RecognitionTable></RecognitionTable>,
+            // children: [
+
+
+            // ]
           },
+
         ],
+
+      },
+      {
+        path: 'send-recognition',
+        element: <CreateRecognition></CreateRecognition>
+      },
+      {
+        path: 'badge-library',
+        element: <BadgeLibrary></BadgeLibrary>
+      },
+      {
+        path: 'edit-badge',
+        element: <EditBadge></EditBadge>
+      },
+      {
+        path: '/create-badge',
+        element: <CreateBadge></CreateBadge>
       },
       {
         path: "/schedule",
@@ -184,6 +211,10 @@ const routes = createBrowserRouter([
           },
 
         ],
+      },
+
+      {
+
       },
       {
         path: "/add-user",
