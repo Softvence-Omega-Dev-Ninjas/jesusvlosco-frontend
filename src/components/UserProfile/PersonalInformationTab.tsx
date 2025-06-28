@@ -1,0 +1,205 @@
+import { parseISO } from "date-fns"; // For converting Date to string for saving
+import { MapPin } from "lucide-react"; // Only MapPin now, CalendarDays is in DateInput
+import React, { useEffect, useState } from "react";
+import DateInput from "./DateInput"; // Import the new DateInput
+import FormInput from "./FormInput";
+
+// Define the interface for the personal information form data
+interface PersonalInfoFormData {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth: Date | null; // Changed to Date | null
+  email: string;
+  phoneNumber: string;
+  address: string;
+  state: string;
+  country: string;
+  pinCode: string;
+  nationality: string;
+}
+
+interface PersonalInformationProps {
+  user: PersonalInfoFormData;
+  isEditing: boolean;
+  onSave?: (updatedUser: PersonalInfoFormData) => void;
+  onCancelEdit?: () => void;
+}
+
+const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
+  user,
+  isEditing,
+  onSave,
+  onCancelEdit,
+}) => {
+  const [formData, setFormData] = useState<PersonalInfoFormData>(user);
+
+  useEffect(() => {
+    // Ensure the dateOfBirth from user prop is a Date object for formData state
+    setFormData({
+      ...user,
+      dateOfBirth:
+        typeof user.dateOfBirth === "string"
+          ? parseISO(user.dateOfBirth)
+          : user.dateOfBirth instanceof Date
+          ? user.dateOfBirth
+          : null,
+    });
+  }, [user]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleDateChange = (
+    date: Date | null,
+    fieldName: keyof PersonalInfoFormData
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: date,
+    }));
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(formData);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset to original user data when canceling
+    setFormData({
+      ...user,
+      dateOfBirth:
+        typeof user.dateOfBirth === "string"
+          ? parseISO(user.dateOfBirth)
+          : user.dateOfBirth instanceof Date
+          ? user.dateOfBirth
+          : null,
+    });
+    if (onCancelEdit) {
+      onCancelEdit();
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+        <FormInput
+          label="First name"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        <FormInput
+          label="Last name"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        <FormInput
+          label="Gender"
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        <DateInput
+          label="Date of Birth"
+          name="dateOfBirth"
+          value={formData.dateOfBirth}
+          onChange={(date) => handleDateChange(date, "dateOfBirth")}
+          readOnly={!isEditing}
+        />
+        <FormInput
+          label="Email ID"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          readOnly={!isEditing}
+          type="email"
+        />
+        <FormInput
+          label="Phone Number"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          readOnly={!isEditing}
+          type="tel"
+        />
+        <FormInput
+          label="Address"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          readOnly={!isEditing}
+          className="md:col-span-2"
+        />
+        <FormInput
+          label="State"
+          name="state"
+          value={formData.state}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        <FormInput
+          label="Country"
+          name="country"
+          value={formData.country}
+          onChange={handleChange}
+          readOnly={!isEditing}
+          icon={<MapPin className="h-5 w-5 text-gray-400" />}
+        />
+        <FormInput
+          label="Pin Code"
+          name="pinCode"
+          value={formData.pinCode}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        <FormInput
+          label="Nationality"
+          name="nationality"
+          value={formData.nationality}
+          onChange={handleChange}
+          readOnly={!isEditing}
+        />
+        {/* The last "Date of Birth" in the UI seems redundant if it's the same as the one above.
+            Keeping it for direct UI representation but it's likely a UI design quirk. */}
+        <DateInput
+          label="Date of Birth (Redundant)"
+          name="dateOfBirthRedundant"
+          value={formData.dateOfBirth} // This will mirror the first DOB field
+          onChange={(date) => handleDateChange(date, "dateOfBirth")} // Still updates the same field
+          readOnly={!isEditing}
+        />
+      </div>
+
+      {isEditing && (
+        <div className="mt-8 flex justify-end gap-3">
+          <button
+            onClick={handleCancel}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-6 py-2 bg-[#4E53B1] text-white rounded-lg shadow-sm hover:bg-indigo-700 transition-colors"
+          >
+            Save Changes
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PersonalInformationTab;

@@ -1,4 +1,14 @@
 @import "tailwindcss";
+@import "react-datepicker/dist/react-datepicker.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add custom styling for the datepicker if needed */
+/* Example: Adjusting z-index if it appears behind other elements */
+.react-datepicker-popper {
+  z-index: 9999; /* Ensure it's on top of other content */
+}
 
 @theme {
   --color-primary: #4e53b1;
@@ -9,4 +19,34 @@
   --color-website-color-lightGray: #d3d9d4;
   --color-website-color-green: #124e66;
   --color-website-color-lightGreen: #748d92;
+  --green-approved: #22c55e;
+  --red-rejected: #ef4444;
+  --light-green-bg: #dcfce7;
+  --light-red-bg: #fee2e2;
+  --blue-primary-ui: #1a56db;
+  --blue-light-text-ui: #0891b2;
+}
+.overview-table {
+  /* Override default table spacing for exact UI match */
+  border-spacing: 0;
+}
+/* Ensure the border-bottom exists only between rows, not on the last one */
+.overview-table th,
+.overview-table td {
+  border-bottom: 1px solid theme("colors.gray.200"); /* Using theme() for gray.200 */
+}
+.overview-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Adjustments for the calendar grid to ensure proper layout */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 1fr auto; /* For the main grid and month sidebar */
+}
+
+.month-selector-panel {
+  grid-column: 2 / 3; /* Places it next to the calendar grid */
+  max-height: 250px; /* Limit height and allow scroll */
+  overflow-y: auto;
 }
