@@ -45,7 +45,7 @@ export const Communication = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab("chat")}
-                className={`md:py-2 md:px-4 whitespace-nowrap  text-lg rounded-md transition duration-200 ${activeTab === "chat"
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${activeTab === "chat"
                   ? "bg-primary text-white shadow-md"
                   : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                   }`}
@@ -55,7 +55,7 @@ export const Communication = () => {
 
               <button
                 onClick={() => setActiveTab("community")}
-                className={`md:py-2 md:px-4 whitespace-nowrap text-lg rounded-md transition duration-200 ${activeTab === "community"
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${activeTab === "community"
                   ? "bg-primary text-white shadow-md"
                   : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                   }`}
