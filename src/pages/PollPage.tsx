@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, X, Pencil, FileText, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 interface Question {
   id: number
@@ -107,8 +107,9 @@ export default function PollPage() {
               </div>
 
               {/* Poll Details Section */}
-              <div className="bg-[#FAFBFF] border border-[#C5C5C5] p-6 rounded-xl w-full max-w-2xl mx-auto">
-                <h3 className="text-xl font-semibold text-[#4E53B1] mb-6 pb-4 border-b">
+              <div className='p-8 border border-[#C5C5C5] rounded-xl bg-[#FAFBFF]'>
+                <div className="bg-[#FAFBFF] border border-[#C5C5C5] p-6 rounded-xl w-full max-w-2xl mx-auto">
+                <h3 className="text-xl font-semibold text-[#4E53B1] mb-6 pb-4 border-b border-[#C5C5C5]">
                   Poll details
                 </h3>
 
@@ -157,7 +158,7 @@ export default function PollPage() {
 
                     <button
                       onClick={() => handleAddOption(qIdx)}
-                      className="mt-4 flex items-center space-x-2 text-[#4E53B1] border border-[#4E53B1] px-3 py-1 rounded hover:bg-[#4E53B1] hover:text-white transition"
+                      className="mt-4 flex items-center space-x-2 text-[#4E53B1] border border-[#4E53B1] px-3 py-2 font-bold rounded hover:bg-[#4E53B1] hover:text-white transition"
                     >
                       <Plus size={20} />
                       <span>Add option</span>
@@ -168,17 +169,22 @@ export default function PollPage() {
                 <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-8 w-full">
                   <button
                     onClick={handlePublishPoll}
-                    className="w-full md:w-80 px-6 py-3 bg-[#4E53B1] text-white font-semibold"
+                    className="w-full rounded md:w-80 px-6 py-3 bg-white text-gray-800 cursor-pointer font-semibold border"
                   >
-                    Publish
+                    Edit
                   </button>
-                  <button
+                  <Link to="/publish-poll">
+                    <button
                     onClick={handleCancelPoll}
-                    className="w-full md:w-80 px-6 py-3 bg-white text-gray-800 font-semibold border"
+                    className="w-full cursor-pointer rounded md:w-80 px-6 py-3 bg-[#4E53B1] text-white font-semibold"
+                   
                   >
-                    Cancel
+                    Publsih
                   </button>
+                  </Link>
+                  
                 </div>
+              </div>
               </div>
             </div>
           </div>
