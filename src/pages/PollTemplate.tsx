@@ -50,12 +50,12 @@ const PollTemplate = ({ onBackToPollCreation }: { onBackToPollCreation: () => vo
   return (
     <div className="w-full min-h-screen font-inter flex flex-col items-center bg-[#FAFBFF] px-4 sm:px-6 md:px-8 py-6">
       {/* Heading and Search/Filter */}
-      <div className="w-full max-w-6xl">
+      <div className="w-full ">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-[#4E53B1] mb-6">
           Employee Satisfaction Survey Template
         </h2>
 
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="flex w-full flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div className="relative w-full lg:w-[42rem]">
             <input
               type="text"
@@ -76,17 +76,18 @@ const PollTemplate = ({ onBackToPollCreation }: { onBackToPollCreation: () => vo
       </div>
 
       {/* Main Content */}
-      <div className="w-full max-w-6xl">
+      <div className="w-full">
         {selectedItem ? (
           <SelectedSurveyView onBack={handleBackToTemplates} />
         ) : (
           <div className="w-full bg-[#FAFBFF] border border-gray-200 rounded-xl px-4 sm:px-6 md:px-8 py-6">
             {/* Top Tag Bar */}
-            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 text-blue-700 font-medium text-sm sm:text-base">
-              <span>Survey Template</span>
+            <div className="flex items-center  p-3 mb-6 font-medium text-sm sm:text-base">
+              <span className='border-b w-full py-2 border-gray-300'>Survey Template</span>
+              
               <button
                 onClick={onBackToPollCreation}
-                className="ml-auto text-blue-600 hover:text-blue-800 focus:outline-none"
+                className="ml-auto "
               >
                 <X size={20} />
               </button>
@@ -103,7 +104,7 @@ const PollTemplate = ({ onBackToPollCreation }: { onBackToPollCreation: () => vo
                     {items.map((item, index) => (
                       <li
                         key={index}
-                        className="flex items-center justify-between py-2 px-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition duration-200"
+                        className="flex items-center justify-between py-2 px-4 "
                         onClick={() => handleItemClick(item)}
                       >
                         <div className="flex items-center gap-3">
