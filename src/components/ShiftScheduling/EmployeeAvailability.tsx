@@ -109,7 +109,9 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     const handleSaveDraft = () => {
+        const employeeName = openIndex !== null ? employees[openIndex].name : "Unknown";
         const newShift = {
+            employeeName,
             date: shiftDetails.date,
             startTime: `${shiftDetails.startTime}am`,
             endTime: `${shiftDetails.endTime}pm`,
@@ -123,7 +125,9 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     const handlePublish = () => {
+        const employeeName = openIndex !== null ? employees[openIndex].name : "Unknown";
         const newShift = {
+            employeeName,
             date: shiftDetails.date,
             startTime: `${shiftDetails.startTime}am`,
             endTime: `${shiftDetails.endTime}pm`,
@@ -137,12 +141,10 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     const handleSaveTemplate = () => {
-        // Template saving logic here
         alert("Shift saved as template");
     };
 
     const handleDelete = () => {
-        // Delete logic here
         alert("Shift deleted");
         setOpenIndex(null);
     };
@@ -156,9 +158,9 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     return (
-        <aside className="w-full mt-18 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
+        <aside className="w-full mt-18 mb-12 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-indigo-700 text-lg font-bold">Employee Availability</h2>
+                <h2 className="text-[rgba(78,83,177,1)] text-lg font-bold">Employee Availability</h2>
                 <span className="text-xs text-green-600 bg-green-100 rounded-full px-2 py-0.5">
                     {employees.filter(e => e.status === 'Available').length} active
                 </span>
@@ -186,8 +188,8 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                             <div className="flex items-center justify-between">
                                 <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.name}</span>
                                 {/* <span className="text-[10px] border rounded-full px-2 py-0.5 text-indigo-700 border-indigo-200">
-                                    {emp.role}
-                                </span> */}
+                                {emp.role}
+                            </span> */}
                                 <EmployeeCardPopup
                                     name={emp.name}
                                     title={emp.role}
@@ -198,9 +200,21 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                     role={emp.role}
                                 />
                             </div>
-                            <p className="text-xs mb-1 text-gray-500">
-                                {emp.status === 'Available' ? '🟢' : '🔴'} {emp.status}
+                            
+                            <p
+                                className={`text-xs mb-1 ${emp.status === 'Available' ? 'text-green-600' : 'text-red-600'
+                                    }`}
+                            >
+                                {emp.status === 'Available' ? '' : ''} {emp.status}
                             </p>
+
+
+                            {/* Floating Templates tab */}
+                            {/* <div className="fixed top-120 right-0 h-34 w-4 sm:w-6 md:w-8 lg:w-8 bg-[rgba(78,83,177,1)] text-white text-[20px] font-semibold flex items-center justify-center cursor-pointer rounded-l-md">
+                                <span className="transform -rotate-90 whitespace-nowrap">Templates</span>
+                            </div> */}
+
+
                             <div className="flex items-center gap-2 mb-1 text-sm text-gray-600 mt-1">
                                 <button onClick={() => setOpenIndex(idx)} className="text-lg">
                                     <BsStopwatch />
@@ -209,7 +223,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                 <ShiftTemplateDropdown />
                                 <span className="text-lg font-medium">1</span>
                             </div>
-                            <p className="text-sm text-indigo-700">Off Day: {emp.offDay}</p>
+                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.offDay}</p>
                         </div>
 
                         {openIndex === idx && (
@@ -226,7 +240,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                             <Tab
                                                 key={tabIdx}
                                                 className={({ selected }) =>
-                                                    `px-3 py-1.5 text-sm font-medium border-b-2 ${selected ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-gray-500'}`
+                                                    `px-3 py-1.5 text-sm font-medium border-b-2 ${selected ? 'border-[rgba(78,83,177,1)] text-[rgba(78,83,177,1)]' : 'border-transparent text-gray-500'}`
                                                 }
                                             >
                                                 {tab}
@@ -247,7 +261,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                                     />
                                                     <div className="flex items-center gap-2">
                                                         <span>All Day</span>
-                                                        <input type="checkbox" checked className="accent-indigo-600 w-4 h-4" />
+                                                        <input type="checkbox" checked className="accent-[rgba(78,83,177,1)] w-4 h-4" />
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3 mt-12 mb-6 items-center">
@@ -290,7 +304,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                                     placeholder="Select Users"
                                                     className="w-full border border-gray-300 rounded-md p-2"
                                                 />
-                                                <a href="#" className="text-indigo-600 text-sm underline">Add User</a>
+                                                <a href="#" className="text-[rgba(78,83,177,1)] text-sm underline">Add User</a>
                                                 <input
                                                     type="text"
                                                     name="location"
@@ -310,23 +324,23 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                                 <div className="text-gray-400 text-sm italic">📎 Attachment</div>
                                                 <div className="flex items-center mt-8 justify-between">
                                                     <p>Shift Tasks <span className="text-gray-400 ml-4">No tasks created</span></p>
-                                                    <a href="#" className="text-indigo-600 text-sm">View shift tasks</a>
+                                                    <a href="#" className="text-[rgba(78,83,177,1)] text-sm">View shift tasks</a>
                                                 </div>
                                                 <div className="flex mt-12 gap-2">
                                                     <button
-                                                        className="bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm"
+                                                        className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-lg text-sm"
                                                         onClick={handlePublish}
                                                     >
                                                         Publish
                                                     </button>
                                                     <button
-                                                        className="border border-indigo-300 px-4 py-2 text-indigo-800 rounded-lg min-w-max text-sm"
+                                                        className="border border-indigo-300 px-4 py-2 text-[rgba(78,83,177,1)] rounded-lg min-w-max text-sm"
                                                         onClick={handleSaveDraft}
                                                     >
                                                         Save Draft
                                                     </button>
                                                     <button
-                                                        className="border border-indigo-300 px-4 text-indigo-800 min-w-max py-2 rounded-lg text-sm"
+                                                        className="border border-indigo-300 px-4 text-[rgba(78,83,177,1)]  min-w-max py-2 rounded-lg text-sm"
                                                         onClick={handleSaveTemplate}
                                                     >
                                                         Save as Template
@@ -416,6 +430,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                 ))}
             </ul>
         </aside>
+    
     );
 };
 

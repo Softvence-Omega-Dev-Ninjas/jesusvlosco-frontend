@@ -5,6 +5,7 @@ import WeeklyScheduleGrid from "./WeeklySchedule";
 
 
 interface PublishedShift {
+  employeeName: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -29,3 +30,6 @@ const ShiftScheduler: FC = () => {
 };
 
 export default ShiftScheduler;
+
+
+
