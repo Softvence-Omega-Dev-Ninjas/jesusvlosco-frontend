@@ -158,7 +158,7 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
     };
 
     return (
-        <aside className="w-full mt-18 mb-12 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
+        <aside className="w-full mt-10 mb-12 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[rgba(78,83,177,1)] text-lg font-bold">Employee Availability</h2>
                 <span className="text-xs text-green-600 bg-green-100 rounded-full px-2 py-0.5">
@@ -177,12 +177,12 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                 {employees.map((emp, idx) => (
                     <li
                         key={idx}
-                        className="relative flex items-start gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-sm"
+                        className="relative flex items-start mt-4 gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-sm"
                     >
                         <img
                             src={`https://i.pravatar.cc/40?img=${emp.avatar}`}
                             alt={emp.name}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-10 h-10 lg:mt-8 rounded-full object-cover"
                         />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
