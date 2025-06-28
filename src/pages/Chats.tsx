@@ -4,18 +4,18 @@ import { PenLine } from "lucide-react";
 
 export const Chat = () => {
   return (
-    <div className="flex">
-      <div className="w-[80%] pr-4 border-r border-website-color-border">
+    <div className="flex flex-col 2xl:flex-row">
+      <div className="2xl:w-[80%] 2xl:pr-4 2xl:border-r border-website-color-border">
         <div className="flex items-start justify-between mb-8">
           <div>
             <h2 className="text-2xl font-semibold mb-3 text-primary">Chat</h2>
-            <p className="text-gray-700">
+            <p className="text-gray-700 text-sm md:text-base">
               This is where your team chat messages will appear.
             </p>
           </div>
 
-          <button className="bg-primary hover:bg-primary/90 transition-colors p-3 cursor-pointer px-4 flex items-center gap-2 rounded-lg text-white">
-            <PenLine /> Create New
+          <button className="bg-primary hover:bg-primary/90 text-sm md:text-base transition-colors p-3 cursor-pointer px-4 flex items-center gap-2 rounded-lg text-white min-w-max">
+            <PenLine className="size-4 md:size-5" /> Create New
           </button>
         </div>
 

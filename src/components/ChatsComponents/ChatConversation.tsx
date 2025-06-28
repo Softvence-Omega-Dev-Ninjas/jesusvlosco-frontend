@@ -22,6 +22,7 @@ const ChatConversation = ({
 
     console.log(`Sending message to ${selectedChat.name}: ${messageInput}`);
   };
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}

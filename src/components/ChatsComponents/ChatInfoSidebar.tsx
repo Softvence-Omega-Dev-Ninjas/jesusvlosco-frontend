@@ -5,9 +5,11 @@ import mediaImgPlaceholder from "@/assets/media-img-placeholder.jpg";
 const ChatInfoSidebar = ({
   setShowChatInfo,
   selectedChat,
+  setMobileView,
 }: {
   setShowChatInfo: (arg0: boolean) => void;
   selectedChat: Chat;
+  setMobileView: React.Dispatch<React.SetStateAction<"list" | "chat" | "info">>;
 }) => {
   return (
     <div className="fixed inset-0 bg-white/50 drop-shadow-xl bg-opacity-50 z-50 flex justify-end">
@@ -16,7 +18,10 @@ const ChatInfoSidebar = ({
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Chat info</h2>
           <button
-            onClick={() => setShowChatInfo(false)}
+            onClick={() => {
+              setShowChatInfo(false);
+              setMobileView("chat");
+            }}
             className="p-1 hover:bg-gray-100 rounded-full"
           >
             <svg
@@ -108,7 +113,7 @@ const ChatInfoSidebar = ({
                   src={mediaImgPlaceholder}
                   alt={`Media ${index + 1}`}
                   className="w-full h-16 object-cover rounded-lg"
-                /> 
+                />
               ))}
             </div>
           </div>
