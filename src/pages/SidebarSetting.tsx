@@ -40,16 +40,16 @@ const SidebarSetting: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen  p-4 font-sans">
+    <div className="min-h-screen bg-gray-50  p-4 font-sans">
       {/* Header Tabs Container */}
       <div className="mb-6">
   {/* Tab buttons */}
-  <div className="flex justify-evenly items-center  font-semibold text-gray-600  w-full">
+  <div className="flex justify-evenly items-center  font-semibold text-gray-600  w-full ">
     {tabs.map((tab) => (
       <button
         key={tab}
         onClick={() => setActiveTab(tab)}
-        className={`px-4 py-2 transition-colors duration-200 ease-in-out w-full text-center
+        className={`px-4 py-2 transition-colors duration-200 ease-in-out w-full text-center 
           ${activeTab === tab
             ? 'text-indigo-700 border-b-2 border-indigo-700'
             : 'text-gray-600 hover:text-gray-800'}
@@ -64,7 +64,7 @@ const SidebarSetting: React.FC = () => {
 </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto  px-4 py-6">
         {renderContent()}
       </div>
     </div>

@@ -113,10 +113,10 @@ const EmployeeManagement = () => {
         </section>
 
         {/* Employee Table Section */}
-        <section className="mt-8 overflow-x-auto">
+        <section className="mt-8 overflow-x-auto rounded-md bg-white">
           <div className="min-w-full">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y  divide-gray-200">
+              <thead className="">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">
                     <input type="checkbox" className="h-4 w-4 text-primary border-gray-300 rounded" />
@@ -170,7 +170,7 @@ const EmployeeManagement = () => {
                       {employee.lastLogin}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="px-4 py-2 rounded-md bg-pink-100 text-red-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                      <button className="px-4 py-2 rounded-md bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                         Remove
                       </button>
                     </td>

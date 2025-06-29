@@ -11,6 +11,7 @@ import {
   ListFilter,
 } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
+import { Link } from "react-router-dom";
 
 
 // Interface for Survey data structure
@@ -364,10 +365,12 @@ const SurveyMainPage: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl font-bold text-primary">Survey & Poll</h1>
-            <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium">
+            <Link to={"/survey-poll-page"}> <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium cursor-pointer">
               <Plus size={16} />
               Create New
             </button>
+            </Link>
+           
           </div>
           <p className="text-gray-600">
             View and manage all surveys & polls. Monitor participation and
