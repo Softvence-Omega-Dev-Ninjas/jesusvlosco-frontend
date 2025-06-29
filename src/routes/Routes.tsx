@@ -42,6 +42,7 @@ import CreateRecognition from "@/pages/CreateRecognition";
 import BadgeLibrary from "@/pages/BadgeLibrary";
 import EditBadge from "@/pages/EditBadge";
 import CreateBadge from "@/pages/CreateBadge";
+import TaskAndProject from "@/pages/TaskAndProject";
 
 const routes = createBrowserRouter([
   {
@@ -177,12 +178,12 @@ const routes = createBrowserRouter([
       },
       {
         path: '/publish-survey',
-        element: <PublishSurvey  />
+        element: <PublishSurvey />
       },
       {
-              path: '/survey-template',
-              element: <SurveyTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
-            },
+        path: '/survey-template',
+        element: <SurveyTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
+      },
       {
         path: '/publish-poll',
         element: <PublishPoll></PublishPoll>
@@ -190,6 +191,11 @@ const routes = createBrowserRouter([
       {
         path: '/poll-template',
         element: <PollTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
+      },
+
+      {
+        path: '/tasks-projects',
+        element: <TaskAndProject></TaskAndProject>
       },
 
 
