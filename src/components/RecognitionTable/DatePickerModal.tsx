@@ -50,7 +50,7 @@ export default function DatePickerModal({
             <div className="flex flex-wrap justify-center items-end gap-3 border-b py-6 pb-4">
               <div className="text-xl font-medium text-[#4F46E5]">From</div>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer "
                 value={fromDate.day}
                 onChange={(e) =>
                   onFromDateChange({ ...fromDate, day: e.target.value })
@@ -63,7 +63,7 @@ export default function DatePickerModal({
                 ))}
               </select>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                 value={fromDate.month}
                 onChange={(e) =>
                   onFromDateChange({ ...fromDate, month: e.target.value })
@@ -89,7 +89,7 @@ export default function DatePickerModal({
                 ))}
               </select>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                 value={fromDate.year}
                 onChange={(e) =>
                   onFromDateChange({ ...fromDate, year: e.target.value })
@@ -104,7 +104,7 @@ export default function DatePickerModal({
 
               <div className="text-xl font-medium text-[#4F46E5]">To</div>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                 value={toDate.day}
                 onChange={(e) =>
                   onToDateChange({ ...toDate, day: e.target.value })
@@ -117,7 +117,7 @@ export default function DatePickerModal({
                 ))}
               </select>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                 value={toDate.month}
                 onChange={(e) =>
                   onToDateChange({ ...toDate, month: e.target.value })
@@ -143,7 +143,7 @@ export default function DatePickerModal({
                 ))}
               </select>
               <select
-                className="px-2 py-2 border rounded-md text-sm"
+                className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                 value={toDate.year}
                 onChange={(e) =>
                   onToDateChange({ ...toDate, year: e.target.value })

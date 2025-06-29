@@ -6,6 +6,7 @@ import light2 from "@/assets/light2.png";
 import { useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
+import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
 
 interface Activity {
   date: string;
@@ -143,6 +144,12 @@ export default function RecognitionTable() {
     return day >= fromDay && day <= toDay;
   };
 
+  // send reaction modul
+  const [isReactionModalOpen, setIsReactionModalOpen] = useState(false);
+
+  const openReactionModal = () => setIsReactionModalOpen(!false);
+  const closeReactionModal = () => setIsReactionModalOpen(false);
+
   return (
     <div>
       {/* <NavLink to={'/send-recognition'}>Send</NavLink> */}
@@ -160,10 +167,10 @@ export default function RecognitionTable() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-3">
-          <button className="px-4  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
+          <button className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
             Send recognition
           </button>
-          <button className="px-4 py-3 bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
+          <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
             Badge library
           </button>
         </div>
@@ -283,12 +290,15 @@ export default function RecognitionTable() {
 
                   {/* Reaction Column */}
                   <td className="p-4 text-end">
-                    <div className="flex items-center gap-1 justify-end  ">
+                    <div className="flex items-center gap-1 justify-end">
                       <button className="p-1 hover:bg-gray-100 rounded transition-colors">
                         <ThumbsUp className="w-4 h-4 text-gray-400 hover:text-blue-500" />
                       </button>
                       <span className="text-[#C5C5C5]">|</span>
-                      <button className="p-1 hover:bg-gray-100 rounded transition-colors relative">
+                      <button
+                        className="p-1 hover:bg-gray-100 rounded transition-colors relative"
+                        onClick={openReactionModal}
+                      >
                         <MessagesSquare className="w-4 h-4 text-black hover:text-blue-500" />
                         {activity.messageCount > 0 && (
                           <div className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#D9F0E4] rounded-full flex items-center justify-center">
@@ -300,6 +310,7 @@ export default function RecognitionTable() {
                       </button>
                     </div>
                   </td>
+                  {/* {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />} */}
                 </tr>
               ))}
             </tbody>
@@ -317,6 +328,8 @@ export default function RecognitionTable() {
           onDateClick={handleDateClick}
           isDateInRange={isDateInRange}
         />
+        {/* reaction modal  */}
+        {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />}
       </div>
     </div>
   );
