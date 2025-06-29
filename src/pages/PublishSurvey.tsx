@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Search, Filter, MoreHorizontal } from 'lucide-react';
+
+import React, { useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 
 // Types
 interface User {
@@ -28,164 +29,71 @@ interface SurveySettings {
 }
 
 // Mock Data
-const mockUsers: User[] = [
-    {
-        id: '21369',
-        name: 'Cody Fisher',
-        email: 'nevaeh.simmons@example.com',
-        phone: '(303) 555-0105',
-        department: 'Design',
-        lastLogin: '2/19/12',
-        avatar: 'CF'
-    },
-    {
-        id: '21369',
-        name: 'Leslie Alexander',
-        email: 'kenzi.lawson@example.com',
-        phone: '(907) 555-0101',
-        department: 'Medical',
-        lastLogin: '4/4/18',
-        avatar: 'LA'
-    },
-    {
-        id: '21369',
-        name: 'Kristin Watson',
-        email: 'georgia.young@example.com',
-        phone: '(316) 555-0116',
-        department: 'Trainer',
-        lastLogin: '7/18/17',
-        avatar: 'KW'
-    },
-    {
-        id: '21369',
-        name: 'Robert Fox',
-        email: 'sara.cruz@example.com',
-        phone: '(219) 555-0114',
-        department: 'Medical',
-        lastLogin: '6/2/19',
-        avatar: 'RF'
-    },
-    {
-        id: '21369',
-        name: 'Jacob Jones',
-        email: 'nathan.roberts@example.com',
-        phone: '(201) 555-0124',
-        department: 'Medical',
-        lastLogin: '1/28/17',
-        avatar: 'JJ'
-    },
-    {
-        id: '21369',
-        name: 'Theresa Webb',
-        email: 'deanna.curtis@example.com',
-        phone: '(406) 555-0120',
-        department: 'Sales',
-        lastLogin: '9/2/15',
-        avatar: 'TW'
-    },
-    {
-        id: '21369',
-        name: 'Guy Hawkins',
-        email: 'bill.sanders@example.com',
-        phone: '(629) 555-0129',
-        department: 'Marketing',
-        lastLogin: '8/30/14',
-        avatar: 'GH'
-    },
-    {
-        id: '21369',
-        name: 'Kathryn Murphy',
-        email: 'debra.holt@example.com',
-        phone: '(270) 555-0117',
-        department: 'Marketing',
-        lastLogin: '8/15/17',
-        avatar: 'KM'
-    },
-    {
-        id: '21369',
-        name: 'Devon Lane',
-        email: 'michelle.rivera@example.com',
-        phone: '(704) 555-0127',
-        department: 'Medical',
-        lastLogin: '5/7/16',
-        avatar: 'DL'
-    },
-    {
-        id: '21369',
-        name: 'Esther Howard',
-        email: 'tanya.hill@example.com',
-        phone: '(307) 555-0133',
-        department: 'Sales',
-        lastLogin: '1/3/14',
-        avatar: 'EH'
-    }
-];
+const mockUsers: User[] = [...Array(10)].map((_, i) => ({
+    id: (21360 + i).toString(),
+    name: ['Cody Fisher', 'Leslie Alexander', 'Kristin Watson', 'Robert Fox', 'Jacob Jones', 'Theresa Webb', 'Guy Hawkins', 'Kathryn Murphy', 'Devon Lane', 'Esther Howard'][i],
+    email: `user${i + 1}@example.com`,
+    phone: '(123) 456-7890',
+    department: ['Design', 'Medical', 'Trainer', 'Medical', 'Medical', 'Sales', 'Marketing', 'Marketing', 'Medical', 'Sales'][i],
+    lastLogin: '2024-06-01',
+    avatar: ['CF', 'LA', 'KW', 'RF', 'JJ', 'TW', 'GH', 'KM', 'DL', 'EH'][i]
+}));
 
-// Progress Steps Component
-const ProgressSteps: React.FC<{ currentStep: number; steps: string[] }> = ({ currentStep, steps }) => {
-    return (
+const ProgressSteps: React.FC<{ currentStep: number; steps: string[] }> = ({ currentStep, steps }) => (
+    <div className="flex items-center bg-white px-4 sm:px-14 py-4 sm:py-6 justify-center mb-8 overflow-x-auto">
+        {steps.map((step, index) => (
+            <React.Fragment key={step}>
+                <div className="flex flex-col items-center min-w-[80px] sm:min-w-auto">
+                    <div
+                        className={`w-4 h-4 rounded-full flex items-center justify-center text-sm font-medium ${index <= currentStep ? 'bg-[#4E53B1] text-white' : 'bg-gray-200 text-gray-500'
+                            }`}
+                    />
+                    <span
+                        className={`mt-2 text-xs text-center ${index === currentStep ? 'text-[#4E53B1] font-medium' : 'text-gray-500'
+                            }`}
+                    >
+                        {step}
+                    </span>
+                </div>
+                {index < steps.length - 1 && (
+                    <div
+                        className={`w-10 sm:w-40 -mt-5 h-0.5 ${index < currentStep ? 'bg-[#4E53B1]' : 'bg-gray-200'
+                            }`}
+                    />
+                )}
+            </React.Fragment>
+        ))}
+    </div>
+);
 
-        <div className="flex items-center bg-white px-14 py-6 justify-center mb-8">
-            {['Assign by', 'Recipients', 'Publish settings', 'Summary'].map((step, index) => (
-                <React.Fragment key={step}>
-                    <div className="flex flex-col  items-center">
-                        <div
-                            className={`w-4 h-4 rounded-full flex items-center justify-center text-sm font-medium ${index <= currentStep
-                                    ? 'bg-[#4E53B1] text-white'
-                                    : 'bg-gray-200 text-gray-500'
-                                }`}
-                        />
-                        <span
-                            className={`mt-2 text-xs ${index === currentStep ? 'text-[#4E53B1] font-medium' : 'text-gray-500'
-                                }`}
-                        >
-                            {step}
-                        </span>
-                    </div>
-                    {index < 3 && (
-                        <div
-                            className={`w-40  -mt-5 h-0.5 ${index < currentStep ? 'bg-[#4E53B1]' : 'bg-gray-200'
-                                }`}
-                        />
-                    )}
-                </React.Fragment>
-            ))}
-        </div>
-    );
-};
-
-// Assign By Step Component
 const AssignByStep: React.FC<{
     assignBy: 'all' | 'select';
     onAssignByChange: (value: 'all' | 'select') => void;
-}> = ({ assignBy, onAssignByChange }) => {
-    return (
-        <div className="max-w-md mx-auto">
-            <div className="flex gap-4 justify-center p-20">
-                <button
-                    onClick={() => onAssignByChange('all')}
-                    className={`px-16 py-6 rounded-lg font-medium transition-colors ${assignBy === 'all'
-                        ? 'bg-[rgba(78,83,177,1)] text-white'
-                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                >
-                    All
-                </button>
-                <button
-                    onClick={() => onAssignByChange('select')}
-                    className={`px-8 py-3 rounded-lg font-medium transition-colors ${assignBy === 'select'
-                        ? 'bg-[rgba(78,83,177,1)] text-white min-w-max'
-                        : 'bg-white border border-[rgba(78,83,177,1)] text-[rgba(78,83,177,1)] hover:bg-gray-50 min-w-max'
-                        }`}
-                >
-                    Select user
-                </button>
-            </div>
+}> = ({ assignBy, onAssignByChange }) => (
+    <div className="max-w-md mx-auto">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center p-4 sm:p-20">
+            <button
+                onClick={() => onAssignByChange('all')}
+                className={`px-8 sm:px-16 py-3 sm:py-6 rounded-lg text-sm sm:text-base transition-colors ${assignBy === 'all'
+                        ? 'bg-[#4E53B1] text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+            >
+                All
+            </button>
+            <button
+                onClick={() => onAssignByChange('select')}
+                className={`px-8 py-3 rounded-lg text-sm sm:text-base transition-colors ${assignBy === 'select'
+                        ? 'bg-[#4E53B1] text-white min-w-max'
+                        : 'bg-white border border-[#4E53B1] text-[#4E53B1] hover:bg-gray-50 min-w-max'
+                    }`}
+            >
+                Select user
+            </button>
         </div>
-    );
-};
+    </div>
+);
 
-// Recipients Step Component
 const RecipientsStep: React.FC<{
     users: User[];
     selectedUsers: string[];
@@ -200,46 +108,59 @@ const RecipientsStep: React.FC<{
     );
 
     const handleSelectAll = (checked: boolean) => {
-        filteredUsers.forEach(user => {
-            onUserSelectionChange(user.id, checked);
-        });
+        if (checked) {
+            filteredUsers.forEach(user => {
+                if (!selectedUsers.includes(user.id)) {
+                    onUserSelectionChange(user.id, true);
+                }
+            });
+        } else {
+            filteredUsers.forEach(user => {
+                if (selectedUsers.includes(user.id)) {
+                    onUserSelectionChange(user.id, false);
+                }
+            });
+        }
     };
 
-    const isAllSelected = filteredUsers.length > 0 && filteredUsers.every(user => selectedUsers.includes(user.id));
+    const isAllSelected = useMemo(() => {
+        return (
+            filteredUsers.length > 0 &&
+            filteredUsers.every(user => selectedUsers.includes(user.id))
+        );
+    }, [filteredUsers, selectedUsers]);
 
     return (
         <div className="bg-white">
-            <div className="mb-6">
-                <h3 className="text-lg font-medium text-[rgba(78,83,177,1)] mb-2">Select user from the list</h3>
-
-                <div className="flex gap-4 mb-4">
-                    <div className="flex-1  relative">
-                        <Search className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <div className="mb-6 px-4 sm:px-0">
+                <h3 className="text-lg font-medium text-[#4E53B1] mb-2">Select user from the list</h3>
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
                             placeholder="Search names, roles, department"
-                            className="w-full max-w-2xl pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                        <Filter className="w-4 h-4" />
-                        Filter
+                    <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
+                        <img src="../src/assets/filter.png" alt="" className="w-4 h-4" />
+                        <span className="hidden sm:inline">Filter</span>
                     </button>
                 </div>
             </div>
-
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                    <thead className="bg-gray-50">
+            <div className="rounded-lg overflow-x-auto">
+                <table className="w-full min-w-[600px]">
+                    <thead className="border-b border-gray-300">
                         <tr>
                             <th className="w-12 px-4 py-3">
                                 <input
                                     type="checkbox"
                                     checked={isAllSelected}
                                     onChange={(e) => handleSelectAll(e.target.checked)}
-                                    className="rounded border-gray-300 text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                                    className="rounded border-gray-300 text-[#4E53B1] focus:ring-indigo-500"
                                 />
                             </th>
                             <th className="text-left px-4 py-3 text-sm font-medium text-gray-900">ID</th>
@@ -249,12 +170,15 @@ const RecipientsStep: React.FC<{
                             <th className="text-left px-4 py-3 text-sm font-medium text-gray-900">Department</th>
                             <th className="text-left px-4 py-3 text-sm font-medium text-gray-900">Last login</th>
                             <th className="w-12 px-4 py-3">
-                                <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                <div className='flex'>
+                                    <img className='w-4 h-4 text-gray-400' src="../src/assets/view_week.png" alt="" />
+                                    <img className='w-4 h-4 text-gray-400' src="../src/assets/Frame.png" alt="" />
+                                </div>
                             </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredUsers.map((user) => (
+                        {filteredUsers.map(user => (
                             <tr key={user.id} className="hover:bg-gray-50">
                                 <td className="px-4 py-3">
                                     <input
@@ -277,9 +201,6 @@ const RecipientsStep: React.FC<{
                                 <td className="px-4 py-3 text-sm text-gray-600">{user.phone}</td>
                                 <td className="px-4 py-3 text-sm text-gray-600">{user.department}</td>
                                 <td className="px-4 py-3 text-sm text-gray-600">{user.lastLogin}</td>
-                                <td className="px-4 py-3">
-                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -289,17 +210,14 @@ const RecipientsStep: React.FC<{
     );
 };
 
-// Publish Settings Step Component
 const PublishSettingsStep: React.FC<{
     settings: SurveySettings;
     onSettingsChange: (settings: Partial<SurveySettings>) => void;
 }> = ({ settings, onSettingsChange }) => {
     return (
-        <div className="max-w-8xl mx-auto space-y-8">
-            {/* Publish Options */}
+        <div className="max-w-8xl mx-auto space-y-8 px-4 sm:px-0">
             <div className="space-y-4">
-               
-               <div className='flex gap-20'>
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-20">
                     <div className="flex items-center gap-4">
                         <label className="flex items-center gap-3">
                             <input
@@ -307,7 +225,7 @@ const PublishSettingsStep: React.FC<{
                                 name="publishOption"
                                 checked={settings.publishNow}
                                 onChange={() => onSettingsChange({ publishNow: true })}
-                                className="text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                                className="text-[#4E53B1] focus:ring-indigo-500"
                             />
                             <span className="text-gray-900">Publish now</span>
                         </label>
@@ -320,22 +238,21 @@ const PublishSettingsStep: React.FC<{
                                 name="publishOption"
                                 checked={!settings.publishNow}
                                 onChange={() => onSettingsChange({ publishNow: false })}
-                                className="text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                                className="text-[#4E53B1] focus:ring-indigo-500"
                             />
                             <span className="text-gray-900">Select date & time</span>
                         </label>
                     </div>
-
-               </div>
+                </div>
                 {!settings.publishNow && (
-                    <div className="ml-8 lg:ml-50 flex items-center gap-4">
+                    <div className="ml-0 sm:ml-8 lg:ml-50 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <input
                             type="date"
                             value={settings.publishDate}
                             onChange={(e) => onSettingsChange({ publishDate: e.target.value })}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
-                        <span className="text-gray-500">At</span>
+                        <span className="text-gray-500 hidden sm:inline">At</span>
                         <input
                             type="time"
                             value={settings.publishTime}
@@ -346,24 +263,22 @@ const PublishSettingsStep: React.FC<{
                 )}
             </div>
 
-            {/* Notification Settings */}
             <div className="space-y-4">
                 <label className="flex items-start gap-3">
                     <input
                         type="checkbox"
                         checked={settings.notifyPushUp}
                         onChange={(e) => onSettingsChange({ notifyPushUp: e.target.checked })}
-                        className="mt-1 rounded border-gray-300 text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                        className="mt-1 rounded border-gray-300 text-[#4E53B1] focus:ring-indigo-500"
                     />
                     <div className="flex-1">
                         <span className="text-gray-900">Notify employees via push up notification</span>
                         <div className="mt-2">
-                            <textarea
+                            <input
                                 value={settings.notificationText}
                                 onChange={(e) => onSettingsChange({ notificationText: e.target.value })}
                                 placeholder="A new update is waiting for you in the XYZ company app"
-                                className="w-full max-w-lg px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                             />
                         </div>
                     </div>
@@ -376,26 +291,25 @@ const PublishSettingsStep: React.FC<{
                         type="checkbox"
                         checked={settings.showOnFeed}
                         onChange={(e) => onSettingsChange({ showOnFeed: e.target.checked })}
-                        className="rounded border-gray-300 text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                        className="rounded border-gray-300 text-[#4E53B1] focus:ring-indigo-500"
                     />
                     <span className="text-gray-900">Show on feed by XYZ agency</span>
                 </label>
             </div>
 
-            {/* Reminder Settings */}
             <div className="space-y-4">
                 <label className="flex items-center gap-3">
                     <input
                         type="checkbox"
                         checked={settings.sendReminder}
                         onChange={(e) => onSettingsChange({ sendReminder: e.target.checked })}
-                        className="rounded border-gray-300 text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                        className="rounded border-gray-300 text-[#4E53B1] focus:ring-indigo-500"
                     />
                     <span className="text-gray-900">Send on reminder if user didn't view by</span>
                 </label>
 
                 {settings.sendReminder && (
-                    <div className="ml-8 flex items-center gap-4">
+                    <div className="ml-0 sm:ml-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <input
                             type="date"
                             value={settings.reminderDate}
@@ -418,7 +332,7 @@ const PublishSettingsStep: React.FC<{
                         type="checkbox"
                         checked={settings.showOnFeedAgency}
                         onChange={(e) => onSettingsChange({ showOnFeedAgency: e.target.checked })}
-                        className="rounded border-gray-300 text-[rgba(78,83,177,1)] focus:ring-indigo-500"
+                        className="rounded border-gray-300 text-[#4E53B1] focus:ring-indigo-500"
                     />
                     <span className="text-gray-900">Show on feed by XYZ agency</span>
                 </label>
@@ -427,7 +341,6 @@ const PublishSettingsStep: React.FC<{
     );
 };
 
-// Summary Step Component
 const SummaryStep: React.FC<{
     settings: SurveySettings;
     onConfirm: () => void;
@@ -446,9 +359,9 @@ const SummaryStep: React.FC<{
     };
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <div className="bg-gray-100 rounded-lg p-12 text-center">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Survey is Live!</h2>
+        <div className="max-w-2xl mx-auto px-4 sm:px-0">
+            <div className="bg-gray-100 rounded-lg p-6 sm:p-12 text-center">
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">Survey is Live!</h2>
 
                 <p className="text-gray-600 mb-6">
                     "Your survey is live and ready for participation!"
@@ -476,25 +389,24 @@ const SummaryStep: React.FC<{
                 </div>
             </div>
 
-            <div className="flex justify-end  gap-4 mt-8">
+            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
                 <button
                     onClick={onConfirm}
-                    className="bg-[rgba(78,83,177,1)] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors order-1 sm:order-2"
                 >
-                    Confirm survey
+                    Cancel
                 </button>
                 <button
                     onClick={onConfirm}
-                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0 order-2 sm:order-1"
                 >
-                    Cancel
+                    Confirm survey
                 </button>
             </div>
         </div>
     );
 };
 
-// Main PublishSurvey Component
 const PublishSurvey: React.FC = () => {
     const steps = ['Assign by', 'Recipients', 'Publish settings', 'Summary'];
     const [currentStep, setCurrentStep] = useState(0);
@@ -544,7 +456,6 @@ const PublishSurvey: React.FC = () => {
 
     const handleConfirm = () => {
         console.log('Survey confirmed with settings:', settings);
-        // Handle survey confirmation logic here
     };
 
     const renderCurrentStep = () => {
@@ -584,29 +495,25 @@ const PublishSurvey: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-8xl mx-auto px-4">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-2xl font-semibold text-[rgba(78,83,177,1)] mb-2">
+        <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+            <div className="max-w-8xl mx-auto px-4 sm:px-6">
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-[#4E53B1] mb-2">
                         Create New Survey & Poll
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-sm sm:text-base text-gray-600">
                         Design your survey or poll by adding questions, choosing response types, and setting audience and scheduling options
                     </p>
                 </div>
 
-                {/* Progress Steps */}
                 <ProgressSteps currentStep={currentStep} steps={steps} />
 
-                {/* Step Content */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-8 mb-6 sm:mb-8">
                     {renderCurrentStep()}
                 </div>
 
-                {/* Navigation Buttons */}
                 {currentStep < 3 && (
-                    <div className="flex justify-end gap-4">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-4">
                         <button
                             onClick={handleCancel}
                             disabled={currentStep === 0}
@@ -616,7 +523,7 @@ const PublishSurvey: React.FC = () => {
                         </button>
                         <button
                             onClick={handleNext}
-                            className="bg-[rgba(78,83,177,1)] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                            className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0"
                         >
                             Next
                         </button>

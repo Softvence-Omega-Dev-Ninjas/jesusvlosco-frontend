@@ -58,9 +58,9 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
       if (!isOpen) return null;
 
       return (
-            <div className="fixed inset-0 bg-white/30 backdrop-blur-[1px] flex items-center justify-center z-50">
+            <div className="fixed  inset-0 bg-white/30 backdrop-blur-[1px] flex items-center justify-center z-50">
 
-                  <div className="bg-white rounded-lg w-full max-w-xl shadow-2xl">
+                  <div className="bg-white  rounded-xl w-full max-w-xl shadow-2xl">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-gray-200">
                               <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-6">
+                        <div className="p-10 space-y-6">
                               {/* Question Field */}
                               <div>
                                     <input
@@ -112,16 +112,16 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
                                                 value={fieldData.minLabel}
                                                 onChange={(e) => setFieldData(prev => ({ ...prev, minLabel: e.target.value }))}
                                                 placeholder="Very bad"
-                                                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                                className="flex-1 p-2 border text-center border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                                           />
 
-                                          <div className="flex items-center mx-4 gap-2">
+                                          <div className="flex items-center bg-gray-200 mx-4 gap-2">
                                                 <button
                                                       onClick={() => handleScaleChange(false)}
-                                                      className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center transition-colors"
+                                                      className="w-8 h-8 bg-gray-300 hover:bg-gray-300 rounded flex items-center justify-center transition-colors"
                                                       disabled={fieldData.scale <= 2}
                                                 >
-                                                      <Minus size={14} className="text-gray-600" />
+                                                      <Plus size={14} className="text-gray-600" />
                                                 </button>
 
                                                 <div className="flex items-center gap-1 px-2">
@@ -131,10 +131,11 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
 
                                                 <button
                                                       onClick={() => handleScaleChange(true)}
-                                                      className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center transition-colors"
+                                                      className="w-8 h-8 bg-gray-300 hover:bg-gray-300 rounded flex items-center justify-center transition-colors"
                                                       disabled={fieldData.scale >= 10}
                                                 >
-                                                      <Plus size={14} className="text-gray-600" />
+                                                      <Minus size={14} className="text-gray-600" />
+                                                     
                                                 </button>
                                           </div>
 
@@ -143,20 +144,11 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
                                                 value={fieldData.maxLabel}
                                                 onChange={(e) => setFieldData(prev => ({ ...prev, maxLabel: e.target.value }))}
                                                 placeholder="Very Good"
-                                                className="flex-1 p-2 border  border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                                className="flex-1 p-2 border text-center  border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                                           />
                                     </div>
 
-                                    {/* Rating Preview */}
-                                    <div className="flex items-center justify-center gap-2 py-4 bg-gray-50 rounded-lg">
-                                          {Array.from({ length: fieldData.scale }, (_, index) => (
-                                                <Star
-                                                      key={index}
-                                                      size={24}
-                                                      className="text-gray-300 hover:text-yellow-400 cursor-pointer transition-colors"
-                                                />
-                                          ))}
-                                    </div>
+                                   
                               </div>
 
                               {/* Checkboxes */}
@@ -184,10 +176,10 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 pt-0">
+                        <div className="p-6 border-t  border-gray-300 pt-0">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-24 py-2 bg-[rgba(78,83,177,1)] mt-3 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>
