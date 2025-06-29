@@ -223,7 +223,7 @@ const routes = createBrowserRouter([
       {
         path: "/sidebar-settings",
         element: <SidebarSetting></SidebarSetting>,
-      },
+       },
     ],
   },
   {
