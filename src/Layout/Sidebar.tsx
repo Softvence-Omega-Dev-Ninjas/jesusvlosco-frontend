@@ -34,64 +34,118 @@ interface NavigationItem {
     badge?: number;
 }
 
+// const navigation: NavigationItem[] = [
+//     {
+//         name: 'Dashboard',
+//         icon: LayoutDashboard,
+//         path: '/'
+//     },
+//     {
+//         name: 'Communication',
+//         path: '/communication',
+
+//         icon: MessageSquare,
+//         hasSubmenu: true,
+//         submenu: [
+//             { name: 'Messages', icon: Award, path: '/communication/chat' },
+//             { name: 'Recognition', icon: Mail, path: '/communication/recognition' }
+//         ]
+//     },
+//     {
+//         name: 'User',
+//         path: '/user',
+
+//         icon: MessageSquare,
+//         hasSubmenu: true,
+//         submenu: [
+//             { name: 'User', icon: Award, path: '/user/user' },
+//             { name: 'User Profile', icon: Mail, path: '/user/user-profile' }
+//         ]
+//     },
+
+//     {
+//         name: 'Survey & Poll',
+//         icon: BarChart3,
+//         path: '/survey-poll'
+//     },
+//     {
+//         name: 'Scheduling',
+//         path: '/schedule',
+//         icon: Calendar,
+//         hasSubmenu: true,
+//         submenu: [
+//             { name: 'Shift Scheduling', icon: Calendar, path: '/schedule/shiftschedule' },
+//             { name: 'Time Clock', icon: Calendar, path: '/schedule/timeclock' },
+//             { name: 'Time Sheets', icon: Calendar, path: '/schedule/timesheet' },
+//             { name: 'TimeOff Request', icon: Calendar, path: '/schedule/timeoffrequest' },
+//         ]
+//     },
+//     {
+//         name: 'Tasks & Projects',
+//         icon: FolderOpen,
+//         path: '/tasks-projects',
+//         badge: 1
+//     },
+//     {
+//         name: 'Settings',
+//         icon: Settings,
+//         path: '/settings'
+//     },
+// ];
+
 const navigation: NavigationItem[] = [
     {
         name: 'Dashboard',
         icon: LayoutDashboard,
-        path: '/'
+        path: '/admin',
     },
     {
         name: 'Communication',
-        path: '/communication',
-
         icon: MessageSquare,
         hasSubmenu: true,
         submenu: [
-            { name: 'Messages', icon: Award, path: '/communication/chat' },
-            { name: 'Recognition', icon: Mail, path: '/communication/recognition' }
-        ]
+            { name: 'Messages', icon: Award, path: '/admin/communication/chat' },
+            { name: 'Recognition', icon: Mail, path: '/admin/communication/recognition' },
+        ],
     },
     {
         name: 'User',
-        path: '/user',
-
         icon: MessageSquare,
         hasSubmenu: true,
         submenu: [
-            { name: 'User', icon: Award, path: '/user/user' },
-            { name: 'User Profile', icon: Mail, path: '/user/user-profile' }
-        ]
+            { name: 'User', icon: Award, path: '/admin/user/user' },
+            { name: 'User Profile', icon: Mail, path: '/admin/user/user-profile' },
+        ],
     },
-
     {
         name: 'Survey & Poll',
         icon: BarChart3,
-        path: '/survey-poll'
+        path: '/admin/survey-poll',
     },
     {
         name: 'Scheduling',
-        path: '/schedule',
         icon: Calendar,
         hasSubmenu: true,
         submenu: [
-            { name: 'Shift Scheduling', icon: Calendar, path: '/schedule/shiftschedule' },
-            { name: 'Time Clock', icon: Calendar, path: '/schedule/timeclock' },
-            { name: 'Time Sheets', icon: Calendar, path: '/schedule/timesheet' },
-            { name: 'TimeOff Request', icon: Calendar, path: '/schedule/timeoffrequest' },
-        ]
+            { name: 'Shift Scheduling', icon: Calendar, path: '/admin/schedule/shiftschedule' },
+            { name: 'Time Clock', icon: Calendar, path: '/admin/schedule/timeclock' },
+            { name: 'Time Sheets', icon: Calendar, path: '/admin/schedule/timesheet' },
+            { name: 'TimeOff Request', icon: Calendar, path: '/admin/schedule/timeoffrequest' },
+        ],
     },
     {
         name: 'Tasks & Projects',
         icon: FolderOpen,
-        path: '/tasks-projects',
-        badge: 1
+        path: '/admin/tasks-projects',
+        badge: 1,
     },
     {
         name: 'Settings',
         icon: Settings,
-        path: '/settings'
+        path: '/admin/sidebar-settings', // make sure this matches your admin route
     },
 ];
+
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const location = useLocation();
