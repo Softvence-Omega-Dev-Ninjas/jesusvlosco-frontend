@@ -44,6 +44,11 @@ import EditBadge from "@/pages/EditBadge";
 import CreateBadge from "@/pages/CreateBadge";
 import TaskAndProject from "@/pages/TaskAndProject";
 import AdminLayout from "@/Layout/Admin/AdminLayout";
+import UserDashboard from "@/pages/userpages/UserDashboard";
+import UserCommunication from "@/pages/userpages/UserCommunication";
+import UserRecognition from "@/pages/userpages/UserRecognition";
+import UserChat from "@/pages/userpages/UserChat";
+import UserSurvey from "@/pages/userpages/UserSurvey";
 
 // const routes = createBrowserRouter([
 //   {
@@ -250,6 +255,33 @@ const routes = createBrowserRouter([
 
 
   // ✅ Admin routes grouped here
+  {
+    path: "/user",
+    element: <UserDashboard></UserDashboard>,
+    children: [
+      {
+        index: true,
+        element: <UserDashboard />,
+      },
+      {
+        path: "communication",
+        element: <UserCommunication></UserCommunication>,
+        children: [
+          { index: true, element: <UserChat></UserChat> },
+          { path: "userchat", element: <UserChat></UserChat> },
+          { path: "user-recognition", element: <UserRecognition></UserRecognition> },
+        ],
+
+      },
+      {
+        path: "survey",
+        element: <UserSurvey></UserSurvey>
+      },
+    ]
+  },
+
+
+
   {
     path: "/admin",
     element: <AdminLayout />, // Admin shell with sidebar/header
