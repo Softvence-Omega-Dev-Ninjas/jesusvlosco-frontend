@@ -75,10 +75,10 @@ const ApiIntregration: React.FC = () => {
       <div className=" p-6 rounded-lg shadow-xl w-full  border border-gray-200">
         {/* Integration Setups Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-[#484848]">
             Integration Setups
           </h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className=" text-sm mt-1 text-[#5B5B5B]">
             Connect and manage third-party integrations.
           </p>
         </div>
@@ -87,10 +87,10 @@ const ApiIntregration: React.FC = () => {
         <div className="border-b border-gray-200 pb-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg font-semibold text-[#484848]">
                 Automatic Synchronization
               </h2>
-              <p className="text-gray-600 text-sm">
+              <p className="text-[#5B5B5B] text-sm">
                 Automatically sync data between integrated services.
               </p>
             </div>
@@ -125,10 +125,10 @@ const ApiIntregration: React.FC = () => {
         {/* Available Integrations Section */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="text-lg font-semibold text-[#484848]">
               Available Integrations
             </h2>
-            <button className="flex items-center bg-primary text-white font-medium py-2 px-4 rounded-md shadow-sm  transition duration-150 ease-in-out ">
+            <button className="flex items-center bg-primary text-white py-2 px-4 rounded-md shadow-sm  transition duration-150 ease-in-out ">
               <PlusIcon className="h-4 w-4 mr-1" /> Add new
             </button>
           </div>
@@ -139,8 +139,9 @@ const ApiIntregration: React.FC = () => {
                 key={integration.id}
                 className="flex items-center justify-between p-4 rounded-lg border border-gray-200"
               >
-                <div className="flex flex-col md:flex-row md:items-center">
-                  <span className="text-gray-800 font-medium mr-2">
+              <div>
+                  <div className="flex flex-col md:flex-row md:items-center">
+                  <span className="text-[#484848] font-medium mr-2">
                     {integration.name}
                   </span>
                   <span
@@ -152,12 +153,16 @@ const ApiIntregration: React.FC = () => {
                   >
                     {integration.status}
                   </span>
+                  
+                </div>
+                <div>
                   {integration.description && (
-                    <p className="text-gray-600 text-sm mt-1 md:mt-0 md:ml-4">
+                    <p className="text-gray-600 text-sm mt-4 ">
                       {integration.description}
                     </p>
                   )}
                 </div>
+              </div>
                 <button
                   onClick={() => handleConnectIntegration(integration.id)}
                   className={`flex items-center justify-center px-4 py-2 rounded-md font-medium text-sm transition duration-150 ease-in-out w-32 ${
@@ -186,7 +191,7 @@ const ApiIntregration: React.FC = () => {
 
         {/* API Access Section */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <h2 className="text-lg font-semibold text-[#484848] mb-4">
             API Access
           </h2>
 
@@ -194,7 +199,7 @@ const ApiIntregration: React.FC = () => {
           <div className="mb-4">
             <label
               htmlFor="api-key"
-              className="block text-gray-700 text-sm font-medium mb-1"
+              className="block text-[#484848] text-sm font-medium mb-1"
             >
               API Key
             </label>
@@ -215,7 +220,7 @@ const ApiIntregration: React.FC = () => {
           <div className="mb-6">
             <label
               htmlFor="webhook-url"
-              className="block text-gray-700 text-sm font-medium mb-1"
+              className="block text-[#484848] text-sm font-medium mb-1"
             >
               Webhook URL
             </label>
@@ -238,7 +243,7 @@ const ApiIntregration: React.FC = () => {
             {/* Changed from justify-end to justify-start */}
             <button
               onClick={handleSaveAllSettings}
-              className="bg-primary  text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2  "
+              className="bg-primary  text-white  py-2 px-6 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2  "
             >
               Save all settings
             </button>

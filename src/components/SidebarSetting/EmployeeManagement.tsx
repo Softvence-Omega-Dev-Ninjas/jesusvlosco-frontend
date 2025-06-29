@@ -46,7 +46,7 @@ const EmployeeManagement = () => {
         <section className=" max-w-3xl mx-auto mb-8">
           <div className=" gap-6 mb-6">
             {/* Name Input */}
-            <div className='mb-6'>
+            <div className='mb-3'>
               <label htmlFor="employeeName" className="block text-sm font-medium text-primary mb-1">Name</label>
               <div className="relative">
                 <select
@@ -56,7 +56,7 @@ const EmployeeManagement = () => {
                   value={employeeName}
                   onChange={(e) => setEmployeeName(e.target.value)}
                 >
-                  <option value="">Select Employee</option>
+                  <option  className='text-[#484848]' value="">Select Employee</option>
                   {employees.map((emp, index) => (
                     <option key={index} value={emp.name}>{emp.name}</option>
                   ))}
@@ -80,16 +80,16 @@ const EmployeeManagement = () => {
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Employee Login Information</h3>
+          <h3 className="text-lg font-semibold text-primary mb-2">Employee Login Information</h3>
           <div className="  mb-10">
             {/* Contact Number Input */}
-            <div className='mb-6'>
+            <div className='mb-3'>
               <label htmlFor="contactNumber" className="block text-sm font-medium text-primary mb-1">Contact Number</label>
               <input
                 type="text"
                 id="contactNumber"
                 name="contactNumber"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full border border-gray-300 text-[#484848] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="000-xxx-xxxx"
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
@@ -170,7 +170,7 @@ const EmployeeManagement = () => {
                       {employee.lastLogin}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="px-4 py-2 rounded-md bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                      <button className="px-4 py-2 rounded-lg bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                         Remove
                       </button>
                     </td>
