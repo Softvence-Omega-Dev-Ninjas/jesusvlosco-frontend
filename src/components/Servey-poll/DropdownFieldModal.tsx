@@ -140,13 +140,15 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                                     </div>
 
                                     {/* Add Field Button */}
-                                    <button
-                                          onClick={handleAddOption}
-                                          className="mt-3 flex items-center gap-2 px-4 py-2 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-                                    >
-                                          <Plus size={16} />
-                                          Add field
-                                    </button>
+                                    <div className='border-b border-gray-300'>
+                                          <button
+                                                onClick={handleAddOption}
+                                                className="mt-3 flex items-center gap-2 px-4 py-2 mb-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                                          >
+                                                <Plus size={16} />
+                                                Add field
+                                          </button>
+                                   </div>
                               </div>
 
                               {/* Checkboxes */}
@@ -184,10 +186,10 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 pt-0">
+                        <div className="p-6 border-t border-gray-300 pt-0">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-24 py-2 bg-[rgba(78,83,177,1)] text-white mt-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>

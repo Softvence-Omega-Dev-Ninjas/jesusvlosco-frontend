@@ -51,8 +51,10 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-gray-200">
                               <div className="flex items-center gap-2">
-                                    <List size={16} className="text-gray-600" />
-                                    <h2 className="text-lg font-medium text-gray-900">Open ended</h2>
+                                    {/* <List size={16} className="text-gray-600" /> */}
+                                    <img src="../src/assets/subject.png" alt="Edit" className="w-5 h-5 " />
+
+                                    <h2 className="text-lg ml-2 font-medium text-gray-900">Open ended</h2>
                               </div>
                               <button
                                     onClick={onClose}
@@ -71,7 +73,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.question}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, question: e.target.value }))}
                                           placeholder="Question"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-500"
+                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-700 placeholder-gray-500"
                                     />
                               </div>
 
@@ -82,7 +84,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.description}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, description: e.target.value }))}
                                           placeholder="Description"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-500"
+                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-700 placeholder-gray-500"
                                     />
                               </div>
 
@@ -96,7 +98,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                                           value={fieldData.placeholder}
                                           onChange={(e) => setFieldData(prev => ({ ...prev, placeholder: e.target.value }))}
                                           placeholder="Type here"
-                                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2  text-gray-900 placeholder-gray-400"
+                                          className="w-full p-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2   placeholder-gray-400"
                                     />
                               </div>
 
@@ -125,10 +127,10 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 pt-0">
+                        <div className="p-6 pt-0 border-t border-gray-300">
                               <button
                                     onClick={handleConfirm}
-                                    className="w-full py-3 bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    className="w-24 py-2 mt-3  bg-[rgba(78,83,177,1)] text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                               >
                                     Confirm
                               </button>
