@@ -36,7 +36,6 @@ const CompanyDetailsPage: React.FC = () => {
     { id: 'branch-1', location: 'New York City', manager: '' },
     { id: 'branch-2', location: 'New York City', manager: '' },
     { id: 'branch-3', location: 'New York City', manager: '' },
-    { id: 'branch-4', location: 'New York City', manager: '' }, // Added Branch 4
   ]);
 
   // State to manage visibility and search for each manager dropdown
@@ -80,8 +79,8 @@ const CompanyDetailsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto mb-8">
-      <h2 className="text-xl font-bold mb-6 text-gray-800">Company Details</h2>
+    <div className="max-w-4xl mx-auto  mb-8">
+      <h2 className="text-xl  mb-6 text-primary">Company Details</h2>
 
       {/* Company Name */}
       <div className="mb-6">
@@ -130,11 +129,11 @@ const CompanyDetailsPage: React.FC = () => {
           </button>
         </div>
 
-        <div className='border border-gray-200'>
+        <div className='border rounded-lg border-gray-200 p-4 '>
           {branches.map((branch) => (
-            <div key={branch.id} className="flex flex-col sm:flex-row items-center gap-4 mb-4 p-4 bg-gray-50">
+            <div key={branch.id} className="flex flex-col sm:flex-row items-center gap-4 mb-4   bg-gray-50">
               {/* Branch Location */}
-              <div className="relative w-full sm:w-1/2 flex-grow"> {/* Added flex-grow */}
+              <div className="relative w-full sm:w-1/2 flex-grow "> {/* Added flex-grow */}
                 <label htmlFor={`branch-location-${branch.id}`} className="block text-gray-700 text-sm font-semibold mb-1">Branch Name</label>
                 <input
                   type="text"
@@ -225,7 +224,7 @@ const CompanyDetailsPage: React.FC = () => {
       <div className="flex justify-end mt-8">
         <button
           onClick={handleSaveChanges}
-          className="bg-primary text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out"
+          className="bg-primary text-white  py-3 px-6 rounded-lg shadow-md transition duration-200 "
         >
           Save Changes
         </button>

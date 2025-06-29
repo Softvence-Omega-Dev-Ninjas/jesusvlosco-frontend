@@ -78,7 +78,7 @@ const Notification: React.FC = () => {
       {/* Main Notification Settings */}
       <div className="rounded-lg border border-gray-200 shadow-sm">
         <div className="px-6 py-4 border-b border-gray-300">
-          <h2 className="text-lg font-semibold text-indigo-600">Notification Settings</h2>
+          <h2 className="text-lg font-semibold text-primary">Notification Settings</h2>
         </div>
         
         <div className="divide-y divide-gray-500">
