@@ -157,7 +157,7 @@ export default function RecognitionTable() {
       <div className="flex items-center justify-between p-6  ">
         {/* Left side - Title and subtitle */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+          <h1 className="text-2xl font-semibold text-[#4E53B1] mb-1">
             Recognition
           </h1>
           <p className="text-gray-600 text-sm">
@@ -167,7 +167,9 @@ export default function RecognitionTable() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-3">
-          <button className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
+          <button
+          onClick={() => { window.location.href = "/send-recognition"; }}
+           className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
             Send recognition
           </button>
           <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
