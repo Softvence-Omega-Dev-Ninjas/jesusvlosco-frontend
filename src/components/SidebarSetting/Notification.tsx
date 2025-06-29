@@ -76,12 +76,12 @@ const Notification: React.FC = () => {
   return (
     <div className=" mx-auto  space-y-6">
       {/* Main Notification Settings */}
-      <div className="rounded-lg border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-300">
+      <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="px-6 py-4 ">
           <h2 className="text-lg font-semibold text-primary">Notification Settings</h2>
         </div>
         
-        <div className="divide-y divide-gray-500">
+        <div className="divide-y text-[#484848] px-2 divide-gray-500">
           <SettingItem
           
             icon={<Mail size={20} />}
@@ -136,8 +136,8 @@ const Notification: React.FC = () => {
 
       {/* User Registration */}
       <div className=" rounded-lg border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-300">
-          <h2 className="text-lg font-semibold text-gray-800">User Registration</h2>
+        <div className="px-6 py-2 ">
+          <h2 className="text-lg font-semibold text-[#484848]">User Registration</h2>
         </div>
         
         <div className="px-6 py-4">
@@ -164,7 +164,7 @@ const Notification: React.FC = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <button className="bg-primary text-white font-medium py-2 px-6 rounded-lg transition-colors focus:outline-none ">
+        <button className="bg-primary text-white  py-2 px-6 rounded-lg transition-colors focus:outline-none ">
           Save Settings
         </button>
       </div>

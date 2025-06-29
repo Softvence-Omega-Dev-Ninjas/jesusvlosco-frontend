@@ -1,5 +1,4 @@
 
-import {  Facebook, Twitter, Chrome } from 'lucide-react';
 import { BiEditAlt } from "react-icons/bi";
 import google from "../../assets/google.png"
 import facebook from "../../assets/facebook.png"
