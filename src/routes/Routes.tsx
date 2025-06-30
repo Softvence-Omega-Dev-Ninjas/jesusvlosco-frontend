@@ -171,13 +171,13 @@ const routes = createBrowserRouter([
 
       },
       {
-        path: "/add-user",
+        path: "add-user",
         element: <AddUserProfile></AddUserProfile>,
       },
       {
-        path: "/sidebar-settings",
+        path: "sidebar-settings",
         element: <SidebarSetting></SidebarSetting>,
-       },
+      },
 
       { path: "add-user", element: <AddUserProfile /> },
       { path: "sidebar-settings", element: <SidebarSetting /> },
