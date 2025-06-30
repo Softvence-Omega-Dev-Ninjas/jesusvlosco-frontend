@@ -1,6 +1,8 @@
 //  this is send reaction page
 import { useState } from "react";
 import user from "@/assets/user1.png";
+import CreateRecognitionBagde from "@/components/RecognitionTable/CreateRecognitionBagde";
+import SummeryTab from "@/components/RecognitionTable/SummeryTab";
 
 const steps = [
   { id: 1, name: "Recipients", current: true },
@@ -324,14 +326,14 @@ export default function CreateRecognition() {
         );
       case 2:
         return (
-          <div className="border border-gray-200 rounded-lg p-8">
-            this is case too
+          <div className=" bg-white rounded-lg  min-h-screen ">
+            <CreateRecognitionBagde />
           </div>
         );
       case 3:
         return (
-          <div className="border border-gray-200 rounded-lg p-8">
-            this is case three
+          <div className=" ">
+            <SummeryTab />
           </div>
         );
       default:
@@ -341,7 +343,7 @@ export default function CreateRecognition() {
 
   return (
     <div className="w-full   min-h-screen">
-            {/* header section  */}
+      {/* header section  */}
       <div className="flex items-center justify-between p-6  ">
         {/* Left side - Title and subtitle */}
         <div className="flex flex-col">
@@ -355,7 +357,6 @@ export default function CreateRecognition() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-3">
-          
           <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
             Badge library
           </button>
@@ -366,36 +367,41 @@ export default function CreateRecognition() {
         <div className="">
           <div className="mb-12 py-6 border-[#C5C5C5] border-b ">
             <div className="flex items-center  justify-center max-w-2xl mx-auto">
-              {steps.map((step, stepIdx) => (
-                <div key={step.id} className="flex items-center flex-1">
-                  <div className="flex flex-col items-center  flex-1">
-                    <div className="relative ">
+              <div className="flex justify-between items-start w-full max-w-2xl mx-auto">
+                {steps.map((step, stepIdx) => (
+                  <div
+                    key={step.id}
+                    className="relative flex flex-col items-center flex-1"
+                  >
+                    {/* Line to next step */}
+                    {stepIdx < steps.length - 1 && (
+                      <div className="absolute top-2 left-1/2 w-full h-0.5 bg-gray-300 z-0" />
+                    )}
+
+                    {/* Circle */}
+                    <div className="relative z-10">
                       <div
-                        className={`w-4 h-4 rounded-full  ${
+                        className={`w-4 h-4 rounded-full ${
                           currentStep === step.id
-                            ? "bg-blue-600"
+                            ? "bg-[#4E53B1]"
                             : "bg-gray-400"
                         }`}
                       />
-                      {stepIdx < steps.length - 1 && (
-                        <div
-                          className="absolute top-2 left-4 w-full h-px bg-gray-400"
-                          style={{ width: "220px" }}
-                        />
-                      )}
                     </div>
+
+                    {/* Step name */}
                     <span
-                      className={`mt-4 text-base font-medium ${
+                      className={`mt-2 text-sm font-normal md:font-medium text-center ${
                         currentStep === step.id
-                          ? "text-blue-600"
+                          ? "text-[#4E53B1]"
                           : "text-gray-500"
                       }`}
                     >
                       {step.name}
                     </span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -405,7 +411,7 @@ export default function CreateRecognition() {
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-4 mt-6 mb-8">
-             <button
+          <button
             onClick={handleNextStep}
             disabled={currentStep === 3}
             className={`px-6 py-3 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
@@ -414,7 +420,7 @@ export default function CreateRecognition() {
                 : "bg-[#4E53B1] hover:bg-blue-700"
             }`}
           >
-            {currentStep === 3 ? "Complete" : "Next step"}
+            {currentStep === 3 ? "Send recognition" : "Next step"}
           </button>
           <button
             onClick={handleCancel}
@@ -422,7 +428,6 @@ export default function CreateRecognition() {
           >
             Cancel
           </button>
-         
         </div>
 
         {/* Filter Modal */}
