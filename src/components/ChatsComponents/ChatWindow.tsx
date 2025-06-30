@@ -15,6 +15,7 @@ import ChatInfoSidebar from "./ChatInfoSidebar";
 import ChatDeleteModal from "./ChatDeleteModal";
 import ChatConversation from "./ChatConversation";
 import MemberSelectorModal from "./MemberSelectorModal";
+import { useNavigate } from "react-router-dom";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -38,6 +39,7 @@ export interface Chat {
 }
 
 export default function ResponsiveChatWindow() {
+  const navigate = useNavigate();
   const chatTabs = ["All", "Unread", "Team"];
   const [activeChatTab, setActiveChatTab] = useState("All");
   const [selectedChatId, setSelectedChatId] = useState<number>(1);
@@ -308,7 +310,10 @@ export default function ResponsiveChatWindow() {
           <h1 className="text-xl md:text-2xl font-semibold text-primary">
             Chat
           </h1>
-          <button className="p-2 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={() => navigate("/user/user-chat-setting")}
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+          >
             <Settings className="w-5 h-5 text-primary" />
           </button>
         </div>
