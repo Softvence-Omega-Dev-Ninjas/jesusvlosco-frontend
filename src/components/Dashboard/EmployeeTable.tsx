@@ -89,13 +89,13 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
                 size="lg"
               />
               <div className="flex-1">
-                <div className="font-medium text-indigo-600 text-sm">
+                <div className="font-medium text-primary text-sm">
                   {employee.name}
                 </div>
                 <div className="text-xs text-gray-500">{employee.role}</div>
               </div>
               <div className="text-right">
-                <div className="text-base font-normal text-[#484848]">
+                <div className="text-xs font-normal text-[#484848]">
                   {employee.shift}
                 </div>
               </div>
@@ -103,18 +103,18 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
 
             <div className="space-y-2 ml-13">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Project:</span>
-                <span className="text-base text-gray-900 font-medium">
+                <span className="text-xs text-gray-500">Project:</span>
+                <span className="text-xs text-gray-900">
                   {employee.project}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Time:</span>
-                <span className="text-base text-gray-600">{employee.time}</span>
+                <span className="text-xs text-gray-600">{employee.time}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Date:</span>
-                <span className="text-base text-gray-900">{employee.date}</span>
+                <span className="text-xs text-gray-900">{employee.date}</span>
               </div>
             </div>
           </div>
