@@ -52,6 +52,8 @@ import UserSurvey from "@/pages/userpages/UserSurvey";
 import { UserCommunication } from "@/pages/userpages/UserCommunication";
 import UserMain from "@/Layout/User/UserMain";
 import UserChatSetting from "@/pages/userpages/UserChatSetting";
+import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
+import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
 
 
 
@@ -89,6 +91,16 @@ const routes = createBrowserRouter([
         path: "survey",
         element: <UserSurvey></UserSurvey>
       },
+
+      {
+        path: 'user-task',
+        element: <UserTaskMainPage></UserTaskMainPage>
+      },
+
+      {
+        path: 'user-task-details',
+        element: <UserTaskDetails></UserTaskDetails>
+      }
     ]
   },
 
