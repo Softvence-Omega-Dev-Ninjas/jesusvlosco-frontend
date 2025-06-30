@@ -32,6 +32,8 @@ interface ParticipationCardProps {
   label: string;
   bgColor: string;
   textColor: string;
+    strokeWidth?: number;
+
 }
 
 const ParticipationCard: React.FC<ParticipationCardProps> = ({
@@ -40,15 +42,17 @@ const ParticipationCard: React.FC<ParticipationCardProps> = ({
   total,
   label,
   bgColor,
-  textColor,
+ 
+    strokeWidth = 10,
+  textColor = "text-blue-500",
 }) => {
-  const radius = 40; // Radius for the SVG circle
+  const radius = 50 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div className={`flex items-center p-4 rounded-md shadow-sm ${bgColor}`}>
-      <div className="relative w-24 h-24 flex items-center justify-center">
+      <div className="relative w-48 h-36 flex items-center justify-center">
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           {/* Background circle */}
           <circle
@@ -56,7 +60,7 @@ const ParticipationCard: React.FC<ParticipationCardProps> = ({
             cy="50"
             r={radius}
             stroke="#e5e7eb"
-            strokeWidth="10"
+            strokeWidth="24"
             fill="transparent"
           />
           {/* Progress circle */}
@@ -65,17 +69,17 @@ const ParticipationCard: React.FC<ParticipationCardProps> = ({
             cy="50"
             r={radius}
             stroke="currentColor"
-            strokeWidth="10"
+            strokeWidth="24"
             fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             className={textColor} // Use textColor for the stroke color
           />
         </svg>
         <div className="absolute text-xl font-bold">{percentage}%</div>
       </div>
-      <div className="ml-4">
+      <div className="">
         <div className={`text-lg font-medium ${textColor}`}>{completed} / {total} users</div>
         <div className={`text-sm ${textColor}`}>{label}</div>
       </div>
@@ -97,11 +101,11 @@ const DepartmentParticipationCard: React.FC<DepartmentParticipationCardProps> = 
     <div className="bg-white p-4 rounded-md shadow-sm">
       <div className="text-md font-semibold text-gray-800 mb-4">Participation by department</div>
       <div className="flex items-center space-x-4">
-        <div className="relative w-24 h-24">
+        <div className="relative w-48 h-36">
           <svg className="w-full h-full" viewBox="0 0 100 100">
             <circle
               className="text-gray-200"
-              strokeWidth="10"
+              strokeWidth="24"
               stroke="currentColor"
               fill="transparent"
               r={radius}
@@ -116,7 +120,7 @@ const DepartmentParticipationCard: React.FC<DepartmentParticipationCardProps> = 
                 <circle
                   key={index}
                   className={item.color}
-                  strokeWidth="10"
+                  strokeWidth="24"
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={offset}
                   strokeLinecap="round"
