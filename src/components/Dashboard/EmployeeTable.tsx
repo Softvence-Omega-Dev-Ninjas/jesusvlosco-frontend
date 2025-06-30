@@ -5,8 +5,10 @@ import { Employee } from "./dashboard";
 export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
   employees,
 }) => {
+  const shouldScroll = employees.length > 5;
+
   return (
-    <div className=" rounded-2xl overflow-hidden w-full">
+    <div className="rounded-2xl overflow-hidden w-full">
       {/* Header */}
       <div className="px-4 sm:px-6 py-4">
         <h2 className="text-2xl font-bold text-[#4E53B1]">Assigned Employee</h2>
@@ -14,14 +16,17 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
 
       {/* Desktop Table View */}
       <div className="hidden lg:block border border-gray-200 p-5 rounded-2xl">
-        <div className="px-5 py-4 grid grid-cols-4 border border-gray-200 rounded-2xl gap-4 text-lg font-medium text-[#4E53B1]">
-          <div>Employee</div>
-          <div>Project Name</div>
-          <div>Shift</div>
-          <div>Date</div>
-        </div>
-
-        <div className="divide-y divide-gray-100">
+        <div
+          className={`divide-y divide-gray-300 ${
+            shouldScroll ? "max-h-[400px] overflow-y-auto" : ""
+          }`}
+        >
+          <div className="px-5 mr-2.5 py-4 grid grid-cols-4 border border-primary rounded-2xl gap-4 text-lg font-medium text-[#4E53B1]">
+            <div>Employee</div>
+            <div>Project Name</div>
+            <div>Shift</div>
+            <div>Date</div>
+          </div>
           {employees.map((employee) => (
             <div
               key={employee.id}
@@ -68,7 +73,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden divide-y divide-gray-100">
+      <div className="lg:hidden divide-y divide-gray-200">
         {employees.map((employee) => (
           <div
             key={employee.id}

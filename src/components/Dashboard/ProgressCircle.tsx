@@ -27,6 +27,7 @@ export const ProgressCircle: React.FC<{
             stroke="#e5e7eb"
             strokeWidth="3"
             fill="none"
+            strokeLinecap="round"
           />
           <circle
             cx="16"
@@ -38,6 +39,7 @@ export const ProgressCircle: React.FC<{
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             className="transition-all duration-300"
+            strokeLinecap="round"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
