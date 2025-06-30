@@ -10,9 +10,7 @@ export const Communication = () => {
 
   const renderContent = () => {
     if (location.pathname.includes("/recognition")) {
-      return (
-        <RecognitionTable></RecognitionTable>
-      );
+      return <RecognitionTable></RecognitionTable>;
     }
 
     // If not on the /recognition path, proceed with tab-switching logic
@@ -28,11 +26,7 @@ export const Communication = () => {
   const showTabButtons = !location.pathname.includes("/recognition");
 
   return (
-
-
     <div className="py-4">
-
-
       {/* Conditionally render tab buttons */}
       <div>
         {showTabButtons && (
@@ -40,20 +34,22 @@ export const Communication = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab("chat")}
-                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${activeTab === "chat"
-                  ? "bg-primary text-white shadow-md"
-                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                  }`}
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${
+                  activeTab === "chat"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
               >
                 Team Chat
               </button>
 
               <button
                 onClick={() => setActiveTab("community")}
-                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${activeTab === "community"
-                  ? "bg-primary text-white shadow-md"
-                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                  }`}
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${
+                  activeTab === "community"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
               >
                 Company Update & announcement
               </button>
