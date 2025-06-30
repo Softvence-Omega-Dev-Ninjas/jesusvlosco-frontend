@@ -3,6 +3,7 @@ import { useState } from "react";
 import user from "@/assets/user1.png";
 import CreateRecognitionBagde from "@/components/RecognitionTable/CreateRecognitionBagde";
 import SummeryTab from "@/components/RecognitionTable/SummeryTab";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   { id: 1, name: "Recipients", current: true },
@@ -182,6 +183,7 @@ export default function CreateRecognition() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState(filterOptions);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -199,9 +201,17 @@ export default function CreateRecognition() {
     }
   };
 
+  // const handleNextStep = () => {
+  //   if (currentStep < 3) {
+  //     setCurrentStep(currentStep + 1);
+  //   }
+  // };
   const handleNextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+    } else if (currentStep === 3) {
+      // Redirect on final step
+      navigate("/admin/communication/recognition");;
     }
   };
 
@@ -279,7 +289,10 @@ export default function CreateRecognition() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {employees.map((employee, index) => (
-                  <tr key={index} className="hover:bg-gray-50 border-0 py-2 cursor-pointer">
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 border-0 py-2 cursor-pointer"
+                  >
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
@@ -342,12 +355,12 @@ export default function CreateRecognition() {
   };
 
   return (
-    <div className="w-full   min-h-screen">
+    <div className="w-full  min-h-screen pb-10">
       {/* header section  */}
-      <div className="flex items-center justify-between p-6  ">
+      <div className="flex flex-col items-center justify-center p-6 md:flex-row md:justify-between md:items-center  ">
         {/* Left side - Title and subtitle */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-[#4E53B1] mb-1">
+          <h1 className="text-2xl text-center md:text-left font-semibold text-[#4E53B1] mb-1">
             Recognition
           </h1>
           <p className="text-gray-600 text-sm">
@@ -357,12 +370,15 @@ export default function CreateRecognition() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-3">
-          <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
-            Badge library
+          <button
+            onClick={() => navigate('/admin/badge-library')}
+            className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
+            Badge library 
           </button>
         </div>
       </div>
-      <div className="bg-white rounded-2xl min-h-screen">
+     <div className="bg-white p-8">
+       <div className="bg-white rounded-2xl min-h-screen">
         {/* Progress Steps */}
         <div className="">
           <div className="mb-12 py-6 border-[#C5C5C5] border-b ">
@@ -410,12 +426,15 @@ export default function CreateRecognition() {
         {renderStepContent()}
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6 mb-8">
+        <div className="flex justify-end gap-4 mt-6 mb-8 mr-3">
+          
           <button
             onClick={handleNextStep}
-            disabled={currentStep === 3}
+            disabled={currentStep > 3}
             className={`px-6 py-3 text-sm cursor-pointer font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
               currentStep === 3
+                ? "bg-[#4E53B1] hover:bg-blue-700"
+                : currentStep > 3
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#4E53B1] hover:bg-blue-700"
             }`}
@@ -507,6 +526,7 @@ export default function CreateRecognition() {
           </div>
         )}
       </div>
+     </div>
     </div>
   );
 }

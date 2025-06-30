@@ -7,6 +7,7 @@ import bage5 from "@/assets/bage5.png";
 import bage6 from "@/assets/bage6.png";
 import bage7 from "@/assets/bage7.png";
 import bage8 from "@/assets/bage8.png";
+import Swal from "sweetalert2";
 
 const CreateRecognitionBagde = () => {
   // const [selectedBadge, setSelectedBadge] = useState("promotion");
@@ -102,11 +103,32 @@ const CreateRecognitionBagde = () => {
     // Add your edit logic here
   };
 
+  // const handleDelete = (badgeId: string) => {
+  //   console.log(`Delete badge: ${badgeId}`);
+  //   setOpenModal(null);
+    
+  //   // Add your delete logic here
+  // };
   const handleDelete = (badgeId: string) => {
-    console.log(`Delete badge: ${badgeId}`);
-    setOpenModal(null);
-    // Add your delete logic here
-  };
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 👇 Place your actual delete logic here
+      console.log(`Delete badge: ${badgeId}`);
+      setOpenModal(null);
+
+      // Optional: show success alert
+      Swal.fire("Deleted!", "The badge has been deleted.", "success");
+    }
+  });
+}
 
   return (
     <div>
@@ -145,7 +167,10 @@ const CreateRecognitionBagde = () => {
               </div>
 
               {/* Create button */}
-              <button className="w-full cursor-pointer sm:w-auto bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <button
+              
+                 onClick={() => { window.location.href = "/admin/create-badge"; }}
+               className="w-full cursor-pointer sm:w-auto bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500">
                 Create a new badge
               </button>
             </div>
