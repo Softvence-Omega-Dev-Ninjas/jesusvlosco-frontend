@@ -51,6 +51,7 @@ import UserChat from "@/pages/userpages/UserChat";
 import UserSurvey from "@/pages/userpages/UserSurvey";
 import { UserCommunication } from "@/pages/userpages/UserCommunication";
 import UserMain from "@/Layout/User/UserMain";
+import UserChatSetting from "@/pages/userpages/UserChatSetting";
 
 
 
@@ -79,6 +80,10 @@ const routes = createBrowserRouter([
           { path: "user-recognition", element: <UserRecognition></UserRecognition> },
         ],
 
+      },
+      {
+        path: 'user-chat-setting',
+        element: <UserChatSetting></UserChatSetting>
       },
       {
         path: "survey",
