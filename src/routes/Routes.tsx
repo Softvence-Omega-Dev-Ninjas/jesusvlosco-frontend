@@ -45,10 +45,12 @@ import CreateBadge from "@/pages/CreateBadge";
 import TaskAndProject from "@/pages/TaskAndProject";
 import AdminLayout from "@/Layout/Admin/AdminLayout";
 import UserDashboard from "@/pages/userpages/UserDashboard";
-import UserCommunication from "@/pages/userpages/UserCommunication";
+
 import UserRecognition from "@/pages/userpages/UserRecognition";
 import UserChat from "@/pages/userpages/UserChat";
 import UserSurvey from "@/pages/userpages/UserSurvey";
+import { UserCommunication } from "@/pages/userpages/UserCommunication";
+import UserMain from "@/Layout/User/UserMain";
 
 
 
@@ -62,7 +64,7 @@ const routes = createBrowserRouter([
   // ✅ Admin routes grouped here
   {
     path: "/user",
-    element: <UserDashboard></UserDashboard>,
+    element: <UserMain></UserMain>,
     children: [
       {
         index: true,
