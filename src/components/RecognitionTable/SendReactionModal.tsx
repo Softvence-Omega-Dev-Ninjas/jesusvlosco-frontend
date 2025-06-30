@@ -143,7 +143,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
           <button
             key={emoji}
             onClick={() => onSelect(emoji)}
-            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded text-lg transition-colors"
+            className="w-8 h-8 flex items-center cursor-pointer justify-center hover:bg-gray-100 rounded text-lg transition-colors"
           >
             {emoji}
           </button>
@@ -219,12 +219,12 @@ const handleDelete = () => {
                 Sent recognition
               </h1>
               <div className="flex gap-2">
-                <button className="p-2 hover:bg-gray-100 border rounded-full transition-colors">
+                <button className="p-2 hover:bg-gray-100 border cursor-pointer rounded-full transition-colors">
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
                  onClick={handleDelete}
-                 className="p-2 hover:bg-gray-100 border rounded-full transition-colors">
+                 className="p-2 hover:bg-gray-100 border rounded-full cursor-pointer transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -338,7 +338,7 @@ const handleDelete = () => {
                     <span>{comment.timestamp}</span>
                     <div className="flex gap-4">
                       <button
-                        className="text-red-500 hover:text-red-600 transition-colors"
+                        className="text-red-500 hover:text-red-600 transition-colors cursor-pointer"
                         onClick={() =>
                           setShowEmojiPicker(
                             showEmojiPicker === comment.id ? null : comment.id
@@ -347,7 +347,7 @@ const handleDelete = () => {
                       >
                         Like
                       </button>
-                      <button className="text-blue-500 hover:text-blue-600 transition-colors">
+                      <button className="text-blue-500 hover:text-blue-600 transition-colors cursor-pointer">
                         Comment
                       </button>
                     </div>
@@ -376,7 +376,7 @@ const handleDelete = () => {
                 <button
                   type="submit"
                   disabled={!commentText.trim()}
-                  className="p-3 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  className="p-3 bg-gray-100 cursor-pointer hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
                   <Send className="w-4 h-4 text-gray-600" />
                 </button>

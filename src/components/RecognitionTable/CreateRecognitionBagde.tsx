@@ -121,15 +121,15 @@ const CreateRecognitionBagde = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
               {/* Select dropdown */}
               <div className="relative w-full sm:w-auto">
-                <select className="w-full appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <select className="w-full cursor-pointer appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                   <option>Category</option>
                   <option>Performance</option>
                   <option>Achievement</option>
                   <option>Recognition</option>
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <div className="absolute inset-y-0 cursor-pointer right-0 flex items-center px-3 pointer-events-none">
                   <svg
-                    className="w-4 h-4 text-gray-400"
+                    className="w-4 h-4 text-gray-400 cursor-pointer"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -145,7 +145,7 @@ const CreateRecognitionBagde = () => {
               </div>
 
               {/* Create button */}
-              <button className="w-full sm:w-auto bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <button className="w-full cursor-pointer sm:w-auto bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500">
                 Create a new badge
               </button>
             </div>
@@ -178,7 +178,7 @@ const CreateRecognitionBagde = () => {
                       e.stopPropagation();
                       handleThreeDotsClick(e, badge.id);
                     }}
-                    className="p-1 rounded-full hover:bg-white/50 transition-colors"
+                    className="p-1 rounded-full cursor-pointer hover:bg-white/50 transition-colors"
                   >
                     <svg
                       className="w-4 h-4 text-gray-600"
@@ -197,13 +197,13 @@ const CreateRecognitionBagde = () => {
                     >
                       <button
                         onClick={() => handleEdit(badge.id)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="w-full px-4 py-2 cursor-pointer text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(badge.id)}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full px-4 py-2 text-left cursor-pointer text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         Delete
                       </button>
@@ -253,17 +253,17 @@ const CreateRecognitionBagde = () => {
                   value={visibilityOption}
                   onChange={(e) => setVisibilityOption(e.target.value)}
                   id="visibility"
-                  className="w-full  appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                  className="w-full cursor-pointer  appearance-none bg-white border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                 >
-                  <option value="">Select an option</option>
-                  <option value="everyone">Everyone</option>
-                  <option value="team">Team only</option>
-                  <option value="managers">Managers only</option>
-                  <option value="private">Private</option>
+                  <option className="cursor-pointer" value="">Select an option</option>
+                  <option className="cursor-pointer" value="everyone">Everyone</option>
+                  <option className="cursor-pointer" value="team">Team only</option>
+                  <option className="cursor-pointer" value="managers">Managers only</option>
+                  <option className="cursor-pointer" value="private">Private</option>
                 </select>
 
                 <svg
-                  className="absolute right-3 top-1/2 transform -translate-y-[45%] pointer-events-none text-gray-500 w-4 h-4"
+                  className="absolute right-3 top-1/2  cursor-pointer transform -translate-y-[45%] pointer-events-none text-gray-500 w-4 h-4"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -286,7 +286,7 @@ const CreateRecognitionBagde = () => {
                 id="notifications"
                 checked={notifyViewer}
                 onChange={(e) => setNotifyViewer(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
               <label htmlFor="notifications" className="text-sm text-gray-700">
                 Notify viewer via push notification
@@ -303,7 +303,7 @@ const CreateRecognitionBagde = () => {
                 value={companyMessage}
                 onChange={(e) => setCompanyMessage(e.target.value)}
                 placeholder="XYZ company recognized K & others"
-                className="w-full flex-1 sm:w-2/3 bg-white border border-gray-200 rounded-md px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full flex-1 sm:w-2/3 cursor-pointer bg-white border border-gray-200 rounded-md px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -314,7 +314,7 @@ const CreateRecognitionBagde = () => {
                 id="interactions"
                 checked={allowInteraction}
                 onChange={(e) => setAllowInteraction(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
               <label htmlFor="interactions" className="text-sm text-gray-700">
                 Allow user to like & comment on this update
