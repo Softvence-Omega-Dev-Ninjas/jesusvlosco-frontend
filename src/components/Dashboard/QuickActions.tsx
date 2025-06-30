@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { AssignIcon, PeopleIcon, TaskIcon, UpdateIcon } from "./icons";
 
 export const QuickActions: React.FC = () => {
@@ -8,10 +9,13 @@ export const QuickActions: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Add users button */}
-        <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200">
+        <Link
+          to={"/admin/add-user"}
+          className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200"
+        >
           <PeopleIcon />
           <span className="text-[#4E53B1] font-medium">Add users</span>
-        </button>
+        </Link>
 
         {/* Add a task button */}
         <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200">
@@ -20,10 +24,13 @@ export const QuickActions: React.FC = () => {
         </button>
 
         {/* Send an update button */}
-        <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200">
+        <Link
+          to={"/admin/communication/chat"}
+          className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200"
+        >
           <UpdateIcon />
           <span className="text-[#4E53B1] font-medium">Send an update</span>
-        </button>
+        </Link>
 
         {/* Assign button - highlighted */}
         <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-[#4E53B1] text-white whitespace-nowrap rounded-lg transition-colors duration-200">
