@@ -182,7 +182,7 @@ export default function RecognitionTable() {
         {/* Date Range Picker */}
         <div className="flex justify-end p-6 bg-gray-50">
           <button
-            className="flex items-center gap-2 text-[#5B5B5B] px-4 py-3 border border-[#C5C5C5] rounded-md  hover:bg-gray-50 transition-colors text-sm"
+            className="flex items-center cursor-pointer gap-2 text-[#5B5B5B] px-4 py-3 border border-[#C5C5C5] rounded-md  hover:bg-gray-50 transition-colors text-sm"
             onClick={() => setIsDatePickerOpen(true)}
           >
             <Calendar className="w-4 h-4" />
@@ -294,14 +294,14 @@ export default function RecognitionTable() {
                   <td className="p-4 text-end">
                     <div className="flex items-center gap-1 justify-end">
                       <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-                        <ThumbsUp className="w-4 h-4 text-gray-400 hover:text-blue-500" />
+                        <ThumbsUp className="w-4 h-4 cursor-pointer text-gray-400 hover:text-blue-500" />
                       </button>
                       <span className="text-[#C5C5C5]">|</span>
                       <button
                         className="p-1 hover:bg-gray-100 rounded transition-colors relative"
                         onClick={openReactionModal}
                       >
-                        <MessagesSquare className="w-4 h-4 text-black hover:text-blue-500" />
+                        <MessagesSquare className="w-4 h-4 cursor-pointer text-black hover:text-blue-500" />
                         {activity.messageCount > 0 && (
                           <div className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#D9F0E4] rounded-full flex items-center justify-center">
                             <span className="text-[#1EBD66] text-xs font-medium leading-none px-1">
