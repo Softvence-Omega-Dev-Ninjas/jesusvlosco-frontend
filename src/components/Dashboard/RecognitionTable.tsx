@@ -1,4 +1,4 @@
-import { Award, Lightbulb, MessageCircle, ThumbsUp } from "lucide-react";
+import { Award, Lightbulb } from "lucide-react";
 import React, { useState } from "react";
 import CommentModal from "./CommentModal";
 import { Recognition } from "./dashboard";
@@ -146,49 +146,56 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden divide-y divide-gray-200 max-h-[80vh] overflow-y-auto">
+      <div className="lg:hidden divide-y divide-gray-200 max-h-[80vh] overflow-y-auto px-2">
         {recognitions.map((recognition) => (
           <div
             key={recognition.id}
-            className="px-4 py-4 hover:bg-gray-50 transition-colors"
+            className="py-4 hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-3 mb-3">
               {getAvatarGroup(recognition)}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   {getTypeIcon(recognition.type)}
-                  <span className="text-sm font-normal text-[#484848]">
+                  <span className="text-xs font-medium text-[#484848]">
                     {recognition.type}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 pl-12 text-sm">
-              <div className="flex justify-between items-center gap-4">
-                <span className="text-gray-500">Message:</span>
-                <span className="text-[#484848] font-medium break-words text-right">
+            <div className="space-y-2 pl-14 text-xs">
+              <div className="flex justify-between items-start gap-4">
+                <span className="text-gray-500 whitespace-nowrap">
+                  Message:
+                </span>
+                <span className="text-[#484848] font-medium break-words text-right flex-1">
                   {recognition.message || "-----"}
                 </span>
               </div>
-              <div className="flex justify-between items-center gap-4">
-                <span className="text-gray-500">Viewer:</span>
-                <span className="text-[#484848] text-right break-words">
+              <div className="flex justify-between items-start gap-4">
+                <span className="text-gray-500 whitespace-nowrap">Viewer:</span>
+                <span className="text-[#484848] text-right break-words flex-1">
                   {recognition.viewer}
                 </span>
               </div>
               <div className="flex justify-between items-center gap-4">
-                <span className="text-gray-500">Reactions:</span>
-                <div className="flex flex-wrap items-center gap-2">
+                <span className="text-gray-500 whitespace-nowrap">
+                  Reactions:
+                </span>
+                <div className="flex items-center gap-3">
                   <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
-                    <ThumbsUp className="w-4 h-4 text-gray-400" />
+                    <LikeIcon className="w-5 h-5 text-gray-500" />
                     <span className="text-xs text-green-600">1</span>
                   </button>
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                    className="relative flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                   >
-                    <MessageCircle className="w-4 h-4 text-gray-400" />
+                    <CommentIcon className="w-5 h-5 text-gray-500" />
+                    <span className="text-[10px] absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1 py-0.5 rounded-full">
+                      1
+                    </span>
                   </button>
                 </div>
               </div>
