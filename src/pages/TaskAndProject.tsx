@@ -134,8 +134,11 @@ function TaskAndProject() {
     const filteredProjects = projects.map(project => ({
         ...project,
         name: groupBy === 'title' ? project.name :
-            project.id === '1' ? 'Low Priority' :
-                project.id === '2' ? 'Medium Priority' : 'High Priority',
+            groupBy === 'label' ?
+                (project.id === '1' ? 'Low Priority' :
+                    project.id === '2' ? 'Medium Priority' : 'High Priority') :
+                project.tasks[0]?.assignedTo.name || project.name,
+        assignedTo: project.tasks[0]?.assignedTo, // Add assignedTo to the project object
         tasks: project.tasks.filter(task => {
             if (activeTab === 'open') return task.status === 'Open' || task.status === 'Draft';
             if (activeTab === 'done') return task.status === 'Done';
@@ -201,6 +204,15 @@ function TaskAndProject() {
         setActiveProject(activeProject === projectId ? null : projectId);
     };
 
+    // Find the original project name for a task
+    const getProjectNameForTask = (taskId: string) => {
+        for (const project of projects) {
+            const task = project.tasks.find(t => t.id === taskId);
+            if (task) return project.name;
+        }
+        return '';
+    };
+
     return (
         <div className="bg-gray-50 p-4 sm:p-6">
             <div className="max-w-8xl mx-auto">
@@ -264,8 +276,6 @@ function TaskAndProject() {
                     </div>
                 </div>
 
-
-
                 {/* Summary Tabs */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
                     {/* Tabs */}
@@ -303,13 +313,7 @@ function TaskAndProject() {
                                 {doneTasks} Done tasks
                             </button>
 
-                            {groupBy === 'label' && (
-                                <button
-                                    className="px-6 py-1 rounded-2xl border font-medium bg-indigo-100 text-indigo-800 border-indigo-300"
-                                >
-                                    Priority View
-                                </button>
-                            )}
+
 
                             <div className="flex items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2">
                                 <span>2</span>
@@ -347,7 +351,16 @@ function TaskAndProject() {
                                             }}
                                             className="w-4 h-4 text-indigo-600 rounded border-gray-300"
                                         />
-                                        <h3 className="text-lg font-medium text-[#4E53B1]">{project.name}</h3>
+                                        <div className="flex items-center gap-2">
+                                            {groupBy === 'assignedTo' && project.assignedTo && (
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
+                                                    {project.assignedTo.avatar}
+                                                </div>
+                                            )}
+                                            <h3 className="text-lg font-medium text-[#4E53B1]">
+                                                {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
+                                            </h3>
+                                        </div>
                                     </div>
                                     <FaSortDown className={`w-4 h-4 text-[#4E53B1] transition-transform ${activeProject === project.id ? 'rotate-180' : ''}`} />
                                 </button>
@@ -365,7 +378,9 @@ function TaskAndProject() {
                                                     />
                                                     <div className="flex-1">
                                                         <div className="flex justify-between items-start">
-                                                            <h4 className="font-medium text-gray-900">{task.name}</h4>
+                                                            <h4 className="font-medium text-gray-900">
+                                                                {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
+                                                            </h4>
                                                             <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
                                                                 {task.status}
                                                             </span>
@@ -383,12 +398,14 @@ function TaskAndProject() {
                                                             <div className="mt-1">
                                                                 <span className="font-medium">Due:</span> <span className={task.status === 'Done' ? 'text-black' : 'text-red-600'}>{task.dueDate}</span>
                                                             </div>
-                                                            <div className="mt-2 flex items-center gap-2">
-                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
-                                                                    {task.assignedTo.avatar}
+                                                            {groupBy !== 'assignedTo' && (
+                                                                <div className="mt-2 flex items-center gap-2">
+                                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
+                                                                        {task.assignedTo.avatar}
+                                                                    </div>
+                                                                    <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
                                                                 </div>
-                                                                <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
-                                                            </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -430,12 +447,21 @@ function TaskAndProject() {
                                                 className="w-4 h-4 text-indigo-600 rounded border-gray-300"
                                             />
                                         </div>
-                                        <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20">{project.name}</div>
+                                        <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20 flex items-center gap-2">
+                                            {groupBy === 'assignedTo' && project.assignedTo && (
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
+                                                    {project.assignedTo.avatar}
+                                                </div>
+                                            )}
+                                            {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
+                                        </div>
                                         <div className="col-span-2 text-[#4E53B1]">Status</div>
                                         <div className="col-span-2 text-[#4E53B1]">Label</div>
                                         <div className="col-span-2 text-[#4E53B1]">Start time</div>
                                         <div className="col-span-2 text-[#4E53B1]">Due date</div>
-                                        <div className="col-span-2 text-[#4E53B1] text-right">Assigned to</div>
+                                        {groupBy !== 'assignedTo' && (
+                                            <div className="col-span-2 text-[#4E53B1] text-right">Assigned to</div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="">
@@ -450,7 +476,9 @@ function TaskAndProject() {
                                                         className="w-4 h-4 text-indigo-600 rounded border-gray-300"
                                                     />
                                                 </div>
-                                                <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">{task.name}</div>
+                                                <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
+                                                    {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
+                                                </div>
                                                 <div className="col-span-2 flex gap-2">
                                                     <img className="" src="../src/assets/forum.png" alt="" />
                                                     <span className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
@@ -464,12 +492,14 @@ function TaskAndProject() {
                                                 </div>
                                                 <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.startTime}</div>
                                                 <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.dueDate}</div>
-                                                <div className="col-span-2 flex justify-end items-center gap-2">
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
-                                                        {task.assignedTo.avatar}
+                                                {groupBy !== 'assignedTo' && (
+                                                    <div className="col-span-2 flex justify-end items-center gap-2">
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
+                                                            {task.assignedTo.avatar}
+                                                        </div>
+                                                        <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
                                                     </div>
-                                                    <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -492,8 +522,3 @@ function TaskAndProject() {
 }
 
 export default TaskAndProject;
-
-
-
-
-
