@@ -115,13 +115,13 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
               </div>
 
               <div className="flex items-center">
-                <span className="text-base font-normal text-[#484848]">
+                <span className="text-base font-normal text-[#484848] break-words">
                   {recognition.message || "-----"}
                 </span>
               </div>
 
               <div className="flex items-center">
-                <span className="text-base font-normal text-[#484848]">
+                <span className="text-base font-normal text-[#484848] break-words">
                   {recognition.viewer}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden divide-y divide-gray-200">
+      <div className="lg:hidden divide-y divide-gray-200 max-h-[80vh] overflow-y-auto">
         {recognitions.map((recognition) => (
           <div
             key={recognition.id}
@@ -157,29 +157,29 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   {getTypeIcon(recognition.type)}
-                  <span className="text-base font-normal text-[#484848]">
+                  <span className="text-sm font-normal text-[#484848]">
                     {recognition.type}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 ml-13">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Message:</span>
-                <span className="text-base text-[#484848] font-medium">
+            <div className="space-y-2 pl-12 text-sm">
+              <div className="flex justify-between items-center gap-4">
+                <span className="text-gray-500">Message:</span>
+                <span className="text-[#484848] font-medium break-words text-right">
                   {recognition.message || "-----"}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Viewer:</span>
-                <span className="text-base text-[#484848]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="text-gray-500">Viewer:</span>
+                <span className="text-[#484848] text-right break-words">
                   {recognition.viewer}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Reactions:</span>
-                <div className="flex items-center gap-2">
+              <div className="flex justify-between items-center gap-4">
+                <span className="text-gray-500">Reactions:</span>
+                <div className="flex flex-wrap items-center gap-2">
                   <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
                     <ThumbsUp className="w-4 h-4 text-gray-400" />
                     <span className="text-xs text-green-600">1</span>
