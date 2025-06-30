@@ -43,181 +43,324 @@ import BadgeLibrary from "@/pages/BadgeLibrary";
 import EditBadge from "@/pages/EditBadge";
 import CreateBadge from "@/pages/CreateBadge";
 import TaskAndProject from "@/pages/TaskAndProject";
+import AdminLayout from "@/Layout/Admin/AdminLayout";
+import UserDashboard from "@/pages/userpages/UserDashboard";
+import UserCommunication from "@/pages/userpages/UserCommunication";
+import UserRecognition from "@/pages/userpages/UserRecognition";
+import UserChat from "@/pages/userpages/UserChat";
+import UserSurvey from "@/pages/userpages/UserSurvey";
 
+// const routes = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <App />,
+//     children: [
+//       {
+//         path: "/",
+//         element: <Dashboard></Dashboard>,
+//       },
+//       {
+//         path: "/communication",
+//         element: <Communication />,
+//         children: [
+//           {
+//             index: true,
+//             element: <Chat />,
+//           },
+//           {
+//             path: "chat",
+//             element: <Chat />,
+//           },
+//           {
+//             path: "recognition",
+//             element: <RecognitionTable></RecognitionTable>,
+//             // children: [
+
+
+//             // ]
+//           },
+
+//         ],
+
+//       },
+//       {
+//         path: 'send-recognition',
+//         element: <CreateRecognition></CreateRecognition>
+//       },
+//       {
+//         path: 'badge-library',
+//         element: <BadgeLibrary></BadgeLibrary>
+//       },
+//       {
+//         path: 'edit-badge',
+//         element: <EditBadge></EditBadge>
+//       },
+//       {
+//         path: '/create-badge',
+//         element: <CreateBadge></CreateBadge>
+//       },
+//       {
+//         path: "/schedule",
+//         element: <Schedule></Schedule>,
+
+//         children: [
+//           {
+//             path: "shiftschedule",
+//             element: <ShiftScheduling></ShiftScheduling>,
+//           },
+//           {
+//             index: true, // 👈 This is the default route for /schedule
+//             element: <JobSchedulingLobby></JobSchedulingLobby>,
+//           },
+//           {
+//             path: "overviewProjects",
+//             element: <OverviewProject></OverviewProject>,
+//           },
+//           {
+//             path: "timeclock",
+//             element: <TimeClock></TimeClock>,
+//           },
+//           {
+//             path: "timesheet",
+//             element: <TimeSheet />,
+//             children: [
+//               {
+//                 index: true, // 👈 This is the default route for /timesheet
+//                 element: <TimeSheets />,
+//               },
+//               {
+//                 path: "time",
+//                 element: <TimeSheets />,
+//               },
+//               {
+//                 path: "payroll",
+//                 element: <Payroll />,
+//               },
+//             ],
+//           },
+
+//           {
+//             path: "useroffdetails",
+//             element: <UserOffDeatils></UserOffDeatils>,
+//           },
+
+//           {
+//             path: "timeoffrequest",
+//             element: <TimeOffRequest></TimeOffRequest>,
+//           },
+
+//         ],
+//       },
+//       {
+//         path: '/survey-poll',
+//         element: <SurveyMainPage></SurveyMainPage>
+//       },
+
+//       {
+//         path: '/survey-response',
+//         element: <SurveyResponse></SurveyResponse>
+//       },
+//       {
+//         path: '/survey-details',
+//         element: <SurveyDetails></SurveyDetails>
+//       },
+//       {
+//         path: '/survey-poll-page',
+//         element: <SurveyAndPoll></SurveyAndPoll>,
+//         children: [
+//           {
+//             index: true,
+//             element: <SurveyPage></SurveyPage>
+//           },
+//           {
+//             path: 'survey',
+//             element: <SurveyPage></SurveyPage>
+//           },
+//           {
+//             path: 'poll',
+//             element: <PollPage></PollPage>
+//           },
+//         ]
+//       },
+//       {
+//         path: '/publish-survey',
+//         element: <PublishSurvey />
+//       },
+//       {
+//         path: '/survey-template',
+//         element: <SurveyTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
+//       },
+//       {
+//         path: '/publish-poll',
+//         element: <PublishPoll></PublishPoll>
+//       },
+//       {
+//         path: '/poll-template',
+//         element: <PollTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
+//       },
+
+//       {
+//         path: '/tasks-projects',
+//         element: <TaskAndProject></TaskAndProject>
+//       },
+
+
+//       {
+//         path: "/user",
+//         element: <UserLayout></UserLayout>,
+//         children: [
+//           {
+//             index: true,
+//             element: <User></User>,
+//           },
+//           {
+//             path: "user",
+//             element: <Chat />,
+//           },
+//           {
+//             path: "user-profile",
+//             element: <UserProfile></UserProfile>,
+//           },
+
+//         ],
+//       },
+
+//       {
+
+//       },
+//       {
+//         path: "/add-user",
+//         element: <AddUserProfile></AddUserProfile>,
+//       },
+//       {
+//         path: "/sidebar-settings",
+//         element: <SidebarSetting></SidebarSetting>,
+//       },
+//     ],
+//   },
+//   {
+//     path: "/login",
+//     element: <Login></Login>,
+//   },
+//   {
+//     path: "*",
+//     element: <NotFound />,
+//   },
+// ]);
 const routes = createBrowserRouter([
   {
-    path: "/",
-    element: <App />,
+    path: "/login",
+    element: <Login />,
+  },
+
+
+  // ✅ Admin routes grouped here
+  {
+    path: "/user",
+    element: <UserDashboard></UserDashboard>,
     children: [
       {
-        path: "/",
-        element: <Dashboard></Dashboard>,
+        index: true,
+        element: <UserDashboard />,
       },
       {
-        path: "/communication",
-        element: <Communication />,
+        path: "communication",
+        element: <UserCommunication></UserCommunication>,
         children: [
-          {
-            index: true,
-            element: <Chat />,
-          },
-          {
-            path: "chat",
-            element: <Chat />,
-          },
-          {
-            path: "recognition",
-            element: <RecognitionTable></RecognitionTable>,
-            // children: [
-
-
-            // ]
-          },
-
+          { index: true, element: <UserChat></UserChat> },
+          { path: "userchat", element: <UserChat></UserChat> },
+          { path: "user-recognition", element: <UserRecognition></UserRecognition> },
         ],
 
       },
       {
-        path: 'send-recognition',
-        element: <CreateRecognition></CreateRecognition>
+        path: "survey",
+        element: <UserSurvey></UserSurvey>
       },
-      {
-        path: 'badge-library',
-        element: <BadgeLibrary></BadgeLibrary>
-      },
-      {
-        path: 'edit-badge',
-        element: <EditBadge></EditBadge>
-      },
-      {
-        path: '/create-badge',
-        element: <CreateBadge></CreateBadge>
-      },
-      {
-        path: "/schedule",
-        element: <Schedule></Schedule>,
+    ]
+  },
 
+
+
+  {
+    path: "/admin",
+    element: <AdminLayout />, // Admin shell with sidebar/header
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: "communication",
+        element: <Communication />,
         children: [
-          {
-            path: "shiftschedule",
-            element: <ShiftScheduling></ShiftScheduling>,
-          },
-          {
-            index: true, // 👈 This is the default route for /schedule
-            element: <JobSchedulingLobby></JobSchedulingLobby>,
-          },
-          {
-            path: "overviewProjects",
-            element: <OverviewProject></OverviewProject>,
-          },
-          {
-            path: "timeclock",
-            element: <TimeClock></TimeClock>,
-          },
+          { index: true, element: <Chat /> },
+          { path: "chat", element: <Chat /> },
+          { path: "recognition", element: <RecognitionTable /> },
+        ],
+      },
+      { path: "send-recognition", element: <CreateRecognition /> },
+      { path: "badge-library", element: <BadgeLibrary /> },
+      { path: "edit-badge", element: <EditBadge /> },
+      { path: "create-badge", element: <CreateBadge /> },
+
+      {
+        path: "schedule",
+        element: <Schedule />,
+        children: [
+          { index: true, element: <JobSchedulingLobby /> },
+          { path: "shiftschedule", element: <ShiftScheduling /> },
+          { path: "overviewProjects", element: <OverviewProject /> },
+          { path: "timeclock", element: <TimeClock /> },
           {
             path: "timesheet",
             element: <TimeSheet />,
             children: [
-              {
-                index: true, // 👈 This is the default route for /timesheet
-                element: <TimeSheets />,
-              },
-              {
-                path: "time",
-                element: <TimeSheets />,
-              },
-              {
-                path: "payroll",
-                element: <Payroll />,
-              },
+              { index: true, element: <TimeSheets /> },
+              { path: "time", element: <TimeSheets /> },
+              { path: "payroll", element: <Payroll /> },
             ],
           },
-
-          {
-            path: "useroffdetails",
-            element: <UserOffDeatils></UserOffDeatils>,
-          },
-
-          {
-            path: "timeoffrequest",
-            element: <TimeOffRequest></TimeOffRequest>,
-          },
-
+          { path: "useroffdetails", element: <UserOffDeatils /> },
+          { path: "timeoffrequest", element: <TimeOffRequest /> },
         ],
       },
-      {
-        path: '/survey-poll',
-        element: <SurveyMainPage></SurveyMainPage>
-      },
 
+      { path: "survey-poll", element: <SurveyMainPage /> },
+      { path: "survey-response", element: <SurveyResponse /> },
+      { path: "survey-details", element: <SurveyDetails /> },
       {
-        path: '/survey-response',
-        element: <SurveyResponse></SurveyResponse>
-      },
-      {
-        path: '/survey-details',
-        element: <SurveyDetails></SurveyDetails>
-      },
-      {
-        path: '/survey-poll-page',
-        element: <SurveyAndPoll></SurveyAndPoll>,
+        path: "survey-poll-page",
+        element: <SurveyAndPoll />,
         children: [
-          {
-            index: true,
-            element: <SurveyPage></SurveyPage>
-          },
-          {
-            path: 'survey',
-            element: <SurveyPage></SurveyPage>
-          },
-          {
-            path: 'poll',
-            element: <PollPage></PollPage>
-          },
-        ]
-      },
-      {
-        path: '/publish-survey',
-        element: <PublishSurvey />
-      },
-      {
-        path: '/survey-template',
-        element: <SurveyTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
-      },
-      {
-        path: '/publish-poll',
-        element: <PublishPoll></PublishPoll>
-      },
-      {
-        path: '/poll-template',
-        element: <PollTemplate onBackToPollCreation={() => { /* handle navigation or logic here */ }} />
-      },
-
-      {
-        path: '/tasks-projects',
-        element: <TaskAndProject></TaskAndProject>
-      },
-
-
-      {
-        path: "/user",
-        element: <UserLayout></UserLayout>,
-        children: [
-          {
-            index: true,
-            element: <User></User>,
-          },
-          {
-            path: "user",
-            element: <Chat />,
-          },
-          {
-            path: "user-profile",
-            element: <UserProfile></UserProfile>,
-          },
-
+          { index: true, element: <SurveyPage /> },
+          { path: "survey", element: <SurveyPage /> },
+          { path: "poll", element: <PollPage /> },
         ],
       },
+      { path: "publish-survey", element: <PublishSurvey /> },
+      {
+        path: "survey-template",
+        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
+      },
+      { path: "publish-poll", element: <PublishPoll /> },
+      {
+        path: "poll-template",
+        element: <PollTemplate onBackToPollCreation={() => { }} />,
+      },
+
+      { path: "tasks-projects", element: <TaskAndProject /> },
+
+      {
+        path: "user",
+        element: <UserLayout />,
+        children: [
+          { index: true, element: <User /> },
+          { path: "user", element: <Chat /> },
+          { path: "user-profile", element: <UserProfile /> },
+        ],
+      },
+
 
       {
 
@@ -230,12 +373,13 @@ const routes = createBrowserRouter([
         path: "/sidebar-settings",
         element: <SidebarSetting></SidebarSetting>,
        },
+
+      { path: "add-user", element: <AddUserProfile /> },
+      { path: "sidebar-settings", element: <SidebarSetting /> },
+
     ],
   },
-  {
-    path: "/login",
-    element: <Login></Login>,
-  },
+
   {
     path: "*",
     element: <NotFound />,

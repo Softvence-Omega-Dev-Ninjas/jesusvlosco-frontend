@@ -1,4 +1,4 @@
-import { MapPinIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { MapPinIcon, PlusIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
 // Define the shape of a single project object
@@ -75,7 +75,7 @@ const ProjectManagement: React.FC = () => {
   return (
     <div className="min-h-screen  flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 font-sans">
       {/* Page Title */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Project Management</h1>
+      <h1 className="text-2xl  text-primary mb-8">Project Management</h1>
 
       {/* Main Container for Project Cards */}
       <div className="   w-full max-w-4xl"> {/* Restored bg-white and shadow-xl */}
@@ -84,7 +84,7 @@ const ProjectManagement: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-700">Project</h2>
           <button
             onClick={handleAddProject}
-            className="flex items-center text-primary font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" /* Restored blue colors and ring */
+            className="flex items-center text-primary font-medium cursor-pointer py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" /* Restored blue colors and ring */
           >
             <PlusIcon className="h-5 w-5 mr-1" /> {/* Plus icon from Lucide React */}
             Add Project
@@ -99,11 +99,11 @@ const ProjectManagement: React.FC = () => {
               className="flex flex-col md:flex-row items-center " /* Restored bg-gray-50, padding, rounded, shadow, border */
             >
               {/* Flex-1 ensures this section takes available space */}
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-[#484848]">
                 {/* Project Details (Left Side - Project Name and Location) */}
                 <div>
                   {/* Label for Project Name (now visible, consistent with Manager) */}
-                  <label htmlFor={`project-name-${project.id}`} className="block text-gray-700 text-sm font-semibold mb-1">
+                  <label htmlFor={`project-name-${project.id}`} className="block text-[#484848] text-sm font-semibold mb-1">
                     Project
                   </label>
                   <select
@@ -119,7 +119,7 @@ const ProjectManagement: React.FC = () => {
                     <option value="Project 3">Project 3</option>
                     <option value="Project name">Project name</option> {/* Default option */}
                   </select>
-                  <div className="flex items-center text-gray-600 text-sm mt-1">
+                  <div className="flex items-center text-[#484848] text-sm mt-1">
                     <MapPinIcon className="h-4 w-4 mr-1 text-gray-500" /> {/* Map pin icon from Lucide React */}
                     <span>{project.projectLocation}</span>
                   </div>
@@ -128,7 +128,7 @@ const ProjectManagement: React.FC = () => {
                 {/* Manager Details (Right Side - Manager label above input field) */}
                 {/* This div no longer uses flex items-center, allowing the label to stack */}
                 <div>
-                  <label htmlFor={`manager-${project.id}`} className="block text-gray-700 text-sm font-semibold mb-1">
+                  <label htmlFor={`manager-${project.id}`} className="block text-[#484848] text-sm font-semibold mb-1">
                     Manager
                   </label>
                   <input
@@ -145,12 +145,10 @@ const ProjectManagement: React.FC = () => {
               </div>
 
               {/* Delete Button for each project entry */}
-              <button
-                onClick={() => handleDeleteProject(project.id)}
-                className="ml-0 md:ml-4 mt-4 md:mt-0 text-red-500 hover:text-red-600 transition duration-150 ease-in-out p-2 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                aria-label="Delete project"
-              >
-                <TrashIcon className="h-6 w-6" /> {/* Trash icon from Lucide React */}
+              <button onClick={() => handleDeleteProject(project.id)} className="p-2 text-red-500 hover:text-red-700 cursor-pointer">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
               </button>
             </div>
           ))}
@@ -161,7 +159,7 @@ const ProjectManagement: React.FC = () => {
       <div className="w-full max-w-4xl flex justify-end mt-8"> {/* New div to control alignment */}
         <button
           onClick={handleSaveChanges}
-          className="bg-primary text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" /* Restored indigo colors and ring */
+          className="bg-primary text-white cursor-pointer py-2 px-4 rounded-lg shadow-md transition " /* Restored indigo colors and ring */
         >
           Save Changes
         </button>

@@ -22,8 +22,11 @@ export interface ChatMessage {
   id: string;
   name: string;
   avatar: string;
+  imageUrl: string;
   message: string;
   time: string;
+  unreadCount: number;
+  isActive: boolean;
 }
 
 export interface Recognition {
