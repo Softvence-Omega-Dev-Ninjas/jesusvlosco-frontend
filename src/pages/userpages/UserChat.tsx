@@ -1,6 +1,9 @@
+import { Chat } from "../Chats";
 
 export default function UserChat() {
-    return (
-        <div>UserChat</div>
-    )
+  return (
+    <div>
+      <Chat />
+    </div>
+  );
 }

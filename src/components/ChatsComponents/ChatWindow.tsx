@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Search,
-  MoreVertical,
   Phone,
   Video,
   MessageCircle,
   EllipsisVertical,
+  Settings,
 } from "lucide-react";
 
 import personImg from "@/assets/chat-person.jpg";
@@ -309,7 +309,7 @@ export default function ResponsiveChatWindow() {
             Chat
           </h1>
           <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <MoreVertical className="w-5 h-5 text-gray-600" />
+            <Settings className="w-5 h-5 text-primary" />
           </button>
         </div>
 
