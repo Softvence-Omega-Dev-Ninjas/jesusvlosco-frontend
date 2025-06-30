@@ -162,7 +162,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
             key={reaction.emoji}
             className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1"
           >
-            <span className="text-sm">{reaction.emoji}</span>
+            <span className="text-sm cursor-pointer">{reaction.emoji}</span>
             <span className="text-xs text-gray-600">{reaction.count}</span>
           </div>
         ))}
@@ -242,19 +242,19 @@ const handleDelete = () => {
                   <div className="text-gray-700 font-medium">XYZ Company</div>
 
                   {/* Lightbulb Icon */}
-                  <div className="relative">
+                  <div className="relative cursor-pointer">
                     <img src={light} alt="" />
                   </div>
 
                   {/* Recognized People */}
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8 rounded-full">
+                    <div className="flex items-center gap-3 ">
+                      <Avatar className="w-8 h-8 rounded-full cursor-pointer">
                        <img src={ user1} alt="" />
                       </Avatar>
                       <span className="text-gray-700 text-sm">Cody Fisher</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
                          <img src={ user2} alt="" />
                       </Avatar>
@@ -262,7 +262,7 @@ const handleDelete = () => {
                         Leslie Alexander
                       </span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
                        <img src={user3} alt="" />
                       </Avatar>
@@ -283,9 +283,9 @@ const handleDelete = () => {
             </div>
 
             {/* Post Reactions */}
-            <div className="flex items-center justify-between mb-6 border-b border-[#C5C5C5] px-2">
+            <div className="flex items-center justify-between mb-6 border-b border-[#C5C5C5] px-2 cursor-pointer">
               <ReactionDisplay reactions={postReactions} />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 cursor-pointer">
                 {comments.reduce(
                   (total, comment) =>
                     total +
@@ -299,7 +299,7 @@ const handleDelete = () => {
         
 
             {/* Comments */}
-            <div className="space-y-6 mb-8 ">
+            <div className="space-y-6 mb-8 cursor-pointer">
               {comments.map((comment, ) => (
                 <div key={comment.id} className=" ">
                   {/* Comment Content */}
