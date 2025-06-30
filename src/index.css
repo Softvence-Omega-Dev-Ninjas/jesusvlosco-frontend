@@ -50,3 +50,24 @@
   max-height: 250px; /* Limit height and allow scroll */
   overflow-y: auto;
 }
+/* WebKit browsers: Chrome, Safari, Edge */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #949494;
+  border-radius: 6px;
+  border: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #949494 #f5f5f5;
+}

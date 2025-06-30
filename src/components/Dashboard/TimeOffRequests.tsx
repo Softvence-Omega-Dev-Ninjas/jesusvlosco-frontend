@@ -1,63 +1,216 @@
-import React from "react";
-import { Avatar } from "./Avatar";
-import { TimeOffRequest } from "./dashboard";
-import { StatusBadge } from "./StatusBadge";
+import { mockEmployeeLeaveData } from "@/assets/mockData"; // adjust path as needed
+import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // adjust path as needed
+import { EmployeeLeave } from "@/types";
+import { useState } from "react";
 
-export const TimeOffRequests: React.FC<{ requests: TimeOffRequest[] }> = ({
-  requests,
+type Request = {
+  id: string;
+  name: string;
+  avatar?: string;
+  date: string;
+  type: string;
+  status: "pending" | "approved" | "declined" | string;
+};
+
+type TimeOffRequestsProps = {
+  requests: Request[];
+  onApprove?: (id: string) => void;
+  onDecline?: (id: string) => void;
+};
+
+const Avatar = ({
+  src,
+  initials,
+  className = "",
+}: {
+  src?: string;
+  initials: string;
+  className?: string;
 }) => {
-  const handleApprove = (id: string) => {
-    console.log("Approved request:", id);
-  };
+  return (
+    <div
+      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${className}`}
+    >
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          className="w-full h-full rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full rounded-full bg-gray-300 flex items-center justify-center text-[#484848]">
+          {initials}
+        </div>
+      )}
+    </div>
+  );
+};
 
-  const handleDecline = (id: string) => {
-    console.log("Declined request:", id);
+const StatusBadge = ({ status }: { status: string }) => {
+  const getStatusStyles = () => {
+    switch (status) {
+      case "pending":
+        return "text-[#FF9200] border-[#FF9200]";
+      case "approved":
+        return "bg-[#1EBD66] text-white border-[#1EBD66]";
+      case "declined":
+        return "bg-red-100 text-red-600 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-600 border-gray-200";
+    }
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold">Time-off requests</h3>
-        <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+    <span
+      className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border ${getStatusStyles()}`}
+    >
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+export default function TimeOffRequests({
+  requests,
+  onApprove,
+}: TimeOffRequestsProps) {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeLeave | null>(null);
+
+  const openModal = (req?: Request) => {
+    if (!req) {
+      setSelectedEmployee(mockEmployeeLeaveData[0]);
+      setIsModalOpen(true);
+      return;
+    }
+
+    const emp = mockEmployeeLeaveData.find(
+      (e) => e.employeeName.toLowerCase() === req.name.toLowerCase()
+    );
+
+    if (emp) {
+      setSelectedEmployee(emp);
+    } else {
+      setSelectedEmployee(mockEmployeeLeaveData[0]);
+    }
+    setIsModalOpen(true);
+  };
+
+  const shouldScroll = requests.length > 2;
+
+  return (
+    <div
+      className={`rounded-2xl border border-gray-200 p-4 sm:p-4 w-full mx-auto ${
+        shouldScroll ? "max-h-[540px] overflow-y-auto" : ""
+      }`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-bold text-primary">Time-off requests</h3>
       </div>
 
+      {/* Requests List with conditional scroll */}
       <div className="space-y-4">
         {requests.map((request) => (
           <div
             key={request.id}
-            className="border rounded-lg p-3 hover:shadow-sm transition-shadow"
+            className="border border-gray-200 rounded-2xl p-4 cursor-pointer hover:bg-gray-50"
+            onClick={() => openModal(request)}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <Avatar initials={request.avatar} />
-              <div className="flex-1">
-                <div className="font-medium text-sm">{request.name}</div>
-                <StatusBadge status={request.status} />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  src={request.avatar}
+                  initials={request.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                />
+                <div className="font-bold text-base text-[#484848]">
+                  {request.name}
+                </div>
               </div>
+              <StatusBadge status={request.status} />
             </div>
 
-            <div className="text-xs text-gray-600 mb-2">{request.date}</div>
-            <div className="text-sm font-medium mb-3">{request.type}</div>
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"
+                />
+              </svg>
+              {request.date}
+            </div>
+
+            <div className="text-sm font-medium text-gray-900 mb-4">
+              {request.type}
+            </div>
 
             {request.status === "pending" && (
-              <div className="flex gap-2">
-                <button className="flex-1 text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 hover:bg-gray-50 transition-colors">
+              <div className="flex flex-row flex-wrap gap-3 items-center justify-start xl:justify-center">
+                <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm sm:text-base font-medium text-gray-600 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"
+                    />
+                  </svg>
                   Deadline
                 </button>
                 <button
-                  onClick={() => handleApprove(request.id)}
-                  className="flex-1 text-xs bg-green-600 text-white rounded px-2 py-1 hover:bg-green-700 transition-colors"
+                  onClick={() => onApprove?.(request.id)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 cursor-pointer bg-[#1EBD66] text-white rounded-xl text-sm sm:text-base font-medium transition-colors"
                 >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                   Approve
                 </button>
               </div>
             )}
           </div>
         ))}
+        <div className="p-4 border-t border-gray-100">
+          <button className="w-full text-center text-primary text-sm transition-colors font-medium">
+            End of Requests
+          </button>
+        </div>
       </div>
 
-      <button className="w-full text-center text-indigo-600 text-sm mt-4 hover:text-indigo-800 transition-colors">
-        End of Requests
-      </button>
+      {isModalOpen && selectedEmployee && (
+        <EmployeeDetailModal
+          employee={selectedEmployee}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
-};
+}
