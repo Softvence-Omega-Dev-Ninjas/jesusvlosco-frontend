@@ -1,20 +1,19 @@
+// SurveyMainPage.tsx
 import React, { useState } from "react";
 import {
   Plus,
   Search,
   Calendar,
- 
   Eye,
-  Edit2,
   Columns3,
   ChevronDown,
   ListFilter,
 } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
+import { BiSolidEditAlt } from "react-icons/bi";
 
-
-// Interface for Survey data structure
+// Interface for Survey data structure (unchanged)
 interface Survey {
   id: string;
   title: string;
@@ -25,7 +24,7 @@ interface Survey {
   assignTo: string;
 }
 
-// Interface for Survey statistics data structure
+// Interface for Survey statistics data structure (unchanged)
 interface SurveyStats {
   title: string;
   subtitle: string;
@@ -35,7 +34,7 @@ interface SurveyStats {
   color: string;
 }
 
-// Interface for Poll data structure
+// Interface for Poll data structure (unchanged)
 interface PollData {
   title: string;
   response: string;
@@ -43,39 +42,42 @@ interface PollData {
   options: { label: string; percentage: number; color: string }[];
 }
 
-// Interface for Column options
+// Interface for Column options (unchanged)
 interface ColumnOption {
   id: string;
   label: string;
   isVisible: boolean;
 }
 
+// NEW: Interfaces for Team Data (should ideally be in a shared types file)
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+}
 
-
+interface TeamData {
+  teamName: string;
+  members: TeamMember[];
+}
 
 const SurveyMainPage: React.FC = () => {
-  // State for search term input
   const [searchTerm, setSearchTerm] = useState("");
-  // State to control which modal is open
   const [openModalType, setOpenModalType] = useState<
-    "filter" | "calendar" | "columns" | "quickView" | null
+    "filter" | "calendar" | "columns" | "quickView" | "teamMembers" | null // Added "teamMembers"
   >(null);
 
-  // State to store selected filter options (e.g., "Active", "Completed")
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  // State to store the selected date from the calendar (placeholder)
   const [selectedDate, setSelectedDate] = useState<string>("");
-  // State to manage column visibility
   const [columnOptions, setColumnOptions] = useState<ColumnOption[]>([
-    { id: "checkbox", label: "", isVisible: true }, // For the initial checkbox column
+    { id: "checkbox", label: "", isVisible: true },
     { id: "title", label: "Survey title", isVisible: true },
     { id: "createdBy", label: "Created By", isVisible: true },
     { id: "startDate", label: "Start Date", isVisible: true },
     { id: "endDate", label: "End Date", isVisible: true },
     { id: "status", label: "Status", isVisible: true },
     { id: "assignTo", label: "Assign to", isVisible: true },
-    { id: "action", label: "Action", isVisible: true }, // This is the action column header
-    // Additional columns for selection in the modal, initially hidden
+    { id: "action", label: "Action", isVisible: true },
     { id: "name", label: "Name", isVisible: false },
     { id: "employeeId", label: "Employee ID", isVisible: false },
     { id: "email", label: "Email", isVisible: false },
@@ -93,9 +95,13 @@ const SurveyMainPage: React.FC = () => {
     },
   ]);
 
-  // State to store the survey data for the quick view modal
-  const [selectedSurveyForQuickView, setSelectedSurveyForQuickView] = useState<Survey | null>(null);
+  const [selectedSurveyForQuickView, setSelectedSurveyForQuickView] =
+    useState<Survey | null>(null);
 
+  // NEW: State to hold data for the team whose members are to be displayed
+  const [selectedTeamData, setSelectedTeamData] = useState<TeamData | null>(
+    null
+  );
 
   // Sample data for surveys
   const surveys: Survey[] = [
@@ -115,7 +121,7 @@ const SurveyMainPage: React.FC = () => {
       startDate: "04/20/2025",
       endDate: "04/20/2025",
       status: "Completed",
-      assignTo: "Team A",
+      assignTo: "Team A", // This will be clickable
     },
     {
       id: "3",
@@ -133,7 +139,7 @@ const SurveyMainPage: React.FC = () => {
       startDate: "04/20/2025",
       endDate: "04/20/2025",
       status: "Active",
-      assignTo: "+3",
+      assignTo: "Team B", // This will be clickable
     },
     {
       id: "5",
@@ -142,7 +148,7 @@ const SurveyMainPage: React.FC = () => {
       startDate: "05/01/2024",
       endDate: "05/01/2024",
       status: "Completed",
-      assignTo: "Team B",
+      assignTo: "Team C", // This will be clickable
     },
     {
       id: "6",
@@ -173,7 +179,25 @@ const SurveyMainPage: React.FC = () => {
     },
   ];
 
-  // Sample data for survey statistics
+  // NEW: Sample data for team members
+  const teamsData: Record<string, TeamMember[]> = {
+    "Team A": [
+      { id: "1", name: "Alice Johnson", email: "alice.j@example.com" },
+      { id: "2", name: "Bob Smith", email: "bob.s@example.com" },
+      { id: "3", name: "Charlie Brown", email: "charlie.b@example.com" },
+    ],
+    "Team B": [
+      { id: "4", name: "David Lee", email: "david.l@example.com" },
+      { id: "5", name: "Eve Davis", email: "eve.d@example.com" },
+    ],
+    "Team C": [
+      { id: "6", name: "Frank White", email: "frank.w@example.com" },
+      { id: "7", name: "Grace Taylor", email: "grace.t@example.com" },
+      { id: "8", name: "Harry Wilson", email: "harry.w@example.com" },
+    ],
+  };
+
+  // Sample data for survey statistics (unchanged)
   const surveyStats: SurveyStats[] = [
     {
       title: "Employee Satisfaction",
@@ -209,7 +233,7 @@ const SurveyMainPage: React.FC = () => {
     },
   ];
 
-  // Sample data for polls
+  // Sample data for polls (unchanged)
   const pollData: PollData[] = [
     {
       title: "How satisfied are you with the current safety protocols on-site?",
@@ -259,26 +283,27 @@ const SurveyMainPage: React.FC = () => {
     },
   ];
 
-  // Circular progress component for survey stats
+  // Circular progress component for survey stats (unchanged)
   const CircularProgress: React.FC<{
     percentage: number;
     color: string;
     size?: number;
   }> = ({ percentage, color, size = 120 }) => {
-    const radius = (size - 20) / 2;
+    const strokeWidth = 24;
+    const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     const strokeDasharray = circumference;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
       <div className="relative">
-        <svg width={size} height={size} className="transform -rotate-90">
+        <svg width={size} height={size} className="transform rotate-80">
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             stroke="#e5e7eb"
-            strokeWidth="10"
+            strokeWidth={strokeWidth}
             fill="none"
           />
           <circle
@@ -286,22 +311,23 @@ const SurveyMainPage: React.FC = () => {
             cy={size / 2}
             r={radius}
             stroke="currentColor"
-            strokeWidth="10"
+            strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             className={color}
           />
         </svg>
+
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-2xl font-bold ${color}`}>{percentage}%</span>
+          <span className="text-2xl font-bold text-primary">{percentage}%</span>
         </div>
       </div>
     );
   };
 
-  // Function to get appropriate Tailwind classes for status badges
+  // Function to get appropriate Tailwind classes for status badges (unchanged)
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
@@ -316,7 +342,7 @@ const SurveyMainPage: React.FC = () => {
     }
   };
 
-  // Handler for filter checkbox changes
+  // Handler for filter checkbox changes (unchanged)
   const handleFilterChange = (filter: string) => {
     setSelectedFilters((prevFilters) =>
       prevFilters.includes(filter)
@@ -325,7 +351,7 @@ const SurveyMainPage: React.FC = () => {
     );
   };
 
-  // Handler for column visibility toggle
+  // Handler for column visibility toggle (unchanged)
   const handleColumnToggle = (columnId: string) => {
     setColumnOptions((prevOptions) =>
       prevOptions.map((col) =>
@@ -334,29 +360,97 @@ const SurveyMainPage: React.FC = () => {
     );
   };
 
-  // Available filter options for the Filter Modal
-  const filterOptions = ["All", "Active", "Completed"]; // Hardcoded for now based on the image
-
-  // Filter surveys based on selected filters
-  const filteredSurveys = surveys.filter((survey) => {
-    if (selectedFilters.length === 0 || selectedFilters.includes("All")) {
-      return true; // Show all surveys if no filters or 'All' is selected
+  // NEW: Function to handle clicking on a team name in the "Assign to" column
+  const handleTeamAssignClick = (teamName: string) => {
+    const members = teamsData[teamName];
+    if (members) {
+      setSelectedTeamData({ teamName, members });
+      setOpenModalType("teamMembers"); // Set the new modal type
+    } else {
+      console.warn(`No data found for team: ${teamName}`);
+      // Optionally, display a toast or alert to the user
     }
-    return selectedFilters.includes(survey.status); // Filter by selected status
+  };
+
+  // Available filter options for the Filter Modal (unchanged)
+  const filterOptions = ["All", "Active", "Completed"];
+
+  // Filter surveys based on selected filters (unchanged, with searchTerm integration)
+  const filteredSurveys = surveys.filter((survey) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const matchesSearchTerm = Object.values(survey).some((value) =>
+      String(value).toLowerCase().includes(lowerCaseSearchTerm)
+    );
+
+    if (selectedFilters.length === 0 || selectedFilters.includes("All")) {
+      return matchesSearchTerm; // Apply search if no status filter or 'All' is selected
+    }
+    return selectedFilters.includes(survey.status) && matchesSearchTerm; // Filter by status AND search term
   });
 
-  // Get visible columns for rendering the table header and cells
+  // Get visible columns for rendering the table header and cells (unchanged)
   const visibleColumns = columnOptions.filter((col) => col.isVisible);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 relative">
-      {/* Overlay for opacity behind the modals, covers the whole screen */}
-      {/* This overlay appears when any of the modals is open */}
-      {openModalType && (
+      {/* Universal Modal Overlay - Renders when any modal type is open */}
+      {openModalType !== null && (
         <div
-          className="fixed inset-0  z-40" // Semi-transparent black background
-          onClick={() => setOpenModalType(null)} // Close all modals when clicking the overlay
-        ></div>
+          className="fixed inset-0 bg-black/25 z-40 flex items-center justify-center"
+          onClick={() => setOpenModalType(null)}
+        >
+          {/* Prevent clicks inside the modal from closing it */}
+          <div onClick={(e) => e.stopPropagation()}>
+            {/* Calendar Modal */}
+            <UniversalModal
+              isOpen={openModalType === "calendar"}
+              onClose={() => setOpenModalType(null)}
+              modalType="calendar"
+              selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+              initialPosition={{ x: 1257, y: 255 }}
+            />
+
+            {/* Filter Modal */}
+            <UniversalModal
+              isOpen={openModalType === "filter"}
+              onClose={() => setOpenModalType(null)}
+              modalType="filter"
+              filterOptions={filterOptions}
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              initialPosition={{ x: 1640, y: 340 }}
+            />
+
+            {/* Columns Modal */}
+            <UniversalModal
+              isOpen={openModalType === "columns"}
+              onClose={() => setOpenModalType(null)}
+              modalType="columns"
+              columnOptions={columnOptions}
+              onColumnToggle={handleColumnToggle}
+              initialPosition={{ x: 1580, y: 400 }}
+            />
+
+            {/* Quick View Modal */}
+            <UniversalModal
+              isOpen={openModalType === "quickView"}
+              onClose={() => setOpenModalType(null)}
+              modalType="quickView"
+              surveyData={selectedSurveyForQuickView}
+              initialPosition={{ x: 1450, y: 430 }}
+            />
+
+            {/* NEW: Team Members Modal */}
+            <UniversalModal
+              isOpen={openModalType === "teamMembers"}
+              onClose={() => setOpenModalType(null)}
+              modalType="teamMembers"
+              teamData={selectedTeamData} // Pass the selected team's data
+              initialPosition={{ x: 1450, y: 430 }} // Adjust position as needed to match screenshot
+            />
+          </div>
+        </div>
       )}
 
       {/* Main content container */}
@@ -365,14 +459,14 @@ const SurveyMainPage: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl font-bold text-primary">Survey & Poll</h1>
-            <Link to={"/survey-poll-page"}> <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium cursor-pointer">
-              <Plus size={16} />
-              Create New
-            </button>
+            <Link to={"/survey-poll-page"}>
+              <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <Plus size={16} />
+                Create New
+              </button>
             </Link>
-           
           </div>
-          <p className="text-gray-600">
+          <p className="text-[#5B5B5B]">
             View and manage all surveys & polls. Monitor participation and
             status at a glance.
           </p>
@@ -396,8 +490,8 @@ const SurveyMainPage: React.FC = () => {
           {/* Date button */}
           <div className="relative">
             <button
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              onClick={() => setOpenModalType("calendar")} // Open calendar modal on click
+              className="flex items-center gap-2 px-4 py-2 text-[#5B5B5B] border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+              onClick={() => setOpenModalType("calendar")}
             >
               <Calendar size={16} />
               Date
@@ -405,150 +499,131 @@ const SurveyMainPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="rounded-lg shadow-sm border border-gray-200">
-          <div className="px-3 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="px-3 py-4  flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[#484848]">
               Survey Table
             </h2>
             <div className="relative">
               <button
-                className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex items-center text-[#5B5B5B] gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                 onClick={() => setOpenModalType("filter")}
               >
                 <ListFilter size={16}></ListFilter>
                 Filter
               </button>
             </div>
-              {/* UniversalModal for calendar */}
-        <UniversalModal
-          isOpen={openModalType === "calendar"}
-          onClose={() => setOpenModalType(null)}
-          modalType="calendar"
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-
-        {/* UniversalModal for filter */}
-        <UniversalModal
-          isOpen={openModalType === "filter"}
-          onClose={() => setOpenModalType(null)}
-          modalType="filter"
-          filterOptions={filterOptions}
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-        />
-
-        {/* UniversalModal for columns */}
-        <UniversalModal
-          isOpen={openModalType === "columns"}
-          onClose={() => setOpenModalType(null)}
-          modalType="columns"
-          columnOptions={columnOptions}
-          onColumnToggle={handleColumnToggle}
-        />
-
-        {/* UniversalModal for quickView */}
-        <UniversalModal
-          isOpen={openModalType === "quickView"}
-          onClose={() => setOpenModalType(null)}
-          modalType="quickView"
-          surveyData={selectedSurveyForQuickView}
-        />
           </div>
 
-          {/* Survey Table - Opacity lowered and interactions disabled when any modal is open */}
-        <div className="w-full overflow-x-auto ">
-  <table className="min-w-[900px] w-full">
-    <thead className="bg-gray-50">
-      <tr>
-        {visibleColumns.map((column) => (
-          <th
-            key={column.id}
-            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
-            {column.label}
-            {column.id === "action" && (
-              <div className="relative inline-flex items-center ml-2">
-                <button
-                  className="flex items-center text-gray-500 hover:text-gray-700"
-                  onClick={() => setOpenModalType("columns")}
-                >
-                  <Columns3 size={16} />
-                  <ChevronDown size={16} className="ml-1" />
-                </button>
-              </div>
-            )}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody className="bg-white divide-y divide-gray-200">
-      {filteredSurveys.map((survey) => (
-        <tr key={survey.id} className="hover:bg-gray-50">
-          {visibleColumns.map((column) => (
-            <td
-              key={`${survey.id}-${column.id}`}
-              className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-            >
-              {column.id === "checkbox" && (
-                <input type="checkbox" className="rounded border-gray-300" />
-              )}
-              {column.id === "title" && (
-                <span className="font-medium text-gray-900">{survey.title}</span>
-              )}
-              {column.id === "createdBy" && survey.createdBy}
-              {column.id === "startDate" && survey.startDate}
-              {column.id === "endDate" && survey.endDate}
-              {column.id === "status" && (
-                <span className={getStatusBadge(survey.status)}>
-                  {survey.status}
-                </span>
-              )}
-              {column.id === "assignTo" && (
-                <div className="flex items-center">
-                  {survey.assignTo.startsWith("+") ? (
-                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                      {survey.assignTo}
-                    </span>
-                  ) : (
-                    <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium">
-                      {survey.assignTo}
-                    </span>
-                  )}
-                </div>
-              )}
-              {column.id === "action" && (
-                <div className="flex items-center gap-3">
-                  <button
-                    className="text-gray-400 hover:text-gray-600"
-                    onClick={() => {
-                      setSelectedSurveyForQuickView(survey);
-                      setOpenModalType("quickView");
-                    }}
-                  >
-                    <Eye size={24} />
-                  </button>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <Edit2 size={24} />
-                  </button>
-                </div>
-              )}
-              {/* other optional columns */}
-            </td>
-          ))}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
+          {/* Survey Table */}
+          <div className="w-full overflow-x-auto ">
+            <table className="min-w-[900px] w-full">
+              <thead className="bg-gray-50   ">
+                <tr>
+                  {visibleColumns.map((column) => (
+                    <th
+                      key={column.id}
+                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300"
+                    >
+                      {column.id === "checkbox" && (
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300"
+                        />
+                      )}
+                      <div className="flex font-semibold items-center">
+                        <div className="text-[#484848]">{column.label}</div>
+                        {column.id === "action" && (
+                          <div className="relative inline-flex items-center ml-2">
+                            <button
+                              className="flex items-center text-gray-500 hover:text-gray-700 cursor-pointer"
+                              onClick={() => setOpenModalType("columns")}
+                            >
+                              <Columns3 size={14} />
+                              <ChevronDown size={14} className="ml-1" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="">
+                {filteredSurveys.map((survey) => (
+                  <tr key={survey.id} className="hover:bg-gray-50">
+                    {visibleColumns.map((column) => (
+                      <td
+                        key={`${survey.id}-${column.id}`}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
+                        {column.id === "checkbox" && (
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300"
+                          />
+                        )}
+                        {column.id === "title" && (
+                          <span className=" text-[#484848]">
+                            {survey.title}
+                          </span>
+                        )}
+                        {column.id === "createdBy" && survey.createdBy}
+                        {column.id === "startDate" && survey.startDate}
+                        {column.id === "endDate" && survey.endDate}
+                        {column.id === "status" && (
+                          <span className={getStatusBadge(survey.status)}>
+                            {survey.status}
+                          </span>
+                        )}
+                        {column.id === "assignTo" && (
+                          <div className="flex items-center">
+                            {/* Conditional rendering for assignTo based on content */}
+                            {survey.assignTo.startsWith("+") ? (
+                              <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
+                                {survey.assignTo}
+                              </span>
+                            ) : (
+                              // If it's a team name, make it clickable and style it
+                              <button
+                                className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:bg-indigo-200"
+                                onClick={() =>
+                                  handleTeamAssignClick(survey.assignTo)
+                                } // Call the new handler
+                              >
+                                {survey.assignTo}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        {column.id === "action" && (
+                          <div className="flex items-center gap-3">
+                            <button
+                              className="text-gray-600 cursor-pointer"
+                              onClick={() => {
+                                setSelectedSurveyForQuickView(survey);
+                                setOpenModalType("quickView");
+                              }}
+                            >
+                              <Eye size={24} />
+                            </button>
+                            <button className="text-gray-600 cursor-pointer">
+                              <BiSolidEditAlt size={24} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-      
 
         {/* Recent Surveys & Polls section */}
         <div className={`mb-8`}>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between my-6">
             <h2 className="text-xl font-bold text-primary">
               Recent Surveys & Poll
             </h2>
@@ -557,8 +632,8 @@ const SurveyMainPage: React.FC = () => {
           {/* Survey Statistics cards */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Survey</h3>
-              <button className="text-primary text-sm font-medium">
+              <h3 className="text-lg font-semibold text-primary">Survey</h3>
+              <button className="text-[#484848] text-sm font-medium cursor-pointer">
                 View All
               </button>
             </div>
@@ -569,11 +644,11 @@ const SurveyMainPage: React.FC = () => {
                   className=" p-6 rounded-lg border border-gray-200 shadow-sm"
                 >
                   <div className="flex flex-col items-center">
-                    <div className="text-center mt-4">
-                      <h4 className="font-semibold text-xl text-gray-900 ">
+                    <div className="text-center  mt-4">
+                      <h4 className="text-xl text-primary">
                         {stat.title}
                       </h4>
-                      <p className="text-xl text-gray-600 my-2">
+                      <p className="text-xl  my-2 text-primary">
                         {stat.subtitle}
                       </p>
                     </div>
@@ -581,10 +656,10 @@ const SurveyMainPage: React.FC = () => {
                       percentage={stat.percentage}
                       color={stat.color}
                     />
-                    <div className="text-center mt-4">
-                      <p className=" text-gray-500 mt-2">{stat.responseRate}</p>
-                      <p className=" text-gray-500">{stat.responseCount}</p>
-                      <button className="mt-2 text-primary text-sm font-medium">
+                    <div className="text-center mt-4 text-[#949494]">
+                      <p className="  mt-2">{stat.responseRate}</p>
+                      <p className=" ">{stat.responseCount}</p>
+                      <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
                         View
                       </button>
                     </div>
@@ -597,8 +672,8 @@ const SurveyMainPage: React.FC = () => {
           {/* Poll section */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Poll</h3>
-              <button className="text-primary text-sm font-medium">
+              <h3 className="text-lg font-semibold text-primary">Poll</h3>
+              <button className="text-[#484848] text-sm font-medium cursor-pointer">
                 View All
               </button>
             </div>
@@ -608,37 +683,52 @@ const SurveyMainPage: React.FC = () => {
                   key={index}
                   className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm"
                 >
-                  <h4 className="font-medium text-gray-900 mb-6 text-sm leading-tight">
+                  <h4 className="font-medium text-primary mb-6 text-sm leading-tight">
                     {poll.title}
                   </h4>
                   <div className="flex items-center justify-center gap-20 mb-6">
-                    <h3>Response:{poll.response}</h3>
-                    <button className="">
-                      Status:{" "}
-                      <span className="w-full py-1 px-3 bg-green-400 rounded-md">
+                    <h3 className="text-[#949494]">Response:{poll.response}</h3>
+                    <div className="text-[#949494]">
+                      Status:
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ml-4 ${
+                          poll.status === "Live"
+                            ? "bg-green-500 text-white" // Deeper green for "Live"
+                            : "bg-yellow-400 text-white" // Grey for "closed"
+                        }`}
+                      >
                         {poll.status}
                       </span>
-                    </button>
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    {poll.options.map((option, optionIndex) => (
-                      <div key={optionIndex}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm text-gray-700">
-                            {option.label}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {option.percentage}%
-                          </span>
+                  <div className="space-y-4 text-[#484848]">
+                    {poll.options.map(
+                      (
+                        option: {
+                          label: string;
+                          percentage: number;
+                          color: string;
+                        },
+                        optionIndex: number
+                      ) => (
+                        <div key={optionIndex} className=" border-b-2 border-gray-300 pb-2 mb-2 ">
+                          <div className="flex items-center justify-between mb-1 ">
+                            <span className="text-sm ">
+                              {option.label}
+                            </span>
+                            <span className="text-sm font-medium ">
+                              {option.percentage}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${option.color}`}
+                              style={{ width: `${option.percentage}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${option.color}`}
-                            style={{ width: `${option.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               ))}
