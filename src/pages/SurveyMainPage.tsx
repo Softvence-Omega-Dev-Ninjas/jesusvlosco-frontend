@@ -659,9 +659,11 @@ const SurveyMainPage: React.FC = () => {
                     <div className="text-center mt-4 text-[#949494]">
                       <p className="  mt-2">{stat.responseRate}</p>
                       <p className=" ">{stat.responseCount}</p>
-                      <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
+
+                      <Link to={"survey-response"}> <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
                         View
-                      </button>
+                      </button></Link>
+                     
                     </div>
                   </div>
                 </div>
