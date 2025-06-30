@@ -154,10 +154,10 @@ export default function RecognitionTable() {
     <div>
       {/* <NavLink to={'/send-recognition'}>Send</NavLink> */}
       {/* header section  */}
-      <div className="flex items-center justify-between p-6  ">
+      <div className="flex flex-col items-center justify-center p-6 md:flex-row md:justify-between md:items-center  ">
         {/* Left side - Title and subtitle */}
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-[#4E53B1] mb-1">
+        <div className="flex flex-col  ">
+          <h1 className="text-2xl text-center md:text-left font-semibold text-[#4E53B1] mb-1">
             Recognition
           </h1>
           <p className="text-gray-600 text-sm">
@@ -166,9 +166,9 @@ export default function RecognitionTable() {
         </div>
 
         {/* Right side - Action buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center  gap-3 mt-4 md:mt-0">
           <button
-          onClick={() => { window.location.href = "/send-recognition"; }}
+          onClick={() => { window.location.href = "/admin/send-recognition"; }}
            className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
             Send recognition
           </button>
@@ -180,7 +180,7 @@ export default function RecognitionTable() {
       {/* start table here  */}
       <div className="w-full ">
         {/* Date Range Picker */}
-        <div className="flex justify-end p-6 bg-gray-50">
+        <div className="flex justify-center md:justify-end p-6 bg-gray-50">
           <button
             className="flex items-center cursor-pointer gap-2 text-[#5B5B5B] px-4 py-3 border border-[#C5C5C5] rounded-md  hover:bg-gray-50 transition-colors text-sm"
             onClick={() => setIsDatePickerOpen(true)}

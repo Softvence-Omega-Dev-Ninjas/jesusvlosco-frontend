@@ -3,6 +3,7 @@ import { useState } from "react";
 import user from "@/assets/user1.png";
 import CreateRecognitionBagde from "@/components/RecognitionTable/CreateRecognitionBagde";
 import SummeryTab from "@/components/RecognitionTable/SummeryTab";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   { id: 1, name: "Recipients", current: true },
@@ -182,6 +183,7 @@ export default function CreateRecognition() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState(filterOptions);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -199,9 +201,17 @@ export default function CreateRecognition() {
     }
   };
 
+  // const handleNextStep = () => {
+  //   if (currentStep < 3) {
+  //     setCurrentStep(currentStep + 1);
+  //   }
+  // };
   const handleNextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+    } else if (currentStep === 3) {
+      // Redirect on final step
+      navigate("/admin/communication/recognition");;
     }
   };
 
@@ -228,7 +238,7 @@ export default function CreateRecognition() {
             <table className="w-full">
               <thead className="bg-[#FFFFFF] border-b py-2 border-[#B5B5B5]">
                 <tr className="">
-                  <th className="w-12 px-4 py-3 text-left">
+                  <th className="w-12 px-4 py-3 cursor-pointer text-left">
                     <input
                       type="checkbox"
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -236,28 +246,28 @@ export default function CreateRecognition() {
                       onChange={(e) => handleSelectAll(e.target.checked)}
                     />
                   </th>
-                  <th className="px-4 py-3  text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3 cursor-pointer   text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     ID
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3  cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     Phone
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     Department
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
                     Last login
                   </th>
                   <th className="w-8 px-4 py-3">
                     <button
                       onClick={() => setIsFilterModalOpen(true)}
-                      className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-3 py-1.5 border cursor-pointer border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                       <svg
                         className="w-4 h-4 mr-1.5"
@@ -279,7 +289,10 @@ export default function CreateRecognition() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {employees.map((employee, index) => (
-                  <tr key={index} className="hover:bg-gray-50 border-0 py-2">
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 border-0 py-2 cursor-pointer"
+                  >
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
@@ -342,12 +355,12 @@ export default function CreateRecognition() {
   };
 
   return (
-    <div className="w-full   min-h-screen">
+    <div className="w-full  min-h-screen pb-10">
       {/* header section  */}
-      <div className="flex items-center justify-between p-6  ">
+      <div className="flex flex-col items-center justify-center p-6 md:flex-row md:justify-between md:items-center  ">
         {/* Left side - Title and subtitle */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-[#4E53B1] mb-1">
+          <h1 className="text-2xl text-center md:text-left font-semibold text-[#4E53B1] mb-1">
             Recognition
           </h1>
           <p className="text-gray-600 text-sm">
@@ -357,12 +370,15 @@ export default function CreateRecognition() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-3">
-          <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
-            Badge library
+          <button
+            onClick={() => navigate('/admin/badge-library')}
+            className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
+            Badge library 
           </button>
         </div>
       </div>
-      <div className="bg-white rounded-2xl min-h-screen">
+     <div className="bg-white p-8">
+       <div className="bg-white rounded-2xl min-h-screen">
         {/* Progress Steps */}
         <div className="">
           <div className="mb-12 py-6 border-[#C5C5C5] border-b ">
@@ -410,12 +426,15 @@ export default function CreateRecognition() {
         {renderStepContent()}
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-6 mb-8">
+        <div className="flex justify-end gap-4 mt-6 mb-8 mr-3">
+          
           <button
             onClick={handleNextStep}
-            disabled={currentStep === 3}
-            className={`px-6 py-3 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+            disabled={currentStep > 3}
+            className={`px-6 py-3 text-sm cursor-pointer font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
               currentStep === 3
+                ? "bg-[#4E53B1] hover:bg-blue-700"
+                : currentStep > 3
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#4E53B1] hover:bg-blue-700"
             }`}
@@ -424,7 +443,7 @@ export default function CreateRecognition() {
           </button>
           <button
             onClick={handleCancel}
-            className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-3 text-sm cursor-pointer font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancel
           </button>
@@ -434,7 +453,7 @@ export default function CreateRecognition() {
         {isFilterModalOpen && (
           <div className="fixed inset-0  bg-black/50 bg-opacity-50 flex items-center justify-end z-50">
             <div className="bg-white rounded-tl-2xl  shadow-xl w-80 max-h-auto overflow-hidden">
-              <div className="p-4">
+              <div className="p-4 ">
                 {/* Search Bar */}
                 <div className="relative mb-4">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -472,7 +491,7 @@ export default function CreateRecognition() {
                         type="checkbox"
                         checked={filter.checked}
                         onChange={() => handleFilterToggle(filter.id)}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                       />
                       <span
                         className={`ml-3 text-sm ${
@@ -491,13 +510,13 @@ export default function CreateRecognition() {
                 <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200">
                   <button
                     onClick={() => setIsFilterModalOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 text-sm font-medium cursor-pointer text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => setIsFilterModalOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Apply
                   </button>
@@ -507,6 +526,7 @@ export default function CreateRecognition() {
           </div>
         )}
       </div>
+     </div>
     </div>
   );
 }
