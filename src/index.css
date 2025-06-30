@@ -50,14 +50,15 @@
   max-height: 250px; /* Limit height and allow scroll */
   overflow-y: auto;
 }
-/* WebKit browsers: Chrome, Safari, Edge */
+/* index.css */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f5f5f5;
-  border: none;
+  border-radius: 12px; /* large enough for visible rounding */
+  margin: 4px 0; /* add vertical margin to "shrink" track height */
 }
 
 ::-webkit-scrollbar-thumb {
