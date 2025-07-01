@@ -312,115 +312,114 @@ function TaskAndProject() {
             </button>
           </div>
         </div>
+
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-gray-300 pb-4 sm:pb-0">
-          <div className="flex mt-6 mb-6 flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <span className="text-sm text-gray-600">View by:</span>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-1 text-indigo-600 font-medium text-sm">
-                  <List className="w-4 h-4" />{" "}
-                  <span className="hidden sm:inline">List</span>
-                </button>
-                <button className="flex items-center gap-1 text-gray-600 text-sm">
-                  <Calendar className="w-4 h-4" />{" "}
-                  <span className="hidden sm:inline">Dates</span>
-                </button>
+        {activeTabMain === "all" && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-gray-300 pb-4 sm:pb-0">
+            <div className="flex mt-6 mb-6 flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <span className="text-sm text-gray-600">View by:</span>
+                <div className="flex gap-2">
+                  <button className="flex items-center gap-1 text-indigo-600 font-medium text-sm">
+                    <List className="w-4 h-4" />
+                    <span className="hidden sm:inline">List</span>
+                  </button>
+                  <button className="flex items-center gap-1 text-gray-600 text-sm">
+                    <Calendar className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dates</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 relative w-full sm:w-auto">
+                <span className="text-sm text-gray-600">Group by:</span>
+                <select
+                  className="text-sm border p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto pr-8"
+                  value={groupBy}
+                  onChange={(e) =>
+                    setGroupBy(
+                      e.target.value as "title" | "label" | "assignedTo"
+                    )
+                  }
+                >
+                  <option value="title">Title</option>
+                  <option value="label">Label</option>
+                  <option value="assignedTo">assigned</option>
+                </select>
+
+                <img
+                  src={arrowDropDown}
+                  alt="dropdown icon"
+                  className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
+                />
+              </div>
+
+              <div className="flex items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
+                <span className="text-sm font-medium text-[#4E53B1]">
+                  May 25 - May 30
+                </span>
+                <FaSortDown className="w-4 h-4 -mt-2 text-[#4E53B1]" />
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 relative w-full sm:w-auto">
-              <span className="text-sm text-gray-600">Group by:</span>
-              <select
-                className="text-sm border p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto
-               appearance-none /* hide native arrow */
-               pr-8 /* space for custom icon */
-              "
-                value={groupBy}
-                onChange={(e) =>
-                  setGroupBy(e.target.value as "title" | "label" | "assignedTo")
-                }
-              >
-                <option value="title">Title</option>
-                <option value="label">Label</option>
-                <option value="assignedTo">assigned</option>
-              </select>
-
-              {/* Custom icon image */}
-              <img
-                src={arrowDropDown} // <-- replace with your icon path
-                alt="dropdown icon"
-                className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
-              />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+              <div className="relative w-full sm:w-auto">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full"
+                />
+              </div>
             </div>
+          </div>
+        )}
 
-            <div className="flex items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
-              <span className="text-sm font-medium text-[#4E53B1]">
-                May 25 - May 30
+        {activeTabMain === "all" && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            {/* Tabs */}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              <span className="text-black w-full sm:w-auto">
+                The view contains
               </span>
-              <FaSortDown className="w-4 h-4 -mt-2 text-[#4E53B1]" />
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => setActiveTab("tasks")}
+                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                    activeTab === "tasks"
+                      ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
+                      : "bg-white text-gray-600 border-gray-300"
+                  }`}
+                >
+                  {totalTasks} Tasks
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("open")}
+                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                    activeTab === "open"
+                      ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
+                      : "bg-white text-gray-600 border-gray-300"
+                  }`}
+                >
+                  {openTasks} Open tasks
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("done")}
+                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                    activeTab === "done"
+                      ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
+                      : "bg-white text-gray-600 border-gray-300"
+                  }`}
+                >
+                  {doneTasks} Done tasks
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
-            <div className="relative w-full sm:w-auto">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full"
-              />
-            </div>
-            <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto">
-              Export
-            </button>
-          </div>
-        </div>
-
-        {/* Summary Tabs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-          {/* Tabs */}
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            <span className="text-black w-full sm:w-auto">
-              The view contains
-            </span>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setActiveTab("tasks")}
-                className={`px-6 py-2 rounded-2xl border font-medium ${
-                  activeTab === "tasks"
-                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                    : "bg-white text-gray-600 border-gray-300"
-                }`}
-              >
-                {totalTasks} Tasks
-              </button>
-
-              <button
-                onClick={() => setActiveTab("open")}
-                className={`px-6 py-2 rounded-2xl border font-medium ${
-                  activeTab === "open"
-                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                    : "bg-white text-gray-600 border-gray-300"
-                }`}
-              >
-                {openTasks} Open tasks
-              </button>
-
-              <button
-                onClick={() => setActiveTab("done")}
-                className={`px-6 py-2 rounded-2xl border font-medium ${
-                  activeTab === "done"
-                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
-                    : "bg-white text-gray-600 border-gray-300"
-                }`}
-              >
-                {doneTasks} Done tasks
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Projects - Mobile Accordion */}
         <div className="block sm:hidden ">
@@ -567,6 +566,9 @@ function TaskAndProject() {
         </div>
 
         {/* Projects - Desktop View */}
+        <div>
+         <h2 className="text-3xl text-[#4E53B1] py-4"> Project List</h2>
+        </div>
         <div className="hidden sm:block">
           {filteredProjects.map(
             (project) =>
