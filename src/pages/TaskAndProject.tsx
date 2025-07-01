@@ -1,7 +1,10 @@
 
 import { useState } from "react";
-import { Search, Calendar, List, Plus } from 'lucide-react';
+import { Search, Calendar, List, Plus, X, Paperclip, Trash2 } from 'lucide-react';
 import { FaSortDown } from 'react-icons/fa';
+import CalendarDropdown from "@/components/TaskAndProject/CalendarDropdown";
+import ActivityLog from "@/components/TaskAndProject/ActivityLog";
+import LabelSelector from "@/components/TaskAndProject/LabelSelector";
 
 interface Task {
     id: string;
@@ -124,11 +127,221 @@ const projects: Project[] = [
     }
 ];
 
+interface NewTaskModalProps {
+    onClose: () => void;
+    onTaskDetailsClick: () => void;
+}
+
+function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
+    const [showDetails, setShowDetails] = useState(false);
+
+    return (
+        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+            <div className="bg-white w-full max-w-xl rounded-xl p-6 shadow-xl relative">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-gray-300 pb-3 mb-4">
+                    <h2 className="text-lg font-semibold text-[#4E53B1] flex items-center gap-2">
+                        <Plus className="w-4 h-4 text-[#4E53B1]" /> New Task
+                    </h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Content */}
+                {!showDetails ? (
+                    <div className="space-y-6">
+                        {/* Task Title */}
+                        <div className="flex items-center gap-4">
+                            <label className="w-24 text-gray-700 font-medium">Task Title</label>
+                            <input
+                                type="text"
+                                placeholder="Type Here"
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            />
+                        </div>
+
+                        {/* Assign To */}
+                        <div className="flex items-center gap-4">
+                            <label className="w-24 text-gray-700 font-medium">Assign to</label>
+                            <select
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            >
+                                <option>Select</option>
+                                <option>Jane Cooper</option>
+                                <option>Robert Fox</option>
+                            </select>
+                        </div>
+
+                        {/* Add More Details Trigger */}
+                        <div
+                            onClick={() => setShowDetails(true)}
+                            className="flex items-center gap-2 text-[#4E53B1] cursor-pointer"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span className="text-sm font-medium">Add more details</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {/* Task Details Trigger */}
+                        <p
+                            className='text-sm underline text-[#4E53B1] cursor-pointer'
+                            onClick={onTaskDetailsClick}
+                        >
+                            Task Details
+                        </p>
+
+                        <div>
+                            <label className="text-sm text-gray-700 font-medium">Task Title</label>
+                            <input
+                                type="text"
+                                placeholder=""
+                                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="text-sm text-gray-700 font-medium">Description</label>
+                            <textarea
+                                placeholder="Type here..."
+                                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            ></textarea>
+                            <div className="text-right text-xs text-gray-500 pt-1">
+                                <Paperclip className="inline-block w-4 h-4 mr-1" /> Attachment
+                            </div>
+                        </div>
+
+                        {/* Location */}
+                        <div>
+                            <label className="text-sm text-gray-700 font-medium">Location</label>
+                            <input
+                                type="text"
+                                placeholder="Type location"
+                                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            />
+                        </div>
+
+                        {/* Start & Due Dates */}
+                        <div className="grid gap-4">
+                            <div className="flex-1">
+                                <div className="flex gap-2 mt-1">
+                                    <label className="text-sm text-gray-500 mt-1 font-medium">Start Date</label>
+                                    <input type="text" defaultValue="22/06/2025" className="border border-gray-300 text-center text-gray-500 rounded-md px-2 py-2 w-30 text-sm" />
+                                    <input type="text" defaultValue="9:00 am" className="border border-gray-300 text-center text-gray-500 rounded-md px-2 py-1 w-28 text-sm" />
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex gap-2 mt-1">
+                                    <label className="text-sm text-gray-500 mt-1 font-medium">Due Date</label>
+                                    <input type="text" defaultValue="23/06/2025" className="border border-gray-300 ml-2 text-gray-500 rounded-md px-2 py-2 text-center w-30 text-sm" />
+                                    <input type="text" defaultValue="8:00 am" className="border border-gray-300 text-gray-500 rounded-md text-center px-2 py-1 w-28 text-sm" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Labels */}
+                        <div>
+                            <LabelSelector />
+                        </div>
+                    </div>
+                )}
+
+                {/* Footer */}
+                <div className="mt-6 flex justify-between items-center">
+                    <div className="flex gap-4">
+                        <button className="bg-[#4E53B1] hover:bg-[#3f45a0] text-white text-sm font-semibold px-5 py-2 rounded-md">
+                            Publish Task
+                        </button>
+                        <button className="border border-[#4E53B1] text-[#4E53B1] text-sm font-semibold px-5 py-2 rounded-md hover:bg-[#f2f2fc]">
+                            Draft Task
+                        </button>
+                    </div>
+                    <button className="text-red-500 hover:text-red-700">
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
+    return (
+        <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-lg relative">
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
+                {/* Tabs */}
+                <div className="flex gap-6 border-b pb-2">
+                    <p className="text-sm text-[#4E53B1] font-medium border-b-2 border-[#4E53B1]">Task Details</p>
+                    <p className="text-sm text-gray-500">Comments</p>
+                </div>
+
+                {/* Title */}
+                <h2 className="text-lg font-medium mt-4 mb-3">City Bridge Renovations</h2>
+
+                {/* Assigned to */}
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm text-gray-600 font-medium w-24">Assigned to</span>
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-xs font-medium text-white">
+                            JC
+                        </div>
+                        <span className="text-sm font-medium">Jane Cooper</span>
+                    </div>
+                </div>
+
+                {/* Frequency */}
+                <div className="flex mb-3">
+                    <span className="text-sm text-gray-600 font-medium w-24">Frequency</span>
+                    <span className="text-sm text-gray-700">One off task</span>
+                </div>
+
+                {/* Start Dates */}
+                <div className="flex mb-3">
+                    <span className="text-sm text-gray-600 font-medium w-24">Start date</span>
+                    <span className="text-sm text-gray-700">22/06/25 at 10:00 am</span>
+                </div>
+                <div className="flex mb-3">
+                    <span className="text-sm text-gray-600 font-medium w-24">Due date</span>
+                    <span className="text-sm text-gray-700">23/06/25 at 10:00 am</span>
+                </div>
+
+                {/* Labels */}
+                <div className="flex mb-4">
+                    <span className="text-sm text-gray-600 font-medium w-24">Labels</span>
+                    <span className="bg-[#E0E7FF] text-[#4E53B1] px-3 py-1 rounded-full text-sm">General Tasks</span>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="flex justify-between items-center mt-4">
+                    <button className="bg-green-500 text-white text-sm px-4 py-1.5 rounded-md">Mark task as done</button>
+                    <div className="flex items-center gap-3">
+                        <button className="border border-[#4E53B1] text-[#4E53B1] px-4 py-1.5 text-sm rounded-md">Edit</button>
+                        <Trash2 size={18} className="text-red-500 cursor-pointer" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function TaskAndProject() {
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     const [activeProject, setActiveProject] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'tasks' | 'open' | 'done'>('tasks');
     const [groupBy, setGroupBy] = useState<'title' | 'label' | 'assignedTo'>('title');
+    const [selectedDateRange, setSelectedDateRange] = useState('May 25 - May 30');
+    const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+    const [showTaskDetailsPanel, setShowTaskDetailsPanel] = useState(false);
 
     // Filter tasks based on active tab
     const filteredProjects = projects.map(project => ({
@@ -138,11 +351,11 @@ function TaskAndProject() {
                 (project.id === '1' ? 'Low Priority' :
                     project.id === '2' ? 'Medium Priority' : 'High Priority') :
                 project.tasks[0]?.assignedTo.name || project.name,
-        assignedTo: project.tasks[0]?.assignedTo, // Add assignedTo to the project object
+        assignedTo: project.tasks[0]?.assignedTo,
         tasks: project.tasks.filter(task => {
             if (activeTab === 'open') return task.status === 'Open' || task.status === 'Draft';
             if (activeTab === 'done') return task.status === 'Done';
-            return true; // 'tasks' tab shows all
+            return true;
         })
     }));
 
@@ -204,7 +417,6 @@ function TaskAndProject() {
         setActiveProject(activeProject === projectId ? null : projectId);
     };
 
-    // Find the original project name for a task
     const getProjectNameForTask = (taskId: string) => {
         for (const project of projects) {
             const task = project.tasks.find(t => t.id === taskId);
@@ -213,18 +425,18 @@ function TaskAndProject() {
         return '';
     };
 
+    const handleTaskDetailsClick = () => {
+        setShowTaskDetailsPanel(true);
+        setShowNewTaskModal(false);
+    };
+
     return (
         <div className="bg-gray-50 p-4 sm:p-6">
             <div className="max-w-8xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                     <h1 className="text-xl sm:text-2xl text-[#4E53B1] font-semibold">Task & Project Management</h1>
-                    <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors">
-                        <div className="flex gap-2 items-center">
-                            <img src="../src/assets/menu_open.png" alt="" className="w-4 h-4" />
-                            <div>Activity</div>
-                        </div>
-                    </button>
+                    <ActivityLog />
                 </div>
 
                 {/* Controls */}
@@ -255,10 +467,10 @@ function TaskAndProject() {
                             </select>
                         </div>
 
-                        <div className="flex items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
-                            <span className="text-sm font-medium text-[#4E53B1]">May 25 - May 30</span>
-                            <FaSortDown className="w-4 h-4 -mt-2 text-[#4E53B1]" />
-                        </div>
+                        <CalendarDropdown
+                            selectedRange={selectedDateRange}
+                            onSelectRange={setSelectedDateRange}
+                        />
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
@@ -270,7 +482,7 @@ function TaskAndProject() {
                                 className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full"
                             />
                         </div>
-                        <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto">
+                        <button className="bg-[#4E53B1] text-white cursor-pointer px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto">
                             Export
                         </button>
                     </div>
@@ -313,8 +525,6 @@ function TaskAndProject() {
                                 {doneTasks} Done tasks
                             </button>
 
-
-
                             <div className="flex items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2">
                                 <span>2</span>
                                 <span>Overdue tasks</span>
@@ -323,8 +533,11 @@ function TaskAndProject() {
                     </div>
 
                     {/* Add Task */}
-                    <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 sm:ml-auto">
-                        <Plus className="w-4 h-4 text-white" />
+                    <button
+                        onClick={() => setShowNewTaskModal(true)}
+                        className="bg-[#4E53B1] text-white cursor-pointer px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 sm:ml-auto"
+                    >
+                        <Plus className="w-4 h-4" />
                         Add Task
                     </button>
                 </div>
@@ -517,6 +730,18 @@ function TaskAndProject() {
                     ))}
                 </div>
             </div>
+
+            {/* Modals */}
+            {showNewTaskModal && (
+                <NewTaskModal
+                    onClose={() => setShowNewTaskModal(false)}
+                    onTaskDetailsClick={handleTaskDetailsClick}
+                />
+            )}
+
+            {showTaskDetailsPanel && (
+                <TaskDetailsPanel onClose={() => setShowTaskDetailsPanel(false)} />
+            )}
         </div>
     );
 }
