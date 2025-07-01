@@ -1,10 +1,13 @@
 
 import { useState } from "react";
-import { Search, Calendar, List, Plus, X, Paperclip, Trash2 } from 'lucide-react';
+import { Search, Calendar, List, Plus, X, Paperclip, Trash2, ChevronDown } from 'lucide-react';
 import { FaSortDown } from 'react-icons/fa';
 import CalendarDropdown from "@/components/TaskAndProject/CalendarDropdown";
 import ActivityLog from "@/components/TaskAndProject/ActivityLog";
 import LabelSelector from "@/components/TaskAndProject/LabelSelector";
+import OptionsDropdownButton from "@/components/TaskAndProject/Action";
+import OverdueTasks from "@/components/TaskAndProject/OverdueTasks";
+
 
 interface Task {
     id: string;
@@ -137,7 +140,7 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
 
     return (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
-            <div className="bg-white w-full max-w-xl rounded-xl p-6 shadow-xl relative">
+            <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-xl relative">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-gray-300 pb-3 mb-4">
                     <h2 className="text-lg font-semibold text-[#4E53B1] flex items-center gap-2">
@@ -226,17 +229,23 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
                         {/* Start & Due Dates */}
                         <div className="grid gap-4">
                             <div className="flex-1">
-                                <div className="flex gap-2 mt-1">
-                                    <label className="text-sm text-gray-500 mt-1 font-medium">Start Date</label>
+                                <div className="flex gap-4 mt-1">
+                                    <label className="text-sm text-gray-500 mt-2 font-medium">Start Date</label>
                                     <input type="text" defaultValue="22/06/2025" className="border border-gray-300 text-center text-gray-500 rounded-md px-2 py-2 w-30 text-sm" />
                                     <input type="text" defaultValue="9:00 am" className="border border-gray-300 text-center text-gray-500 rounded-md px-2 py-1 w-28 text-sm" />
+                                    <button className="p-2 text-gray-400 hover:text-gray-600">
+                                        <X className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <div className="flex gap-2 mt-1">
-                                    <label className="text-sm text-gray-500 mt-1 font-medium">Due Date</label>
+                                <div className="flex gap-4 mt-1">
+                                    <label className="text-sm text-gray-500 mt-2 font-medium">Due Date</label>
                                     <input type="text" defaultValue="23/06/2025" className="border border-gray-300 ml-2 text-gray-500 rounded-md px-2 py-2 text-center w-30 text-sm" />
                                     <input type="text" defaultValue="8:00 am" className="border border-gray-300 text-gray-500 rounded-md text-center px-2 py-1 w-28 text-sm" />
+                                    <button className="p-2 text-gray-400 hover:text-gray-600">
+                                        <X className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -267,7 +276,37 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
     );
 }
 
+
+
 function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
+    const [activeTab, setActiveTab] = useState<'details' | 'comments'>('details');
+    const [isTaskDone, setIsTaskDone] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [comment, setComment] = useState('');
+    const [comments, setComments] = useState([
+        { id: 1, author: 'mei', content: 'Write a comment', time: '10:45 PM' },
+        { id: 2, author: 'haca', content: 'Statue', time: '2:00 am' },
+        { id: 3, author: 'haca', content: 'Label', time: '2:00 am' },
+        { id: 4, author: 'haca', content: 'Start time', time: '2:00 am' },
+    ]);
+
+    const handleAddComment = () => {
+        if (comment.trim()) {
+            const newComment = {
+                id: comments.length + 1,
+                author: 'Current User',
+                content: comment,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            setComments([...comments, newComment]);
+            setComment('');
+        }
+    };
+
+    if (isEditing) {
+        return <EditTaskForm onCancel={() => setIsEditing(false)} />;
+    }
+
     return (
         <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center">
             <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-lg relative">
@@ -280,59 +319,344 @@ function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
                 </button>
 
                 {/* Tabs */}
-                <div className="flex gap-6 border-b pb-2">
-                    <p className="text-sm text-[#4E53B1] font-medium border-b-2 border-[#4E53B1]">Task Details</p>
-                    <p className="text-sm text-gray-500">Comments</p>
+                <div className="flex gap-6 border-b border-gray-300 pb-2">
+                    <button
+                        onClick={() => setActiveTab('details')}
+                        className={`text-sm font-medium ${activeTab === 'details' ? 'text-[#4E53B1] border-b-2 border-[#4E53B1]' : 'text-gray-500'}`}
+                    >
+                        Task Details
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('comments')}
+                        className={`text-sm font-medium ${activeTab === 'comments' ? 'text-[#4E53B1] border-b-2 border-[#4E53B1]' : 'text-gray-500'}`}
+                    >
+                        Comments
+                    </button>
                 </div>
 
-                {/* Title */}
-                <h2 className="text-lg font-medium mt-4 mb-3">City Bridge Renovations</h2>
+                {activeTab === 'details' ? (
+                    <>
+                        {/* Title */}
+                        <h2 className="text-xl font-medium mt-4 mb-3">City Bridge Renovations</h2>
 
-                {/* Assigned to */}
-                <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm text-gray-600 font-medium w-24">Assigned to</span>
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-xs font-medium text-white">
-                            JC
+                        {/* Assigned to */}
+                        <div className="flex items-center border-t mt-6 mb-6 border-gray-300 gap-2">
+                            <div className="flex items-center mt-4 gap-2">
+                                <span className="text-sm text-gray-600 font-medium w-24">Assigned to</span>
+                                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-medium text-white">
+                                    JC
+                                </div>
+                                <span className="text-sm font-medium">Jane Cooper</span>
+                            </div>
                         </div>
-                        <span className="text-sm font-medium">Jane Cooper</span>
+
+                        {/* Frequency */}
+                        <div className="flex border-t py-4 border-gray-300">
+                            <span className="text-sm text-gray-600 font-medium w-24">Frequency</span>
+                            <span className="text-sm text-gray-700">One off task</span>
+                        </div>
+
+                        {/* Start Dates */}
+                        <div className="flex mb-3">
+                            <span className="text-sm text-gray-600 font-medium w-24">Start date</span>
+                            <span className="text-sm text-gray-700">22/06/25 at 10:00 am</span>
+                        </div>
+                        <div className="flex mb-3">
+                            <span className="text-sm text-gray-600 font-medium w-24">Due date</span>
+                            <span className="text-sm text-gray-700">23/06/25 at 10:00 am</span>
+                        </div>
+
+                        {/* Labels */}
+                        <div className="flex mb-4 border-t border-b border-gray-300 py-3">
+                            <span className="text-sm text-gray-600 font-medium w-24">Labels</span>
+                            <span className="bg-[#E0E7FF] text-[#4E53B1] px-3 py-1 rounded-full text-sm">General Tasks</span>
+                        </div>
+
+                        {/* Footer Buttons */}
+                        <div className="flex justify-between mt-4 lg:mt-30">
+                            {!isTaskDone ? (
+                                <button
+                                    className="bg-green-500 hover:bg-[#373a77] cursor-pointer text-white text-sm px-4 py-1.5 rounded-md"
+                                    onClick={() => setIsTaskDone(true)}
+                                >
+                                    Mark task as done
+                                </button>
+                            ) : (
+                                <button
+                                    className="bg-[#4E53B1] hover:bg-[#373a77] cursor-pointer text-white text-sm px-8 py-1.5 rounded-md"
+                                    onClick={() => console.log('Publish action triggered')}
+                                >
+                                    Publish
+                                </button>
+                            )}
+
+                            <button
+                                className="border border-[#4E53B1] hover:bg-[#898dd7] cursor-pointer text-[#4E53B1] px-4 py-1.5 text-sm rounded-md lg:-ml-30"
+                                onClick={() => setIsEditing(true)}
+                            >
+                                Edit
+                            </button>
+                            <div className="flex items-center gap-3">
+                                <Trash2 size={18} className="text-red-500 cursor-pointer" />
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="mt-4">
+                        {/* Comments List */}
+                        <div className="space-y-4 max-h-96 overflow-y-auto">
+                            {comments.map((comment) => (
+                                <div key={comment.id} className="flex gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium">
+                                        {comment.author.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium">{comment.author}</span>
+                                            <span className="text-xs text-gray-500">{comment.time}</span>
+                                        </div>
+                                        <p className="text-sm mt-1">{comment.content}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Comment Input */}
+                        <div className="flex gap-3 mt-6 mb-3">
+                            <div className="w-9 h-9 mt-1 rounded-full bg-blue-500 flex items-center justify-center text-xs font-medium text-white">
+                                JC
+                            </div>
+                            <input
+                                type="text"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder="Write a comment..."
+                                className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                            />
+                            <button
+                                onClick={handleAddComment}
+                                className="text-white px-3 py-2 rounded-md text-sm"
+                            >
+                                <img src="../src/assets/send.png" alt="" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function EditTaskForm({ onCancel }: { onCancel: () => void }) {
+    const [taskTitle, setTaskTitle] = useState('City Bridge Renovations');
+    const [description, setDescription] = useState('');
+    const [location, setLocation] = useState('');
+    const [startDate, setStartDate] = useState('22/06/2025');
+    const [startTime, setStartTime] = useState('10:00 am');
+    const [dueDate, setDueDate] = useState('23/06/2025');
+    const [dueTime, setDueTime] = useState('10:00 am');
+    const [labels, setLabels] = useState(['General Tasks']);
+    const [showLabelsDropdown, setShowLabelsDropdown] = useState(false);
+
+    const removeLabel = (labelToRemove: string) => {
+        setLabels(labels.filter(label => label !== labelToRemove));
+    };
+
+    const timeOptions = [
+        '12:00 am', '12:30 am', '1:00 am', '1:30 am', '2:00 am', '2:30 am',
+        '3:00 am', '3:30 am', '4:00 am', '4:30 am', '5:00 am', '5:30 am',
+        '6:00 am', '6:30 am', '7:00 am', '7:30 am', '8:00 am', '8:30 am',
+        '9:00 am', '9:30 am', '10:00 am', '10:30 am', '11:00 am', '11:30 am',
+        '12:00 pm', '12:30 pm', '1:00 pm', '1:30 pm', '2:00 pm', '2:30 pm',
+        '3:00 pm', '3:30 pm', '4:00 pm', '4:30 pm', '5:00 pm', '5:30 pm',
+        '6:00 pm', '6:30 pm', '7:00 pm', '7:30 pm', '8:00 pm', '8:30 pm',
+        '9:00 pm', '9:30 pm', '10:00 pm', '10:30 pm', '11:00 pm', '11:30 pm'
+    ];
+
+    return (
+        <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center">
+            <div className="w-full max-w-md bg-white rounded-lg shadow-sm border border-gray-200 mx-4">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-300">
+                    <div className="flex items-center space-x-3">
+                        <button onClick={onCancel}>
+                            {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
+                            <img src="../src/assets/arrow_back.png" alt="" />
+                        </button>
+                        <h1 className="text-lg font-medium text-[#4E53B1]">Edit Task</h1>
                     </div>
                 </div>
 
-                {/* Frequency */}
-                <div className="flex mb-3">
-                    <span className="text-sm text-gray-600 font-medium w-24">Frequency</span>
-                    <span className="text-sm text-gray-700">One off task</span>
-                </div>
+                {/* Form Content */}
+                <div className="p-6 space-y-6">
+                    {/* Task Details Section */}
+                    <div>
+                        <h2 className="text-sm font-medium text-[#4E53B1] underline mb-4">Task Details</h2>
 
-                {/* Start Dates */}
-                <div className="flex mb-3">
-                    <span className="text-sm text-gray-600 font-medium w-24">Start date</span>
-                    <span className="text-sm text-gray-700">22/06/25 at 10:00 am</span>
-                </div>
-                <div className="flex mb-3">
-                    <span className="text-sm text-gray-600 font-medium w-24">Due date</span>
-                    <span className="text-sm text-gray-700">23/06/25 at 10:00 am</span>
-                </div>
+                        {/* Task Title */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Task Title
+                            </label>
+                            <input
+                                type="text"
+                                value={taskTitle}
+                                onChange={(e) => setTaskTitle(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder=""
+                            />
+                        </div>
 
-                {/* Labels */}
-                <div className="flex mb-4">
-                    <span className="text-sm text-gray-600 font-medium w-24">Labels</span>
-                    <span className="bg-[#E0E7FF] text-[#4E53B1] px-3 py-1 rounded-full text-sm">General Tasks</span>
-                </div>
+                        {/* Description */}
+                        <div className="mb-4">
+                            <div>
+                                <label className="text-sm text-gray-700 font-medium">Description</label>
+                                <textarea
+                                    placeholder="Type here..."
+                                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-[#4E53B1]"
+                                ></textarea>
+                                <div className="text-right text-xs text-gray-500 pt-1">
+                                    <Paperclip className="inline-block w-4 h-4 mr-1" /> Attachment
+                                </div>
+                            </div>
+                        </div>
 
-                {/* Footer Buttons */}
-                <div className="flex justify-between items-center mt-4">
-                    <button className="bg-green-500 text-white text-sm px-4 py-1.5 rounded-md">Mark task as done</button>
-                    <div className="flex items-center gap-3">
-                        <button className="border border-[#4E53B1] text-[#4E53B1] px-4 py-1.5 text-sm rounded-md">Edit</button>
-                        <Trash2 size={18} className="text-red-500 cursor-pointer" />
+                        {/* Location */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Location
+                            </label>
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Type location"
+                            />
+                        </div>
+
+                        {/* Start Date */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Start Date
+                            </label>
+                            <div className="flex space-x-2">
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                </div>
+                                <div className="relative">
+                                    <select
+                                        value={startTime}
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                        className="appearance-none px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white pr-8"
+                                    >
+                                        {timeOptions.map(time => (
+                                            <option key={time} value={time}>{time}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
+                                <button className="p-2 text-gray-400 hover:text-gray-600">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Due Date */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Due Date
+                            </label>
+                            <div className="flex space-x-2">
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        value={dueDate}
+                                        onChange={(e) => setDueDate(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                </div>
+                                <div className="relative">
+                                    <select
+                                        value={dueTime}
+                                        onChange={(e) => setDueTime(e.target.value)}
+                                        className="appearance-none px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white pr-8"
+                                    >
+                                        {timeOptions.map(time => (
+                                            <option key={time} value={time}>{time}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
+                                <button className="p-2 text-gray-400 hover:text-gray-600">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Labels */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Labels
+                            </label>
+                            <div className="relative">
+                                <div
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer flex items-center justify-between"
+                                    onClick={() => setShowLabelsDropdown(!showLabelsDropdown)}
+                                >
+                                    <div className="flex flex-wrap gap-1">
+                                        {labels.map((label, index) => (
+                                            <span
+                                                key={index}
+                                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                                            >
+                                                {label}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeLabel(label);
+                                                    }}
+                                                    className="ml-1 hover:text-blue-600"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-between">
+                        <button className="px-6 py-2 bg-[#4E53B1] cursor-pointer text-white rounded-md hover:bg-[#373a77] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                            Update Task
+                        </button>
+                        <button className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">
+                            <Trash2 className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+
+
+
+
+
+
 
 function TaskAndProject() {
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
@@ -342,6 +666,8 @@ function TaskAndProject() {
     const [selectedDateRange, setSelectedDateRange] = useState('May 25 - May 30');
     const [showNewTaskModal, setShowNewTaskModal] = useState(false);
     const [showTaskDetailsPanel, setShowTaskDetailsPanel] = useState(false);
+    const [showOverdueTasks, setShowOverdueTasks] = useState(false);
+
 
     // Filter tasks based on active tab
     const filteredProjects = projects.map(project => ({
@@ -525,10 +851,32 @@ function TaskAndProject() {
                                 {doneTasks} Done tasks
                             </button>
 
-                            <div className="flex items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2">
+
+                            <button className=""> <OptionsDropdownButton /></button>
+
+
+                            <button
+                                onClick={() => setShowOverdueTasks(true)}
+                                className="flex  items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2"
+                            >
                                 <span>2</span>
                                 <span>Overdue tasks</span>
-                            </div>
+                            </button>
+
+
+                            {showOverdueTasks && (
+                                <div className="fixed inset-0 bg-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
+                                    <div className="relative bg-white rounded-lg max-w-2xl  w-full max-h-[90vh] overflow-y-auto">
+                                        <button
+                                            onClick={() => setShowOverdueTasks(false)}
+                                            className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100"
+                                        >
+                                            <X className="w-5 h-5 text-gray-500" />
+                                        </button>
+                                        <OverdueTasks />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -618,6 +966,8 @@ function TaskAndProject() {
                                                                     </div>
                                                                     <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
                                                                 </div>
+
+
                                                             )}
                                                         </div>
                                                     </div>
