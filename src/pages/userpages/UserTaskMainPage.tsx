@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-
 // this is new code ............. for testing
 
 import { useState } from "react";
-import { Search, Calendar, List, } from "lucide-react";
+import { Search, Calendar, List } from "lucide-react";
 import { FaSortDown } from "react-icons/fa";
 import arrowDropDown from "@/assets/arrow_drop_down.svg";
 
@@ -125,6 +124,15 @@ const projects: Project[] = [
         dueDate: "23/06/25 at 12:00 am",
         assignedTo: { name: "Mike Chen", avatar: "MC" },
       },
+      {
+        id: "3-4",
+        name: "task 3",
+        status: "Done", // 👈 Changed from "Overdue" to "Done"
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
     ],
   },
 ];
@@ -228,6 +236,8 @@ function TaskAndProject() {
         return "bg-red-100 text-red-800 border border-red-200";
       case "Running":
         return "bg-green-100 text-green-800 border border-green-200";
+      case "Done":
+        return "bg-green-100 text ";
       default:
         return "bg-gray-100 text-gray-800 border border-gray-200";
     }
@@ -338,7 +348,7 @@ function TaskAndProject() {
 
               {/* Custom icon image */}
               <img
-                src={arrowDropDown}// <-- replace with your icon path
+                src={arrowDropDown} // <-- replace with your icon path
                 alt="dropdown icon"
                 className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
               />
@@ -499,7 +509,9 @@ function TaskAndProject() {
                                     task.status
                                   )}`}
                                 >
-                                  {task.status}
+                                  {task.status === "Done"
+                                    ? "Completed"
+                                    : task.status}
                                 </span>
                               </div>
                               <div className="mt-2 text-sm text-gray-500">
@@ -644,12 +656,21 @@ function TaskAndProject() {
                               src="../src/assets/forum.png"
                               alt=""
                             />
-                            <span
+                            {/* <span
                               className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
                                 task.status
                               )}`}
                             >
                               {task.status}
+                            </span> */}
+                            <span
+                              className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
+                                task.status
+                              )}`}
+                            >
+                              {task.status === "Done"
+                                ? "Completed"
+                                : task.status}
                             </span>
                           </div>
                           <div className="col-span-2">
