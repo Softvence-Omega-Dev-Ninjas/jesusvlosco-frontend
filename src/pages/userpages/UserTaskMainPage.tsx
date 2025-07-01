@@ -1,705 +1,721 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-// export default function UserTaskMainPage() {
-//     // note: i start work on the page 
-//     return (
-//         <div>UserTaskMainPage</div>
-//     )
-// }
+// this is new code ............. for testing
 
-
-// "use client"
-
-"use client"
-
-import { useState, useMemo } from "react"
-import { Calendar, List, Search, Activity, MessageSquare } from "lucide-react"
+import { useState } from "react";
+import { Search, Calendar, List } from "lucide-react";
+import { FaSortDown } from "react-icons/fa";
+import arrowDropDown from "@/assets/arrow_drop_down.svg";
 
 interface Task {
-  id: string
-  name: string
-  status: "Running" | "Open" | "Overdue" | "Done" | "Submitted"
-  label: string
-  startTime: string
-  dueDate: string
-  assignedTo: string
-  projectId: string
-  createdDate: Date
+  id: string;
+  name: string;
+  status: "Open" | "Draft" | "Done" | "Running" | "Overdue";
+  label: string;
+  startTime: string;
+  dueDate: string;
+  assignedTo: {
+    name: string;
+    avatar: string;
+  };
 }
 
 interface Project {
-  id: string
-  name: string
-  tasks: Task[]
+  id: string;
+  name: string;
+  tasks: Task[];
 }
 
-const mockData: Project[] = [
+const projects: Project[] = [
   {
-    id: "project1",
-    name: "Project 1",
+    id: "1",
+    name: "project1",
     tasks: [
       {
-        id: "task1-1",
-        name: "Task 1",
+        id: "1-1",
+        name: "task 1",
         status: "Running",
         label: "General Tasks",
         startTime: "23/06/25 at 12:00 am",
         dueDate: "23/06/25 at 12:00 am",
-        assignedTo: "John Doe",
-        projectId: "project1",
-        createdDate: new Date(2024, 4, 25),
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
       {
-        id: "task1-2",
-        name: "Task 2",
+        id: "1-2",
+        name: "task 2",
         status: "Open",
-        label: "Development",
-        startTime: "24/06/25 at 12:00 am",
-        dueDate: "24/06/25 at 12:00 am",
-        assignedTo: "Jane Smith",
-        projectId: "project1",
-        createdDate: new Date(2024, 4, 26),
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
       {
-        id: "task1-3",
-        name: "Task 3",
+        id: "1-3",
+        name: "task 3",
         status: "Overdue",
-        label: "Testing",
-        startTime: "25/06/25 at 12:00 am",
-        dueDate: "25/06/25 at 12:00 am",
-        assignedTo: "Bob Wilson",
-        projectId: "project1",
-        createdDate: new Date(2024, 4, 27),
-      },
-      {
-        id: "task1-4",
-        name: "Task 4",
-        status: "Done",
-        label: "Design",
-        startTime: "26/06/25 at 12:00 am",
-        dueDate: "26/06/25 at 12:00 am",
-        assignedTo: "Alice Brown",
-        projectId: "project1",
-        createdDate: new Date(2024, 4, 28),
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
     ],
   },
   {
-    id: "project2",
-    name: "Project 2",
+    id: "2",
+    name: "project2",
     tasks: [
       {
-        id: "task2-1",
+        id: "2-1",
         name: "Task 1",
+        status: "Overdue",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "2-2",
+        name: "task 2",
+        status: "Open",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Wade Warren", avatar: "WW" },
+      },
+      {
+        id: "2-3",
+        name: "Task 3",
         status: "Running",
         label: "General Tasks",
-        startTime: "27/06/25 at 12:00 am",
-        dueDate: "27/06/25 at 12:00 am",
-        assignedTo: "John Doe",
-        projectId: "project2",
-        createdDate: new Date(2024, 4, 29),
-      },
-      {
-        id: "task2-2",
-        name: "Task 2",
-        status: "Open",
-        label: "Research",
-        startTime: "28/06/25 at 12:00 am",
-        dueDate: "28/06/25 at 12:00 am",
-        assignedTo: "Jane Smith",
-        projectId: "project2",
-        createdDate: new Date(2024, 4, 30),
-      },
-      {
-        id: "task2-3",
-        name: "Task 3",
-        status: "Overdue",
-        label: "Development",
-        startTime: "29/06/25 at 12:00 am",
-        dueDate: "29/06/25 at 12:00 am",
-        assignedTo: "Bob Wilson",
-        projectId: "project2",
-        createdDate: new Date(2024, 5, 1),
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
     ],
   },
   {
-    id: "project3",
-    name: "Project 3",
+    id: "3",
+    name: "project1",
     tasks: [
       {
-        id: "task3-1",
-        name: "Task 1",
+        id: "3-1",
+        name: "Task 1 ",
         status: "Running",
         label: "General Tasks",
-        startTime: "30/06/25 at 12:00 am",
-        dueDate: "30/06/25 at 12:00 am",
-        assignedTo: "Alice Brown",
-        projectId: "project3",
-        createdDate: new Date(2024, 5, 2),
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
       {
-        id: "task3-2",
+        id: "3-2",
         name: "Task 2",
         status: "Open",
-        label: "Design",
-        startTime: "01/07/25 at 12:00 am",
-        dueDate: "01/07/25 at 12:00 am",
-        assignedTo: "John Doe",
-        projectId: "project3",
-        createdDate: new Date(2024, 5, 3),
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
       {
-        id: "task3-3",
+        id: "3-3",
         name: "Task 3",
         status: "Overdue",
-        label: "Testing",
-        startTime: "02/07/25 at 12:00 am",
-        dueDate: "02/07/25 at 12:00 am",
-        assignedTo: "Jane Smith",
-        projectId: "project3",
-        createdDate: new Date(2024, 5, 4),
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Mike Chen", avatar: "MC" },
       },
       {
-        id: "task3-4",
-        name: "Task 4",
-        status: "Done",
-        label: "Development",
-        startTime: "03/07/25 at 12:00 am",
-        dueDate: "03/07/25 at 12:00 am",
-        assignedTo: "Bob Wilson",
-        projectId: "project3",
-        createdDate: new Date(2024, 5, 5),
-      },
-      {
-        id: "task3-5",
-        name: "Task 5",
-        status: "Submitted",
-        label: "Research",
-        startTime: "04/07/25 at 12:00 am",
-        dueDate: "04/07/25 at 12:00 am",
-        assignedTo: "Alice Brown",
-        projectId: "project3",
-        createdDate: new Date(2024, 5, 6),
+        id: "3-4",
+        name: "task 3",
+        status: "Done", // 👈 Changed from "Overdue" to "Done"
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
     ],
   },
-  {
-    id: "project4",
-    name: "Project 4",
-    tasks: [
-      {
-        id: "task4-1",
-        name: "Task 1",
-        status: "Open",
-        label: "Planning",
-        startTime: "05/07/25 at 12:00 am",
-        dueDate: "05/07/25 at 12:00 am",
-        assignedTo: "John Doe",
-        projectId: "project4",
-        createdDate: new Date(2024, 5, 7),
-      },
-      {
-        id: "task4-2",
-        name: "Task 2",
-        status: "Running",
-        label: "Development",
-        startTime: "06/07/25 at 12:00 am",
-        dueDate: "06/07/25 at 12:00 am",
-        assignedTo: "Jane Smith",
-        projectId: "project4",
-        createdDate: new Date(2024, 5, 8),
-      },
-      {
-        id: "task4-3",
-        name: "Task 3",
-        status: "Overdue",
-        label: "Testing",
-        startTime: "07/07/25 at 12:00 am",
-        dueDate: "07/07/25 at 12:00 am",
-        assignedTo: "Bob Wilson",
-        projectId: "project4",
-        createdDate: new Date(2024, 5, 9),
-      },
-      {
-        id: "task4-4",
-        name: "Task 4",
-        status: "Done",
-        label: "General Tasks",
-        startTime: "08/07/25 at 12:00 am",
-        dueDate: "08/07/25 at 12:00 am",
-        assignedTo: "Alice Brown",
-        projectId: "project4",
-        createdDate: new Date(2024, 5, 10),
-      },
-    ],
-  },
-]
+];
 
-const isTaskOverdue = (dueDate: string) => {
-  // Parse the due date string (format: "23/06/25 at 12:00 am")
-  const datePart = dueDate.split(" at ")[0]
-  const [day, month, year] = datePart.split("/")
-  const taskDueDate = new Date(2000 + Number.parseInt(year), Number.parseInt(month) - 1, Number.parseInt(day))
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to compare only dates
-  return taskDueDate < today
-}
+function TaskAndProject() {
+  const [activeTabMain, setActiveTabMain] = useState<"all" | "submitted">(
+    "all"
+  );
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"tasks" | "open" | "done">(
+    "tasks"
+  );
+  const [groupBy, setGroupBy] = useState<"title" | "label" | "assignedTo">(
+    "title"
+  );
 
-export default function UserTaskMainPage() {
-  const [activeTab, setActiveTab] = useState<"all" | "submitted">("all")
-  const [viewBy, setViewBy] = useState<"list" | "dates">("list")
-  const [groupBy, setGroupBy] = useState("title")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([])
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  // Filter tasks based on active tab
+  const filteredProjects = projects.map((project) => {
+    const filteredTasks = project.tasks.filter((task) => {
+      const statusMatch =
+        activeTab === "open"
+          ? task.status === "Open" || task.status === "Draft"
+          : activeTab === "done"
+          ? task.status === "Done"
+          : true;
 
-  const allTasks = useMemo(() => {
-    return mockData.flatMap((project) => project.tasks)
-  }, [])
+      const submittedMatch =
+        activeTabMain === "submitted" ? task.status === "Done" : true;
 
-  // Filter tasks by date range and active tab
-  const dateFilteredTasks = useMemo(() => {
-    let filtered = allTasks
+      return statusMatch && submittedMatch;
+    });
 
-    // Apply date filtering if both start and end dates are selected
-    if (startDate && endDate) {
-      const start = new Date(startDate)
-      const end = new Date(endDate)
-      // Set end date to end of day to include tasks created on the end date
-      end.setHours(23, 59, 59, 999)
+    return {
+      ...project,
+      name:
+        groupBy === "title"
+          ? project.name
+          : groupBy === "label"
+          ? project.id === "1"
+            ? "Low Priority"
+            : project.id === "2"
+            ? "Medium Priority"
+            : "High Priority"
+          : project.tasks[0]?.assignedTo.name || project.name,
+      assignedTo: project.tasks[0]?.assignedTo,
+      tasks: filteredTasks,
+    };
+  });
 
-      filtered = allTasks.filter((task) => task.createdDate >= start && task.createdDate <= end)
-    }
+  const totalTasks = projects.reduce(
+    (acc, project) => acc + project.tasks.length,
+    0
+  );
+  const openTasks = projects.reduce(
+    (acc, project) =>
+      acc +
+      project.tasks.filter(
+        (task) => task.status === "Open" || task.status === "Draft"
+      ).length,
+    0
+  );
+  const doneTasks = projects.reduce(
+    (acc, project) =>
+      acc + project.tasks.filter((task) => task.status === "Done").length,
+    0
+  );
 
-    // Filter by active tab
-    if (activeTab === "submitted") {
-      filtered = filtered.filter((task) => task.status === "Submitted")
+  const isTaskSelected = (taskId: string) => selectedTasks.includes(taskId);
+
+  const toggleTask = (taskId: string) => {
+    setSelectedTasks((prev) =>
+      prev.includes(taskId)
+        ? prev.filter((id) => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+
+  const areAllSelected = filteredProjects
+    .flatMap((p) => p.tasks)
+    .every((task) => selectedTasks.includes(task.id));
+
+  const toggleAll = () => {
+    const allFilteredTaskIds = filteredProjects.flatMap((p) =>
+      p.tasks.map((t) => t.id)
+    );
+    if (areAllSelected) {
+      setSelectedTasks(
+        selectedTasks.filter((id) => !allFilteredTaskIds.includes(id))
+      );
     } else {
-      // "all" tab shows all tasks except submitted
-      filtered = filtered.filter((task) => task.status !== "Submitted")
+      setSelectedTasks([...new Set([...selectedTasks, ...allFilteredTaskIds])]);
     }
+  };
 
-    return filtered
-  }, [allTasks, startDate, endDate, activeTab])
-
-  // Filter by search query and status
-  const searchFilteredTasks = useMemo(() => {
-    let filtered = dateFilteredTasks
-
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (task) =>
-          task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.assignedTo.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    // Apply status filter
-    if (statusFilter) {
-      if (statusFilter === "open") {
-        filtered = filtered.filter((task) => task.status === "Open" || task.status === "Running")
-      } else if (statusFilter === "done") {
-        filtered = filtered.filter((task) => task.status === "Done")
-      }
-    }
-
-    return filtered
-  }, [dateFilteredTasks, searchQuery, statusFilter])
-
-  // Group tasks
-  const groupedData = useMemo(() => {
-    const filteredTasks = searchFilteredTasks
-
-    if (groupBy === "status") {
-      const grouped = filteredTasks.reduce(
-        (acc, task) => {
-          if (!acc[task.status]) {
-            acc[task.status] = []
-          }
-          acc[task.status].push(task)
-          return acc
-        },
-        {} as Record<string, Task[]>,
-      )
-
-      return Object.entries(grouped).map(([status, tasks]) => ({
-        id: status,
-        name: `${status} Tasks`,
-        tasks,
-      }))
-    } else if (groupBy === "assignee") {
-      const grouped = filteredTasks.reduce(
-        (acc, task) => {
-          if (!acc[task.assignedTo]) {
-            acc[task.assignedTo] = []
-          }
-          acc[task.assignedTo].push(task)
-          return acc
-        },
-        {} as Record<string, Task[]>,
-      )
-
-      return Object.entries(grouped).map(([assignee, tasks]) => ({
-        id: assignee,
-        name: `Assigned to ${assignee}`,
-        tasks,
-      }))
-    } else {
-      // Group by title (projects)
-      const projectsWithFilteredTasks = mockData
-        .map((project) => ({
-          ...project,
-          tasks: project.tasks.filter((task) => filteredTasks.includes(task)),
-        }))
-        .filter((project) => project.tasks.length > 0)
-
-      return projectsWithFilteredTasks
-    }
-  }, [searchFilteredTasks, groupBy])
-
-  // Calculate stats from filtered tasks
-  const taskStats = useMemo(() => {
-    const totalTasks = searchFilteredTasks.length
-    const openTasks = searchFilteredTasks.filter((task) => task.status === "Open" || task.status === "Running").length
-    const doneTasks = searchFilteredTasks.filter((task) => task.status === "Done").length
-    const submittedTasks = searchFilteredTasks.filter((task) => task.status === "Submitted").length
-
-    return { totalTasks, openTasks, doneTasks, submittedTasks }
-  }, [searchFilteredTasks])
-
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Running":
-        return "bg-green-100 text-green-800"
       case "Open":
-        return "bg-gray-100 text-gray-800"
+        return "bg-blue-100 text-blue-800 border border-blue-200";
       case "Overdue":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 border border-red-200";
+      case "Running":
+        return "bg-green-100 text-green-800 border border-green-200";
       case "Done":
-        return "bg-blue-100 text-blue-800"
-      case "Submitted":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-green-100 text ";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 border border-gray-200";
     }
-  }
+  };
 
-  const handleTaskSelect = (taskId: string) => {
-    setSelectedTasks((prev) => (prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]))
-  }
+  const getAvatarColor = (name: string) => {
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-yellow-500",
+    ];
+    return colors[name.length % colors.length];
+  };
 
-  const handleProjectSelect = (projectId: string) => {
-    const project = groupedData.find((p) => p.id === projectId)
-    if (!project) return
+  const toggleProject = (projectId: string) => {
+    setActiveProject(activeProject === projectId ? null : projectId);
+  };
 
-    const projectTaskIds = project.tasks.map((task) => task.id)
-    const allSelected = projectTaskIds.every((id) => selectedTasks.includes(id))
-
-    if (allSelected) {
-      setSelectedTasks((prev) => prev.filter((id) => !projectTaskIds.includes(id)))
-    } else {
-      setSelectedTasks((prev) => [...new Set([...prev, ...projectTaskIds])])
+  // Find the original project name for a task
+  const getProjectNameForTask = (taskId: string) => {
+    for (const project of projects) {
+      const task = project.tasks.find((t) => t.id === taskId);
+      if (task) return project.name;
     }
-  }
-
-  const clearDateFilter = () => {
-    setStartDate("")
-    setEndDate("")
-  }
-
-  const formatDateRange = () => {
-    if (startDate && endDate) {
-      const start = new Date(startDate).toLocaleDateString()
-      const end = new Date(endDate).toLocaleDateString()
-      return `${start} - ${end}`
-    }
-    return "All Time"
-  }
+    return "";
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Task & Projects</h1>
-          <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <Activity className="w-4 h-4 mr-2" />
-            Activity
+    <div className="bg-gray-50 p-4 sm:p-6">
+      <div className="max-w-8xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <h1 className="text-xl sm:text-2xl text-[#4E53B1] font-semibold">
+            Task & Projects
+          </h1>
+          <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors">
+            <div className="flex gap-2 items-center">
+              <img
+                src="../src/assets/menu_open.png"
+                alt=""
+                className="w-4 h-4"
+              />
+              <div>Activity</div>
+            </div>
           </button>
         </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex space-x-1">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "all"
-                ? "border-blue-600 text-blue-600 bg-blue-50"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            All Tasks
-          </button>
-          <button
-            onClick={() => setActiveTab("submitted")}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "submitted"
-                ? "border-blue-600 text-blue-600 bg-blue-50"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Submitted Tasks
-          </button>
+        {/* here add tab button  */}
+        <div className="  border-gray-200 ">
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setActiveTabMain("all")}
+              className={`px-6 py-3 text-sm font-medium rounded-lg  border-2 transition-colors ${
+                activeTabMain === "all"
+                  ? "bg-[#4E53B1] px-6 py-3 rounded-lg text-white"
+                  : "border-[#C5C5C5] text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              All Tasks
+            </button>
+            <button
+              onClick={() => setActiveTabMain("submitted")}
+              className={`px-4 py-3 text-sm font-medium  rounded-lg border-2 transition-colors ${
+                activeTabMain === "submitted"
+                  ? "bg-[#4E53B1]  text-white border-[#4E53B1]"
+                  : "border-[#C5C5C5] text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Submitted Tasks
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-gray-300 pb-4 sm:pb-0">
+          <div className="flex mt-6 mb-6 flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <span className="text-sm text-gray-600">View by:</span>
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={() => setViewBy("list")}
-                  className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                    viewBy === "list"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <List className="w-4 h-4 mr-1" />
-                  List
+              <div className="flex gap-2">
+                <button className="flex items-center gap-1 text-indigo-600 font-medium text-sm">
+                  <List className="w-4 h-4" />{" "}
+                  <span className="hidden sm:inline">List</span>
                 </button>
-                <button
-                  onClick={() => setViewBy("dates")}
-                  className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                    viewBy === "dates"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <Calendar className="w-4 h-4 mr-1" />
-                  Dates
+                <button className="flex items-center gap-1 text-gray-600 text-sm">
+                  <Calendar className="w-4 h-4" />{" "}
+                  <span className="hidden sm:inline">Dates</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 relative w-full sm:w-auto">
               <span className="text-sm text-gray-600">Group by:</span>
               <select
+                className="text-sm border p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto
+               appearance-none /* hide native arrow */
+               pr-8 /* space for custom icon */
+              "
                 value={groupBy}
-                onChange={(e) => setGroupBy(e.target.value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) =>
+                  setGroupBy(e.target.value as "title" | "label" | "assignedTo")
+                }
               >
                 <option value="title">Title</option>
-                <option value="status">Status</option>
-                <option value="assignee">Assignee</option>
+                <option value="label">Label</option>
+                <option value="assignedTo">assigned</option>
               </select>
+
+              {/* Custom icon image */}
+              <img
+                src={arrowDropDown} // <-- replace with your icon path
+                alt="dropdown icon"
+                className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
+              />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <div className="flex items-center space-x-2 px-3 py-1 border border-gray-300 rounded-md bg-white">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="text-sm focus:outline-none"
-                  placeholder="Start date"
-                />
-                <span className="text-gray-400">to</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="text-sm focus:outline-none"
-                  placeholder="End date"
-                />
-                {(startDate || endDate) && (
-                  <button
-                    onClick={clearDateFilter}
-                    className="text-gray-400 hover:text-gray-600 text-xs ml-1"
-                    title="Clear date filter"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-              <span className="text-xs text-gray-500">{formatDateRange()}</span>
+            <div className="flex items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
+              <span className="text-sm font-medium text-[#4E53B1]">
+                May 25 - May 30
+              </span>
+              <FaSortDown className="w-4 h-4 -mt-2 text-[#4E53B1]" />
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+            <div className="relative w-full sm:w-auto">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-64 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full"
               />
+            </div>
+            <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors w-full sm:w-auto">
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Summary Tabs */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+          {/* Tabs */}
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+            <span className="text-black w-full sm:w-auto">
+              The view contains
+            </span>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setActiveTab("tasks")}
+                className={`px-6 py-2 rounded-2xl border font-medium ${
+                  activeTab === "tasks"
+                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
+                    : "bg-white text-gray-600 border-gray-300"
+                }`}
+              >
+                {totalTasks} Tasks
+              </button>
+
+              <button
+                onClick={() => setActiveTab("open")}
+                className={`px-6 py-2 rounded-2xl border font-medium ${
+                  activeTab === "open"
+                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
+                    : "bg-white text-gray-600 border-gray-300"
+                }`}
+              >
+                {openTasks} Open tasks
+              </button>
+
+              <button
+                onClick={() => setActiveTab("done")}
+                className={`px-6 py-2 rounded-2xl border font-medium ${
+                  activeTab === "done"
+                    ? "bg-indigo-100 text-indigo-800 border-indigo-300"
+                    : "bg-white text-gray-600 border-gray-300"
+                }`}
+              >
+                {doneTasks} Done tasks
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">The view contains</span>
-          <button
-            onClick={() => setStatusFilter(null)}
-            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              statusFilter === null ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-            }`}
-          >
-            {taskStats.totalTasks} tasks in total
-          </button>
-          <button
-            onClick={() => setStatusFilter("open")}
-            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-              statusFilter === "open"
-                ? "bg-blue-50 text-blue-800 border-blue-200"
-                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-            }`}
-          >
-            {taskStats.openTasks} open tasks
-          </button>
-          <button
-            onClick={() => setStatusFilter("done")}
-            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-              statusFilter === "done"
-                ? "bg-blue-50 text-blue-800 border-blue-200"
-                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-            }`}
-          >
-            {taskStats.doneTasks} done tasks
-          </button>
-          <button
-            onClick={() => setStatusFilter("submitted")}
-            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-              statusFilter === "submitted"
-                ? "bg-blue-50 text-blue-800 border-blue-200"
-                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
-            }`}
-          >
-            {taskStats.submittedTasks} submitted tasks
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-6 py-6">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-blue-600">
-              {groupBy === "title" ? "Project List" : groupBy === "status" ? "Tasks by Status" : "Tasks by Assignee"}
-            </h2>
-          </div>
-
-          {/* Content */}
-          <div className="bg-white">
-            {groupedData.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">No tasks found matching the current filters.</div>
-            ) : (
-              groupedData.map((group, groupIndex) => (
-                <div key={group.id} className={groupIndex > 0 ? "border-t border-gray-200" : ""}>
-                  {/* Project Header */}
-                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                    <div className="flex items-center">
-                      <div className="flex items-center space-x-3 flex-1">
-                        <input
-                          type="checkbox"
-                          checked={group.tasks.every((task) => selectedTasks.includes(task.id))}
-                          onChange={() => handleProjectSelect(group.id)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <h3 className="text-base font-medium text-blue-600 min-w-[60px]">{group.name}</h3>
-                        <div className="w-4 h-4 ml-2"></div> {/* Spacer to match MessageSquare icon */}
-                      </div>
-
-                      <div className="flex items-center space-x-24">
-                        <div className="min-w-[80px] flex justify-center">
-                          <span className="text-sm font-medium text-blue-600">Status</span>
-                        </div>
-                        <div className="min-w-[120px] flex justify-center">
-                          <span className="text-sm font-medium text-blue-600">Label</span>
-                        </div>
-                        <div className="min-w-[140px] text-sm font-medium text-blue-600 text-center">Start time</div>
-                        <div className="min-w-[140px] text-sm font-medium text-blue-600 text-center">Due date</div>
-                        <div className="min-w-[100px] flex justify-center">
-                          <span className="text-sm font-medium text-blue-600">Assigned to</span>
-                        </div>
+        {/* Projects - Mobile Accordion */}
+        <div className="block sm:hidden ">
+          {filteredProjects.map(
+            (project) =>
+              project.tasks.length > 0 && (
+                <div
+                  key={project.id}
+                  className="bg-white mt-4 rounded-lg border border-gray-200 overflow-hidden"
+                >
+                  <button
+                    onClick={() => toggleProject(project.id)}
+                    className="w-full px-4 py-3 bg-gray-50 flex justify-between items-center"
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={project.tasks.every((t) =>
+                          isTaskSelected(t.id)
+                        )}
+                        onChange={() => {
+                          if (
+                            project.tasks.every((t) => isTaskSelected(t.id))
+                          ) {
+                            setSelectedTasks(
+                              selectedTasks.filter(
+                                (id) => !project.tasks.some((t) => t.id === id)
+                              )
+                            );
+                          } else {
+                            setSelectedTasks([
+                              ...selectedTasks,
+                              ...project.tasks.map((t) => t.id),
+                            ]);
+                          }
+                        }}
+                        className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                      />
+                      <div className="flex items-center gap-2">
+                        {groupBy === "assignedTo" && project.assignedTo && (
+                          <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(
+                              project.assignedTo.name
+                            )}`}
+                          >
+                            {project.assignedTo.avatar}
+                          </div>
+                        )}
+                        <h3 className="text-lg font-medium text-[#4E53B1]">
+                          {groupBy === "assignedTo"
+                            ? project.tasks[0]?.assignedTo.name
+                            : project.name}
+                        </h3>
                       </div>
                     </div>
-                  </div>
+                    <FaSortDown
+                      className={`w-4 h-4 text-[#4E53B1] transition-transform ${
+                        activeProject === project.id ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
 
-                  {/* Tasks */}
-                  <div className="bg-white">
-                    {group.tasks.map((task, taskIndex) => (
+                  {activeProject === project.id && (
+                    <div className="border-t border-gray-200">
+                      {project.tasks.map((task) => (
+                        <div
+                          key={task.id}
+                          className="p-4 border-b border-gray-200"
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            <input
+                              type="checkbox"
+                              checked={isTaskSelected(task.id)}
+                              onChange={() => toggleTask(task.id)}
+                              className="w-4 h-4 text-indigo-600 rounded border-gray-300 mt-1"
+                            />
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <h4 className="font-medium text-gray-900">
+                                  {groupBy === "assignedTo"
+                                    ? getProjectNameForTask(task.id)
+                                    : task.name}
+                                </h4>
+                                <span
+                                  className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusBadge(
+                                    task.status
+                                  )}`}
+                                >
+                                  {task.status === "Done"
+                                    ? "Completed"
+                                    : task.status}
+                                </span>
+                              </div>
+                              <div className="mt-2 text-sm text-gray-500">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">Label:</span>
+                                  <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                                    {task.label}
+                                  </span>
+                                </div>
+                                <div className="mt-1">
+                                  <span className="font-medium">Start:</span>{" "}
+                                  <span
+                                    className={
+                                      task.status === "Done"
+                                        ? "text-black"
+                                        : "text-red-600"
+                                    }
+                                  >
+                                    {task.startTime}
+                                  </span>
+                                </div>
+                                <div className="mt-1">
+                                  <span className="font-medium">Due:</span>{" "}
+                                  <span
+                                    className={
+                                      task.status === "Done"
+                                        ? "text-black"
+                                        : "text-red-600"
+                                    }
+                                  >
+                                    {task.dueDate}
+                                  </span>
+                                </div>
+                                {groupBy !== "assignedTo" && (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <div>
+                                      <button className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                        View Task
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+          )}
+        </div>
+
+        {/* Projects - Desktop View */}
+        <div className="hidden sm:block">
+          {filteredProjects.map(
+            (project) =>
+              project.tasks.length > 0 && (
+                <div
+                  key={project.id}
+                  className="bg-gray-50 mt-4 rounded-lg border border-gray-200 overflow-hidden"
+                >
+                  <div className="px-6 bg-white py-6  shadow ">
+                    <div className="grid  grid-cols-13 gap-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="col-span-1">
+                        <input
+                          type="checkbox"
+                          checked={project.tasks.every((t) =>
+                            isTaskSelected(t.id)
+                          )}
+                          onChange={() => {
+                            if (
+                              project.tasks.every((t) => isTaskSelected(t.id))
+                            ) {
+                              setSelectedTasks(
+                                selectedTasks.filter(
+                                  (id) =>
+                                    !project.tasks.some((t) => t.id === id)
+                                )
+                              );
+                            } else {
+                              setSelectedTasks([
+                                ...selectedTasks,
+                                ...project.tasks.map((t) => t.id),
+                              ]);
+                            }
+                          }}
+                          className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                        />
+                      </div>
+                      <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20 flex items-center gap-2">
+                        {groupBy === "assignedTo" && project.assignedTo && (
+                          <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(
+                              project.assignedTo.name
+                            )}`}
+                          >
+                            {project.assignedTo.avatar}
+                          </div>
+                        )}
+                        {groupBy === "assignedTo"
+                          ? project.tasks[0]?.assignedTo.name
+                          : project.name}
+                      </div>
+                      <div className="col-span-2 text-[#4E53B1]">Status</div>
+                      <div className="col-span-2 text-[#4E53B1]">Label</div>
+                      <div className="col-span-2 text-[#4E53B1]">
+                        Start time
+                      </div>
+                      <div className="col-span-2 text-[#4E53B1]">Due date</div>
+                      {groupBy !== "assignedTo" && (
+                        <div className="col-span-2 text-[#4E53B1] text-right">
+                          Assigned to
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="">
+                    {project.tasks.map((task) => (
                       <div
                         key={task.id}
-                        className={`px-6 py-3 flex items-center justify-between hover:bg-gray-50 ${
-                          taskIndex < group.tasks.length - 1 ? "border-b border-gray-100" : ""
-                        }`}
+                        className="px-6 py-8 hover:bg-gray-50 border-b border-gray-300 transition-colors"
                       >
-                        <div className="flex items-center space-x-3 flex-1">
-                          <input
-                            type="checkbox"
-                            checked={selectedTasks.includes(task.id)}
-                            onChange={() => handleTaskSelect(task.id)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                          <span className="text-sm font-medium text-gray-900 min-w-[60px]">{task.name}</span>
-                          <MessageSquare className="w-4 h-4 text-gray-400 ml-2" />
-                        </div>
-
-                        <div className="flex items-center space-x-24">
-                          <div className="min-w-[80px] flex justify-center">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(
-                                task.status,
+                        <div className="grid grid-cols-13 gap-6 items-center">
+                          <div className="col-span-1">
+                            <input
+                              type="checkbox"
+                              checked={isTaskSelected(task.id)}
+                              onChange={() => toggleTask(task.id)}
+                              className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                            />
+                          </div>
+                          <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
+                            {groupBy === "assignedTo"
+                              ? getProjectNameForTask(task.id)
+                              : task.name}
+                          </div>
+                          <div className="col-span-2 flex gap-2">
+                            <img
+                              className=""
+                              src="../src/assets/forum.png"
+                              alt=""
+                            />
+                            {/* <span
+                              className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
+                                task.status
                               )}`}
                             >
                               {task.status}
+                            </span> */}
+                            <span
+                              className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
+                                task.status
+                              )}`}
+                            >
+                              {task.status === "Done"
+                                ? "Completed"
+                                : task.status}
                             </span>
                           </div>
-                          <div className="min-w-[120px] flex justify-center">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <div className="col-span-2">
+                            <span className="inline-flex px-8 py-2 text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 rounded-full">
                               {task.label}
                             </span>
                           </div>
-                          <div className="min-w-[140px] text-sm text-gray-600 text-center">{task.startTime}</div>
-                          <div className="min-w-[140px] text-sm text-center">
-                            <span className={isTaskOverdue(task.dueDate) ? "text-red-600" : "text-gray-600"}>
-                              {task.dueDate}
-                            </span>
+                          <div
+                            className={`col-span-2 text-sm ${
+                              task.status === "Done"
+                                ? "text-black"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {task.startTime}
                           </div>
-                          <div className="min-w-[100px] flex justify-center">
-                            <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                              View Task
-                            </button>
+                          <div
+                            className={`col-span-2 text-sm ${
+                              task.status === "Done"
+                                ? "text-black"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {task.dueDate}
                           </div>
+                          {groupBy !== "assignedTo" && (
+                            <div className="col-span-2 flex justify-end items-center gap-2">
+                              <div>
+                                <button className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                  View Task
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              )
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
+
+export default TaskAndProject;
