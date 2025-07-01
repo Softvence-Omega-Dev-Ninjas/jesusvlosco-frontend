@@ -235,11 +235,22 @@ const mockData: Project[] = [
   },
 ]
 
+const isTaskOverdue = (dueDate: string) => {
+  // Parse the due date string (format: "23/06/25 at 12:00 am")
+  const datePart = dueDate.split(" at ")[0]
+  const [day, month, year] = datePart.split("/")
+  const taskDueDate = new Date(2000 + Number.parseInt(year), Number.parseInt(month) - 1, Number.parseInt(day))
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Reset time to compare only dates
+  return taskDueDate < today
+}
+
 export default function UserTaskMainPage() {
   const [activeTab, setActiveTab] = useState<"all" | "submitted">("all")
   const [viewBy, setViewBy] = useState<"list" | "dates">("list")
   const [groupBy, setGroupBy] = useState("title")
-  const [dateRange, setDateRange] = useState("All Time")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
@@ -252,44 +263,26 @@ export default function UserTaskMainPage() {
   const dateFilteredTasks = useMemo(() => {
     let filtered = allTasks
 
-    // Apply date filtering only if a specific date range is selected
-    if (dateRange !== "All Time") {
-      let startDate: Date, endDate: Date
+    // Apply date filtering if both start and end dates are selected
+    if (startDate && endDate) {
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      // Set end date to end of day to include tasks created on the end date
+      end.setHours(23, 59, 59, 999)
 
-      switch (dateRange) {
-        case "May 25 - May 30":
-          startDate = new Date(2024, 4, 25)
-          endDate = new Date(2024, 4, 30)
-          break
-        case "June 1 - June 7":
-          startDate = new Date(2024, 5, 1)
-          endDate = new Date(2024, 5, 7)
-          break
-        case "This Week":
-          startDate = new Date(2024, 4, 25)
-          endDate = new Date(2024, 5, 7)
-          break
-        case "This Month":
-          startDate = new Date(2024, 4, 1)
-          endDate = new Date(2024, 5, 30)
-          break
-        default:
-          return allTasks
-      }
-
-      filtered = allTasks.filter((task) => task.createdDate >= startDate && task.createdDate <= endDate)
+      filtered = allTasks.filter((task) => task.createdDate >= start && task.createdDate <= end)
     }
 
     // Filter by active tab
     if (activeTab === "submitted") {
       filtered = filtered.filter((task) => task.status === "Submitted")
     } else {
-      // "all" tab shows all tasks except submitted (unless specifically searching for submitted)
+      // "all" tab shows all tasks except submitted
       filtered = filtered.filter((task) => task.status !== "Submitted")
     }
 
     return filtered
-  }, [allTasks, dateRange, activeTab])
+  }, [allTasks, startDate, endDate, activeTab])
 
   // Filter by search query and status
   const searchFilteredTasks = useMemo(() => {
@@ -414,6 +407,20 @@ export default function UserTaskMainPage() {
     }
   }
 
+  const clearDateFilter = () => {
+    setStartDate("")
+    setEndDate("")
+  }
+
+  const formatDateRange = () => {
+    if (startDate && endDate) {
+      const start = new Date(startDate).toLocaleDateString()
+      const end = new Date(endDate).toLocaleDateString()
+      return `${start} - ${end}`
+    }
+    return "All Time"
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -499,17 +506,34 @@ export default function UserTaskMainPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="All Time">All Time</option>
-                <option value="May 25 - May 30">May 25 - May 30</option>
-                <option value="June 1 - June 7">June 1 - June 7</option>
-                <option value="This Week">This Week</option>
-                <option value="This Month">This Month</option>
-              </select>
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <div className="flex items-center space-x-2 px-3 py-1 border border-gray-300 rounded-md bg-white">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="text-sm focus:outline-none"
+                  placeholder="Start date"
+                />
+                <span className="text-gray-400">to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="text-sm focus:outline-none"
+                  placeholder="End date"
+                />
+                {(startDate || endDate) && (
+                  <button
+                    onClick={clearDateFilter}
+                    className="text-gray-400 hover:text-gray-600 text-xs ml-1"
+                    title="Clear date filter"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <span className="text-xs text-gray-500">{formatDateRange()}</span>
             </div>
           </div>
 
@@ -592,22 +616,30 @@ export default function UserTaskMainPage() {
                 <div key={group.id} className={groupIndex > 0 ? "border-t border-gray-200" : ""}>
                   {/* Project Header */}
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex items-center">
+                      <div className="flex items-center space-x-3 flex-1">
                         <input
                           type="checkbox"
                           checked={group.tasks.every((task) => selectedTasks.includes(task.id))}
                           onChange={() => handleProjectSelect(group.id)}
                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
-                        <h3 className="text-base font-medium text-blue-600">{group.name}</h3>
+                        <h3 className="text-base font-medium text-blue-600 min-w-[60px]">{group.name}</h3>
+                        <div className="w-4 h-4 ml-2"></div> {/* Spacer to match MessageSquare icon */}
                       </div>
-                      <div className="flex items-center space-x-24 text-sm font-medium text-blue-600">
-                        <span>Status</span>
-                        <span>Label</span>
-                        <span>Start time</span>
-                        <span>Due date</span>
-                        <span>Assigned to</span>
+
+                      <div className="flex items-center space-x-24">
+                        <div className="min-w-[80px] flex justify-center">
+                          <span className="text-sm font-medium text-blue-600">Status</span>
+                        </div>
+                        <div className="min-w-[120px] flex justify-center">
+                          <span className="text-sm font-medium text-blue-600">Label</span>
+                        </div>
+                        <div className="min-w-[140px] text-sm font-medium text-blue-600 text-center">Start time</div>
+                        <div className="min-w-[140px] text-sm font-medium text-blue-600 text-center">Due date</div>
+                        <div className="min-w-[100px] flex justify-center">
+                          <span className="text-sm font-medium text-blue-600">Assigned to</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -648,7 +680,11 @@ export default function UserTaskMainPage() {
                             </span>
                           </div>
                           <div className="min-w-[140px] text-sm text-gray-600 text-center">{task.startTime}</div>
-                          <div className="min-w-[140px] text-sm text-red-600 text-center">{task.dueDate}</div>
+                          <div className="min-w-[140px] text-sm text-center">
+                            <span className={isTaskOverdue(task.dueDate) ? "text-red-600" : "text-gray-600"}>
+                              {task.dueDate}
+                            </span>
+                          </div>
                           <div className="min-w-[100px] flex justify-center">
                             <button className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                               View Task
