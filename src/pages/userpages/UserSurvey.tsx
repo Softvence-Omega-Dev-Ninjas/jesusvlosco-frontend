@@ -208,7 +208,7 @@ const UserSurvey: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {survey.status === "Active" ? (
                         <Link to={`/user/take-survey/${survey.id}`}>
-                          <button className="px-4 py-2 rounded-full bg-primary text-white transition">
+                          <button className="px-4 py-2 rounded-full bg-primary text-white transition cursor-pointer">
                             Take Survey
                           </button>
                         </Link>
