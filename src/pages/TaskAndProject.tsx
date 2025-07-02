@@ -7,6 +7,7 @@ import ActivityLog from "@/components/TaskAndProject/ActivityLog";
 import LabelSelector from "@/components/TaskAndProject/LabelSelector";
 import OptionsDropdownButton from "@/components/TaskAndProject/Action";
 import OverdueTasks from "@/components/TaskAndProject/OverdueTasks";
+import TaskPage from "@/components/TaskAndProject/TaskPage";
 
 
 interface Task {
@@ -135,12 +136,20 @@ interface NewTaskModalProps {
     onTaskDetailsClick: () => void;
 }
 
+
+
 function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
     const [showDetails, setShowDetails] = useState(false);
+    const [showTaskDetailsPanel, setShowTaskDetailsPanel] = useState(false);
+
+    if (showTaskDetailsPanel) {
+        return <TaskDetailsPanel onClose={() => setShowTaskDetailsPanel(false)} />;
+    }
 
     return (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
             <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-xl relative">
+
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-gray-300 pb-3 mb-4">
                     <h2 className="text-lg font-semibold text-[#4E53B1] flex items-center gap-2">
@@ -263,7 +272,10 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
                         <button className="bg-[#4E53B1] hover:bg-[#3f45a0] text-white text-sm font-semibold px-5 py-2 rounded-md">
                             Publish Task
                         </button>
-                        <button className="border border-[#4E53B1] text-[#4E53B1] text-sm font-semibold px-5 py-2 rounded-md hover:bg-[#f2f2fc]">
+                        <button
+                            onClick={() => setShowTaskDetailsPanel(true)}
+                            className="border border-[#4E53B1] text-[#4E53B1] text-sm font-semibold px-5 py-2 rounded-md hover:bg-[#f2f2fc]"
+                        >
                             Draft Task
                         </button>
                     </div>
@@ -275,8 +287,6 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
         </div>
     );
 }
-
-
 
 function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
     const [activeTab, setActiveTab] = useState<'details' | 'comments'>('details');
@@ -654,10 +664,6 @@ function EditTaskForm({ onCancel }: { onCancel: () => void }) {
 
 
 
-
-
-
-
 function TaskAndProject() {
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     const [activeProject, setActiveProject] = useState<string | null>(null);
@@ -667,7 +673,7 @@ function TaskAndProject() {
     const [showNewTaskModal, setShowNewTaskModal] = useState(false);
     const [showTaskDetailsPanel, setShowTaskDetailsPanel] = useState(false);
     const [showOverdueTasks, setShowOverdueTasks] = useState(false);
-
+    const [viewMode, setViewMode] = useState<'list' | 'dates'>('list'); // New state for view mode
 
     // Filter tasks based on active tab
     const filteredProjects = projects.map(project => ({
@@ -678,11 +684,16 @@ function TaskAndProject() {
                     project.id === '2' ? 'Medium Priority' : 'High Priority') :
                 project.tasks[0]?.assignedTo.name || project.name,
         assignedTo: project.tasks[0]?.assignedTo,
-        tasks: project.tasks.filter(task => {
-            if (activeTab === 'open') return task.status === 'Open' || task.status === 'Draft';
-            if (activeTab === 'done') return task.status === 'Done';
-            return true;
-        })
+        tasks: project.tasks
+            .filter(task => {
+                if (activeTab === 'open') return task.status === 'Open' || task.status === 'Draft';
+                if (activeTab === 'done') return task.status === 'Done';
+                return true;
+            })
+            .map(task => ({
+                ...task,
+                title: (task as any).title ?? task.name // Add title if missing
+            }))
     }));
 
     const totalTasks = projects.reduce((acc, project) => acc + project.tasks.length, 0);
@@ -756,6 +767,10 @@ function TaskAndProject() {
         setShowNewTaskModal(false);
     };
 
+    const toggleViewMode = () => {
+        setViewMode(viewMode === 'list' ? 'dates' : 'list');
+    };
+
     return (
         <div className="bg-gray-50 p-4 sm:p-6">
             <div className="max-w-8xl mx-auto">
@@ -771,10 +786,17 @@ function TaskAndProject() {
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                             <span className="text-sm text-gray-600">View by:</span>
                             <div className="flex gap-2">
-                                <button className="flex items-center gap-1 text-indigo-600 font-medium text-sm">
+                                <button
+                                    className={`flex items-center gap-1 ${viewMode === 'list' ? 'text-indigo-600 font-medium' : 'text-gray-600'} text-sm`}
+                                    onClick={() => setViewMode('list')}
+                                >
                                     <List className="w-4 h-4" /> <span className="hidden sm:inline">List</span>
                                 </button>
-                                <button className="flex items-center gap-1 text-gray-600 text-sm">
+
+                                <button
+                                    className={`flex items-center gap-1 ${viewMode === 'dates' ? 'text-indigo-600 font-medium' : 'text-gray-600'} text-sm`}
+                                    onClick={() => setViewMode('dates')}
+                                >
                                     <Calendar className="w-4 h-4" /> <span className="hidden sm:inline">Dates</span>
                                 </button>
                             </div>
@@ -851,22 +873,19 @@ function TaskAndProject() {
                                 {doneTasks} Done tasks
                             </button>
 
-
                             <button className=""> <OptionsDropdownButton /></button>
-
 
                             <button
                                 onClick={() => setShowOverdueTasks(true)}
-                                className="flex  items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2"
+                                className="flex items-center gap-1 text-red-600 border bg-red-200 border-gray-300 rounded-2xl px-2 py-2"
                             >
                                 <span>2</span>
                                 <span>Overdue tasks</span>
                             </button>
 
-
                             {showOverdueTasks && (
                                 <div className="fixed inset-0 bg-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
-                                    <div className="relative bg-white rounded-lg max-w-2xl  w-full max-h-[90vh] overflow-y-auto">
+                                    <div className="relative bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                                         <button
                                             onClick={() => setShowOverdueTasks(false)}
                                             className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100"
@@ -890,91 +909,185 @@ function TaskAndProject() {
                     </button>
                 </div>
 
-                {/* Projects - Mobile Accordion */}
-                <div className="block sm:hidden">
-                    {filteredProjects.map((project) => (
-                        project.tasks.length > 0 && (
-                            <div key={project.id} className="bg-white mt-4 rounded-lg border border-gray-200 overflow-hidden">
-                                <button
-                                    onClick={() => toggleProject(project.id)}
-                                    className="w-full px-4 py-3 bg-gray-50 flex justify-between items-center"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={project.tasks.every(t => isTaskSelected(t.id))}
-                                            onChange={() => {
-                                                if (project.tasks.every(t => isTaskSelected(t.id))) {
-                                                    setSelectedTasks(selectedTasks.filter(id => !project.tasks.some(t => t.id === id)));
-                                                } else {
-                                                    setSelectedTasks([...selectedTasks, ...project.tasks.map(t => t.id)]);
-                                                }
-                                            }}
-                                            className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-                                        />
-                                        <div className="flex items-center gap-2">
-                                            {groupBy === 'assignedTo' && project.assignedTo && (
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
-                                                    {project.assignedTo.avatar}
+                {/* Content Area - Switches between list view and TaskPage */}
+                {viewMode === 'list' ? (
+                    <>
+                        {/* Projects Items- Mobile Accordion */}
+                        <div className="block sm:hidden">
+                            {filteredProjects.map((project) => (
+                                project.tasks.length > 0 && (
+                                    <div key={project.id} className="bg-white mt-4 rounded-lg border border-gray-200 overflow-hidden">
+                                        <button
+                                            onClick={() => toggleProject(project.id)}
+                                            className="w-full px-4 py-3 bg-gray-50 flex justify-between items-center"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={project.tasks.every(t => isTaskSelected(t.id))}
+                                                    onChange={() => {
+                                                        if (project.tasks.every(t => isTaskSelected(t.id))) {
+                                                            setSelectedTasks(selectedTasks.filter(id => !project.tasks.some(t => t.id === id)));
+                                                        } else {
+                                                            setSelectedTasks([...selectedTasks, ...project.tasks.map(t => t.id)]);
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    {groupBy === 'assignedTo' && project.assignedTo && (
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
+                                                            {project.assignedTo.avatar}
+                                                        </div>
+                                                    )}
+                                                    <h3 className="text-lg font-medium text-[#4E53B1]">
+                                                        {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
+                                                    </h3>
                                                 </div>
-                                            )}
-                                            <h3 className="text-lg font-medium text-[#4E53B1]">
-                                                {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <FaSortDown className={`w-4 h-4 text-[#4E53B1] transition-transform ${activeProject === project.id ? 'rotate-180' : ''}`} />
-                                </button>
+                                            </div>
+                                            <FaSortDown className={`w-4 h-4 text-[#4E53B1] transition-transform ${activeProject === project.id ? 'rotate-180' : ''}`} />
+                                        </button>
 
-                                {activeProject === project.id && (
-                                    <div className="border-t border-gray-200">
-                                        {project.tasks.map((task) => (
-                                            <div key={task.id} className="p-4 border-b border-gray-200">
-                                                <div className="flex items-start gap-3 mb-3">
+                                        {activeProject === project.id && (
+                                            <div className="border-t border-gray-200">
+                                                {project.tasks.map((task) => (
+                                                    <div key={task.id} className="p-4 border-b border-gray-200">
+                                                        <div className="flex items-start gap-3 mb-3">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isTaskSelected(task.id)}
+                                                                onChange={() => toggleTask(task.id)}
+                                                                className="w-4 h-4 text-indigo-600 rounded border-gray-300 mt-1"
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex justify-between items-start">
+                                                                    <h4 className="font-medium text-gray-900">
+                                                                        {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
+                                                                    </h4>
+                                                                    <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
+                                                                        {task.status}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="mt-2 text-sm text-gray-500">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-medium">Label:</span>
+                                                                        <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                                                                            {task.label}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="mt-1">
+                                                                        <span className="font-medium">Start:</span> <span className={task.status === 'Done' ? 'text-black' : 'text-red-600'}>{task.startTime}</span>
+                                                                    </div>
+                                                                    <div className="mt-1">
+                                                                        <span className="font-medium">Due:</span> <span className={task.status === 'Done' ? 'text-black' : 'text-red-600'}>{task.dueDate}</span>
+                                                                    </div>
+                                                                    {groupBy !== 'assignedTo' && (
+                                                                        <div className="mt-2 flex items-center gap-2">
+                                                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
+                                                                                {task.assignedTo.avatar}
+                                                                            </div>
+                                                                            <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <div className="p-4">
+                                                    <button className="flex items-center gap-2 text-indigo-600 text-sm font-medium hover:text-indigo-700 transition-colors">
+                                                        <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
+                                                            <Plus className="w-3 h-3 text-white" />
+                                                        </div>
+                                                        Add Task
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            ))}
+                        </div>
+
+                        {/* Projects Items - Desktop View */}
+                        <div className="hidden sm:block">
+                            {filteredProjects.map((project) => (
+                                project.tasks.length > 0 && (
+                                    <div key={project.id} className="bg-white mt-4 rounded-lg border border-gray-200 overflow-hidden">
+                                        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+                                            <div className="grid grid-cols-13 gap-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <div className="col-span-1">
                                                     <input
                                                         type="checkbox"
-                                                        checked={isTaskSelected(task.id)}
-                                                        onChange={() => toggleTask(task.id)}
-                                                        className="w-4 h-4 text-indigo-600 rounded border-gray-300 mt-1"
+                                                        checked={project.tasks.every(t => isTaskSelected(t.id))}
+                                                        onChange={() => {
+                                                            if (project.tasks.every(t => isTaskSelected(t.id))) {
+                                                                setSelectedTasks(selectedTasks.filter(id => !project.tasks.some(t => t.id === id)));
+                                                            } else {
+                                                                setSelectedTasks([...selectedTasks, ...project.tasks.map(t => t.id)]);
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4 text-indigo-600 rounded border-gray-300"
                                                     />
-                                                    <div className="flex-1">
-                                                        <div className="flex justify-between items-start">
-                                                            <h4 className="font-medium text-gray-900">
-                                                                {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
-                                                            </h4>
-                                                            <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
+                                                </div>
+                                                <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20 flex items-center gap-2">
+                                                    {groupBy === 'assignedTo' && project.assignedTo && (
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
+                                                            {project.assignedTo.avatar}
+                                                        </div>
+                                                    )}
+                                                    {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
+                                                </div>
+                                                <div className="col-span-2 text-[#4E53B1]">Status</div>
+                                                <div className="col-span-2 text-[#4E53B1]">Label</div>
+                                                <div className="col-span-2 text-[#4E53B1]">Start time</div>
+                                                <div className="col-span-2 text-[#4E53B1]">Due date</div>
+                                                {groupBy !== 'assignedTo' && (
+                                                    <div className="col-span-2 text-[#4E53B1] text-right">Assigned to</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="">
+                                            {project.tasks.map((task) => (
+                                                <div key={task.id} className="px-6 py-8 hover:bg-gray-50 border-b border-gray-300 transition-colors">
+                                                    <div className="grid grid-cols-13 gap-6 items-center">
+                                                        <div className="col-span-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isTaskSelected(task.id)}
+                                                                onChange={() => toggleTask(task.id)}
+                                                                className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
+                                                            {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
+                                                        </div>
+                                                        <div className="col-span-2 flex gap-2">
+                                                            <img className="" src="../src/assets/forum.png" alt="" />
+                                                            <span className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
                                                                 {task.status}
                                                             </span>
                                                         </div>
-                                                        <div className="mt-2 text-sm text-gray-500">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="font-medium">Label:</span>
-                                                                <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
-                                                                    {task.label}
-                                                                </span>
-                                                            </div>
-                                                            <div className="mt-1">
-                                                                <span className="font-medium">Start:</span> <span className={task.status === 'Done' ? 'text-black' : 'text-red-600'}>{task.startTime}</span>
-                                                            </div>
-                                                            <div className="mt-1">
-                                                                <span className="font-medium">Due:</span> <span className={task.status === 'Done' ? 'text-black' : 'text-red-600'}>{task.dueDate}</span>
-                                                            </div>
-                                                            {groupBy !== 'assignedTo' && (
-                                                                <div className="mt-2 flex items-center gap-2">
-                                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
-                                                                        {task.assignedTo.avatar}
-                                                                    </div>
-                                                                    <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
-                                                                </div>
-
-
-                                                            )}
+                                                        <div className="col-span-2">
+                                                            <span className="inline-flex px-8 py-2 text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 rounded-full">
+                                                                {task.label}
+                                                            </span>
                                                         </div>
+                                                        <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.startTime}</div>
+                                                        <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.dueDate}</div>
+                                                        {groupBy !== 'assignedTo' && (
+                                                            <div className="col-span-2 flex justify-end items-center gap-2">
+                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
+                                                                    {task.assignedTo.avatar}
+                                                                </div>
+                                                                <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                        <div className="p-4">
+                                            ))}
+                                        </div>
+                                        <div className="px-6 py-4 border-t border-gray-200 mb-3">
                                             <button className="flex items-center gap-2 text-indigo-600 text-sm font-medium hover:text-indigo-700 transition-colors">
                                                 <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
                                                     <Plus className="w-3 h-3 text-white" />
@@ -983,115 +1096,33 @@ function TaskAndProject() {
                                             </button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )
-                    ))}
-                </div>
+                                )
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <TaskPage
+                        projects={filteredProjects}
+                        activeTab={activeTab}
+                        groupBy={groupBy}
+                        selectedTasks={selectedTasks}
+                        toggleTask={toggleTask}
+                        isTaskSelected={isTaskSelected}
+                    />
+                )}
 
-                {/* Projects - Desktop View */}
-                <div className="hidden sm:block">
-                    {filteredProjects.map((project) => (
-                        project.tasks.length > 0 && (
-                            <div key={project.id} className="bg-white mt-4 rounded-lg border border-gray-200 overflow-hidden">
-                                <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-                                    <div className="grid grid-cols-13 gap-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <div className="col-span-1">
-                                            <input
-                                                type="checkbox"
-                                                checked={project.tasks.every(t => isTaskSelected(t.id))}
-                                                onChange={() => {
-                                                    if (project.tasks.every(t => isTaskSelected(t.id))) {
-                                                        setSelectedTasks(selectedTasks.filter(id => !project.tasks.some(t => t.id === id)));
-                                                    } else {
-                                                        setSelectedTasks([...selectedTasks, ...project.tasks.map(t => t.id)]);
-                                                    }
-                                                }}
-                                                className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-                                            />
-                                        </div>
-                                        <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20 flex items-center gap-2">
-                                            {groupBy === 'assignedTo' && project.assignedTo && (
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(project.assignedTo.name)}`}>
-                                                    {project.assignedTo.avatar}
-                                                </div>
-                                            )}
-                                            {groupBy === 'assignedTo' ? project.tasks[0]?.assignedTo.name : project.name}
-                                        </div>
-                                        <div className="col-span-2 text-[#4E53B1]">Status</div>
-                                        <div className="col-span-2 text-[#4E53B1]">Label</div>
-                                        <div className="col-span-2 text-[#4E53B1]">Start time</div>
-                                        <div className="col-span-2 text-[#4E53B1]">Due date</div>
-                                        {groupBy !== 'assignedTo' && (
-                                            <div className="col-span-2 text-[#4E53B1] text-right">Assigned to</div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="">
-                                    {project.tasks.map((task) => (
-                                        <div key={task.id} className="px-6 py-8 hover:bg-gray-50 border-b border-gray-300 transition-colors">
-                                            <div className="grid grid-cols-13 gap-6 items-center">
-                                                <div className="col-span-1">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isTaskSelected(task.id)}
-                                                        onChange={() => toggleTask(task.id)}
-                                                        className="w-4 h-4 text-indigo-600 rounded border-gray-300"
-                                                    />
-                                                </div>
-                                                <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
-                                                    {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
-                                                </div>
-                                                <div className="col-span-2 flex gap-2">
-                                                    <img className="" src="../src/assets/forum.png" alt="" />
-                                                    <span className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
-                                                        {task.status}
-                                                    </span>
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <span className="inline-flex px-8 py-2 text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 rounded-full">
-                                                        {task.label}
-                                                    </span>
-                                                </div>
-                                                <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.startTime}</div>
-                                                <div className={`col-span-2 text-sm ${task.status === 'Done' ? 'text-black' : 'text-red-600'}`}>{task.dueDate}</div>
-                                                {groupBy !== 'assignedTo' && (
-                                                    <div className="col-span-2 flex justify-end items-center gap-2">
-                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${getAvatarColor(task.assignedTo.name)}`}>
-                                                            {task.assignedTo.avatar}
-                                                        </div>
-                                                        <span className="text-sm text-gray-900">{task.assignedTo.name}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="px-6 py-4 border-t border-gray-200 mb-3">
-                                    <button className="flex items-center gap-2 text-indigo-600 text-sm font-medium hover:text-indigo-700 transition-colors">
-                                        <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
-                                            <Plus className="w-3 h-3 text-white" />
-                                        </div>
-                                        Add Task
-                                    </button>
-                                </div>
-                            </div>
-                        )
-                    ))}
-                </div>
+                {/* Modals */}
+                {showNewTaskModal && (
+                    <NewTaskModal
+                        onClose={() => setShowNewTaskModal(false)}
+                        onTaskDetailsClick={handleTaskDetailsClick}
+                    />
+                )}
+
+                {showTaskDetailsPanel && (
+                    <TaskDetailsPanel onClose={() => setShowTaskDetailsPanel(false)} />
+                )}
             </div>
-
-            {/* Modals */}
-            {showNewTaskModal && (
-                <NewTaskModal
-                    onClose={() => setShowNewTaskModal(false)}
-                    onTaskDetailsClick={handleTaskDetailsClick}
-                />
-            )}
-
-            {showTaskDetailsPanel && (
-                <TaskDetailsPanel onClose={() => setShowTaskDetailsPanel(false)} />
-            )}
         </div>
     );
 }
