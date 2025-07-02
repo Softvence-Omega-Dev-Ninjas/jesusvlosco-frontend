@@ -138,7 +138,7 @@ interface NewTaskModalProps {
 
 
 
-function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
+export function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
     const [showDetails, setShowDetails] = useState(false);
     const [showTaskDetailsPanel, setShowTaskDetailsPanel] = useState(false);
 
@@ -269,7 +269,11 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
                 {/* Footer */}
                 <div className="mt-6 flex justify-between items-center">
                     <div className="flex gap-4">
-                        <button className="bg-[#4E53B1] hover:bg-[#3f45a0] text-white text-sm font-semibold px-5 py-2 rounded-md">
+
+                        <button
+                            onClick={onClose}
+                            className="bg-[#4E53B1] hover:bg-[#3f45a0] text-white text-sm font-semibold px-5 py-2 rounded-md"
+                        >
                             Publish Task
                         </button>
                         <button
@@ -288,7 +292,11 @@ function NewTaskModal({ onClose, onTaskDetailsClick }: NewTaskModalProps) {
     );
 }
 
-function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
+interface TaskDetailsPanelProps {
+    onClose: () => void;
+}
+
+function TaskDetailsPanel({ onClose }: TaskDetailsPanelProps) {
     const [activeTab, setActiveTab] = useState<'details' | 'comments'>('details');
     const [isTaskDone, setIsTaskDone] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -393,8 +401,9 @@ function TaskDetailsPanel({ onClose }: { onClose: () => void }) {
                                 </button>
                             ) : (
                                 <button
+
                                     className="bg-[#4E53B1] hover:bg-[#373a77] cursor-pointer text-white text-sm px-8 py-1.5 rounded-md"
-                                    onClick={() => console.log('Publish action triggered')}
+                                    onClick={onClose}
                                 >
                                     Publish
                                 </button>
@@ -648,7 +657,7 @@ function EditTaskForm({ onCancel }: { onCancel: () => void }) {
 
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between">
-                        <button className="px-6 py-2 bg-[#4E53B1] cursor-pointer text-white rounded-md hover:bg-[#373a77] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <button onClick={onCancel} className="px-6 py-2 bg-[#4E53B1] cursor-pointer text-white rounded-md hover:bg-[#373a77] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                             Update Task
                         </button>
                         <button className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">
@@ -692,7 +701,7 @@ function TaskAndProject() {
             })
             .map(task => ({
                 ...task,
-                title: (task as any).title ?? task.name // Add title if missing
+                title: (task as any).title ?? task.name 
             }))
     }));
 
@@ -1062,12 +1071,25 @@ function TaskAndProject() {
                                                         <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
                                                             {groupBy === 'assignedTo' ? getProjectNameForTask(task.id) : task.name}
                                                         </div>
+
+
                                                         <div className="col-span-2 flex gap-2">
-                                                            <img className="" src="../src/assets/forum.png" alt="" />
-                                                            <span className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
-                                                                {task.status}
-                                                            </span>
+                                                            <img src="../src/assets/forum.png" alt="" />
+
+                                                            {task.status === 'Draft' ? (
+                                                                <button
+                                                                    onClick={() => setShowTaskDetailsPanel(true)}
+                                                                    className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)} hover:bg-red-200 transition`}
+                                                                >
+                                                                    {task.status}
+                                                                </button>
+                                                            ) : (
+                                                                <span className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(task.status)}`}>
+                                                                    {task.status}
+                                                                </span>
+                                                            )}
                                                         </div>
+
                                                         <div className="col-span-2">
                                                             <span className="inline-flex px-8 py-2 text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 rounded-full">
                                                                 {task.label}
@@ -1108,6 +1130,7 @@ function TaskAndProject() {
                         selectedTasks={selectedTasks}
                         toggleTask={toggleTask}
                         isTaskSelected={isTaskSelected}
+                            onAddTask={() => setShowNewTaskModal(true)}  // Add this prop
                     />
                 )}
 
@@ -1128,3 +1151,5 @@ function TaskAndProject() {
 }
 
 export default TaskAndProject;
+
+

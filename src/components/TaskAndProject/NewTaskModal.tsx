@@ -2,15 +2,17 @@
 import { useState } from 'react';
 import { X, Plus, Paperclip, Trash2 } from 'lucide-react';
 import LabelSelector from './LabelSelector';
-import TaskDetailsPanel from './TaskDetailsPanel';
+
 
 interface NewTaskModalProps {
-      onClose: () => void;
+    onClose: () => void;
+    onTaskDetailsClick: () => void;
 }
+
 
 export default function NewTaskModal({ onClose }: NewTaskModalProps) {
       const [showDetails, setShowDetails] = useState(false);
-      const [showLabelSelector, setShowLabelSelector] = useState(false);
+      
 
 
       return (
