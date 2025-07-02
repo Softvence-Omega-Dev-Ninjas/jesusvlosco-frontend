@@ -95,7 +95,7 @@ const routes = createBrowserRouter([
           { index: true, element: <JobSchedulingLobby /> },
           { path: "user-shiftschedule", element: <UserShiftScheduling></UserShiftScheduling> },
           { path: "user-overviewProjects/:id", element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails> },
-          { path: "timeclock", element: <UserTimeOffRequests></UserTimeOffRequests> },
+          { path: "user-timeclock", element: <UserTimeOffRequests></UserTimeOffRequests> },
 
 
           { path: "user-timeoffrequest", element: <UserTimeOffRequests></UserTimeOffRequests> },
