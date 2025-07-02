@@ -7,12 +7,13 @@
 
 
 import { useState } from "react";
-import { MessageCircle, Eye, ThumbsUp, Send } from "lucide-react";
+import { Eye, ThumbsUp, Send } from "lucide-react";
 import Creative from "@/assets/creative.png";
 import WellDone from "@/assets/Well Done!.png";
 import GreatLea from "@/assets/Great Lea.png";
 import TeamPlayer from "@/assets/Team Player.png";
 import down from "@/assets/arrow_drop_down.svg";
+import comment from "@/assets/comment.png";
 
 interface Comment {
   id: string;
@@ -456,7 +457,7 @@ function RecognitionPostCard({
       </div>
 
       {/* Action Buttons */}
-      <div className="px-6 py-3 ">
+      <div className=" py-3 ">
         <div className="flex gap-4">
           <button
             onClick={onLike}
@@ -473,7 +474,8 @@ function RecognitionPostCard({
             className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full  transition-colors cursor-pointer hover:bg-gray-50"
             onClick={() => setShowCommentInput(!showCommentInput)}
           >
-            <MessageCircle className="w-4 h-4" />
+            {/* <MessageCircle className="w-4 h-4" /> */}
+            <img src={comment} alt="" className="w-4 h-4"/>
             Comment
           </button>
         </div>
