@@ -54,6 +54,7 @@ import UserMain from "@/Layout/User/UserMain";
 import UserChatSetting from "@/pages/userpages/UserChatSetting";
 import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
+import UserPoll from "@/pages/userpages/UserPoll";
 
 
 
@@ -90,6 +91,11 @@ const routes = createBrowserRouter([
       {
         path: "survey",
         element: <UserSurvey></UserSurvey>
+      },
+
+      {
+        path: "poll",
+        element: <UserPoll></UserPoll>
       },
 
       {
