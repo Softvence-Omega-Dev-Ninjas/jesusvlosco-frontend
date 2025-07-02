@@ -397,7 +397,7 @@ function RecognitionPostCard({
   );
 
   return (
-    <div className="max-w-lg mx-auto rounded-lg shadow-sm border bg-white p-4 border-gray-200">
+    <div className="max-w-lg mx-auto rounded-xl  bg-white p-4 border-gray-200">
       {/* Main Post Content */}
       <div className="relative rounded-2xl bg-[#FFF6DC] p-8 rounded-t-lg overflow-hidden">
         {/* Header */}
@@ -483,7 +483,7 @@ function RecognitionPostCard({
 
       {/* Engagement Stats */}
       {post.likeCount > 0 && (
-        <div className="px-6 py-2 border-b border-gray-100">
+        <div className="px-6 py-2 border-b border-t border-gray-100">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
