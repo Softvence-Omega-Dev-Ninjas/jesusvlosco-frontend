@@ -241,7 +241,7 @@ export default function UserRecognition() {
       {/* Main Content */}
       <div className="max-w-lg mx-auto  py-10 ">
         {/* Feed Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+        <div className="flex flex-col gap-4 md:flex-row items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-[#484848]">
             Recognitions Feed
           </h2>
@@ -408,7 +408,7 @@ function RecognitionPostCard({
         </div>
 
         {/* ✅ Responsive Profile Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-6">
+        <div className="flex  sm:flex-row items-center justify-center gap-2 md:gap-8 mb-6">
           {/* Recognizer */}
           <div className="flex flex-col items-center">
             <div
