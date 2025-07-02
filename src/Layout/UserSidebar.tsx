@@ -47,6 +47,21 @@ const navigation: NavigationItem[] = [
             { name: 'Recognition', icon: Mail, path: '/user/communication/user-recognition' },
         ],
     },
+
+
+    {
+        name: 'Scheduling',
+        icon: Calendar,
+        hasSubmenu: true,
+        submenu: [
+            { name: 'Shift Scheduling', icon: Calendar, path: '/user/user-schedule/user-shiftschedule' },
+            { name: 'Time Clock', icon: Calendar, path: '/user/user-schedule/user-timeclock' },
+
+            { name: 'TimeOff Request', icon: Calendar, path: '/user/user-schedule/user-timeoffrequest' },
+        ],
+    },
+
+
     {
         name: 'Survey & Poll',
         icon: BarChart3,

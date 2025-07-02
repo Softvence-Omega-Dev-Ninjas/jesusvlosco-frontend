@@ -59,6 +59,7 @@ import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
 import ShiftSchedulingProjectDetails from "@/pages/userpages/ShiftSchedulingProjectDetails";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import TakeSurvey from "@/pages/userpages/TakeSurvey";
+import UserTimeClock from "@/pages/userpages/UserTimeClock";
 
 
 
@@ -92,10 +93,10 @@ const routes = createBrowserRouter([
         path: "user-schedule",
         element: <Schedule />,
         children: [
-          { index: true, element: <JobSchedulingLobby /> },
+
           { path: "user-shiftschedule", element: <UserShiftScheduling></UserShiftScheduling> },
           { path: "user-overviewProjects/:id", element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails> },
-          { path: "user-timeclock", element: <UserTimeOffRequests></UserTimeOffRequests> },
+          { path: "user-timeclock", element: <UserTimeClock></UserTimeClock> },
 
 
           { path: "user-timeoffrequest", element: <UserTimeOffRequests></UserTimeOffRequests> },
@@ -162,6 +163,7 @@ const routes = createBrowserRouter([
         children: [
           { index: true, element: <JobSchedulingLobby /> },
           { path: "shiftschedule", element: <ShiftScheduling /> },
+          //dynamic routes
           { path: "overviewProjects", element: <OverviewProject /> },
           { path: "timeclock", element: <TimeClock /> },
           {
