@@ -66,7 +66,7 @@ const UserPoll: React.FC = () => {
               key={index}
               className={`flex items-center p-3 rounded-lg border cursor-pointer ${
                 selectedOption === option
-                  ? 'border-purple-600 bg-purple-50'
+                  ? 'border-primary bg-purple-50'
                   : 'border-gray-300'
               }`}
             >

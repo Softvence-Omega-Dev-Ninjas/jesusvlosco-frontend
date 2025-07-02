@@ -130,7 +130,7 @@ const TakeSurvey: React.FC = () => {
               key={index}
               className={`flex items-center p-3 rounded-lg border cursor-pointer ${
                 selectedOption === option
-                  ? "border-purple-600 bg-purple-50"
+                  ? "border-primary bg-purple-50"
                   : "border-gray-300"
               }`}
             >
@@ -140,7 +140,7 @@ const TakeSurvey: React.FC = () => {
                 value={option}
                 checked={selectedOption === option}
                 onChange={handleOptionChange}
-                className="form-radio h-5 w-5 text-purple-600 focus:ring-purple-500"
+                className="form-radio h-5 w-5 text-primary "
               />
               <span className="ml-4 text-gray-800">{option}</span>
             </label>
