@@ -399,7 +399,7 @@ function RecognitionPostCard({
   return (
     <div className="max-w-lg mx-auto rounded-xl  bg-white p-4 border-gray-200">
       {/* Main Post Content */}
-      <div className="relative rounded-2xl bg-[#FFF6DC] p-8 rounded-t-lg overflow-hidden">
+      <div className="relative rounded-2xl bg-[#FFF6DC] p-8  overflow-hidden">
         {/* Header */}
         <div className="text-center mb-6">
           <h2 className="text-lg font-semibold text-[#484848]">
