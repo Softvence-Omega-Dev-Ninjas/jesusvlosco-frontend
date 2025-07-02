@@ -55,7 +55,7 @@ const navigation: NavigationItem[] = [
     {
         name: 'Tasks & Projects',
         icon: FolderOpen,
-        path: '/user/tasks-projects',
+        path: '/user/user-task',
         badge: 1,
     },
     {
