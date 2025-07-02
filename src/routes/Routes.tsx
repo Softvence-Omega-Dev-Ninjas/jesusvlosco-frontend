@@ -55,6 +55,10 @@ import UserChatSetting from "@/pages/userpages/UserChatSetting";
 import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
 import UserPoll from "@/pages/userpages/UserPoll";
+import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
+import ShiftSchedulingProjectDetails from "@/pages/userpages/ShiftSchedulingProjectDetails";
+import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
+import TakeSurvey from "@/pages/userpages/TakeSurvey";
 
 
 
@@ -85,12 +89,29 @@ const routes = createBrowserRouter([
 
       },
       {
+        path: "user-schedule",
+        element: <Schedule />,
+        children: [
+          { index: true, element: <JobSchedulingLobby /> },
+          { path: "user-shiftschedule", element: <UserShiftScheduling></UserShiftScheduling> },
+          { path: "user-overviewProjects/:id", element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails> },
+          { path: "timeclock", element: <UserTimeOffRequests></UserTimeOffRequests> },
+
+
+          { path: "user-timeoffrequest", element: <UserTimeOffRequests></UserTimeOffRequests> },
+        ],
+      },
+      {
         path: 'user-chat-setting',
         element: <UserChatSetting></UserChatSetting>
       },
       {
         path: "survey",
         element: <UserSurvey></UserSurvey>
+      },
+      {
+        path: "take-survey/:id",
+        element: <TakeSurvey></TakeSurvey>
       },
 
       {
@@ -103,6 +124,7 @@ const routes = createBrowserRouter([
         element: <UserTaskMainPage></UserTaskMainPage>
       },
 
+      // dynamic routes
       {
         path: 'user-task-details',
         element: <UserTaskDetails></UserTaskDetails>
@@ -151,6 +173,7 @@ const routes = createBrowserRouter([
               { path: "payroll", element: <Payroll /> },
             ],
           },
+          // dynamic
           { path: "useroffdetails", element: <UserOffDeatils /> },
           { path: "timeoffrequest", element: <TimeOffRequest /> },
         ],
@@ -158,7 +181,8 @@ const routes = createBrowserRouter([
 
       { path: "survey-poll", element: <SurveyMainPage /> },
       { path: "survey-response", element: <SurveyResponse /> },
-      { path: "survey-details", element: <SurveyDetails /> },
+      { path: "survey-details/", element: <SurveyDetails /> },
+      // dynamic
       {
         path: "survey-poll-page",
         element: <SurveyAndPoll />,
