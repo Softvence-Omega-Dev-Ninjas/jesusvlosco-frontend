@@ -170,10 +170,12 @@ export default function RecognitionTable() {
           <button
           onClick={() => { window.location.href = "/admin/send-recognition"; }}
            className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
-            Send recognition
+            Send recognition 
           </button>
-          <button className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
-            Badge library
+          <button
+           onClick={() => { window.location.href = "/admin/badge-library"; }}
+           className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
+            Badge library 
           </button>
         </div>
       </div>

@@ -66,7 +66,7 @@ export default function UserTaskDetails() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex-1 ">
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
-                  Website Redesign Project t{" "}
+                  Website Redesign Project {" "}
                 </h2>
                 <div className="flex flex-wrap gap-4 pt-4">
                   <span className="inline-flex items-center px-6 py-2 rounded-full text-sm  bg-[#D9F0E4] text-[#06843F]">
@@ -98,7 +98,7 @@ export default function UserTaskDetails() {
                 <div className="flex gap-2">
                   <button
                     onClick={toggleTimer}
-                    className="px-6 py-3 rounded-lg font-medium transition-colors duration-200 w-full sm:w-auto bg-[#4E53B1] hover:bg-green-700 text-white"
+                    className="px-6 py-3 cursor-pointer rounded-lg font-medium transition-colors duration-200 w-full sm:w-auto bg-[#4E53B1] hover:bg-green-700 text-white"
                   >
                     Start Task
                   </button>
@@ -195,7 +195,7 @@ export default function UserTaskDetails() {
                   />
                 </label>
               </div>
-              <button className="px-6 py-3 rounded-lg text-white hover:bg-[#30325e] bg-[#4E53B1]">
+              <button className="px-6 py-3 cursor-pointer rounded-lg text-white hover:bg-[#30325e] bg-[#4E53B1]">
                 Submit Task
               </button>
             </div>

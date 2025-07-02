@@ -101,6 +101,8 @@ const CreateRecognitionBagde = () => {
     console.log(`Edit badge: ${badgeId}`);
     setOpenModal(null);
     // Add your edit logic here
+      // Redirect to badge library
+  window.location.href = "/admin/badge-library";
   };
 
   // const handleDelete = (badgeId: string) => {
@@ -143,7 +145,7 @@ const CreateRecognitionBagde = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
               {/* Select dropdown */}
               <div className="relative w-full sm:w-auto">
-                <select className="w-full cursor-pointer appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <select className="w-full cursor-pointer  appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                   <option>Category</option>
                   <option>Performance</option>
                   <option>Achievement</option>
