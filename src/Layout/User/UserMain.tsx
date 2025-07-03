@@ -12,7 +12,7 @@ import { UserSidebar } from '../UserSidebar';
 export default function UserMain() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen  flex flex-col">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div
