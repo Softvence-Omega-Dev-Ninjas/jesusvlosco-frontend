@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import App from "../App";
 
 import NotFound from "../pages/NotFound";
 
@@ -58,6 +59,8 @@ import ShiftSchedulingProjectDetails from "@/pages/userpages/ShiftSchedulingProj
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import TakeSurvey from "@/pages/userpages/TakeSurvey";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
+import UserNotification from "@/pages/userpages/UserNotification";
+import UserPageProfile from "@/pages/userpages/UserPageProfile";
 
 const routes = createBrowserRouter([
   {
@@ -85,6 +88,14 @@ const routes = createBrowserRouter([
             element: <UserRecognition></UserRecognition>,
           },
         ],
+      },
+      {
+        path: 'user-notification',
+        element: <UserNotification></UserNotification>
+      },
+      {
+        path: 'user-profile',
+        element: <UserPageProfile></UserPageProfile>
       },
       {
         path: "user-schedule",
@@ -201,12 +212,12 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
+        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
       },
       { path: "publish-poll", element: <PublishPoll /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => {}} />,
+        element: <PollTemplate onBackToPollCreation={() => { }} />,
       },
 
       { path: "tasks-projects", element: <TaskAndProject /> },
