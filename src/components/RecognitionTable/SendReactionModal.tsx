@@ -1,12 +1,11 @@
 import React from "react";
 import { Edit, Trash2, Eye, Send } from "lucide-react";
 import { useState } from "react";
-import light from "@/assets/reaction light.png"
-import user1 from "@/assets/reactionuser2.png"
-import user2  from "@/assets/reactionu1.png"
-import user3  from "@/assets/reaction user 3.png"
-import Swal from 'sweetalert2';
-
+import light from "@/assets/reaction light.png";
+import user1 from "@/assets/reactionuser2.png";
+import user2 from "@/assets/reactionu1.png";
+import user3 from "@/assets/reaction user 3.png";
+import Swal from "sweetalert2";
 
 interface SendReactionModalProps {
   onClose: () => void;
@@ -24,7 +23,7 @@ interface Comment {
   content: string;
   timestamp: string;
   reactions: Reaction[];
-   image: string;
+  image: string;
 }
 
 const EMOJI_OPTIONS = ["👍", "❤️", "😊", "🎉", "👏"];
@@ -39,7 +38,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
       content: "Well-done! Keep it up.",
       timestamp: "2 days ago",
       reactions: [],
-      image: user2
+      image: user2,
     },
     {
       id: "cody-comment",
@@ -47,7 +46,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
       content: "Thanks",
       timestamp: "2 days ago",
       reactions: [],
-      image: user3
+      image: user3,
     },
   ]);
 
@@ -110,7 +109,6 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
     );
     setShowEmojiPicker(null);
   };
-
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,24 +182,24 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
     </div>
   );
 
-const handleDelete = () => {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: "This action cannot be undone!",
-    position: 'top-end',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it!',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // ✅ Proceed with delete
-      console.log("Item deleted");
-      // Example: deleteComment(comment.id);
-    }
-  });
-};
+  const handleDelete = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      position: "top-end",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // ✅ Proceed with delete
+        console.log("Item deleted");
+        // Example: deleteComment(comment.id);
+      }
+    });
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-40 z-50 flex justify-end">
@@ -219,12 +217,19 @@ const handleDelete = () => {
                 Sent recognition
               </h1>
               <div className="flex gap-2">
-                <button className="p-2 hover:bg-gray-100 border cursor-pointer rounded-full transition-colors">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault(); // prevent form submission
+                    window.location.href = "/admin/badge-library";
+                  }}
+                  className="p-2 hover:bg-gray-100 border cursor-pointer rounded-full transition-colors"
+                >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
-                 onClick={handleDelete}
-                 className="p-2 hover:bg-gray-100 border rounded-full cursor-pointer transition-colors">
+                  onClick={handleDelete}
+                  className="p-2 hover:bg-gray-100 border rounded-full cursor-pointer transition-colors"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -250,13 +255,13 @@ const handleDelete = () => {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full cursor-pointer">
-                       <img src={ user1} alt="" />
+                        <img src={user1} alt="" />
                       </Avatar>
                       <span className="text-gray-700 text-sm">Cody Fisher</span>
                     </div>
                     <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
-                         <img src={ user2} alt="" />
+                        <img src={user2} alt="" />
                       </Avatar>
                       <span className="text-gray-700 text-sm">
                         Leslie Alexander
@@ -264,7 +269,7 @@ const handleDelete = () => {
                     </div>
                     <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
-                       <img src={user3} alt="" />
+                        <img src={user3} alt="" />
                       </Avatar>
                       <span className="text-gray-700 text-sm">Robert Fox</span>
                     </div>
@@ -296,11 +301,9 @@ const handleDelete = () => {
               </span>
             </div>
 
-        
-
             {/* Comments */}
             <div className="space-y-6 mb-8 cursor-pointer">
-              {comments.map((comment, ) => (
+              {comments.map((comment) => (
                 <div key={comment.id} className=" ">
                   {/* Comment Content */}
                   <div
@@ -315,7 +318,6 @@ const handleDelete = () => {
                     <div className="flex items-start gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
                         <img src={comment.image} alt={comment.author} />
-                        
                       </Avatar>
                       <div className="flex-1">
                         <div className="font-medium text-gray-800 text-sm mb-1">

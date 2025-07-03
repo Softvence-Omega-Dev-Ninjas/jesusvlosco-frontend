@@ -43,7 +43,7 @@ const SurveyFirstCard: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-3 ">
-        <Link to="survey-details" >  <button className="px-5 py-2 bg-primary rounded-md text-white cursor-pointer ">
+        <Link to="/admin/survey-details" >  <button className="px-5 py-2 bg-primary rounded-md text-white cursor-pointer ">
             View Response
           </button></Link>
           <button className="px-5 py-2 text-primary outline rounded-md cursor-pointer">

@@ -3,7 +3,7 @@
 // this is new code ............. for testing
 
 import { useState } from "react";
-import { Search, Calendar, List } from "lucide-react";
+import { Search, Calendar, List, Link } from "lucide-react";
 import { FaSortDown } from "react-icons/fa";
 import arrowDropDown from "@/assets/arrow_drop_down.svg";
 
@@ -276,7 +276,7 @@ function TaskAndProject() {
           <h1 className="text-xl sm:text-2xl text-[#4E53B1] font-semibold">
             Task & Projects
           </h1>
-          <button className="bg-[#4E53B1] text-white px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors">
+          <button className="bg-[#4E53B1] cursor-pointer text-white px-4 py-2 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors">
             <div className="flex gap-2 items-center">
               <img
                 src="../src/assets/menu_open.png"
@@ -292,7 +292,7 @@ function TaskAndProject() {
           <div className="flex space-x-3">
             <button
               onClick={() => setActiveTabMain("all")}
-              className={`px-6 py-3 text-sm font-medium rounded-lg  border-2 transition-colors ${
+              className={`px-6 py-3 text-sm font-medium rounded-lg cursor-pointer  border-2 transition-colors ${
                 activeTabMain === "all"
                   ? "bg-[#4E53B1] px-6 py-3 rounded-lg text-white"
                   : "border-[#C5C5C5] text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -302,7 +302,7 @@ function TaskAndProject() {
             </button>
             <button
               onClick={() => setActiveTabMain("submitted")}
-              className={`px-4 py-3 text-sm font-medium  rounded-lg border-2 transition-colors ${
+              className={`px-4 py-3 text-sm font-medium  cursor-pointer rounded-lg border-2 transition-colors ${
                 activeTabMain === "submitted"
                   ? "bg-[#4E53B1]  text-white border-[#4E53B1]"
                   : "border-[#C5C5C5] text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -334,7 +334,7 @@ function TaskAndProject() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 relative w-full sm:w-auto">
                 <span className="text-sm text-gray-600">Group by:</span>
                 <select
-                  className="text-sm border p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto pr-8"
+                  className="text-sm border appearance-none cursor-pointer p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto pr-8"
                   value={groupBy}
                   onChange={(e) =>
                     setGroupBy(
@@ -354,7 +354,7 @@ function TaskAndProject() {
                 />
               </div>
 
-              <div className="flex items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
+              <div className="flex cursor-pointer items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
                 <span className="text-sm font-medium text-[#4E53B1]">
                   May 25 - May 30
                 </span>
@@ -386,7 +386,7 @@ function TaskAndProject() {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => setActiveTab("tasks")}
-                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                  className={`px-6 py-2 rounded-2xl border cursor-pointer font-medium ${
                     activeTab === "tasks"
                       ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
                       : "bg-white text-gray-600 border-gray-300"
@@ -397,7 +397,7 @@ function TaskAndProject() {
 
                 <button
                   onClick={() => setActiveTab("open")}
-                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                  className={`px-6 py-2 rounded-2xl border cursor-pointer font-medium ${
                     activeTab === "open"
                       ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
                       : "bg-white text-gray-600 border-gray-300"
@@ -408,7 +408,7 @@ function TaskAndProject() {
 
                 <button
                   onClick={() => setActiveTab("done")}
-                  className={`px-6 py-2 rounded-2xl border font-medium ${
+                  className={`px-6 py-2 cursor-pointer rounded-2xl border font-medium ${
                     activeTab === "done"
                       ? "bg-[#C8CAE7] text-[#4E53B1] border-[#4E53B1] border-2"
                       : "bg-white text-gray-600 border-gray-300"
@@ -602,7 +602,7 @@ function TaskAndProject() {
                               ]);
                             }
                           }}
-                          className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                          className="w-4 h-4 text-indigo-600 rounded border-gray-300 cursor-pointer"
                         />
                       </div>
                       <div className="col-span-2 text-[#4E53B1] text-lg -mt-2 lg:-ml-20 flex items-center gap-2">
@@ -644,7 +644,7 @@ function TaskAndProject() {
                               type="checkbox"
                               checked={isTaskSelected(task.id)}
                               onChange={() => toggleTask(task.id)}
-                              className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                              className="w-4 h-4 text-indigo-600 rounded border-gray-300 cursor-pointer"
                             />
                           </div>
                           <div className="col-span-2 lg:-ml-20 text-sm font-medium text-gray-600">
@@ -654,7 +654,7 @@ function TaskAndProject() {
                           </div>
                           <div className="col-span-2 flex gap-2">
                             <img
-                              className=""
+                              className="cursor-pointer"
                               src="../src/assets/forum.png"
                               alt=""
                             />
@@ -701,9 +701,12 @@ function TaskAndProject() {
                           {groupBy !== "assignedTo" && (
                             <div className="col-span-2 flex justify-end items-center gap-2">
                               <div>
-                                <button className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                <button 
+                                           onClick={() => { window.location.href = "/user/user-task-details"; }}
+                                 className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
                                   View Task
                                 </button>
+                               
                               </div>
                             </div>
                           )}
