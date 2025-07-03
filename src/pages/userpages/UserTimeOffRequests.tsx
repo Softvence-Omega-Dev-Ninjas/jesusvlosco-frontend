@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 
 import { useState } from "react";
@@ -307,14 +305,4 @@ export default function TimeOffComponent() {
       )}
     </div>
   );
-}
-
-interface TimeOffRequest {
-  id: string;
-  date: string;
-  policy: string;
-  requestedOn: string;
-  totalRequested: string;
-  status: "Added by admin" | "Rejected" | "Pending" | "Approved";
-  statusColor: string;
 }

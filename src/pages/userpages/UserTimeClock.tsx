@@ -1,6 +1,9 @@
+import TimeSheet from "@/components/UserTimeClockComponents/TimeSheet";
 
 export default function UserTimeClock() {
-    return (
-        <div>UserTimeClock</div>
-    )
+  return (
+    <div>
+      <TimeSheet />
+    </div>
+  );
 }
