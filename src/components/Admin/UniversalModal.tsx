@@ -1,6 +1,7 @@
 // UniversalModal.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Assuming these interfaces are defined either here or imported from a shared types file
 interface Survey {
@@ -645,11 +646,14 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               </p>
             </div>
             <div className="p-3 border-t border-gray-200 flex justify-center gap-2">
-              <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
+              <Link to={"/admin/survey-details"}>
+               <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium cursor-pointer">
                 View detail
               </button>
+              </Link>
+             
               <button
-                className="border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50"
+                className="border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 cursor-pointer "
                 onClick={onClose}
               >
                 Close

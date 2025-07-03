@@ -1,12 +1,11 @@
 import React from 'react';
-import { X } from 'lucide-react';
 
 interface SurveyPreviewProps {
       isOpen: boolean;
       onClose: () => void;
 }
 
-const SurveyPreview: React.FC<SurveyPreviewProps> = ({ isOpen, onClose }) => {
+const SurveyPreview: React.FC<SurveyPreviewProps> = ({ isOpen }) => {
       if (!isOpen) return null;
 
       return (
