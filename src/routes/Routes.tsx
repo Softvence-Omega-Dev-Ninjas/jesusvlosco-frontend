@@ -59,6 +59,8 @@ import ShiftSchedulingProjectDetails from "@/pages/userpages/ShiftSchedulingProj
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import TakeSurvey from "@/pages/userpages/TakeSurvey";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
+import UserNotification from "@/pages/userpages/UserNotification";
+import UserPageProfile from "@/pages/userpages/UserPageProfile";
 
 const routes = createBrowserRouter([
   {
@@ -86,6 +88,14 @@ const routes = createBrowserRouter([
             element: <UserRecognition></UserRecognition>,
           },
         ],
+      },
+      {
+        path: 'user-notification',
+        element: <UserNotification></UserNotification>
+      },
+      {
+        path: 'user-profile',
+        element: <UserPageProfile></UserPageProfile>
       },
       {
         path: "user-schedule",
