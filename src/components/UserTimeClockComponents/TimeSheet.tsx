@@ -13,9 +13,9 @@ export default function TimeSheet() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="px-4 lg:px-0">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between my-8 gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="relative">
