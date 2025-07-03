@@ -1,3 +1,4 @@
+import { Calendar, ChevronDown } from "lucide-react";
 import type React from "react";
 
 import { useState } from "react";
@@ -97,7 +98,7 @@ export default function TimeOffComponent() {
         </h1>
         <button
           onClick={() => setIsPopupOpen(true)}
-          className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium transition-colors"
+          className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
         >
           Request time off
         </button>
@@ -182,7 +183,7 @@ export default function TimeOffComponent() {
 
       {/* Popup Modal */}
       {isPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -191,7 +192,7 @@ export default function TimeOffComponent() {
               </h3>
               <button
                 onClick={() => setIsPopupOpen(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold w-6 h-6 flex items-center justify-center"
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold w-6 h-6 flex items-center justify-center cursor-pointer"
               >
                 ×
               </button>
@@ -211,7 +212,7 @@ export default function TimeOffComponent() {
                   id="time-off-type"
                   value={timeOffType}
                   onChange={(e) => setTimeOffType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="sick-leave">Sick leave</option>
                   <option value="time-off">Time off</option>
@@ -232,7 +233,7 @@ export default function TimeOffComponent() {
                   type="button"
                   onClick={() => setAllDayOff(!allDayOff)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    allDayOff ? "bg-blue-600" : "bg-gray-200"
+                    allDayOff ? "bg-primary" : "bg-gray-200"
                   }`}
                 >
                   <span
@@ -244,31 +245,22 @@ export default function TimeOffComponent() {
               </div>
 
               {/* Date picker */}
-              <div>
+              <div className="flex justify-between">
                 <label
                   htmlFor="date-time"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Date and time of time off
                 </label>
-                <div className="flex">
-                  <input
-                    type="date"
-                    id="date-time"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    type="button"
-                    className="px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100"
-                  >
-                    📅
-                  </button>
+                <div className="p-2 flex items-center border border-primary text-primary rounded-lg justify-center">
+                  <Calendar className="border-r px-2 size-4 min-w-max" />
+                  <ChevronDown className="size-4 px-2 min-w-max" />
                 </div>
               </div>
 
               {/* Total days */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex justify-between bg-gray-100 p-2 py-4 rounded-lg items-center">
+                <label className="block text-sm font-medium text-gray-700">
                   Total time off days
                 </label>
                 <div className="text-sm text-gray-600">1.00 work days</div>
@@ -295,7 +287,7 @@ export default function TimeOffComponent() {
               {/* Submit button */}
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md font-medium transition-colors"
+                className="bg-green-100 hover:bg-[#1EBD66] text-green-600 hover:text-white py-2 px-8 rounded-full text-sm transition-colors mt-20 cursor-pointer"
               >
                 Send for approval
               </button>
