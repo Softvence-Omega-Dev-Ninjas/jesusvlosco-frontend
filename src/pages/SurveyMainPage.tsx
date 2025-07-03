@@ -408,7 +408,7 @@ const SurveyMainPage: React.FC = () => {
               modalType="calendar"
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
-              initialPosition={{ x: 1257, y: 255 }}
+              // initialPosition={{ x: 1257, y: 255 }}
             />
 
             {/* Filter Modal */}
@@ -438,7 +438,7 @@ const SurveyMainPage: React.FC = () => {
               onClose={() => setOpenModalType(null)}
               modalType="quickView"
               surveyData={selectedSurveyForQuickView}
-              initialPosition={{ x: 1450, y: 430 }}
+              // initialPosition={{ x: 1450, y: 430 }}
             />
 
             {/* NEW: Team Members Modal */}
@@ -459,7 +459,7 @@ const SurveyMainPage: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl font-bold text-primary">Survey & Poll</h1>
-            <Link to={"/survey-poll-page"}>
+            <Link to={"/admin/survey-poll-page"}>
               <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium cursor-pointer">
                 <Plus size={16} />
                 Create New
@@ -660,7 +660,7 @@ const SurveyMainPage: React.FC = () => {
                       <p className="  mt-2">{stat.responseRate}</p>
                       <p className=" ">{stat.responseCount}</p>
 
-                      <Link to={"survey-response"}> <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
+                      <Link to={"/admin/survey-response"}> <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
                         View
                       </button></Link>
                      
