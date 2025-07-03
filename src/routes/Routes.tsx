@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-
+import App from "../App";
 
 import NotFound from "../pages/NotFound";
 
@@ -8,7 +8,6 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 
 import { Chat } from "@/pages/Chats";
-import Recognition from "@/pages/Recognition";
 
 import { Communication } from "@/Layout/CommunicationLayout/Communication";
 
@@ -61,14 +60,11 @@ import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import TakeSurvey from "@/pages/userpages/TakeSurvey";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 
-
-
 const routes = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
   },
-
 
   // ✅ Admin routes grouped here
   {
@@ -85,55 +81,64 @@ const routes = createBrowserRouter([
         children: [
           { index: true, element: <UserChat></UserChat> },
           { path: "userchat", element: <UserChat></UserChat> },
-          { path: "user-recognition", element: <UserRecognition></UserRecognition> },
+          {
+            path: "user-recognition",
+            element: <UserRecognition></UserRecognition>,
+          },
         ],
-
       },
       {
         path: "user-schedule",
         element: <Schedule />,
         children: [
+          {
+            path: "user-shiftschedule",
+            element: <UserShiftScheduling></UserShiftScheduling>,
+          },
+          {
+            path: "user-overviewProjects/:id",
+            element: (
+              <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>
+            ),
+          },
+          { path: "user-timeclock", element: <UserTimeClock /> },
 
-          { path: "user-shiftschedule", element: <UserShiftScheduling></UserShiftScheduling> },
-          { path: "user-overviewProjects/:id", element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails> },
-          { path: "user-timeclock", element: <UserTimeClock></UserTimeClock> },
-
-
-          { path: "user-timeoffrequest", element: <UserTimeOffRequests></UserTimeOffRequests> },
+          {
+            path: "user-timeoffrequest",
+            element: <UserTimeOffRequests></UserTimeOffRequests>,
+          },
         ],
       },
       {
-        path: 'user-chat-setting',
-        element: <UserChatSetting></UserChatSetting>
+        path: "user-chat-setting",
+        element: <UserChatSetting></UserChatSetting>,
       },
       {
         path: "survey",
-        element: <UserSurvey></UserSurvey>
+        element: <UserSurvey></UserSurvey>,
       },
       {
         path: "take-survey/:id",
-        element: <TakeSurvey></TakeSurvey>
+        element: <TakeSurvey></TakeSurvey>,
       },
 
       {
         path: "poll",
-        element: <UserPoll></UserPoll>
+        element: <UserPoll></UserPoll>,
       },
 
       {
-        path: 'user-task',
-        element: <UserTaskMainPage></UserTaskMainPage>
+        path: "user-task",
+        element: <UserTaskMainPage></UserTaskMainPage>,
       },
 
       // dynamic routes
       {
-        path: 'user-task-details',
-        element: <UserTaskDetails></UserTaskDetails>
-      }
-    ]
+        path: "user-task-details",
+        element: <UserTaskDetails></UserTaskDetails>,
+      },
+    ],
   },
-
-
 
   {
     path: "/admin",
@@ -217,10 +222,7 @@ const routes = createBrowserRouter([
         ],
       },
 
-
-      {
-
-      },
+      {},
       {
         path: "add-user",
         element: <AddUserProfile></AddUserProfile>,
@@ -232,7 +234,6 @@ const routes = createBrowserRouter([
 
       { path: "add-user", element: <AddUserProfile /> },
       { path: "sidebar-settings", element: <SidebarSetting /> },
-
     ],
   },
 
