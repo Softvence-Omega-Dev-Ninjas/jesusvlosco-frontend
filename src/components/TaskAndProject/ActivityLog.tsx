@@ -80,7 +80,7 @@ const activityData: ActivityItem[] = [
 
 export default function ActivityLog() {
       const [showActivity, setShowActivity] = useState(false);
-      const [selectedDate, setSelectedDate] = useState('19/06');
+      const [selectedDate] = useState('19/06');
 
       const toggleActivity = () => {
             setShowActivity(!showActivity);

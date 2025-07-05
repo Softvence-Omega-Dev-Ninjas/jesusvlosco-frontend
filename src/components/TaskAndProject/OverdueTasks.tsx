@@ -59,27 +59,27 @@ const OverdueTasks: React.FC = () => {
             }
       ];
 
-      const assignUsers: User[] = [
-            {
-                  name: 'Jane',
-                  avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
-            },
-            {
-                  name: 'Wade',
-                  avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
-            },
-            {
-                  name: 'John',
-                  avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
-            }
-      ];
+      // const assignUsers: User[] = [
+      //       {
+      //             name: 'Jane',
+      //             avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
+      //       },
+      //       {
+      //             name: 'Wade',
+      //             avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
+      //       },
+      //       {
+      //             name: 'John',
+      //             avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2'
+      //       }
+      // ];
 
       return (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-w-4xl mx-auto">
                   {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                         <div className="flex items-center gap-3">
-                           
+
                               <h2 className="text-lg font-semibold text-[#4E53B1]">Overdue Tasks</h2>
                         </div>
                   </div>
@@ -114,13 +114,13 @@ const OverdueTasks: React.FC = () => {
                                                 </div>
                                           </div>
 
-                                          
+
                                     </div>
                               </div>
                         ))}
                   </div>
 
-                 
+
             </div>
       );
 };
