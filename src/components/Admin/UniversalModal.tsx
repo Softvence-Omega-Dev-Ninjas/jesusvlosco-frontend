@@ -133,8 +133,8 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
   // API data for filters (unchanged)
   const [apiFilterOptions, setApiFilterOptions] = useState<string[]>([]);
-  const [loadingFilters, setLoadingFilters] = useState(false);
-  const [filterError, setFilterError] = useState<string | null>(null);
+  const [loadingFilters, ] = useState(false);
+  const [filterError, ] = useState<string | null>(null);
 
   const centerModal = () => {
     if (modalRef.current) {
@@ -171,24 +171,24 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
       // API call for filters
       if (modalType === "filter") {
-        const fetchFilterData = async () => {
-          setLoadingFilters(true);
-          setFilterError(null);
-          try {
-            // Replace with your actual API endpoint if needed
-            const response = await fetch('/api/filters'); // Example API endpoint
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data: string[] = await response.json();
-            setApiFilterOptions(data);
-          } catch (error: any) {
-            console.error("Failed to fetch filter options:", error);
-            setFilterError(`Failed to load filters: ${error.message}`);
-          } finally {
-            setLoadingFilters(false);
-          }
-        };
+        // const fetchFilterData = async () => {
+        //   setLoadingFilters(true);
+        //   setFilterError(null);
+        //   try {
+        //     // Replace with your actual API endpoint if needed
+        //     const response = await fetch('/api/filters'); // Example API endpoint
+        //     if (!response.ok) {
+        //       throw new Error(`HTTP error! status: ${response.status}`);
+        //     }
+        //     const data: string[] = await response.json();
+        //     setApiFilterOptions(data);
+        //   } catch (error: any) {
+        //     console.error("Failed to fetch filter options:", error);
+        //     setFilterError(`Failed to load filters: ${error.message}`);
+        //   } finally {
+        //     setLoadingFilters(false);
+        //   }
+        // };
         // This is a placeholder. In a real app, you'd fetch from an API.
         // For now, hardcode some filter options:
         setApiFilterOptions(["All", "Active", "Completed"]); //
@@ -487,25 +487,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 </div>
               </div>
             </div>
-            {/* <div className="p-3 border-t border-gray-200">
-              <button
-                className="w-full bg-primary text-white py-1.5 rounded-md text-sm"
-                onClick={() => {
-                  const formatCalendarDate = (dateObj: CalendarDate) => {
-                    const monthNum = monthNameToNumber(dateObj.month) + 1;
-                    return `${dateObj.year}-${String(monthNum).padStart(2, '0')}-${dateObj.day}`;
-                  };
-
-                  const formattedFromDate = formatCalendarDate(fromDate);
-                  const formattedToDate = formatCalendarDate(toDate);
-
-                  onDateChange && onDateChange(`${formattedFromDate} to ${formattedToDate}`);
-                  onClose();
-                }}
-              >
-                Apply Date
-              </button>
-            </div> */}
+           
           </>
         );
       case "filter":

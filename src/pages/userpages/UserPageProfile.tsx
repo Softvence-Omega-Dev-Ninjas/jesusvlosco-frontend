@@ -1,9 +1,12 @@
 import profile from "../../assets/Ellipse 295.png"
+import distance from "../../assets/distance.png"
+import calendar from "../../assets/calendar_month (1).png"
 
 
 import { BiEditAlt } from "react-icons/bi";
 
 const UserPageProfile = () => {
+
   return (
     <div className=" mx-auto p-6 min-h-screen mt-4">
 
@@ -52,7 +55,19 @@ const UserPageProfile = () => {
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-          <input type="date" className="w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2" defaultValue="1998-07-25" />
+      <div className="w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2 flex justify-between items-center">
+      <input
+      
+        defaultValue="1998-07-25"
+        className="bg-transparent outline-none"
+      />
+      <img
+        src={calendar}
+        alt="calendar icon"
+        className="w-6 h-6 cursor-pointer"
+        
+      />
+    </div>
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Email ID</label>
@@ -75,7 +90,11 @@ const UserPageProfile = () => {
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Country</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="America" />
+          <div className="flex justify-between w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2">
+                      <input className="" defaultValue="America" />
+                      <img src={distance} alt="" />
+
+          </div>
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Pin Code</label>
@@ -87,8 +106,12 @@ const UserPageProfile = () => {
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-          <input type="date" className="w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2" defaultValue="1998-07-25" />
-        </div>
+<div  className="flex justify-between  w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2">
+
+            <input defaultValue="1998-07-25" />
+             <img src={calendar} alt="" className="cursor-pointer"/>
+  
+  </div>        </div>
       </form>
 
       <div className="mt-8  flex justify-end">

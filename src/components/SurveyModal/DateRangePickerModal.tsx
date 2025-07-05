@@ -22,11 +22,11 @@ interface DateRangePickerModalProps {
   onDateChange: (dateRange: string) => void;
 }
 
-const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({ isOpen, onClose, onDateChange }) => {
+const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({ isOpen, }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [offsetX, setOffsetX] = useState(0);
-  const [offsetY, setOffsetY] = useState(0);
+  const [offsetX, ] = useState(0);
+  const [offsetY, ] = useState(0);
 
   const today = new Date();
   const currentDay = String(today.getDate()).padStart(2, '0');
@@ -104,14 +104,14 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({ isOpen, onC
     return current >= min && current <= max;
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (modalRef.current && !(e.target as HTMLElement).closest('.no-drag')) {
-      setIsDragging(true);
-      setOffsetX(e.clientX - modalRef.current.getBoundingClientRect().left);
-      setOffsetY(e.clientY - modalRef.current.getBoundingClientRect().top);
-      e.stopPropagation();
-    }
-  };
+  // const handleMouseDown = (e: React.MouseEvent) => {
+  //   if (modalRef.current && !(e.target as HTMLElement).closest('.no-drag')) {
+  //     setIsDragging(true);
+  //     setOffsetX(e.clientX - modalRef.current.getBoundingClientRect().left);
+  //     setOffsetY(e.clientY - modalRef.current.getBoundingClientRect().top);
+  //     e.stopPropagation();
+  //   }
+  // };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging && modalRef.current) {

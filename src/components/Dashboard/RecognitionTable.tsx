@@ -185,14 +185,14 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
                 </span>
                 <div className="flex items-center gap-3">
                   <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
-                    <LikeIcon className="w-5 h-5 text-gray-500" />
+                    <LikeIcon />
                     <span className="text-xs text-green-600">1</span>
                   </button>
                   <button
                     onClick={() => setIsModalOpen(true)}
                     className="relative flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                   >
-                    <CommentIcon className="w-5 h-5 text-gray-500" />
+                    <CommentIcon />
                     <span className="text-[10px] absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1 py-0.5 rounded-full">
                       1
                     </span>

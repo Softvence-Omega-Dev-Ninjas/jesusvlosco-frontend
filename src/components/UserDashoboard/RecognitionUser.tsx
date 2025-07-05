@@ -22,7 +22,7 @@ export const RecognitionUser: React.FC<{
   return (
     <div className={` bg-white rounded-2xl p-6 border border-gray-200 `}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-200">
+      <div className="flex items-center gap-3 mb-4 pb-2 border-b border-gray-200">
         <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
           <BadgeIcon />
         </div>

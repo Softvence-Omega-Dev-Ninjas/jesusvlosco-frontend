@@ -45,7 +45,7 @@ export default function CreateBadge() {
       </div>
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <div className="w-full lg:w-80 bg-white border  border-[#C5C5C5]  p-4 lg:p-6 lg:min-h-1/2 rounded-2xl">
+        <div className="w-full lg:w-80 bg-white  border  border-[#C5C5C5]  p-4 lg:p-6 lg:min-h-1/2 rounded-2xl">
           <div className="mb-6">
             <h2 className="text-md text-center py-4  text-gray-800 mb-4">
               Your custom badge

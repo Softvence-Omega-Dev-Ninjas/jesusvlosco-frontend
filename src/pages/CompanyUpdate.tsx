@@ -1,11 +1,6 @@
-
-
-
-
-
-import React, { useState } from "react";
 import AnnouncementForm from "@/components/CompanyUpdate/AnnouncementForm";
 import AnnouncementList from "@/components/CompanyUpdate/AnnouncementList";
+import { useState } from "react";
 
 export const CompanyUpdate = () => {
   const [showForm, setShowForm] = useState(false);
@@ -18,7 +13,9 @@ export const CompanyUpdate = () => {
     <div className="p-4 bg-white rounded-lg shadow">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div>
-          <h2 className="text-xl text-indigo-900 font-semibold mb-1">Company Update & Announcement</h2>
+          <h2 className="text-xl text-indigo-900 font-semibold mb-1">
+            Company Update & Announcement
+          </h2>
           <p className="text-gray-700">
             Stay informed with the latest company news and important updates
           </p>
