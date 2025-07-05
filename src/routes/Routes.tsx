@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
 
 import NotFound from "../pages/NotFound";
 
@@ -11,56 +10,56 @@ import { Chat } from "@/pages/Chats";
 
 import { Communication } from "@/Layout/CommunicationLayout/Communication";
 
+import AdminLayout from "@/Layout/Admin/AdminLayout";
 import Payroll from "@/Layout/UserLayout/Payroll";
 import { UserLayout } from "@/Layout/UserLayout/UserLayout";
 import UserOffDeatils from "@/Layout/UserLayout/UserOffDeatils";
 import AddUserProfile from "@/pages/AddUserProfile";
+import BadgeLibrary from "@/pages/BadgeLibrary";
+import CreateBadge from "@/pages/CreateBadge";
+import CreateRecognition from "@/pages/CreateRecognition";
+import EditBadge from "@/pages/EditBadge";
 import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
+import PollPage from "@/pages/PollPage";
+import PollTemplate from "@/pages/PollTemplate";
+import PublishPoll from "@/pages/PublishPoll";
+import PublishSurvey from "@/pages/PublishSurvey";
+import RecognitionTable from "@/pages/RecognitionTable";
 import Schedule from "@/pages/Schedule";
 import ShiftScheduling from "@/pages/ShiftScheduling";
 import SidebarSetting from "@/pages/SidebarSetting";
+import SurveyAndPoll from "@/pages/SurveyAndPoll";
+import SurveyDetails from "@/pages/SurveyDetails";
+import SurveyMainPage from "@/pages/SurveyMainPage";
+import SurveyResponse from "@/pages/SurveyResponse";
+import SurveyTemplate from "@/pages/SurveyTemplate";
+import TaskAndProject from "@/pages/TaskAndProject";
 import TimeClock from "@/pages/TimeClock";
 import TimeOffRequest from "@/pages/TimeOffRequest";
 import TimeSheet from "@/pages/TimeSheet";
 import TimeSheets from "@/pages/TimeSheets";
 import User from "@/pages/User";
-import UserProfile from "@/pages/UserProfile";
-import SurveyAndPoll from "@/pages/SurveyAndPoll";
-import SurveyPage from "./SurveyPage";
-import PollPage from "@/pages/PollPage";
-import PublishSurvey from "@/pages/PublishSurvey";
-import PublishPoll from "@/pages/PublishPoll";
-import SurveyMainPage from "@/pages/SurveyMainPage";
-import SurveyResponse from "@/pages/SurveyResponse";
-import SurveyDetails from "@/pages/SurveyDetails";
-import PollTemplate from "@/pages/PollTemplate";
-import SurveyTemplate from "@/pages/SurveyTemplate";
-import RecognitionTable from "@/pages/RecognitionTable";
-import CreateRecognition from "@/pages/CreateRecognition";
-import BadgeLibrary from "@/pages/BadgeLibrary";
-import EditBadge from "@/pages/EditBadge";
-import CreateBadge from "@/pages/CreateBadge";
-import TaskAndProject from "@/pages/TaskAndProject";
-import AdminLayout from "@/Layout/Admin/AdminLayout";
 import UserDashboard from "@/pages/userpages/UserDashboard";
+import UserProfile from "@/pages/UserProfile";
+import SurveyPage from "./SurveyPage";
 
-import UserRecognition from "@/pages/userpages/UserRecognition";
-import UserChat from "@/pages/userpages/UserChat";
-import UserSurvey from "@/pages/userpages/UserSurvey";
-import { UserCommunication } from "@/pages/userpages/UserCommunication";
 import UserMain from "@/Layout/User/UserMain";
-import UserChatSetting from "@/pages/userpages/UserChatSetting";
-import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
-import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
-import UserPoll from "@/pages/userpages/UserPoll";
-import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
 import ShiftSchedulingProjectDetails from "@/pages/userpages/ShiftSchedulingProjectDetails";
-import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import TakeSurvey from "@/pages/userpages/TakeSurvey";
-import UserTimeClock from "@/pages/userpages/UserTimeClock";
+import UserChat from "@/pages/userpages/UserChat";
+import UserChatSetting from "@/pages/userpages/UserChatSetting";
+import { UserCommunication } from "@/pages/userpages/UserCommunication";
 import UserNotification from "@/pages/userpages/UserNotification";
 import UserPageProfile from "@/pages/userpages/UserPageProfile";
+import UserPoll from "@/pages/userpages/UserPoll";
+import UserRecognition from "@/pages/userpages/UserRecognition";
+import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
+import UserSurvey from "@/pages/userpages/UserSurvey";
+import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
+import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
+import UserTimeClock from "@/pages/userpages/UserTimeClock";
+import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 
 const routes = createBrowserRouter([
   {
@@ -90,12 +89,12 @@ const routes = createBrowserRouter([
         ],
       },
       {
-        path: 'user-notification',
-        element: <UserNotification></UserNotification>
+        path: "user-notification",
+        element: <UserNotification></UserNotification>,
       },
       {
-        path: 'user-profile',
-        element: <UserPageProfile></UserPageProfile>
+        path: "user-profile",
+        element: <UserPageProfile></UserPageProfile>,
       },
       {
         path: "user-schedule",
@@ -212,12 +211,12 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
+        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
       },
       { path: "publish-poll", element: <PublishPoll /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => { }} />,
+        element: <PollTemplate onBackToPollCreation={() => {}} />,
       },
 
       { path: "tasks-projects", element: <TaskAndProject /> },
