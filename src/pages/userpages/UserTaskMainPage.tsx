@@ -1,9 +1,7 @@
-
-
 // this is new code ............. for testing
 
 import { useState } from "react";
-import { Search, Calendar, List,  } from "lucide-react";
+import { Search, Calendar, List } from "lucide-react";
 import { FaSortDown } from "react-icons/fa";
 import arrowDropDown from "@/assets/arrow_drop_down.svg";
 
@@ -210,8 +208,6 @@ function TaskAndProject() {
         : [...prev, taskId]
     );
   };
-
-
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -529,15 +525,21 @@ function TaskAndProject() {
                                     {task.dueDate}
                                   </span>
                                 </div>
-                                {groupBy !== "assignedTo" && (
-                                  <div className="mt-2 flex items-center gap-2">
-                                    <div>
-                                      <button className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
-                                        View Task
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
+                                 {activeTabMain !== "submitted" && (
+                            <div className="col-span-2 flex justify-end items-center gap-2">
+                              <div>
+                                <button
+                                  onClick={() => {
+                                    window.location.href =
+                                      "/user/user-task-details";
+                                  }}
+                                  className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e]"
+                                >
+                                  View Task
+                                </button>
+                              </div>
+                            </div>
+                          )}
                               </div>
                             </div>
                           </div>
@@ -552,7 +554,7 @@ function TaskAndProject() {
 
         {/* Projects - Desktop View */}
         <div>
-         <h2 className="text-3xl text-[#4E53B1] py-4"> Project List</h2>
+          <h2 className="text-3xl text-[#4E53B1] py-4"> Project List</h2>
         </div>
         <div className="hidden sm:block">
           {filteredProjects.map(
@@ -610,7 +612,7 @@ function TaskAndProject() {
                         Start time
                       </div>
                       <div className="col-span-2 text-[#4E53B1]">Due date</div>
-                      {groupBy !== "assignedTo" && (
+                      {activeTabMain !== "submitted" && (
                         <div className="col-span-2 text-[#4E53B1] text-right">
                           Assigned to
                         </div>
@@ -643,13 +645,7 @@ function TaskAndProject() {
                               src="../src/assets/forum.png"
                               alt=""
                             />
-                            {/* <span
-                              className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
-                                task.status
-                              )}`}
-                            >
-                              {task.status}
-                            </span> */}
+                            
                             <span
                               className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
                                 task.status
@@ -683,15 +679,19 @@ function TaskAndProject() {
                           >
                             {task.dueDate}
                           </div>
-                          {groupBy !== "assignedTo" && (
+                         
+                          {activeTabMain !== "submitted" && (
                             <div className="col-span-2 flex justify-end items-center gap-2">
                               <div>
-                                <button 
-                                           onClick={() => { window.location.href = "/user/user-task-details"; }}
-                                 className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                <button
+                                  onClick={() => {
+                                    window.location.href =
+                                      "/user/user-task-details";
+                                  }}
+                                  className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e]"
+                                >
                                   View Task
                                 </button>
-                               
                               </div>
                             </div>
                           )}
