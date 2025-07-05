@@ -1,5 +1,12 @@
 import { useState, ChangeEvent } from 'react';
 
+import userA from "../../assets/user1.png"
+import userB from "../../assets/user2.png"
+import userC from "../../assets/user3.png"
+import userD from "../../assets/user4.png"
+import userE from "../../assets/user5.png"
+import userF from "../../assets/user6.png"
+
 // Define the type for a User object
 interface User {
   id: string;
@@ -20,7 +27,7 @@ const users: User[] = [
     phone: '(303) 555-0105',
     department: 'Design',
     lastLogin: '2/11/12',
-    avatar: 'https://placehold.co/40x40/FFD700/000?text=CF',
+    avatar: userA,
   },
   {
     id: '21389-2',
@@ -29,7 +36,7 @@ const users: User[] = [
     phone: '(907) 555-0104',
     department: 'Medical',
     lastLogin: '4/4/18',
-    avatar: 'https://placehold.co/40x40/FFA07A/000?text=LA',
+    avatar: userB,
   },
   {
     id: '21389-3',
@@ -38,7 +45,7 @@ const users: User[] = [
     phone: '(316) 555-0116',
     department: 'Trainer',
     lastLogin: '7/18/17',
-    avatar: 'https://placehold.co/40x40/ADD8E6/000?text=KW',
+    avatar: userC,
   },
   {
     id: '21389-4',
@@ -47,7 +54,7 @@ const users: User[] = [
     phone: '(219) 555-0114',
     department: 'Medical',
     lastLogin: '6/21/19',
-    avatar: 'https://placehold.co/40x40/90EE90/000?text=RF',
+    avatar: userD,
   },
   {
     id: '21389-5',
@@ -56,7 +63,7 @@ const users: User[] = [
     phone: '(201) 555-0124',
     department: 'Medical',
     lastLogin: '1/28/17',
-    avatar: 'https://placehold.co/40x40/FFB6C1/000?text=JJ',
+    avatar: userE,
   },
   {
     id: '21389-6',
@@ -65,7 +72,7 @@ const users: User[] = [
     phone: '(406) 555-0120',
     department: 'Sales',
     lastLogin: '8/21/15',
-    avatar: 'https://placehold.co/40x40/F0E68C/000?text=TW',
+    avatar: userF,
   },
   {
     id: '21389-7',
@@ -74,7 +81,7 @@ const users: User[] = [
     phone: '(629) 555-0129',
     department: 'Marketing',
     lastLogin: '8/30/14',
-    avatar: 'https://placehold.co/40x40/DDA0DD/000?text=GH',
+    avatar: userA,
   },
   {
     id: '21389-8',
@@ -83,7 +90,7 @@ const users: User[] = [
     phone: '(270) 555-0117',
     department: 'Marketing',
     lastLogin: '8/15/17',
-    avatar: 'https://placehold.co/40x40/B0C4DE/000?text=KM',
+    avatar: userB,
   },
   {
     id: '21389-9',
@@ -92,7 +99,7 @@ const users: User[] = [
     phone: '(704) 555-0127',
     department: 'Medical',
     lastLogin: '5/7/16',
-    avatar: 'https://placehold.co/40x40/E0FFFF/000?text=DL',
+    avatar: userC,
   },
   {
     id: '21389-10',
@@ -101,7 +108,7 @@ const users: User[] = [
     phone: '(307) 555-0133',
     department: 'Sales',
     lastLogin: '1/31/14',
-    avatar: 'https://placehold.co/40x40/F5DEB3/000?text=EH',
+    avatar: userA,
   },
 ];
 
