@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 
 // this is new code ............. for testing
 
 import { useState } from "react";
-import { Search, Calendar, List, Link } from "lucide-react";
+import { Search, Calendar, List,  } from "lucide-react";
 import { FaSortDown } from "react-icons/fa";
 import arrowDropDown from "@/assets/arrow_drop_down.svg";
 
@@ -211,22 +211,7 @@ function TaskAndProject() {
     );
   };
 
-  const areAllSelected = filteredProjects
-    .flatMap((p) => p.tasks)
-    .every((task) => selectedTasks.includes(task.id));
 
-  const toggleAll = () => {
-    const allFilteredTaskIds = filteredProjects.flatMap((p) =>
-      p.tasks.map((t) => t.id)
-    );
-    if (areAllSelected) {
-      setSelectedTasks(
-        selectedTasks.filter((id) => !allFilteredTaskIds.includes(id))
-      );
-    } else {
-      setSelectedTasks([...new Set([...selectedTasks, ...allFilteredTaskIds])]);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
