@@ -128,7 +128,7 @@ const navigation: NavigationItem[] = [
         hasSubmenu: true,
         submenu: [
             { name: 'Shift Scheduling', icon: Calendar, path: '/admin/schedule/shiftschedule' },
-            { name: 'Time Clock', icon: Calendar, path: '/admin/schedule/timeclock' },
+            // { name: 'Time Clock', icon: Calendar, path: '/admin/schedule/timeclock' },
             { name: 'Time Sheets', icon: Calendar, path: '/admin/schedule/timesheet' },
             { name: 'TimeOff Request', icon: Calendar, path: '/admin/schedule/timeoffrequest' },
         ],
