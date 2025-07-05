@@ -1,11 +1,11 @@
-
-
 // this is new code ............. for testing
 
 import { useState } from "react";
-import { Search, Calendar, List,  } from "lucide-react";
+import { Search, Calendar, List } from "lucide-react";
 import { FaSortDown } from "react-icons/fa";
 import arrowDropDown from "@/assets/arrow_drop_down.svg";
+import CalendarDropdown from "@/components/TaskAndProject/CalendarDropdown";
+
 
 interface Task {
   id: string;
@@ -143,6 +143,7 @@ function TaskAndProject() {
   );
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [selectedDateRange, setSelectedDateRange] = useState("May 25 - May 30");
   const [activeTab, setActiveTab] = useState<"tasks" | "open" | "done">(
     "tasks"
   );
@@ -210,8 +211,6 @@ function TaskAndProject() {
         : [...prev, taskId]
     );
   };
-
-
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -315,35 +314,36 @@ function TaskAndProject() {
                   </button>
                 </div>
               </div>
-
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 relative w-full sm:w-auto">
                 <span className="text-sm text-gray-600">Group by:</span>
-                <select
-                  className="text-sm border appearance-none cursor-pointer p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto pr-8"
-                  value={groupBy}
-                  onChange={(e) =>
-                    setGroupBy(
-                      e.target.value as "title" | "label" | "assignedTo"
-                    )
-                  }
-                >
-                  <option value="title">Title</option>
-                  <option value="label">Label</option>
-                  <option value="assignedTo">assigned</option>
-                </select>
+                <div className="relative w-full sm:w-auto">
+                  <select
+                    className="text-sm border appearance-none cursor-pointer p-2 rounded-lg border-gray-300 bg-transparent text-gray-900 font-medium focus:outline-none w-full sm:w-auto pr-8"
+                    value={groupBy}
+                    onChange={(e) =>
+                      setGroupBy(
+                        e.target.value as "title" | "label" | "assignedTo"
+                      )
+                    }
+                  >
+                    <option value="title">Title</option>
+                    <option value="label">Label</option>
+                    <option value="assignedTo">assigned</option>
+                  </select>
 
-                <img
-                  src={arrowDropDown}
-                  alt="dropdown icon"
-                  className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
-                />
+                  <img
+                    src={arrowDropDown}
+                    alt="dropdown icon"
+                    className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3"
+                  />
+                </div>
               </div>
 
-              <div className="flex cursor-pointer items-center border border-[#4E53B1] rounded-2xl py-1 px-2 gap-2 w-full sm:w-auto">
-                <span className="text-sm font-medium text-[#4E53B1]">
-                  May 25 - May 30
-                </span>
-                <FaSortDown className="w-4 h-4 -mt-2 text-[#4E53B1]" />
+              <div className="">
+                <CalendarDropdown
+                  selectedRange={selectedDateRange}
+                  onSelectRange={setSelectedDateRange}
+                />
               </div>
             </div>
 
@@ -529,10 +529,16 @@ function TaskAndProject() {
                                     {task.dueDate}
                                   </span>
                                 </div>
-                                {groupBy !== "assignedTo" && (
-                                  <div className="mt-2 flex items-center gap-2">
+                                {activeTabMain !== "submitted" && (
+                                  <div className="col-span-2 flex justify-end items-center gap-2">
                                     <div>
-                                      <button className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                      <button
+                                        onClick={() => {
+                                          window.location.href =
+                                            "/user/user-task-details";
+                                        }}
+                                        className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e]"
+                                      >
                                         View Task
                                       </button>
                                     </div>
@@ -552,7 +558,7 @@ function TaskAndProject() {
 
         {/* Projects - Desktop View */}
         <div>
-         <h2 className="text-3xl text-[#4E53B1] py-4"> Project List</h2>
+          <h2 className="text-3xl text-[#4E53B1] py-4"> Project List</h2>
         </div>
         <div className="hidden sm:block">
           {filteredProjects.map(
@@ -610,7 +616,7 @@ function TaskAndProject() {
                         Start time
                       </div>
                       <div className="col-span-2 text-[#4E53B1]">Due date</div>
-                      {groupBy !== "assignedTo" && (
+                      {activeTabMain !== "submitted" && (
                         <div className="col-span-2 text-[#4E53B1] text-right">
                           Assigned to
                         </div>
@@ -643,13 +649,7 @@ function TaskAndProject() {
                               src="../src/assets/forum.png"
                               alt=""
                             />
-                            {/* <span
-                              className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
-                                task.status
-                              )}`}
-                            >
-                              {task.status}
-                            </span> */}
+
                             <span
                               className={`inline-flex px-6 py-2 text-xs font-medium rounded-full ${getStatusBadge(
                                 task.status
@@ -683,15 +683,19 @@ function TaskAndProject() {
                           >
                             {task.dueDate}
                           </div>
-                          {groupBy !== "assignedTo" && (
+
+                          {activeTabMain !== "submitted" && (
                             <div className="col-span-2 flex justify-end items-center gap-2">
                               <div>
-                                <button 
-                                           onClick={() => { window.location.href = "/user/user-task-details"; }}
-                                 className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e] ">
+                                <button
+                                  onClick={() => {
+                                    window.location.href =
+                                      "/user/user-task-details";
+                                  }}
+                                  className="px-6 py-3 text-xs font-medium text-white bg-[#4E53B1] rounded-xl cursor-pointer hover:bg-[#30325e]"
+                                >
                                   View Task
                                 </button>
-                               
                               </div>
                             </div>
                           )}
