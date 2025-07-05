@@ -175,11 +175,15 @@ const routes = createBrowserRouter([
         path: "schedule",
         element: <Schedule />,
         children: [
-          { index: true, element: <JobSchedulingLobby /> },
-          { path: "shiftschedule", element: <ShiftScheduling /> },
+
+          { path: "shiftschedule", element: <JobSchedulingLobby /> },
           //dynamic routes
-          { path: "overviewProjects", element: <OverviewProject /> },
-          { path: "timeclock", element: <TimeClock /> },
+          { path: "overviewProjects/:id", element: <OverviewProject /> },
+          // { path: "timeclock", element: <TimeClock /> },
+          {
+            path: 'shift-scheduling',
+            element: <ShiftScheduling />
+          },
           {
             path: "timesheet",
             element: <TimeSheet />,
@@ -242,7 +246,7 @@ const routes = createBrowserRouter([
       },
 
       { path: "add-user", element: <AddUserProfile /> },
-      { path: "sidebar-settings", element: <SidebarSetting /> },
+      // { path: "sidebar-settings", element: <SidebarSetting /> },
     ],
   },
 
