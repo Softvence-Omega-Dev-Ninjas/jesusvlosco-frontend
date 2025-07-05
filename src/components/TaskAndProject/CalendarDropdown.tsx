@@ -123,7 +123,7 @@ export default function CalendarDropdown({ selectedRange, onSelectRange }: Calen
             <div className="relative">
                   <button
                         onClick={toggleCalendar}
-                        className="flex items-center gap-2 border border-[#4E53B1] rounded-full py-2 px-4 bg-white hover:bg-gray-50 transition-colors"
+                        className="flex cursor-pointer items-center gap-2 border border-[#4E53B1] rounded-full py-2 px-4 bg-white hover:bg-gray-50 transition-colors"
                   >
                         <span className="text-sm font-medium text-[#4E53B1]">{selectedRange}</span>
                         {showCalendar ? (
