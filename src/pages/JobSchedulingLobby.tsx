@@ -356,7 +356,7 @@ const JobSchedulingLobby: React.FC = () => {
             Job Scheduling Lobby
           </h2>
           <button
-            className="flex items-center bg-primary text-white px-4 py-2 rounded-lg text-sm"
+            className="flex items-center bg-primary text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
             onClick={handleAddNewClick}
           >
             <Plus size={16} className="mr-2" /> Add New

@@ -80,7 +80,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, toggleMoreModal, isM
           <MoreHorizontal size={20} />
         </button>
 
-        <Link to="/schedule/overviewProjects">
+        <Link to="/admin/schedule/overviewProjects">
           <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">
           Access Schedule
         </button>
