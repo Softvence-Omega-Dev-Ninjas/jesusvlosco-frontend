@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
 
-export  interface TaskDetailsPanelProps {
-  onClose: () => void;
-}
-const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({ onClose }) => {
+// No props are needed for this component
+
+const TaskDetailsPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
