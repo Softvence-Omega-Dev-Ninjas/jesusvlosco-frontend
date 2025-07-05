@@ -27,7 +27,7 @@ export default function PollPage() {
   const handleCreateNewPoll = () => setShowModal(false)
   const handleUseTemplate = () => {
     setShowModal(false)
-    navigate('/poll-template')
+    navigate('/admin/poll-template')
   }
   const handlePublishPoll = () => {
     console.log('Publish Poll clicked', {
@@ -173,7 +173,7 @@ export default function PollPage() {
                   >
                     Edit
                   </button>
-                  <Link to="/publish-poll">
+                  <Link to="/admin/publish-poll">
                     <button
                     onClick={handleCancelPoll}
                     className="w-full cursor-pointer rounded md:w-80 px-6 py-3 bg-[#4E53B1] text-white font-semibold"
