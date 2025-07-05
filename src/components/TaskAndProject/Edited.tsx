@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronRight, Paperclip, X, Trash2, ChevronDown } from 'lucide-react';
 
 
 interface EditedProps {
       onClose: () => void;
-    }
+}
 
 function Edited({ onClose }: EditedProps) {
       const [taskTitle, setTaskTitle] = useState('');
@@ -201,7 +201,7 @@ function Edited({ onClose }: EditedProps) {
                               {/* Action Buttons */}
                               <div className="flex items-center justify-between">
                                     <button onClick={onClose}
-                                     className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                                           Update Task
                                     </button>
                                     <button className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">

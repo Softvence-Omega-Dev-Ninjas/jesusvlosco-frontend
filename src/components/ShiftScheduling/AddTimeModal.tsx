@@ -46,13 +46,14 @@ const PopupModal: React.FC<PopupModalProps> = ({
 
 interface TimeOffRequestModalProps {
       isOpen: boolean;
-      onClose: () => void; }
+      onClose: () => void;
+}
 
 export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({ isOpen, onClose }) => {
       const [timeOffType, setTimeOffType] = React.useState('sick-leave');
       const [allDayOff, setAllDayOff] = React.useState(true);
       const [note, setNote] = React.useState('');
-      const [showDatePicker, setShowDatePicker] = React.useState(false);
+      // const [showDatePicker, setShowDatePicker] = React.useState(false);
       const [startDate, setStartDate] = React.useState<Date | null>(new Date());
       const [endDate, setEndDate] = React.useState<Date | null>(new Date());
       const [startTime, setStartTime] = React.useState('09:00');
@@ -75,11 +76,11 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({ isOpen
             return diffDays;
       };
 
-      const handleDateChange = (dates: [Date | null, Date | null]) => {
-            const [start, end] = dates;
-            setStartDate(start);
-            setEndDate(end || start);
-      };
+      // const handleDateChange = (dates: [Date | null, Date | null]) => {
+      //       const [start, end] = dates;
+      //       setStartDate(start);
+      //       setEndDate(end || start);
+      // };
 
       const handleSubmit = (e: React.FormEvent) => {
             e.preventDefault();

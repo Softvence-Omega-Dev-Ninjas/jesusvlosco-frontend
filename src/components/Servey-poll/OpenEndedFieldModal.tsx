@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, List } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface OpenEndedFieldModalProps {
       isOpen: boolean;

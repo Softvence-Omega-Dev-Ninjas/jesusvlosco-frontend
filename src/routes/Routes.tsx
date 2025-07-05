@@ -35,7 +35,7 @@ import SurveyMainPage from "@/pages/SurveyMainPage";
 import SurveyResponse from "@/pages/SurveyResponse";
 import SurveyTemplate from "@/pages/SurveyTemplate";
 import TaskAndProject from "@/pages/TaskAndProject";
-import TimeClock from "@/pages/TimeClock";
+
 import TimeOffRequest from "@/pages/TimeOffRequest";
 import TimeSheet from "@/pages/TimeSheet";
 import TimeSheets from "@/pages/TimeSheets";
@@ -215,12 +215,12 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
+        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
       },
       { path: "publish-poll", element: <PublishPoll /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => {}} />,
+        element: <PollTemplate onBackToPollCreation={() => { }} />,
       },
 
       { path: "tasks-projects", element: <TaskAndProject /> },

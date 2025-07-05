@@ -5,13 +5,13 @@ import {
     MessageSquare,
     Mail,
     Award,
-    Users,
+
     BarChart3,
     Calendar,
     FolderOpen,
     Settings,
     LogOut,
-    X,
+
     ChevronDown,
     ChevronRight
 } from 'lucide-react';

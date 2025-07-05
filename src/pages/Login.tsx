@@ -7,7 +7,7 @@ import Step3ProjectSelection from '../components/Step3ProjectSelection';
 const Login = () => {
   const [step, setStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedProject, setSelectedProject] = useState(null);
+  // Removed unused selectedProject state
 
   const handlePhoneNumberSubmit = (number: any) => {
     setPhoneNumber(number);
@@ -19,7 +19,6 @@ const Login = () => {
   };
 
   const handleProjectSelection = (project: any) => {
-    setSelectedProject(project);
     // Here you would typically redirect the user to the dashboard or home page
     console.log('Logged in with project:', project);
   };

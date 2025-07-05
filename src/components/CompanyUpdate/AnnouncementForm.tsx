@@ -3,7 +3,7 @@ import CategoryDropdown from "./CategoryDropdown";
 import DateTimePicker from "./dateTimeform";
 
 const AnnouncementForm: React.FC = () => {
-  const [publishNow, setPublishNow] = useState(true);
+  // const [publishNow, setPublishNow] = useState(true);
   const [fileName, setFileName] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +77,7 @@ const AnnouncementForm: React.FC = () => {
         )}
       </div> */}
 
-     <DateTimePicker/>
+      <DateTimePicker />
 
       {/* Attachment */}
       <div className="mb-4 p-4 border border-gray-300  rounded-md text-center text-sm text-gray-500 bg-gray-50">
