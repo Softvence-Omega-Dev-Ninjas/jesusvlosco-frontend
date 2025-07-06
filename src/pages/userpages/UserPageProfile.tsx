@@ -4,9 +4,26 @@ import calendar from "../../assets/calendar_month (1).png"
 
 
 import { BiEditAlt } from "react-icons/bi";
+import {  useRef, useState } from "react";
 
 const UserPageProfile = () => {
 
+   const inputRef1 = useRef<HTMLInputElement>(null);
+  const inputRef2 = useRef<HTMLInputElement>(null);
+
+  const [selectedDate1, setSelectedDate1] = useState("1998-07-25");
+  const [selectedDate2, setSelectedDate2] = useState("1998-07-25");
+
+  const handleIconClick1 = () => inputRef1.current?.showPicker();
+  const handleIconClick2 = () => inputRef2.current?.showPicker();
+
+  const handleDateChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate1(e.target.value);
+  };
+
+  const handleDateChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate2(e.target.value);
+  };
   return (
     <div className=" mx-auto p-6 min-h-screen mt-4">
 
@@ -55,19 +72,28 @@ const UserPageProfile = () => {
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-      <div className="w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2 flex justify-between items-center">
-      <input
-      
-        defaultValue="1998-07-25"
-        className="bg-transparent outline-none"
-      />
-      <img
-        src={calendar}
-        alt="calendar icon"
-        className="w-6 h-6 cursor-pointer"
-        
-      />
-    </div>
+  <div className="relative w-full">
+          <input
+            type="text"
+            value={selectedDate1}
+            readOnly
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2 pr-10"
+          />
+          <img
+            src={calendar}
+            alt="calendar icon"
+            onClick={handleIconClick1}
+            className="w-6 h-6 absolute right-3 top-2.5 cursor-pointer"
+          />
+          <input
+            ref={inputRef1}
+            type="date"
+            value={selectedDate1}
+            onChange={handleDateChange1}
+            className="absolute inset-0 left-16 md:left-[275px] md:right-0 opacity-0 cursor-pointer"
+            style={{ pointerEvents: "none" }}
+          />
+        </div>
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Email ID</label>
@@ -106,12 +132,29 @@ const UserPageProfile = () => {
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-<div  className="flex justify-between  w-full border-2 text-gray-500 border-gray-200 rounded-lg p-2">
-
-            <input defaultValue="1998-07-25" />
-             <img src={calendar} alt="" className="cursor-pointer"/>
-  
-  </div>        </div>
+  <div className="relative w-full">
+          <input
+            type="text"
+            value={selectedDate2}
+            readOnly
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2 pr-10"
+          />
+          <img
+            src={calendar}
+            alt="calendar icon"
+            onClick={handleIconClick2}
+            className="w-6 h-6 absolute right-3 top-2.5 cursor-pointer"
+          />
+          <input
+            ref={inputRef2}
+            type="date"
+            value={selectedDate2}
+            onChange={handleDateChange2}
+            className="absolute inset-0 left-16 md:left-[275px] md:right-0 opacity-0 cursor-pointer"
+            style={{ pointerEvents: "none" }}
+          />
+        </div>
+   </div>
       </form>
 
       <div className="mt-8  flex justify-end">
