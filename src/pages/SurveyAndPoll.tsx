@@ -9,7 +9,7 @@ const SurveyAndPoll: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = e.target.value.toLowerCase();
-        navigate(`/survey-poll-page/${selected}`);
+        navigate(`/admin/survey-poll-page/${selected}`);
     };
 
     return (
@@ -45,10 +45,10 @@ const SurveyAndPoll: React.FC = () => {
                         <Pencil size={18} />
                     </button>
                 </div>
-                
+
             </div>
             <div className="mt-6">
-                
+
                 <Outlet></Outlet>
             </div>
         </div>

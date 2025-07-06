@@ -494,7 +494,7 @@ const User: React.FC = () => {
           </p>
         </div>
         <Link
-          to={"/add-user"}
+          to={"/admin/add-user"}
           className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
         >
           <svg

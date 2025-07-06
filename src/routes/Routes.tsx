@@ -63,7 +63,7 @@ import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 
 const routes = createBrowserRouter([
   {
-    path: "/login",
+    path: "/",
     element: <Login />,
   },
 

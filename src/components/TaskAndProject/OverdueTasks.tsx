@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MessageCircle, User } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 interface Task {
       id: string;
@@ -14,10 +14,10 @@ interface Task {
       showAssign?: boolean;
 }
 
-interface User {
-      name: string;
-      avatar: string;
-}
+// interface User {
+//       name: string;
+//       avatar: string;
+// }
 
 const OverdueTasks: React.FC = () => {
       const overdueTasks: Task[] = [
