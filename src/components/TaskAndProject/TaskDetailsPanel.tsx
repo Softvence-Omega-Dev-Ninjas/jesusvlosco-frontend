@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-
+interface TaskDetailsPanelProps {
+  onClose: () => void;
+}
 
 // No props are needed for this component
 
-const TaskDetailsPanel: React.FC = () => {
+const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div>
+
       {/* Trigger */}
       <p
         className="text-sm underline text-[#4E53B1] cursor-pointer"

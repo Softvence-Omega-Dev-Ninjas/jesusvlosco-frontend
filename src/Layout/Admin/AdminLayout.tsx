@@ -18,8 +18,11 @@ export default function AdminLayout() {
             )}
 
             <div className="flex flex-1">
+
                 {/* Sidebar */}
                 <div className='mt-4'>
+
+
                     <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
                 </div>
 

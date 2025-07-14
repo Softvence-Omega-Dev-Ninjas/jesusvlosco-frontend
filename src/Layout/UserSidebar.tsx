@@ -8,10 +8,11 @@ import {
     BarChart3,
     Calendar,
     FolderOpen,
-    Settings,
+
     LogOut,
     ChevronDown,
     ChevronRight,
+    User,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -48,13 +49,19 @@ const navigation: NavigationItem[] = [
         ],
     },
 
+    {
+        name: 'user',
+        icon: User,
+        path: '/user/user-profile',
+    },
+
 
     {
         name: 'Scheduling',
         icon: Calendar,
         hasSubmenu: true,
         submenu: [
-            { name: 'Shift Scheduling', icon: Calendar, path: '/user/user-schedule/user-shiftschedule' },
+            // { name: 'Shift Scheduling', icon: Calendar, path: '/user/user-schedule/user-shiftschedule' },
             { name: 'Time Clock', icon: Calendar, path: '/user/user-schedule/user-timeclock' },
 
             { name: 'TimeOff Request', icon: Calendar, path: '/user/user-schedule/user-timeoffrequest' },
@@ -73,11 +80,7 @@ const navigation: NavigationItem[] = [
         path: '/user/user-task',
         badge: 1,
     },
-    {
-        name: 'Settings',
-        icon: Settings,
-        path: '/user/sidebar-settings',
-    },
+
 ];
 
 export const UserSidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
