@@ -112,7 +112,7 @@ const AddUnavailabilityModal: React.FC<AddUnavailabilityModalProps> = ({
                                           </div>
 
                                           <button className="mt-6   hover:text-blue-700 transition-colors">
-                                                
+
                                                 <span className="text-sm ml-1 flex"><Plus className="w-5 h-5" /> Add Hours</span>
                                           </button>
                                     </div>
@@ -146,6 +146,7 @@ const AddUnavailabilityModal: React.FC<AddUnavailabilityModalProps> = ({
 };
 
 // Demo component to show the modal
+// @ts-ignore
 const App: React.FC = () => {
       const [isModalOpen, setIsModalOpen] = useState(true);
 
