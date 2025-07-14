@@ -1,3 +1,5 @@
+
+import { useRef, useState, useEffect } from "react";
 import EmployeeCard from "@/components/UserDashoboard/EmployeeCard";
 import {
   ChevronDown,
@@ -5,7 +7,10 @@ import {
   ChevronRight,
   Download,
   SearchIcon,
+  X,
 } from "lucide-react";
+import AddUnavailabilityModal from "@/components/ShiftScheduling/AddUnavailabilityModal";
+import VisibilityToggle from "@/components/ShiftScheduling/VisibilityToggle";
 
 interface Employee {
   id: string;
@@ -17,6 +22,13 @@ interface Employee {
 }
 
 export default function UserShiftScheduling() {
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  const [showAddUnavailability, setShowAddUnavailability] = useState(false);
+  const [showVisibilityToggle, setShowVisibilityToggle] = useState(false);
+  const [exportScope, setExportScope] = useState<"everyone" | "only-me">("everyone");
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+
   const days = [
     { short: "Mon", date: "6/9" },
     { short: "Tue", date: "6/10" },
@@ -72,11 +84,26 @@ export default function UserShiftScheduling() {
       id: "6",
       name: "Lisa Chen",
       role: "Associate",
-      status: "Unavailable",
+      status: "Busy",
       offDay: "Wednesday",
       avatar: "/placeholder.svg?height=64&width=64",
     },
   ];
+
+  // Handle clicks outside the popup to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        setShowVisibilityToggle(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const getShiftForEmployeeAndDay = (employeeId: string, day: string) => {
     return shifts.find(
@@ -84,94 +111,156 @@ export default function UserShiftScheduling() {
     );
   };
 
+  const handleEmployeeClick = (employeeId: string) => {
+    if (selectedEmployee === employeeId) {
+      setSelectedEmployee(null);
+    } else {
+      setSelectedEmployee(employeeId);
+    }
+  };
+
+  const handleExportScopeChange = (scope: "everyone" | "only-me") => {
+    setExportScope(scope);
+    setShowVisibilityToggle(false);
+    triggerExport(scope);
+  };
+
+  const triggerExport = (scope: "everyone" | "only-me") => {
+    // Here you would implement the actual export functionality
+    console.log(`Exporting schedule for ${scope}`);
+    // For demonstration, we'll just show an alert
+    alert(`Exporting schedule for ${scope === "everyone" ? "Everyone" : "Only me"}`);
+  };
+
+  const sortedEmployees = [...employees].sort((a, b) => {
+    if (selectedEmployee) {
+      if (a.id === selectedEmployee) return -1;
+      if (b.id === selectedEmployee) return 1;
+    }
+    return 0;
+  });
+
   return (
-    <div className="py-3">
-      <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-bold text-primary">
+    <div className="py-3 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h3 className="text-xl sm:text-2xl font-bold text-primary">
           Shift Scheduling Project 1
         </h3>
-        <button className="flex gap-2 items-center border rounded-lg px-4 p-3 border-primary text-primary">
-          <Download />
-          Export
-        </button>
+
+        <div className="relative inline-block">
+          <button
+            ref={buttonRef}
+            onClick={() => setShowVisibilityToggle(!showVisibilityToggle)}
+            className="flex gap-2 items-center border rounded-lg px-3 sm:px-4 py-2 sm:p-3 border-primary text-primary text-sm sm:text-base"
+          >
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            Export
+          </button>
+
+          {showVisibilityToggle && (
+            <div
+              ref={popupRef}
+              className="absolute z-50 right-0 sm:right-auto lg:right-0 left-0 sm:left-auto top-full mt-2 sm:mt-3"
+            >
+              <div className="relative bg-white shadow-lg rounded-lg w-[280px] sm:w-[320px] border border-gray-200 p-4">
+                <VisibilityToggle
+                  selected={exportScope}
+                  onSelect={handleExportScopeChange}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex mt-10 gap-5">
+      <div className="flex flex-col lg:flex-row mt-6 sm:mt-10 gap-3 sm:gap-5">
         {/* left side */}
-        <div className="py-5 max-w-[23%]">
-          <div className="flex justify-between gap-10">
-            <button className="flex gap-1 items-center border px-4 p-3 border-primary text-primary rounded-2xl">
-              Everyone <ChevronDown />
+        <div className="py-3 sm:py-5 w-full lg:max-w-[23%]">
+          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row justify-between gap-3 sm:gap-5 lg:gap-3 xl:gap-5">
+            <button className="flex gap-1 items-center justify-center border px-3 sm:px-4 py-2 sm:p-3 border-primary text-primary rounded-2xl text-sm sm:text-base">
+              Everyone <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <button className="flex gap-1 items-center border px-4 p-3 border-primary text-primary rounded-2xl">
-              <ChevronLeft /> Jul 28- Aug 3 <ChevronRight />
+            <button className="flex gap-1 items-center justify-center border px-3 sm:px-4 py-2 sm:p-3 border-primary text-primary rounded-2xl text-sm sm:text-base">
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="whitespace-nowrap">Jul 28- Aug 3</span>
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
-          <div className="relative flex items-center">
+          <div className="relative flex items-center mt-4 sm:mt-6">
             <input
               type="text"
               name="search"
               placeholder="Search"
-              className="bg-gray-100 w-full p-2 pl-4 rounded-lg mt-6 pr-5"
+              className="bg-gray-100 w-full p-2 pl-4 rounded-lg pr-5 text-sm sm:text-base"
             />
-            <SearchIcon className="absolute right-3 translate-y-1/2 size-5 text-gray-400" />
+            <SearchIcon className="absolute  lg:-mt-4 right-3 translate-y-1/2 size-4 sm:size-5 text-gray-400" />
           </div>
 
-          <div className="space-y-5 mt-5">
-            <EmployeeCard
-              name="Sarah Johnson"
-              role="Manager"
-              status="Available"
-              offDay="Friday"
-              avatar="https://i.pravatar.cc"
-            />
-            <EmployeeCard
-              name="Sarah Johnson"
-              role="Manager"
-              status="Available"
-              offDay="Friday"
-              avatar="https://i.pravatar.cc"
-            />
-            <EmployeeCard
-              name="Sarah Johnson"
-              role="Manager"
-              status="Available"
-              offDay="Friday"
-              avatar="https://i.pravatar.cc"
-            />
-            <EmployeeCard
-              name="Sarah Johnson"
-              role="Manager"
-              status="Available"
-              offDay="Friday"
-              avatar="https://i.pravatar.cc"
-            />
+          <div className="space-y-3 sm:space-y-5 mt-4 sm:mt-5">
+            {employees
+              .filter(employee => !selectedEmployee || employee.id === selectedEmployee)
+              .map((employee) => (
+                <div
+                  key={employee.id}
+                  onClick={() => handleEmployeeClick(employee.id)}
+                  className={`cursor-pointer transition-all ${selectedEmployee === employee.id ? 'ring-2 ring-primary rounded-lg' : ''}`}
+                >
+                  <EmployeeCard
+                    name={employee.name}
+                    role={employee.role}
+                    status={employee.status}
+                    offDay={employee.offDay}
+                    avatar={employee.avatar}
+                  />
+                </div>
+              ))}
           </div>
         </div>
 
         {/* Right Side */}
-        <div className="border rounded-2xl border-gray-200 p-5 flex-1">
-          <h3 className="text-lg font-semibold text-primary">
-            Weekly Schedule
-          </h3>
-          <div className="text-right mt-0">
-            <button className="border rounded-full text-sm px-4 p-2 border-primary text-primary">
-              Availability
+        <div className="border mt-auto rounded-2xl border-gray-200 p-3 sm:p-5 flex-1 overflow-x-auto">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h3 className="text-base sm:text-lg font-semibold text-primary">
+              Weekly Schedule
+            </h3>
+            <button
+              onClick={() => setShowAddUnavailability(true)}
+              className="border rounded-full text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 border-primary text-primary"
+            >
+              My Availability
             </button>
+
+            {showAddUnavailability && (
+              <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="relative bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                  <button
+                    onClick={() => setShowAddUnavailability(false)}
+                    className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100"
+                  >
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+                  <AddUnavailabilityModal
+                    isOpen={showAddUnavailability}
+                    onClose={() => setShowAddUnavailability(false)}
+                    onSubmit={() => setShowAddUnavailability(false)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Schedule Grid */}
-          <div className="bg-white overflow-hidden w-full mt-4">
+          <div className="bg-white overflow-hidden w-full mt-3 sm:mt-4 lg:mt-12">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[700px] sm:min-w-full">
                 <thead>
-                  <tr className="">
+                  <tr>
                     {days.map((day) => (
                       <th
                         key={day.short}
-                        className="p-4 text-center font-medium text-gray-900 min-w-32"
+                        className="p-2 sm:p-4 text-center font-medium text-gray-900 min-w-24 sm:min-w-32"
                       >
-                        <div className="text-sm">
+                        <div className="text-xs sm:text-sm">
                           {day.short} {day.date}
                         </div>
                       </th>
@@ -179,82 +268,81 @@ export default function UserShiftScheduling() {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map((employee, employeeIndex) => (
-                    <tr key={employee.id}>
-                      {days.map((day) => {
-                        const shift = getShiftForEmployeeAndDay(
-                          employee.id,
-                          day.short
-                        );
-                        return (
-                          <td key={day.short}>
-                            {shift && shift.status !== "empty" ? (
-                              <div
-                                className={`rounded-lg mb-5 mr-3 p-3 min-h-[140px] ${
-                                  shift.status === "scheduled"
+                  {sortedEmployees
+                    .filter(employee => !selectedEmployee || employee.id === selectedEmployee)
+                    .map((employee) => (
+                      <tr key={employee.id}>
+                        {days.map((day) => {
+                          const shift = getShiftForEmployeeAndDay(
+                            employee.id,
+                            day.short
+                          );
+                          return (
+                            <td key={day.short}>
+                              {shift && shift.status !== "empty" ? (
+                                <div
+                                  className={`rounded-lg mb-3 sm:mb-5 mr-2 sm:mr-3 p-2 sm:p-3 min-h-[100px] sm:min-h-[140px] ${shift.status === "scheduled"
                                     ? "bg-indigo-100 border border-indigo-200"
                                     : shift.status === "unavailable"
-                                    ? "bg-red-100 border border-red-200"
-                                    : "bg-white border border-gray-200"
-                                }`}
-                              >
-                                <div
-                                  className={`text-xs font-medium mb-1 ${
-                                    shift.status === "scheduled"
+                                      ? "bg-red-100 border border-red-200"
+                                      : "bg-white border border-gray-200"
+                                    }`}
+                                >
+                                  <div
+                                    className={`text-xs mb-1 ${shift.status === "scheduled"
                                       ? "text-indigo-800"
                                       : shift.status === "unavailable"
-                                      ? "text-red-800"
-                                      : "text-gray-800"
-                                  }`}
-                                >
-                                  {shift.time}
-                                </div>
-                                {shift.location && (
-                                  <div
-                                    className={`text-xs mb-2 ${
-                                      shift.status === "scheduled"
+                                        ? "text-red-800"
+                                        : "text-gray-800"
+                                      }`}
+                                  >
+                                    {shift.time}
+                                  </div>
+                                  {shift.location && (
+                                    <div
+                                      className={`text-xs mb-1 sm:mb-2 ${shift.status === "scheduled"
                                         ? "text-indigo-600"
                                         : shift.status === "unavailable"
-                                        ? "text-red-600"
-                                        : "text-gray-600"
-                                    }`}
-                                  >
-                                    {shift.location}
-                                  </div>
-                                )}
-                                {shift.status === "scheduled" &&
-                                  shift.tasksDone && (
-                                    <div className="flex items-center text-xs text-indigo-600">
-                                      <svg
-                                        className="w-3 h-3 mr-1"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                      >
-                                        <path
-                                          fillRule="evenodd"
-                                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                          clipRule="evenodd"
-                                        />
-                                      </svg>
-                                      Tasks Done
+                                          ? "text-red-600"
+                                          : "text-gray-600"
+                                        }`}
+                                    >
+                                      {shift.location}
                                     </div>
                                   )}
-                                {shift.status === "unavailable" && (
-                                  <div className="text-xs font-medium text-red-600">
-                                    Unavailable
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="border-2 border-dashed border-gray-300 rounded-lg min-h-[140px] -mt-5 mr-3 flex items-center justify-center">
-                                <div className="text-xs text-gray-400"></div>
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
+                                  {shift.status === "scheduled" &&
+                                    shift.tasksDone && (
+                                      <div className="flex items-center text-xs text-indigo-600">
+                                        <svg
+                                          className="w-3 h-3 mr-1"
+                                          fill="currentColor"
+                                          viewBox="0 0 20 20"
+                                        >
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                          />
+                                        </svg>
+                                        Tasks Done
+                                      </div>
+                                    )}
+                                  {shift.status === "unavailable" && (
+                                    <div className="text-xs font-medium text-red-600">
+                                      Unavailable
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg min-h-[100px] sm:min-h-[140px] -mt-3 sm:-mt-5 mr-2 sm:mr-3 flex items-center justify-center">
+                                  <div className="text-xs text-gray-400"></div>
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
