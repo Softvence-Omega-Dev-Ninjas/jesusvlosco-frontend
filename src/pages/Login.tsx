@@ -1,14 +1,13 @@
 // src/pages/LoginPage.jsx
-import { useState } from 'react';
-import Step1PhoneNumber from '../components/Step1PhoneNumber';
-import Step2VerifyCode from '../components/Step2VerifyCode';
-import Step3ProjectSelection from '../components/Step3ProjectSelection';
+import { useState } from "react";
+import Step1PhoneNumber from "../components/Step1PhoneNumber";
+import Step2VerifyCode from "../components/Step2VerifyCode";
+import Step3ProjectSelection from "../components/Step3ProjectSelection";
 
 const Login = () => {
   const [step, setStep] = useState(1);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   // Removed unused selectedProject state
-
   const handlePhoneNumberSubmit = (number: any) => {
     setPhoneNumber(number);
     setStep(2); // Move to the next step
@@ -20,7 +19,7 @@ const Login = () => {
 
   const handleProjectSelection = (project: any) => {
     // Here you would typically redirect the user to the dashboard or home page
-    console.log('Logged in with project:', project);
+    console.log("Logged in with project:", project);
   };
 
   const renderStep = () => {
@@ -28,9 +27,16 @@ const Login = () => {
       case 1:
         return <Step1PhoneNumber onSubmit={handlePhoneNumberSubmit} />;
       case 2:
-        return <Step2VerifyCode phoneNumber={phoneNumber} onVerify={handleCodeVerification} />;
+        return (
+          <Step2VerifyCode
+            phoneNumber={phoneNumber}
+            onVerify={handleCodeVerification}
+          />
+        );
       case 3:
-        return <Step3ProjectSelection onSelectProject={handleProjectSelection} />;
+        return (
+          <Step3ProjectSelection onSelectProject={handleProjectSelection} />
+        );
       default:
         return <Step1PhoneNumber onSubmit={handlePhoneNumberSubmit} />;
     }

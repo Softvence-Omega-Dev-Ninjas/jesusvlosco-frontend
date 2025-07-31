@@ -60,11 +60,17 @@ import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
 import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
+import EmailLogin from "@/pages/email-login/EmailLogin";
+// import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
   {
     path: "/",
     element: <Login />,
+  },
+  {
+    path: "/email-login",
+    element: <EmailLogin />,
   },
 
   // ✅ Admin routes grouped here
