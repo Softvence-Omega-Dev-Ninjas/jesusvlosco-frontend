@@ -6,8 +6,9 @@ export const baseApi = createApi({
     baseUrl: "https://api.lgcglobalcontractingltd.com/js",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.user?.accessToken || "";
+      console.log({token})
       if (token) {
-        headers.set("Authorization", `${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
 
       return headers;

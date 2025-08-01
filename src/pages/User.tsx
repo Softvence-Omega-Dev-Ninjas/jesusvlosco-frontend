@@ -9,6 +9,7 @@ import user3 from "../assets/user3.png";
 import user4 from "../assets/user4.png";
 import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 
 // Define the type for a User
 interface User {
@@ -161,6 +162,8 @@ const initialUsers: User[] = [
 //testing component
 const User: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
+  const {data, isLoading} = useGetAllUserQuery(null)
+  console.log({data, isLoading})
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
