@@ -1,32 +1,25 @@
 import { ChevronDown, Edit } from "lucide-react";
 import { useState } from "react";
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  emailId: string;
-  gender: string;
-  employeeId: string;
-  jobTitle: string;
-  department: string;
-  address: string;
-  city: string;
-  state: string;
-  dateOfBirth: string;
-}
+import { FormData } from "./types";
 
 interface PersonalInfoFormProps {
   formData: FormData;
   handleInputChange: (field: string, value: string) => void;
-  genderOptions: string[];
-  jobTitleOptions: string[];
-  departmentOptions: string[];
+  genderOptions: {
+    label: string;
+    value: string;
+  }[];
+  jobTitleOptions: { label: string; value: string }[];
+  departmentOptions: {
+    label: string;
+    value: string;
+  }[];
   cityOptions: string[];
+  isLoading: boolean;
   stateOptions: string[];
   setActiveTab: (tabId: string) => void;
-  handleSave: (data: FormData, tabId: string) => void;
   handleCancel: (tabId: string) => void;
+  handlePersonalInfo: (formData: FormData) => Promise<void>;
 }
 
 const PersonalInfoForm = ({
@@ -37,8 +30,8 @@ const PersonalInfoForm = ({
   departmentOptions,
   cityOptions,
   stateOptions,
-
-  handleSave,
+  handlePersonalInfo,
+  isLoading,
   handleCancel,
 }: PersonalInfoFormProps) => {
   const [genderOpen, setGenderOpen] = useState(false);
@@ -96,8 +89,8 @@ const PersonalInfoForm = ({
           <input
             type="tel"
             placeholder="Enter phone number here"
-            value={formData.phoneNumber}
-            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+            value={formData.phone}
+            onChange={(e) => handleInputChange("phone", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
@@ -110,8 +103,8 @@ const PersonalInfoForm = ({
           <input
             type="email"
             placeholder="Enter Email ID here"
-            value={formData.emailId}
-            onChange={(e) => handleInputChange("emailId", e.target.value)}
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
@@ -133,18 +126,18 @@ const PersonalInfoForm = ({
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
                 {genderOptions.map((option) => (
                   <div
-                    key={option}
+                    key={option.label}
                     onClick={() => {
-                      handleInputChange("gender", option);
+                      handleInputChange("gender", option.value);
                       setGenderOpen(false);
                     }}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option === formData.gender
+                      option.label === formData.gender
                         ? "text-blue-600 font-medium"
                         : "text-gray-600"
                     }`}
                   >
-                    {option}
+                    {option.label}
                   </div>
                 ))}
               </div>
@@ -160,8 +153,8 @@ const PersonalInfoForm = ({
           <input
             type="text"
             placeholder="Enter employee ID here"
-            value={formData.employeeId}
-            onChange={(e) => handleInputChange("employeeId", e.target.value)}
+            value={formData.employeeID}
+            onChange={(e) => handleInputChange("employeeID", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
@@ -183,18 +176,18 @@ const PersonalInfoForm = ({
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
                 {jobTitleOptions.map((option) => (
                   <div
-                    key={option}
+                    key={option.label}
                     onClick={() => {
-                      handleInputChange("jobTitle", option);
+                      handleInputChange("jobTitle", option.value);
                       setJobTitleOpen(false);
                     }}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option === formData.jobTitle
+                      option.value === formData.jobTitle
                         ? "text-blue-600 font-medium"
                         : "text-gray-600"
                     }`}
                   >
-                    {option}
+                    {option.label}
                   </div>
                 ))}
               </div>
@@ -219,18 +212,18 @@ const PersonalInfoForm = ({
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
                 {departmentOptions.map((option) => (
                   <div
-                    key={option}
+                    key={option.label}
                     onClick={() => {
-                      handleInputChange("department", option);
+                      handleInputChange("department", option.value);
                       setDepartmentOpen(false);
                     }}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option === formData.department
+                      option.label === formData.department
                         ? "text-blue-600 font-medium"
                         : "text-gray-600"
                     }`}
                   >
-                    {option}
+                    {option.label}
                   </div>
                 ))}
               </div>
@@ -332,8 +325,11 @@ const PersonalInfoForm = ({
           <div className="relative">
             <input
               type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+              value={formData.dob}
+              onChange={(e) => {
+                const dob = new Date(e.target.value);
+                handleInputChange("dob", dob.toISOString());
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-500"
               placeholder="Select date"
             />
@@ -344,10 +340,13 @@ const PersonalInfoForm = ({
 
       <div className="flex justify-end gap-4 mt-8">
         <button
-          onClick={() => handleSave(formData, "personal")}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
+          onClick={() => handlePersonalInfo(formData)}
+          disabled={isLoading}
+          // onClick={() => handleSave(formData, "personal")}
+          className="cursor-pointer disabled:opacity-70 px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
         >
-          Save
+          {isLoading ? 'Saving...' : "Save"}
+   
         </button>
         <button
           onClick={() => handleCancel("personal")}

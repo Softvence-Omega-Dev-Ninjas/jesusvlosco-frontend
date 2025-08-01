@@ -7,35 +7,133 @@ import Tabs from "@/components/AddUserProfile/Tabs";
 import {
   Education,
   Experience,
-  FormData,
+  type FormData,
   PayrollData,
   Tab,
+  TRole,
 } from "@/components/AddUserProfile/types";
+import {
+  useCreateUserEducationMultipleMutation,
+  useCreateUserEducationMutation,
+  useCreateUserMutation,
+} from "@/store/api/admin/user/userApi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
+const payPeriodOptions = ["Hour", "Day", "Week", "Month"];
+const casualLeaveOptions = [
+  "3 days",
+  "5 days",
+  "10 days",
+  "15 days",
+  "20 days",
+];
+const sickLeaveOptions = ["10 days", "15 days", "20 days", "30 days"];
+const numberOfDaysOptions = ["Select number here", "1", "2", "3"];
+const offDayOptions = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const breakTimeOptions = ["30 min", "1 hour", "3 hour"];
+const genderOptions = [
+  { label: "Male", value: "MALE" },
+  { label: "Female", value: "FEMALE" },
+  { label: "Other", value: "OTHER" },
+  { label: "Prefer not to say", value: "PREFER_NOT_TO_SAY" },
+];
+const jobTitleOptions = [
+  { label: "Back-End Developer", value: "BACK_END_DEVELOPER" },
+  { label: "Front-End Developer", value: "FRONT_END_DEVELOPER" },
+  { label: "Full Stack Developer", value: "FULL_STACK_DEVELOPER" },
+  { label: "Mobile Developer", value: "MOBILE_DEVELOPER" },
+  { label: "UI Developer", value: "UI_DEVELOPER" },
+  { label: "UX Developer", value: "UX_DEVELOPER" },
+  { label: "Seals Engineer", value: "SEALS_ENGINEER" },
+  { label: "Data Scientist", value: "DATA_SCIENTIST" },
+  { label: "Data Analyst", value: "DATA_ANALYST" },
+  { label: "Data Engineer", value: "DATA_ENGINEER" },
+  { label: "HR Manager", value: "HR_MANAGER" },
+  { label: "Finance Manager", value: "FINANCE_MANAGER" },
+  { label: "Marketing Manager", value: "MARKETING_MANAGER" },
+];
+
+const departmentOptions = [
+  { label: "IT", value: "IT" },
+  { label: "Development", value: "DEVELOPMENT" },
+  { label: "HR", value: "HR" },
+  { label: "Finance", value: "FINANCE" },
+  { label: "Marketing", value: "MARKETING" },
+  { label: "Seals", value: "SEALS" },
+];
+const cityOptions = [
+  "New York",
+  "Los Angeles",
+  "Chicago",
+  "Houston",
+  "Phoenix",
+  "Philadelphia",
+];
+const stateOptions = [
+  "California",
+  "Texas",
+  "Florida",
+  "New York",
+  "Pennsylvania",
+  "Illinois",
+];
+const programOptions = [
+  "Bachelor of Science",
+  "Bachelor of Arts",
+  "Master of Science",
+  "Master of Arts",
+  "PhD",
+  "Associate Degree",
+  "Diploma",
+  "Certificate",
+];
+const institutionOptions = [
+  "Harvard University",
+  "MIT",
+  "Stanford University",
+  "UC Berkeley",
+  "Yale University",
+  "Princeton University",
+  "Columbia University",
+  "Other",
+];
 const AddUserProfile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("personal");
-  const [selectedRole, setSelectedRole] = useState<string>("Employee");
-
+  const [selectedRole, setSelectedRole] = useState<TRole>("EMPLOYEE");
+  const [createUser, { isLoading }] = useCreateUserMutation();
+  const [userId, setUserId] = useState("");
+  const [createUserEducation] = useCreateUserEducationMutation();
+  const [createuserMultipleEducation] =
+    useCreateUserEducationMultipleMutation();
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
-    phoneNumber: "",
-    emailId: "",
+    phone: "",
+    email: "",
     gender: "",
-    employeeId: "",
+    employeeID: "",
     jobTitle: "",
     department: "",
     address: "",
     city: "",
+    role: selectedRole,
     state: "",
-    dateOfBirth: "",
+    dob: "",
   });
 
   const [educationList, setEducationList] = useState<Education[]>([
-    { id: 1, program: "", institution: "", year: "" },
+    { id: 1, program: "", institution: "", year: 0 },
   ]);
 
   const [experienceList, setExperienceList] = useState<Experience[]>([
@@ -63,81 +161,8 @@ const AddUserProfile = () => {
     breakTime: "30 min",
   });
 
-  const payPeriodOptions = ["Hour", "Day", "Week", "Month"];
-  const casualLeaveOptions = [
-    "3 days",
-    "5 days",
-    "10 days",
-    "15 days",
-    "20 days",
-  ];
-  const sickLeaveOptions = ["10 days", "15 days", "20 days", "30 days"];
-  const numberOfDaysOptions = ["Select number here", "1", "2", "3"];
-  const offDayOptions = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const breakTimeOptions = ["30 min", "1 hour", "3 hour"];
-  const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
-  const jobTitleOptions = [
-    "Software Engineer",
-    "Product Manager",
-    "Designer",
-    "Data Analyst",
-    "Marketing Specialist",
-  ];
-  const departmentOptions = [
-    "Engineering",
-    "Product",
-    "Design",
-    "Marketing",
-    "Sales",
-    "HR",
-    "Finance",
-  ];
-  const cityOptions = [
-    "New York",
-    "Los Angeles",
-    "Chicago",
-    "Houston",
-    "Phoenix",
-    "Philadelphia",
-  ];
-  const stateOptions = [
-    "California",
-    "Texas",
-    "Florida",
-    "New York",
-    "Pennsylvania",
-    "Illinois",
-  ];
-  const programOptions = [
-    "Bachelor of Science",
-    "Bachelor of Arts",
-    "Master of Science",
-    "Master of Arts",
-    "PhD",
-    "Associate Degree",
-    "Diploma",
-    "Certificate",
-  ];
-  const institutionOptions = [
-    "Harvard University",
-    "MIT",
-    "Stanford University",
-    "UC Berkeley",
-    "Yale University",
-    "Princeton University",
-    "Columbia University",
-    "Other",
-  ];
   const yearOptions = Array.from({ length: 50 }, (_, i) =>
-    (new Date().getFullYear() - i).toString()
+    Number((new Date().getFullYear() - i).toString())
   );
   const jobTypeOptions = [
     "Full-time",
@@ -176,7 +201,7 @@ const AddUserProfile = () => {
     const newId = Math.max(...educationList.map((edu) => edu.id)) + 1;
     setEducationList((prev) => [
       ...prev,
-      { id: newId, program: "", institution: "", year: "" },
+      { id: newId, program: "", institution: "", year: 0 },
     ]);
   };
 
@@ -248,20 +273,21 @@ const AddUserProfile = () => {
       setFormData({
         firstName: "",
         lastName: "",
-        phoneNumber: "",
-        emailId: "",
+        phone: "",
+        email: "",
         gender: "",
-        employeeId: "",
+        employeeID: "",
         jobTitle: "",
         department: "",
         address: "",
         city: "",
+        role: "USER",
         state: "",
-        dateOfBirth: "",
+        dob: "",
       });
     }
     if (tabId === "education" || tabId === "all") {
-      setEducationList([{ id: 1, program: "", institution: "", year: "" }]);
+      setEducationList([{ id: 1, program: "", institution: "", year: 0 }]);
     }
     if (tabId === "experience" || tabId === "all") {
       setExperienceList([
@@ -292,6 +318,45 @@ const AddUserProfile = () => {
     }
   };
 
+  const handlePersonalInfo = async (formData: FormData) => {
+    console.log({ formData });
+    const personalFormData = new FormData();
+    // formData.role = selectedRole || 'EMPLOYEE';
+    for (const key in formData) {
+      personalFormData.append(key, formData[key as keyof FormData] as string);
+    }
+
+    try {
+      const result = await createUser(personalFormData).unwrap();
+      console.log({ result });
+      if (result?.success) {
+        setUserId(result?.data?.id);
+        setActiveTab("education");
+      }
+    } catch (error: any) {
+      console.log({ error });
+      toast.error(error?.data?.message);
+    }
+    // console.log({ personalFormData });
+  };
+
+  const hanldeEducationInfo = async () => {
+    try {
+      if (educationList?.length === 1) {
+        const result = await createUserEducation({
+          data: educationList[0],
+          userId,
+        });
+        console.log(result);
+      } else if (educationList?.length > 1) {
+        const result = await createuserMultipleEducation({
+          data: { educations: educationList },
+          userId,
+        });
+        console.log(result);
+      }
+    } catch (error) {}
+  };
   return (
     <div className=" w-full bg-gray-50 mx-auto">
       <Header selectedRole={selectedRole} setSelectedRole={setSelectedRole} />
@@ -306,10 +371,11 @@ const AddUserProfile = () => {
           jobTitleOptions={jobTitleOptions}
           departmentOptions={departmentOptions}
           cityOptions={cityOptions}
+          isLoading={isLoading}
           stateOptions={stateOptions}
           setActiveTab={setActiveTab}
-          handleSave={handleSave}
           handleCancel={handleCancel}
+          handlePersonalInfo={handlePersonalInfo}
         />
       )}
       {activeTab === "education" && (
@@ -318,6 +384,7 @@ const AddUserProfile = () => {
           handleEducationChange={(id: number, field: string, value: string) =>
             handleEducationChange(id, field as keyof Education, value)
           }
+          hanldeEducationInfo={hanldeEducationInfo}
           addEducation={addEducation}
           programOptions={programOptions}
           institutionOptions={institutionOptions}

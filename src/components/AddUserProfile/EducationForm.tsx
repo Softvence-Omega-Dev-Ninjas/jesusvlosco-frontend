@@ -17,7 +17,9 @@ interface EducationFormProps {
   yearOptions: string[];
   setActiveTab: (tabId: string) => void;
   handleSave: (data: Education[], tabId: string) => void;
+  hanldeEducationInfo: (data: Education[]) => void;
   handleCancel: (tabId: string) => void;
+  
 }
 
 const EducationForm = ({
@@ -28,6 +30,7 @@ const EducationForm = ({
   institutionOptions,
   yearOptions,
   handleSave,
+  hanldeEducationInfo,
   handleCancel,
 }: EducationFormProps) => {
   const [dropdownStates, setDropdownStates] = useState<
@@ -217,7 +220,7 @@ const EducationForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
-          onClick={() => handleSave(educationList, "education")}
+          onClick={() => hanldeEducationInfo(educationList)}
           className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
         >
           Save

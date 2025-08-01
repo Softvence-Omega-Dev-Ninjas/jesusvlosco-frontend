@@ -1,12 +1,12 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { TRole } from "./types";
 
 interface HeaderProps {
-  selectedRole: string;
-  setSelectedRole: (role: string) => void;
+  selectedRole: TRole;
+  setSelectedRole: (role: TRole) => void;
 }
-
-const roleOptions = ["Employee", "Manager", "Admin"];
+const roleOptions = ["ADMIN", "USER", "EMPLOYEE", "MANAGER"];
 
 const Header = ({ selectedRole, setSelectedRole }: HeaderProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -39,7 +39,7 @@ const Header = ({ selectedRole, setSelectedRole }: HeaderProps) => {
               <div
                 key={role}
                 onClick={() => {
-                  setSelectedRole(role);
+                  setSelectedRole(role as TRole);
                   setDropdownOpen(false);
                 }}
                 className={`px-4 py-2 cursor-pointer hover:bg-gray-50 ${

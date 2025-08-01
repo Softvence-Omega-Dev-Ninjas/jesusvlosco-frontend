@@ -1,23 +1,24 @@
 export interface FormData {
   firstName: string;
   lastName: string;
-  phoneNumber: string;
-  emailId: string;
+  phone: string;
+  email: string;
   gender: string;
-  employeeId: string;
+  employeeID: string;
   jobTitle: string;
   department: string;
   address: string;
   city: string;
   state: string;
-  dateOfBirth: string;
+  dob: string;
+  role: TRole
 }
 
 export interface Education {
   id: number;
   program: string;
   institution: string;
-  year: string;
+  year: number;
 }
 
 export interface Experience {
@@ -47,3 +48,5 @@ export interface Tab {
   id: string;
   label: string;
 }
+
+export type TRole = "SUPER_ADMIN" | "ADMIN" | "USER" | "EMPLOYEE" | "MANAGER";
