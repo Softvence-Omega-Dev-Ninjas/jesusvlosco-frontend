@@ -28,6 +28,8 @@ const userApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
+
+    // Education
     createUserEducation: build.mutation({
       query: ({ data: credentials, userId }) => ({
         url: `/admin/user/education/create/single/${userId}`,
@@ -43,6 +45,28 @@ const userApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // Experience
+    createUserExperience: build.mutation({
+      query: ({ data, userId }) => {
+        return {
+          url: `/admin/user/experience/create/user/${userId}`,
+          method: "POST",
+          body: JSON.stringify({ experiences: data }),
+        };
+      },
+    }),
+
+    updateUser: build.mutation({
+      query: ({ data, userId }) => {
+        console.log({data, userId})
+        return {
+          url: `/admin/user/${userId}`,
+          method: "PATCH",
+          body: data,
+        };
+      },
+    }),
+
     // Patch Api
   }),
 });
@@ -53,7 +77,14 @@ export const {
   useGetUserByEmailQuery,
   useGetUserByPhoneQuery,
   useGetUserByEmployeeIdQuery,
+
+  useUpdateUserMutation,
+
+  // User Creation
   useCreateUserMutation,
   useCreateUserEducationMutation,
-  useCreateUserEducationMultipleMutation
+  useCreateUserEducationMultipleMutation,
+
+  // user experient
+  useCreateUserExperienceMutation,
 } = userApi;

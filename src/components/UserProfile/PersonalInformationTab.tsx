@@ -9,9 +9,9 @@ interface PersonalInfoFormData {
   firstName: string;
   lastName: string;
   gender: string;
-  dateOfBirth: Date | null; // Changed to Date | null
+dob: Date | null; // Changed to Date | null
   email: string;
-  phoneNumber: string;
+  phone: string;
   address: string;
   state: string;
   country: string;
@@ -38,11 +38,11 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
     // Ensure the dateOfBirth from user prop is a Date object for formData state
     setFormData({
       ...user,
-      dateOfBirth:
-        typeof user.dateOfBirth === "string"
-          ? parseISO(user.dateOfBirth)
-          : user.dateOfBirth instanceof Date
-          ? user.dateOfBirth
+      dob:
+        typeof user.dob === "string"
+          ? parseISO(user.dob)
+          : user.dob instanceof Date
+          ? user.dob
           : null,
     });
   }, [user]);
@@ -75,11 +75,11 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
     // Reset to original user data when canceling
     setFormData({
       ...user,
-      dateOfBirth:
-        typeof user.dateOfBirth === "string"
-          ? parseISO(user.dateOfBirth)
-          : user.dateOfBirth instanceof Date
-          ? user.dateOfBirth
+      dob:
+        typeof user.dob === "string"
+          ? parseISO(user.dob)
+          : user.dob instanceof Date
+          ? user.dob
           : null,
     });
     if (onCancelEdit) {
@@ -114,8 +114,8 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
         <DateInput
           label="Date of Birth"
           name="dateOfBirth"
-          value={formData.dateOfBirth}
-          onChange={(date) => handleDateChange(date, "dateOfBirth")}
+          value={formData.dob}
+          onChange={(date) => handleDateChange(date, "dob")}
           readOnly={!isEditing}
         />
         <FormInput
@@ -129,7 +129,7 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
         <FormInput
           label="Phone Number"
           name="phoneNumber"
-          value={formData.phoneNumber}
+          value={formData.phone}
           onChange={handleChange}
           readOnly={!isEditing}
           type="tel"
@@ -176,8 +176,8 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
         <DateInput
           label="Date of Birth (Redundant)"
           name="dateOfBirthRedundant"
-          value={formData.dateOfBirth} // This will mirror the first DOB field
-          onChange={(date) => handleDateChange(date, "dateOfBirth")} // Still updates the same field
+          value={formData.dob} // This will mirror the first DOB field
+          onChange={(date) => handleDateChange(date, "dob")} // Still updates the same field
           readOnly={!isEditing}
         />
       </div>

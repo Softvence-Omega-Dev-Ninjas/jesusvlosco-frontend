@@ -10,6 +10,7 @@ import user4 from "../assets/user4.png";
 import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { PiUserCircleLight } from "react-icons/pi";
 
 // Define the type for a User
 interface User {
@@ -162,8 +163,9 @@ const initialUsers: User[] = [
 //testing component
 const User: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
-  const {data, isLoading} = useGetAllUserQuery(null)
-  console.log({data, isLoading})
+  const { data, isLoading } = useGetAllUserQuery(null);
+  const allUsers = data?.data;
+  console.log({ data, isLoading });
   const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
@@ -483,6 +485,35 @@ const User: React.FC = () => {
     { label: "Trainer", value: "Trainer" },
   ];
 
+  type DateOverride = { year: number; month: number; day: number } | null;
+
+  function formatDateToMDY(
+    dateInput: string | number | Date,
+    override: DateOverride = null
+  ) {
+    const original = new Date(dateInput);
+
+    const finalDate = override
+      ? new Date(
+          Date.UTC(
+            override.year,
+            override.month - 1,
+            override.day,
+            original.getUTCHours(),
+            original.getUTCMinutes(),
+            original.getUTCSeconds()
+          )
+        )
+      : original;
+
+    const month = finalDate.getUTCMonth() + 1;
+    const day = finalDate.getUTCDate();
+    const year = String(finalDate.getUTCFullYear()).slice(-2);
+
+    return `${month}/${day}/${year}`;
+  }
+
+  console.log({ team: searchTerm });
   return (
     <div
       ref={mainContainerRef}
@@ -710,8 +741,9 @@ const User: React.FC = () => {
 
       {/* Users Table */}
       <div
-        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${isAnyModalOpen ? "opacity-50" : "opacity-100"
-          }`}
+        className={`bg-white rounded-lg shadow overflow-hidden transition-opacity duration-300 ${
+          isAnyModalOpen ? "opacity-50" : "opacity-100"
+        }`}
       >
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -802,54 +834,59 @@ const User: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
+            {allUsers?.map((user: any) => (
               <tr key={user.email} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
-                    checked={selectedUserIds.includes(user.id)} // Control checked state
-                    onChange={(e) => handleUserCheckboxChange(e, user.id)} // Add individual handler
+                    checked={selectedUserIds.includes(user?.id)} // Control checked state
+                    onChange={(e) => handleUserCheckboxChange(e, user?.id)} // Add individual handler
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {user.id}
+                  {user?.employeeID}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={user.avatar}
-                        alt={`Avatar of ${user.name}`}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).onerror = null;
-                          (
-                            e.target as HTMLImageElement
-                          ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
-                            .charAt(0)
-                            .toUpperCase()}`;
-                        }}
-                      />
+                      {user?.profile?.profileUrl ? (
+                        <img
+                          className="h-10 w-10 rounded-full"
+                          src={user.avatar}
+                          alt={`Avatar of ${user.name}`}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).onerror = null;
+                            (
+                              e.target as HTMLImageElement
+                            ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                              .charAt(0)
+                              .toUpperCase()}`;
+                          }}
+                        />
+                      ) : (
+                        <PiUserCircleLight size={36} />
+                      )}
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name}
+                    <div className="ml-3 ">
+                      <div className="text-sm flex items-center gap-2 font-medium text-gray-900">
+                        <p>{user?.profile?.firstName}</p>
+                        <p> {user?.profile?.lastName}</p>
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
+                  {user?.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.phone}
+                  {user?.phone}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.department}
+                  {user?.profile?.department}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.lastLogin}
+                  {formatDateToMDY(user?.updatedAt)}
                 </td>
               </tr>
             ))}

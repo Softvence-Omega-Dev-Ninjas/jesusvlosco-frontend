@@ -1,12 +1,13 @@
 import { ChevronDown, Edit } from "lucide-react";
 import { useState } from "react";
+import { Education } from "./types";
 
-interface Education {
-  id: number;
-  program: string;
-  institution: string;
-  year: string;
-}
+// interface Education {
+//   id: number;
+//   program: string;
+//   institution: string;
+//   year: string;
+// }
 
 interface EducationFormProps {
   educationList: Education[];

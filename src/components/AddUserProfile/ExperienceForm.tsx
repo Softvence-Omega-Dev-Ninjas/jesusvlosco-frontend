@@ -1,16 +1,17 @@
 import { ChevronDown, Edit } from "lucide-react";
 import { useState } from "react";
+import { Experience } from "./types";
 
-interface Experience {
-  id: number;
-  position: string;
-  companyName: string;
-  jobType: string;
-  startDate: string;
-  endDate: string;
-  isCurrentlyWorking: boolean;
-  description: string;
-}
+// interface Experience {
+//   id: number;
+//   position: string;
+//   companyName: string;
+//   jobType: string;
+//   startDate: string;
+//   endDate: string;
+//   isCurrentlyWorking: boolean;
+//   description: string;
+// }
 
 interface ExperienceFormProps {
   experienceList: Experience[];
@@ -23,8 +24,18 @@ interface ExperienceFormProps {
   jobTypeOptions: string[];
   setActiveTab: (tabId: string) => void;
   handleSave: (data: Experience[], tabId: string) => void;
+  handleExperience: (data: Experience[]) => void
   handleCancel: (tabId: string) => void;
 }
+
+const employmentTypes = [
+  { label: "Full-time", value: "FULL_TIME" },
+  { label: "Part-time", value: "PART_TIME" },
+  { label: "Contract", value: "CONTRACT" },
+  { label: "Internship", value: "INTERNSHIP" },
+  { label: "Temporary", value: "TEMPORARY" },
+  { label: "Freelance", value: "FREELANCE" },
+];
 
 const ExperienceForm = ({
   experienceList,
@@ -33,6 +44,7 @@ const ExperienceForm = ({
   jobTypeOptions,
   handleSave,
   handleCancel,
+  handleExperience
 }: ExperienceFormProps) => {
   const [dropdownStates, setDropdownStates] = useState<
     Record<number, { jobTypeOpen: boolean }>
@@ -57,6 +69,7 @@ const ExperienceForm = ({
   };
 
   const handleAddExperience = () => {
+    
     const newId = Math.max(...experienceList.map((exp) => exp.id)) + 1;
     setDropdownStates((prev) => ({
       ...prev,
@@ -87,11 +100,11 @@ const ExperienceForm = ({
                 <input
                   type="text"
                   placeholder="Enter designation"
-                  value={experience.position}
+                  value={experience.designation}
                   onChange={(e) =>
                     handleExperienceChange(
                       experience.id,
-                      "position",
+                      "designation",
                       e.target.value
                     )
                   }
@@ -136,24 +149,24 @@ const ExperienceForm = ({
                   </div>
                   {dropdownStates[experience.id]?.jobTypeOpen && (
                     <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
-                      {jobTypeOptions.map((option) => (
+                      {employmentTypes.map((option) => (
                         <div
-                          key={option}
+                          key={option.label}
                           onClick={() => {
                             handleExperienceChange(
                               experience.id,
                               "jobType",
-                              option
+                              option.value
                             );
                             toggleDropdown(experience.id, "jobTypeOpen");
                           }}
                           className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                            option === experience.jobType
+                            option.value === experience.jobType
                               ? "text-blue-600 font-medium"
                               : "text-gray-600"
                           }`}
                         >
-                          {option}
+                          {option.label}
                         </div>
                       ))}
                     </div>
@@ -275,7 +288,11 @@ const ExperienceForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
-          onClick={() => handleSave(experienceList, "experience")}
+
+          onClick={() => {
+            handleExperience(experienceList)
+            // handleSave(experienceList, "experience")
+          }}
           className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
         >
           Save
