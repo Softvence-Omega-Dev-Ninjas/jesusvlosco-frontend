@@ -15,6 +15,7 @@ import {
 import {
   useCreateUserEducationMultipleMutation,
   useCreateUserEducationMutation,
+  useCreateUserExperienceMutation,
   useCreateUserMutation,
 } from "@/store/api/admin/user/userApi";
 import { useState } from "react";
@@ -116,6 +117,8 @@ const AddUserProfile = () => {
   const [createUserEducation] = useCreateUserEducationMutation();
   const [createuserMultipleEducation] =
     useCreateUserEducationMultipleMutation();
+  const [createUserExperience] = useCreateUserExperienceMutation();
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -133,13 +136,13 @@ const AddUserProfile = () => {
   });
 
   const [educationList, setEducationList] = useState<Education[]>([
-    { id: 1, program: "", institution: "", year: 0 },
+    { id: 1, program: "", institution: "", year: "" as string },
   ]);
 
   const [experienceList, setExperienceList] = useState<Experience[]>([
     {
       id: 1,
-      position: "",
+      designation: "",
       companyName: "",
       jobType: "",
       startDate: "",
@@ -162,7 +165,7 @@ const AddUserProfile = () => {
   });
 
   const yearOptions = Array.from({ length: 50 }, (_, i) =>
-    Number((new Date().getFullYear() - i).toString())
+    (new Date().getFullYear() - i).toString()
   );
   const jobTypeOptions = [
     "Full-time",
@@ -201,7 +204,7 @@ const AddUserProfile = () => {
     const newId = Math.max(...educationList.map((edu) => edu.id)) + 1;
     setEducationList((prev) => [
       ...prev,
-      { id: newId, program: "", institution: "", year: 0 },
+      { id: newId, program: "", institution: "", year: "" as string },
     ]);
   };
 
@@ -221,7 +224,7 @@ const AddUserProfile = () => {
       ...prev,
       {
         id: newId,
-        position: "",
+        designation: "",
         companyName: "",
         jobType: "",
         startDate: "",
@@ -287,13 +290,15 @@ const AddUserProfile = () => {
       });
     }
     if (tabId === "education" || tabId === "all") {
-      setEducationList([{ id: 1, program: "", institution: "", year: 0 }]);
+      setEducationList([
+        { id: 1, program: "", institution: "", year: "" as string },
+      ]);
     }
     if (tabId === "experience" || tabId === "all") {
       setExperienceList([
         {
           id: 1,
-          position: "",
+          designation: "",
           companyName: "",
           jobType: "",
           startDate: "",
@@ -340,22 +345,44 @@ const AddUserProfile = () => {
     // console.log({ personalFormData });
   };
 
-  const hanldeEducationInfo = async () => {
+  const hanldeEducationInfo = async (
+    data: { program: string; year: string | number; institution: string }[]
+  ) => {
     try {
       if (educationList?.length === 1) {
-        const result = await createUserEducation({
-          data: educationList[0],
-          userId,
-        });
+        console.log("Single");
+        data[0].year = Number(data[0].year);
+        console.log(data, userId);
+        const result = await createUserEducation({ data: data[0], userId });
         console.log(result);
       } else if (educationList?.length > 1) {
-        const result = await createuserMultipleEducation({
-          data: { educations: educationList },
-          userId,
-        });
-        console.log(result);
+        console.log("Multiple");
+        return;
+        const result = await createuserMultipleEducation({ data, userId });
       }
+      setActiveTab("experience");
     } catch (error) {}
+  };
+
+  const handleExperience = async (data: Experience[]) => {
+    console.log({  data });
+    
+    try {
+      const newData = data?.map(el => {
+        return {
+          ...el,
+          startDate: new Date(el.startDate).toISOString(),
+          endDate: new Date(el.endDate).toISOString()
+        }
+      })
+      console.log({newData})
+      const result = await createUserExperience({  data, userId }).unwrap();
+      console.log(result);
+
+      setActiveTab("experience");
+    } catch (error) {
+      console.log({ error });
+    }
   };
   return (
     <div className=" w-full bg-gray-50 mx-auto">
@@ -405,6 +432,7 @@ const AddUserProfile = () => {
           addExperience={addExperience}
           jobTypeOptions={jobTypeOptions}
           setActiveTab={setActiveTab}
+          handleExperience={handleExperience}
           handleSave={handleSave}
           handleCancel={handleCancel}
         />

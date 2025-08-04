@@ -8,9 +8,9 @@ interface PersonalInfoFormData {
   firstName: string;
   lastName: string;
   gender: string;
-  dateOfBirth: Date | null; // Changed to Date | null
+  dob: Date | null; // Changed to Date | null
   email: string;
-  phoneNumber: string;
+  phone: string;
   address: string;
   state: string;
   country: string;

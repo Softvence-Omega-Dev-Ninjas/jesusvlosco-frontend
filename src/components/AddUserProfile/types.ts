@@ -18,12 +18,12 @@ export interface Education {
   id: number;
   program: string;
   institution: string;
-  year: number;
+  year: number | string;
 }
 
 export interface Experience {
   id: number;
-  position: string;
+  designation: string;
   companyName: string;
   jobType: string;
   startDate: string;

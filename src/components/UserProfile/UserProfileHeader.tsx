@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react";
 import React from "react";
 
 interface UserHeaderData {
-  avatar: string;
+  profileUrl: string;
   name: string;
   title: string;
 }
@@ -22,7 +22,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
     <div className="flex items-center justify-between p-6 pb-4">
       <div className="flex items-center">
         <img
-          src={user.avatar}
+          src={user.profileUrl}
           alt={user.name}
           className="w-24 h-24 rounded-full  shadow-md object-cover"
           onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
