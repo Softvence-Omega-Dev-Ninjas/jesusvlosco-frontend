@@ -3,18 +3,59 @@ import { useState } from "react";
 import Step1PhoneNumber from "../components/Step1PhoneNumber";
 import Step2VerifyCode from "../components/Step2VerifyCode";
 import Step3ProjectSelection from "../components/Step3ProjectSelection";
+import {
+  usePhoneLoginMutation,
+  useVarifyPhoneLoginMutation,
+} from "@/store/api/auth/authApi";
+import { toast } from "sonner";
+import { loginUser } from "@/store/Slices/AuthSlice/authSlice";
+import { useAppDispatch } from "@/hooks/useRedux";
 
 const Login = () => {
   const [step, setStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneLogin, { isLoading: phoneLoading }] = usePhoneLoginMutation();
+  const dispatch = useAppDispatch();
+  const [verifyCode, { isLoading: verifyLoading }] =
+    useVarifyPhoneLoginMutation();
   // Removed unused selectedProject state
-  const handlePhoneNumberSubmit = (number: any) => {
+  const handlePhoneNumberSubmit = async (number: any) => {
     setPhoneNumber(number);
-    setStep(2); // Move to the next step
+    try {
+      const result = await phoneLogin({ phoneNumber: number }).unwrap();
+      console.log({ result });
+      if (result?.success) {
+        toast.success(result?.message || "Otp send to your phone");
+        setStep(2);
+      } 
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong")
+      console.log({ error });
+    }
+
+    // Move to the next step
   };
 
-  const handleCodeVerification = () => {
-    setStep(3); // Move to the next step after successful code verification
+  const handleCodeVerification = async (code: string) => {
+    console.log(phoneNumber.slice(1), code);
+    try {
+      const result = await verifyCode({
+        phoneNumber: phoneNumber.slice(1),
+        otp: code,
+      }).unwrap();
+      console.log({ result });
+      if (result?.success) {
+        toast.success(result?.message || "Login Successfull");
+        dispatch(
+          loginUser({ ...result?.data?.user, accessToken: result?.data?.token })
+        );
+        setStep(3);
+      } else {
+        toast.error(result?.data?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log({ error });
+    }
   };
 
   const handleProjectSelection = (project: any) => {
@@ -25,10 +66,16 @@ const Login = () => {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Step1PhoneNumber onSubmit={handlePhoneNumberSubmit} />;
+        return (
+          <Step1PhoneNumber
+            isLoading={phoneLoading}
+            onSubmit={handlePhoneNumberSubmit}
+          />
+        );
       case 2:
         return (
           <Step2VerifyCode
+            isLoading={verifyLoading}
             phoneNumber={phoneNumber}
             onVerify={handleCodeVerification}
           />
@@ -38,7 +85,12 @@ const Login = () => {
           <Step3ProjectSelection onSelectProject={handleProjectSelection} />
         );
       default:
-        return <Step1PhoneNumber onSubmit={handlePhoneNumberSubmit} />;
+        return (
+          <Step1PhoneNumber
+            isLoading={phoneLoading}
+            onSubmit={handlePhoneNumberSubmit}
+          />
+        );
     }
   };
 

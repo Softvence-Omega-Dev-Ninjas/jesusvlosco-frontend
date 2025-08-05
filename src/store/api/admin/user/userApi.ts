@@ -49,16 +49,17 @@ const userApi = baseApi.injectEndpoints({
     createUserExperience: build.mutation({
       query: ({ data, userId }) => {
         return {
+          // url: `/admin/user/experience/create/user/6bea4b48-71a0-45c6-981d-6940b264485a`,
           url: `/admin/user/experience/create/user/${userId}`,
           method: "POST",
-          body: JSON.stringify({ experiences: data }),
+          body: { experiences: data },
         };
       },
     }),
 
     updateUser: build.mutation({
       query: ({ data, userId }) => {
-        console.log({data, userId})
+        console.log({ data, userId });
         return {
           url: `/admin/user/${userId}`,
           method: "PATCH",
