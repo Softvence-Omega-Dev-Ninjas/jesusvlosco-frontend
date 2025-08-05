@@ -2,17 +2,6 @@ import { ChevronDown, Edit } from "lucide-react";
 import { useState } from "react";
 import { Experience } from "./types";
 
-// interface Experience {
-//   id: number;
-//   position: string;
-//   companyName: string;
-//   jobType: string;
-//   startDate: string;
-//   endDate: string;
-//   isCurrentlyWorking: boolean;
-//   description: string;
-// }
-
 interface ExperienceFormProps {
   experienceList: Experience[];
   handleExperienceChange: (
@@ -134,7 +123,7 @@ const ExperienceForm = ({
             </div>
 
             {/* Job Type */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 border-red-600 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Job type

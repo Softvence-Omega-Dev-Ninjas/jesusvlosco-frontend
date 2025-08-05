@@ -16,6 +16,20 @@ const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
+    phoneLogin: build.mutation({
+      query: (credentials) => ({
+        url: "/auth/login/phone",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    varifyPhoneLogin: build.mutation({
+      query: (credentials) => ({
+        url: "/auth/verify/phone",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
     superAdminLogin: build.mutation({
       query: (credentials) => ({
         url: "/auth/login/super-admin",
@@ -26,4 +40,4 @@ const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useEmailLoginMutation, useSuperAdminLoginMutation, useVarifyemailLoginMutation } = authApi;
+export const { useEmailLoginMutation, useSuperAdminLoginMutation, useVarifyemailLoginMutation, usePhoneLoginMutation, useVarifyPhoneLoginMutation } = authApi;

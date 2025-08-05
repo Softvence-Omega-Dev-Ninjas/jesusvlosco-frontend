@@ -357,26 +357,26 @@ const AddUserProfile = () => {
         console.log(result);
       } else if (educationList?.length > 1) {
         console.log("Multiple");
-        return;
+        // return;
         const result = await createuserMultipleEducation({ data, userId });
+        console.log(result)
       }
       setActiveTab("experience");
     } catch (error) {}
   };
 
   const handleExperience = async (data: Experience[]) => {
-    console.log({  data });
+    // console.log({  data,userId });
     
     try {
-      const newData = data?.map(el => {
-        return {
-          ...el,
-          startDate: new Date(el.startDate).toISOString(),
-          endDate: new Date(el.endDate).toISOString()
-        }
-      })
+      const newData = data?.map(({ id, ...rest }) => ({
+        ...rest,
+        startDate: rest?.startDate.toString(),
+    endDate: rest?.endDate.toString(),
+      }));
       console.log({newData})
-      const result = await createUserExperience({  data, userId }).unwrap();
+
+      const result = await createUserExperience({  data, userId: '84588304-daf4-4d79-ba3a-6de4c29f7107' }).unwrap();
       console.log(result);
 
       setActiveTab("experience");
