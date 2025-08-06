@@ -21,10 +21,11 @@ interface PayrollFormProps {
   sickLeaveOptions: string[];
   numberOfDaysOptions: string[];
   offDayOptions: string[];
-  breakTimeOptions: string[];
+  breakTimeOptions: { label: string; value: string }[];
   handlePartialSave: (data: PayrollData) => void;
-  handleFinalSave: () => void;
+  handleFinalSave: (data: any) => void;
   handleCancel: (tabId: string) => void;
+  isLoading: boolean;
 }
 
 const PayrollForm = ({
@@ -37,6 +38,7 @@ const PayrollForm = ({
   breakTimeOptions,
   handlePartialSave,
   handleFinalSave,
+  isLoading,
   handleCancel,
 }: PayrollFormProps) => {
   const [regularPeriodOpen, setRegularPeriodOpen] = useState(false);
@@ -265,10 +267,11 @@ const PayrollForm = ({
 
         <div className="flex justify-end gap-4 mt-8">
           <button
+            disabled={isLoading}
             onClick={() => handlePartialSave(payrollData)}
-            className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
+            className="cursor-pointer  disabled:opacity-70 disabled:cursor-not-allowed px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
           >
-            Save
+            {isLoading ? "Saveing..." : "Save"}
           </button>
           <button
             onClick={() => handleCancel("payroll")}
@@ -345,18 +348,18 @@ const PayrollForm = ({
                 <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
                   {breakTimeOptions.map((option) => (
                     <div
-                      key={option}
+                      key={option.label}
                       onClick={() => {
-                        handlePayrollChange("breakTime", option);
+                        handlePayrollChange("breakTime", option.value);
                         setBreakTimeOpen(false);
                       }}
                       className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                        option === payrollData.breakTime
+                        option.value === payrollData.breakTime
                           ? "text-blue-600 font-medium"
                           : "text-gray-600"
                       }`}
                     >
-                      {option}
+                      {option.label}
                     </div>
                   ))}
                 </div>
@@ -367,7 +370,7 @@ const PayrollForm = ({
 
         <div className="flex justify-end gap-4 mt-auto">
           <button
-            onClick={handleFinalSave}
+            onClick={() => handleFinalSave(payrollData)}
             className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
           >
             Save

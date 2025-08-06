@@ -18,7 +18,7 @@ export interface Education {
   id: number;
   program: string;
   institution: string;
-  year: number | string;
+  year: number;
 }
 
 export interface Experience {

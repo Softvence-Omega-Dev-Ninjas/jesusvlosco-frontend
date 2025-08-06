@@ -20,7 +20,6 @@ interface EducationFormProps {
   handleSave: (data: Education[], tabId: string) => void;
   hanldeEducationInfo: (data: Education[]) => void;
   handleCancel: (tabId: string) => void;
-  
 }
 
 const EducationForm = ({
@@ -193,7 +192,7 @@ const EducationForm = ({
                           toggleDropdown(education.id, "yearOpen");
                         }}
                         className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                          option === education.year
+                          Number(option) === education.year
                             ? "text-blue-600 font-medium"
                             : "text-gray-600"
                         }`}
