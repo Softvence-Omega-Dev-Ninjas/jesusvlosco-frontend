@@ -13,10 +13,12 @@ import {
   TRole,
 } from "@/components/AddUserProfile/types";
 import {
+  useCreateOffdayPayRollMutation,
   useCreateUserEducationMultipleMutation,
   useCreateUserEducationMutation,
   useCreateUserExperienceMutation,
   useCreateUserMutation,
+  useCreateUserPayRollMutation,
 } from "@/store/api/admin/user/userApi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -41,7 +43,14 @@ const offDayOptions = [
   "Friday",
   "Saturday",
 ];
-const breakTimeOptions = ["30 min", "1 hour", "3 hour"];
+const breakTimeOptions = [
+  { label: "None", value: "NONE" },
+  { label: "Half Hour", value: "HALF_HOUR" },
+  { label: "One Hour", value: "ONE_HOUR" },
+  { label: "Two Hour", value: "TWO_HOUR" },
+  { label: "Three Hour", value: "THREE_HOUR" },
+];
+
 const genderOptions = [
   { label: "Male", value: "MALE" },
   { label: "Female", value: "FEMALE" },
@@ -113,8 +122,10 @@ const AddUserProfile = () => {
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [selectedRole, setSelectedRole] = useState<TRole>("EMPLOYEE");
   const [createUser, { isLoading }] = useCreateUserMutation();
+  const [createUserPayroll, { isLoading: isPayrollLoading }] =
+    useCreateUserPayRollMutation();
   const [userId, setUserId] = useState("");
-  const [createUserEducation] = useCreateUserEducationMutation();
+
   const [createuserMultipleEducation] =
     useCreateUserEducationMultipleMutation();
   const [createUserExperience] = useCreateUserExperienceMutation();
@@ -136,7 +147,7 @@ const AddUserProfile = () => {
   });
 
   const [educationList, setEducationList] = useState<Education[]>([
-    { id: 1, program: "", institution: "", year: "" as string },
+    { id: 1, program: "", institution: "", year: 0 },
   ]);
 
   const [experienceList, setExperienceList] = useState<Experience[]>([
@@ -204,7 +215,7 @@ const AddUserProfile = () => {
     const newId = Math.max(...educationList.map((edu) => edu.id)) + 1;
     setEducationList((prev) => [
       ...prev,
-      { id: newId, program: "", institution: "", year: "" as string },
+      { id: newId, program: "", institution: "", year: 0 },
     ]);
   };
 
@@ -253,11 +264,40 @@ const AddUserProfile = () => {
     }
   };
 
-  const handlePartialSave = (data: unknown): void => {
-    console.log("Partial save (Payroll Cycle & Time-off):", data);
+  const handlePartialSave = async (data: any) => {
+    // console.log("Partial save (Payroll Cycle & Time-off):", data);
+    const payrollData = {
+      regularPayRate: Number(data?.payRateRegular),
+      overTimePayRate: Number(data?.payRateOvertime),
+      regularPayRateType: data?.payRateRegularPeriod.toUpperCase(),
+      overTimePayRateType: data?.payRateOvertimePeriod.toUpperCase(),
+      casualLeave: Number(data?.casualLeave?.split(" ")[0]),
+      sickLeave: Number(data?.sickLeave?.split(" ")[0]),
+    };
+    console.log({ payrollData });
+    try {
+      const result = await createUserPayroll({
+        data: payrollData,
+        userId,
+      }).unwrap();
+      console.log({ result });
+    } catch (error) {
+      console.log({ error });
+    }
   };
-
-  const handleFinalSave = (): void => {
+  const [createOffday] = useCreateOffdayPayRollMutation();
+  const handleFinalSave = async (data: any) => {
+    const offdayData = {
+      numberOffDay: 1,
+      offDay: [data?.selectOffDay],
+      breakTimePerDay: data?.breakTime,
+    };
+    try {
+      const result = await createOffday({ offdayData, userId });
+      console.log({ result });
+    } catch (error) {}
+    console.log({ offdayData });
+    return;
     const allData = {
       role: selectedRole,
       personalInfo: formData,
@@ -290,9 +330,7 @@ const AddUserProfile = () => {
       });
     }
     if (tabId === "education" || tabId === "all") {
-      setEducationList([
-        { id: 1, program: "", institution: "", year: "" as string },
-      ]);
+      setEducationList([{ id: 1, program: "", institution: "", year: 0 }]);
     }
     if (tabId === "experience" || tabId === "all") {
       setExperienceList([
@@ -346,40 +384,50 @@ const AddUserProfile = () => {
   };
 
   const hanldeEducationInfo = async (
-    data: { program: string; year: string | number; institution: string }[]
+    data: { program: string; year: number; institution: string }[]
   ) => {
+    console.log({ data });
+    const educations = educationList?.map((el) => {
+      return {
+        program: el?.program,
+        institution: el?.institution,
+        year: Number(el?.year),
+      };
+    });
+    console.log({ educations });
+
     try {
-      if (educationList?.length === 1) {
-        console.log("Single");
-        data[0].year = Number(data[0].year);
-        console.log(data, userId);
-        const result = await createUserEducation({ data: data[0], userId });
-        console.log(result);
-      } else if (educationList?.length > 1) {
-        console.log("Multiple");
-        // return;
-        const result = await createuserMultipleEducation({ data, userId });
-        console.log(result)
+      // return;
+      const result = await createuserMultipleEducation({
+        educations,
+        userId,
+      }).unwrap();
+      if (result?.success) {
+        setActiveTab("experience");
       }
-      setActiveTab("experience");
+      console.log(result);
     } catch (error) {}
   };
 
   const handleExperience = async (data: Experience[]) => {
     // console.log({  data,userId });
-    
+
     try {
       const newData = data?.map(({ id, ...rest }) => ({
         ...rest,
         startDate: rest?.startDate.toString(),
-    endDate: rest?.endDate.toString(),
+        endDate: rest?.endDate.toString(),
       }));
-      console.log({newData})
+      console.log({ newData });
 
-      const result = await createUserExperience({  data, userId: '84588304-daf4-4d79-ba3a-6de4c29f7107' }).unwrap();
+      const result = await createUserExperience({
+        data,
+        userId: "84588304-daf4-4d79-ba3a-6de4c29f7107",
+      }).unwrap();
       console.log(result);
-
-      setActiveTab("experience");
+      if (result?.success) {
+        setActiveTab("payroll");
+      }
     } catch (error) {
       console.log({ error });
     }
@@ -443,6 +491,7 @@ const AddUserProfile = () => {
           handlePayrollChange={(field: string, value: string) =>
             handlePayrollChange(field as keyof PayrollData, value)
           }
+          isLoading={isPayrollLoading}
           payPeriodOptions={payPeriodOptions}
           casualLeaveOptions={casualLeaveOptions}
           sickLeaveOptions={sickLeaveOptions}

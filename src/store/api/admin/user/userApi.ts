@@ -38,11 +38,13 @@ const userApi = baseApi.injectEndpoints({
       }),
     }),
     createUserEducationMultiple: build.mutation({
-      query: ({ data: credentials, userId }) => ({
-        url: `/admin/user/education/create/multiple/${userId}`,
-        method: "POST",
-        body: credentials,
-      }),
+      query: ({ educations, userId }) => {
+        return {
+          url: `/admin/user/education/create/multiple/${userId}`,
+          method: "POST",
+          body: { educations },
+        };
+      },
     }),
 
     // Experience
@@ -62,6 +64,28 @@ const userApi = baseApi.injectEndpoints({
         console.log({ data, userId });
         return {
           url: `/admin/user/${userId}`,
+          method: "PATCH",
+          body: data,
+        };
+      },
+    }),
+
+    // Payroll
+    createUserPayRoll: build.mutation({
+      query: ({ data, userId }) => {
+        console.log({ data, userId });
+        return {
+          url: `/admin/payroll/payrate/${userId}`,
+          method: "PATCH",
+          body: data,
+        };
+      },
+    }),
+    createOffdayPayRoll: build.mutation({
+      query: ({ data, userId }) => {
+        console.log({ data, userId });
+        return {
+          url: `/admin/payroll/offday/${userId}`,
           method: "PATCH",
           body: data,
         };
@@ -88,4 +112,8 @@ export const {
 
   // user experient
   useCreateUserExperienceMutation,
+
+  // userpayroll
+  useCreateOffdayPayRollMutation,
+  useCreateUserPayRollMutation
 } = userApi;
