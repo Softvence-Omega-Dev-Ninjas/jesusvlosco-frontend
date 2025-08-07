@@ -6,6 +6,7 @@ const userApi = baseApi.injectEndpoints({
 
     getAllUser: build.query({
       query: () => `/admin/user`,
+      providesTags: ["ADMIN_USER"],
     }),
     getUserById: build.query({
       query: (id: string) => `/admin/user/id/${id}`,
@@ -45,6 +46,7 @@ const userApi = baseApi.injectEndpoints({
           body: { educations },
         };
       },
+      invalidatesTags: ["ADMIN_USER"],
     }),
 
     // Experience
@@ -57,6 +59,7 @@ const userApi = baseApi.injectEndpoints({
           body: { experiences: data },
         };
       },
+      invalidatesTags: ["ADMIN_USER"],
     }),
 
     updateUser: build.mutation({
@@ -80,6 +83,7 @@ const userApi = baseApi.injectEndpoints({
           body: data,
         };
       },
+      invalidatesTags: ["ADMIN_USER"],
     }),
     createOffdayPayRoll: build.mutation({
       query: ({ data, userId }) => {
@@ -90,6 +94,7 @@ const userApi = baseApi.injectEndpoints({
           body: data,
         };
       },
+      invalidatesTags: ["ADMIN_USER"],
     }),
 
     // Patch Api
@@ -115,5 +120,5 @@ export const {
 
   // userpayroll
   useCreateOffdayPayRollMutation,
-  useCreateUserPayRollMutation
+  useCreateUserPayRollMutation,
 } = userApi;

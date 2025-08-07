@@ -112,14 +112,19 @@ const navigation: NavigationItem[] = [
       },
     ],
   },
+  // {
+  //   name: "User",
+  //   icon: MessageSquare,
+  //   hasSubmenu: true,
+  //   submenu: [
+  //     { name: "User", icon: Award, path: "/admin/user/user" },
+  //     { name: "User Profile", icon: Mail, path: "/admin/user/user-profile" },
+  //   ],
+  // },
   {
-    name: "User",
+    name: "Users",
     icon: MessageSquare,
-    hasSubmenu: true,
-    submenu: [
-      { name: "User", icon: Award, path: "/admin/user/user" },
-      { name: "User Profile", icon: Mail, path: "/admin/user/user-profile" },
-    ],
+    path: "/admin/user/user",
   },
   {
     name: "Survey & Poll",
@@ -255,6 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </button>
         ) : (
           <NavLink
+            end
             to={item.path!}
             onClick={() => handleNavClick()}
             className={({ isActive }) => `
@@ -360,7 +366,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </nav>
 
           <div className="flex-shrink-0 px-3 pb-4 border-t border-gray-200 pt-4">
-            <button onClick={() => handleLogout()} className="group flex items-center w-full px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200">
+            <button
+              onClick={() => handleLogout()}
+              className="group flex items-center w-full px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+            >
               <LogOut className="mr-3 h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
               Log out
             </button>
