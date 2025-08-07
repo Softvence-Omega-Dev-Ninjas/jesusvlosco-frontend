@@ -26,6 +26,7 @@ interface PayrollFormProps {
   handleFinalSave: (data: any) => void;
   handleCancel: (tabId: string) => void;
   isLoading: boolean;
+  isOffdayLoadin: boolean;
 }
 
 const PayrollForm = ({
@@ -40,6 +41,7 @@ const PayrollForm = ({
   handleFinalSave,
   isLoading,
   handleCancel,
+  isOffdayLoadin,
 }: PayrollFormProps) => {
   const [regularPeriodOpen, setRegularPeriodOpen] = useState(false);
   const [overtimePeriodOpen, setOvertimePeriodOpen] = useState(false);
@@ -370,10 +372,11 @@ const PayrollForm = ({
 
         <div className="flex justify-end gap-4 mt-auto">
           <button
+            disabled={isOffdayLoadin}
             onClick={() => handleFinalSave(payrollData)}
-            className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
+            className="cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
           >
-            Save
+            {isOffdayLoadin ? "Saving" : "Save"}
           </button>
           <button
             onClick={() => handleCancel("payroll")}

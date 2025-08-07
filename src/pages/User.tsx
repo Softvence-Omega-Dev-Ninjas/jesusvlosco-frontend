@@ -1,4 +1,4 @@
-import { Columns3 } from "lucide-react";
+import { Columns3, LoaderIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { IoFilterOutline } from "react-icons/io5";
 
@@ -745,7 +745,10 @@ const User: React.FC = () => {
           isAnyModalOpen ? "opacity-50" : "opacity-100"
         }`}
       >
-        <table className="min-w-full divide-y divide-gray-200">
+        {
+          isLoading ? <div className="bg-transparent min-h-[300px] w-full flex justify-center items-center">
+          <LoaderIcon  size={52} className="animate-spin text-blue-600 duration-1000"/>
+          </div> :  <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th
@@ -890,8 +893,11 @@ const User: React.FC = () => {
                 </td>
               </tr>
             ))}
+           
           </tbody>
         </table>
+        }
+       
       </div>
 
       {/* View by Options Modal - now a direct child of the main container, right-aligned */}
