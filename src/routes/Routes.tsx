@@ -230,6 +230,7 @@ const routes = createBrowserRouter([
       },
 
       { path: "tasks-projects", element: <TaskAndProject /> },
+      { path: "user", element: <TaskAndProject /> },
 
       {
         path: "user",

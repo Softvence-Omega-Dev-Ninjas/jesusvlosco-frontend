@@ -20,6 +20,7 @@ interface EducationFormProps {
   handleSave: (data: Education[], tabId: string) => void;
   hanldeEducationInfo: (data: Education[]) => void;
   handleCancel: (tabId: string) => void;
+  isLoading: boolean
 }
 
 const EducationForm = ({
@@ -32,6 +33,7 @@ const EducationForm = ({
   handleSave,
   hanldeEducationInfo,
   handleCancel,
+  isLoading
 }: EducationFormProps) => {
   const [dropdownStates, setDropdownStates] = useState<
     Record<
@@ -220,10 +222,11 @@ const EducationForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
+        disabled={isLoading}
           onClick={() => hanldeEducationInfo(educationList)}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
+          className="cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
         >
-          Save
+         {isLoading ? 'Saving...' : "Save"}
         </button>
         <button
           onClick={() => handleCancel("education")}

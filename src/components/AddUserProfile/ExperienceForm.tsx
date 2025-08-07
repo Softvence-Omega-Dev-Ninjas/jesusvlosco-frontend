@@ -15,6 +15,7 @@ interface ExperienceFormProps {
   handleSave: (data: Experience[], tabId: string) => void;
   handleExperience: (data: Experience[]) => void
   handleCancel: (tabId: string) => void;
+  isLoading: boolean
 }
 
 const employmentTypes = [
@@ -33,6 +34,7 @@ const ExperienceForm = ({
   jobTypeOptions,
   handleSave,
   handleCancel,
+  isLoading,
   handleExperience
 }: ExperienceFormProps) => {
   const [dropdownStates, setDropdownStates] = useState<
@@ -282,9 +284,10 @@ const ExperienceForm = ({
             handleExperience(experienceList)
             // handleSave(experienceList, "experience")
           }}
-          className="cursor-pointer px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
+          disabled={isLoading}
+          className="cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
         >
-          Save
+          {isLoading ? 'Saving...' : "Save"}
         </button>
         <button
           onClick={() => handleCancel("experience")}

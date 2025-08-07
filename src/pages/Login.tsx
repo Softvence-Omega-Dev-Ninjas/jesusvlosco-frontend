@@ -37,10 +37,13 @@ const Login = () => {
   };
 
   const handleCodeVerification = async (code: string) => {
-    console.log(phoneNumber.slice(1), code);
+    console.log(phoneNumber, code);
+    const isPlusContains = phoneNumber?.includes("+")
+    console.log({isPlusContains, phoneNumber})
     try {
+
       const result = await verifyCode({
-        phoneNumber: phoneNumber.slice(1),
+        phoneNumber: isPlusContains ? phoneNumber.slice(1) : phoneNumber,
         otp: code,
       }).unwrap();
       console.log({ result });
