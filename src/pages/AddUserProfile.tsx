@@ -15,13 +15,13 @@ import {
 import {
   useCreateOffdayPayRollMutation,
   useCreateUserEducationMultipleMutation,
-  useCreateUserEducationMutation,
+  
   useCreateUserExperienceMutation,
   useCreateUserMutation,
   useCreateUserPayRollMutation,
 } from "@/store/api/admin/user/userApi";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const payPeriodOptions = ["Hour", "Day", "Week", "Month"];
@@ -120,15 +120,22 @@ const institutionOptions = [
 const AddUserProfile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("personal");
-  const [selectedRole, setSelectedRole] = useState<TRole>("EMPLOYEE");
+  const [params] = useSearchParams();
+  console.log();
+  const [selectedRole, setSelectedRole] = useState<TRole>(
+    (params.get("role") as "ADMIN" | "EMPLOYEE") || "EMPLOYEE"
+  );
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [createUserPayroll, { isLoading: isPayrollLoading }] =
     useCreateUserPayRollMutation();
   const [userId, setUserId] = useState("");
-
-  const [createuserMultipleEducation, {isLoading: isCreateUserEducationLoading}] =
-    useCreateUserEducationMultipleMutation();
-  const [createUserExperience, {isLoading: isCreateUserExperienceLoading}] = useCreateUserExperienceMutation();
+  console.log({ selectedRole });
+  const [
+    createuserMultipleEducation,
+    { isLoading: isCreateUserEducationLoading },
+  ] = useCreateUserEducationMultipleMutation();
+  const [createUserExperience, { isLoading: isCreateUserExperienceLoading }] =
+    useCreateUserExperienceMutation();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -285,7 +292,8 @@ const AddUserProfile = () => {
       console.log({ error });
     }
   };
-  const [createOffday, {isLoading: isCreateOffdayLoading}] = useCreateOffdayPayRollMutation();
+  const [createOffday, { isLoading: isCreateOffdayLoading }] =
+    useCreateOffdayPayRollMutation();
   const handleFinalSave = async (data: any) => {
     const offdayData = {
       numberOffDay: 1,
@@ -295,13 +303,15 @@ const AddUserProfile = () => {
     try {
       const result = await createOffday({
         data: offdayData,
-        userId: "d7860ea2-5caf-4179-89a5-09b9b28352cd",
+        userId,
       }).unwrap();
       if (result?.success) {
         navigate("/admin/user/user");
       }
       console.log({ result });
-    } catch (error) {}
+    } catch (error) {
+      console.log({ error });
+    }
     console.log({ offdayData });
   };
 
@@ -318,7 +328,7 @@ const AddUserProfile = () => {
         department: "",
         address: "",
         city: "",
-        role: "USER",
+        role: "EMPLOYEE",
         state: "",
         dob: "",
       });
@@ -357,6 +367,7 @@ const AddUserProfile = () => {
 
   const handlePersonalInfo = async (formData: FormData) => {
     console.log({ formData });
+    formData.role = selectedRole;
     const personalFormData = new FormData();
     // formData.role = selectedRole || 'EMPLOYEE';
     for (const key in formData) {

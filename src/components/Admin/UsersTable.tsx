@@ -30,11 +30,38 @@ const UsersTable: React.FC<UsersTableProps> = ({
   filterColumnButtonRef, // Destructure the ref
 }) => {
   const allUsersSelected =
-    selectedUserIds.length === users.length && users.length > 0;
+    selectedUserIds.length === users?.length && users?.length > 0;
   const indeterminate =
     selectedUserIds.length > 0 && selectedUserIds.length < users.length;
+ type DateOverride = { year: number; month: number; day: number } | null;
+  function formatDateToMDY(
+    dateInput: string | number | Date,
+    override: DateOverride = null
+  ) {
+    const original = new Date(dateInput);
+
+    const finalDate = override
+      ? new Date(
+          Date.UTC(
+            override.year,
+            override.month - 1,
+            override.day,
+            original.getUTCHours(),
+            original.getUTCMinutes(),
+            original.getUTCSeconds()
+          )
+        )
+      : original;
+
+    const month = finalDate.getUTCMonth() + 1;
+    const day = finalDate.getUTCDate();
+    const year = String(finalDate.getUTCFullYear()).slice(-2);
+
+    return `${month}/${day}/${year}`;
+  }
 
   return (
+    
     <div
       className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${
         isAnyModalOpen ? "opacity-50 pointer-events-none" : ""
@@ -110,7 +137,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users?.map((user: any) => (
               <tr
                 key={user.id}
                 className={
@@ -126,7 +153,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.id}
+                  {user?.employeeID}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -139,7 +166,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {user.name}
+                        {user?.profile?.firstName +
+                          " " +
+                          user?.profile?.lastName}
                       </div>
                     </div>
                   </div>
@@ -151,10 +180,10 @@ const UsersTable: React.FC<UsersTableProps> = ({
                   {user.phone}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.department}
+                  {user?.profile?.department}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.lastLogin}
+                  {formatDateToMDY(user?.lastLoginAt)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   {/* Action button for individual user if needed */}

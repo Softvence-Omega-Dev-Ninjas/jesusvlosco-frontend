@@ -40,6 +40,7 @@ const PersonalInfoForm = ({
   const [cityOpen, setCityOpen] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
 
+
   return (
     <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-6">
@@ -325,15 +326,19 @@ const PersonalInfoForm = ({
           <div className="relative">
             <input
               type="date"
-              value={formData.dob}
+              value={
+                formData.dob
+                  ? new Date(formData.dob).toISOString().split("T")[0]
+                  : ""
+              }
               onChange={(e) => {
-                const dob = new Date(e.target.value);
-                handleInputChange("dob", dob.toISOString());
+                // Store as ISO string if needed
+                const dob = e.target.value ? new Date(e.target.value) : null;
+                handleInputChange("dob", dob ? dob.toISOString() : "");
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-500"
               placeholder="Select date"
             />
-            {/* <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" /> */}
           </div>
         </div>
       </div>
@@ -342,11 +347,9 @@ const PersonalInfoForm = ({
         <button
           onClick={() => handlePersonalInfo(formData)}
           disabled={isLoading}
-          // onClick={() => handleSave(formData, "personal")}
           className="cursor-pointer disabled:opacity-70 px-6 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors"
         >
-          {isLoading ? 'Saving...' : "Save"}
-   
+          {isLoading ? "Saving..." : "Save"}
         </button>
         <button
           onClick={() => handleCancel("personal")}

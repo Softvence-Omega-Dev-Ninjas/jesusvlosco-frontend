@@ -6,7 +6,7 @@ interface HeaderProps {
   selectedRole: TRole;
   setSelectedRole: (role: TRole) => void;
 }
-const roleOptions = ["ADMIN", "USER", "EMPLOYEE", "MANAGER"];
+const roleOptions = ["EMPLOYEE", "ADMIN"];
 
 const Header = ({ selectedRole, setSelectedRole }: HeaderProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

@@ -12,8 +12,10 @@ import user6 from "../assets/user6.png";
 
 // Import components
 import ActionDropdown from "@/components/Admin/ActionDropdown";
-import UsersTable from "@/components/Admin/UsersTable"; 
+import UsersTable from "@/components/Admin/UsersTable";
 import FilterColumnModal from "@/components/Admin/FilterColumnModal";
+import { Link } from "react-router-dom";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 
 // --- START: New definitions for Filter Options ---
 
@@ -184,6 +186,9 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
+  const { data, isLoading } = useGetAllUserQuery({ role: "ADMIN" });
+  const allUsers = data?.data;
+  console.log({allUsers, isLoading})
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
@@ -332,12 +337,15 @@ const Admin: React.FC = () => {
       {/* Header Section */}
       <header className="flex items-center justify-between p-4 mb-3">
         <div>
-          <h1 className="text-[24px] font-bold text-[#4E53B1]">Users list</h1>
+          <h1 className="text-[24px] font-bold text-[#4E53B1]">Admins list</h1>
           <p className="text-xl text-gray-400">
-            All Employee Information In One Place
+            All Admins Information In One Place
           </p>
         </div>
-        <button className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow focus:outline-none focus:ring-offset-2 cursor-pointer">
+        <Link
+          to={"/admin/add-user?role=ADMIN"}
+          className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
+        >
           <svg
             className="w-5 h-5 mr-2"
             fill="none"
@@ -352,8 +360,8 @@ const Admin: React.FC = () => {
               d="M12 4v16m8-8H4"
             ></path>
           </svg>
-          Add Admin
-        </button>
+          Add User
+        </Link>
       </header>
 
       {/* Control Bar */}
@@ -394,7 +402,7 @@ const Admin: React.FC = () => {
 
       {/* Users Table Component */}
       <UsersTable
-        users={filteredUsers}
+        users={allUsers}
         selectedUserIds={selectedUserIds}
         handleHeaderCheckboxChange={handleHeaderCheckboxChange}
         handleUserCheckboxChange={handleUserCheckboxChange}
@@ -408,7 +416,6 @@ const Admin: React.FC = () => {
         showFilterColumnModal={showFilterColumnModal}
         filterModalPosition={filterModalPosition}
         filterColumnModalRef={filterColumnModalRef}
-       
       />
     </div>
   );
