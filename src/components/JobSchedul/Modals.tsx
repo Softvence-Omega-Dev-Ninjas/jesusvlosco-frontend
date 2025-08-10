@@ -213,14 +213,14 @@ const Modals: React.FC<ModalsProps> = ({
             className="w-full px-4 py-2 mb-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-lg"
           />
 
-          <h4 className="text-md font-semibold mb-2">Choose Projects</h4>
+          <h4 className="text-md font-semibold mb-2">Choose Team</h4>
           <div className="relative mb-4">
             <button
               ref={projectDropdownButtonRef}
               onClick={() => setShowProjectDropdown(prev => !prev)}
               className="w-full px-4 py-2 border rounded-lg bg-white text-left flex justify-between items-center text-lg"
             >
-              {selectedCreateProject || "Select project"}
+              {selectedCreateProject || "Select Team"}
               <svg className={`fill-current h-4 w-4 transform ${showProjectDropdown ? 'rotate-180' : 'rotate-0'}`} viewBox="0 0 20 20">
                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828L6.757 7.586L5.343 9z" />
               </svg>
