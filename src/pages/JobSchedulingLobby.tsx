@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import ProjectCard from "@/components/JobSchedul/ProjectCard";
 import Modals from "@/components/JobSchedul/Modals";
+import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
 
 interface Project {
   id: number;
@@ -139,7 +140,7 @@ const JobSchedulingLobby: React.FC = () => {
 
   const [showCreateNewModal, setShowCreateNewModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
-  const [selectedCreateProject, setSelectedCreateProject] = useState("");
+
   const [selectedCreateMembers, setSelectedCreateMembers] = useState<string[]>(
     []
   );
@@ -198,7 +199,7 @@ const JobSchedulingLobby: React.FC = () => {
         ) {
           setShowCreateNewModal(false);
           setNewProjectName("");
-          setSelectedCreateProject("");
+         
           setSelectedCreateMembers([]);
           setShowProjectDropdown(false);
           setShowMembersDropdown(false);
@@ -246,7 +247,7 @@ const JobSchedulingLobby: React.FC = () => {
     setProjectIdToDelete(null);
     setShowCreateNewModal(false);
     setNewProjectName("");
-    setSelectedCreateProject("");
+  
     setSelectedCreateMembers([]);
     setShowProjectDropdown(false);
     setShowMembersDropdown(false);
@@ -342,6 +343,12 @@ const JobSchedulingLobby: React.FC = () => {
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+ 
+  const {data}=useGetAllTeamDataQuery(undefined)
+console.log(data)
+
+
+
   return (
     <div className="min-h-screen relative">
       <div
@@ -420,16 +427,15 @@ const JobSchedulingLobby: React.FC = () => {
         showCreateNewModal={showCreateNewModal}
         newProjectName={newProjectName}
         setNewProjectName={setNewProjectName}
-        selectedCreateProject={selectedCreateProject}
-        setSelectedCreateProject={setSelectedCreateProject}
+      
+        
         selectedCreateMembers={selectedCreateMembers}
         setSelectedCreateMembers={setSelectedCreateMembers}
         handleSelectMember={handleSelectMember}
         handleCreateNewConfirm={handleCreateNewConfirm}
         setShowCreateNewModal={setShowCreateNewModal}
         createNewModalRef={createNewModalRef}
-        allMembers={allMembers}
-        availableProjectsForDropdown={projects}
+   
         showProjectDropdown={showProjectDropdown}
         setShowProjectDropdown={setShowProjectDropdown}
         projectDropdownRef={projectDropdownRef}
