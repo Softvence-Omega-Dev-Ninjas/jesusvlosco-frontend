@@ -51,6 +51,7 @@ const RatingFieldModal: React.FC<RatingFieldModalProps> = ({
       };
 
       const handleConfirm = () => {
+            console.log(fieldData)
             onSave(fieldData);
             onClose();
       };

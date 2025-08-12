@@ -46,7 +46,7 @@ export function formatDateToDDMMYYYY(isoDate?: string): string {
   return `${day}/${month}/${year}`;
 }
 
-const PollRecipients = () => {
+  const PollRecipients = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 

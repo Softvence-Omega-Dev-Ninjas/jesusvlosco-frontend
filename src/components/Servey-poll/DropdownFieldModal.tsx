@@ -63,6 +63,7 @@ const DropdownFieldModal: React.FC<DropdownFieldModalProps> = ({
       };
 
       const handleConfirm = () => {
+            console.log(fieldData)
             onSave(fieldData);
             onClose();
       };

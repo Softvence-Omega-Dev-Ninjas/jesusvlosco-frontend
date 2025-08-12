@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import {
      FileText,  Star, Trash2, 
-    PlusCircle,
+   
     X,
 } from 'lucide-react';
 
@@ -11,7 +11,8 @@ import Modal from '@/components/Servey-poll/Modal';
 import DropdownFieldModal from '@/components/Servey-poll/DropdownFieldModal';
 import OpenEndedFieldModal from '@/components/Servey-poll/OpenEndedFieldModal';
 import RatingFieldModal from '@/components/Servey-poll/RatingFieldModal'; // ✅ Import rating modal
-import { NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 interface DropdownFieldData {
     question: string;
@@ -41,6 +42,7 @@ interface RatingFieldData {
 }
 
 export default function SurveyPage() {
+    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(true);
     const [fields, setFields] = useState<string[]>([]);
     const [tempDescription, setTempDescription] = useState('');
@@ -54,6 +56,7 @@ export default function SurveyPage() {
 
     const [showRatingModal, setShowRatingModal] = useState(false);
     const [ratingFields, setRatingFields] = useState<RatingFieldData[]>([]);
+
 
     const addField = (type: string) => {
         if (type === 'description') {
@@ -79,19 +82,63 @@ export default function SurveyPage() {
 
     const handleSaveDropdown = (data: DropdownFieldData) => {
         setDropdownFields((prev) => [...prev, data]);
+       
     };
 
     const handleSaveOpenEnded = (data: OpenEndedFieldData) => {
         setOpenEndedFields((prev) => [...prev, data]);
+        console.log(data)
     };
 
     const handleSaveRatingField = (data: RatingFieldData) => {
         setRatingFields((prev) => [...prev, data]);
+        console.log(data)
     };
 
     const removeField = (index: number) => {
         setFields((prev) => prev.filter((_, i) => i !== index));
     };
+
+
+const handlePublish = () => {
+  const combinedQuestions = [
+    ...dropdownFields.map((field, index) => ({
+      question: field.question,
+      description: field.description,
+      type: "SELECT",
+      order: index + 1,
+      isRequired: field.required,
+      captureLocation: field.locationStampCapture,
+      multiSelect: field.multipleSelection,
+      options: field.options
+    })),
+    ...openEndedFields.map((field, index) => ({
+      question: field.question,
+      description: field.description,
+      type: "OPEN_ENDED",
+      order: dropdownFields.length + index + 1,
+      isRequired: field.required,
+      captureLocation: field.locationStampCapture
+    })),
+    ...ratingFields.map((field, index) => ({
+      question: field.question,
+      description: field.description,
+      type: "RANGE",
+      order: dropdownFields.length + openEndedFields.length + index + 1,
+      isRequired: field.required,
+      captureLocation: field.locationStampCapture,
+      rangeStart: 1,
+      rangeEnd: field.scale
+    }))
+  ];
+// Before navigate
+localStorage.setItem("surveyData", JSON.stringify(combinedQuestions));
+navigate("/admin/publish-survey");
+
+
+
+};
+
 
     return (
         <div className="min-h-screen font-inter">
@@ -115,12 +162,7 @@ export default function SurveyPage() {
                             <div className="bg-gray-50 p-4  border-gray-300 border-r">
                                 <p className="text-sm text-center font-semibold mt-3 mb-4">Add a field</p>
                                 <div className="space-y-3  ">
-                                    <button onClick={() => addField('description')} className="flex items-center  gap-2 text-sm w-full border border-gray-300 px-3 py-4 rounded-md bg-gray-50 hover:bg-gray-100">
-                                        {/* <LayoutPanelTop size={16} />  */}
-                                        <img src="../src/assets/article.png" alt="Edit" className="w-5 h-5 ml-6 " />
-
-                                        Description
-                                    </button>
+                                   
                                     <div className="flex gap-2">
                                         <button onClick={() => addField('dropdown')} className="flex items-center bg-gray-50 justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-4 rounded-md  hover:bg-gray-100">
                                             <img src="../src/assets/checkbox.png" alt="Edit" className="w-5 h-5  " />
@@ -137,9 +179,7 @@ export default function SurveyPage() {
                                         <button onClick={() => addField('rating')} className="flex items-center justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-4 rounded-md bg-gray-50 hover:bg-gray-100">
                                             <Star size={16} /> Rating
                                         </button>
-                                        <button className="flex items-center justify-center gap-2 text-sm w-full border border-gray-300 px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100">
-                                            <PlusCircle size={16} /> Poll
-                                        </button>
+                                       
 
                                     </div>
                                     <h1 className='border-b border-gray-300 mt-6'></h1>
@@ -245,7 +285,7 @@ export default function SurveyPage() {
 
                         <div className="flex justify-end gap-2 border-t border-gray-300 px-6 py-4 bg-gray-50 rounded-b-md">
                             <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button>
-                            <NavLink to={'/publish-survey'} className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Publish Survey</NavLink>
+                            <button onClick={handlePublish}  className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Publish Survey</button>
                         </div>
 
                     </div>
