@@ -3,9 +3,9 @@ import { baseApi } from "../../baseApi";
 const createSurveyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // POST - Create project
-    createProject: builder.mutation({
+    createSurvey: builder.mutation({
       query: (body) => ({
-        url: "/admin/servey",
+        url: "/admin/survey",
         method: "POST",
         body,
       }),
@@ -13,4 +13,4 @@ const createSurveyApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {useCreateProjectMutation }= createSurveyApi;
+export const {useCreateSurveyMutation }= createSurveyApi;
