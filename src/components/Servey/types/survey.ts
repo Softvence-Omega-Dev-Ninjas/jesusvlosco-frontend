@@ -10,7 +10,7 @@ export interface User {
 
 export interface SurveySettings {
   assignBy: "all" | "select"
-  selectedUsers: string[]
+  employees?: string[]
   publishNow: boolean
   publishDate: string
   publishTime: string
@@ -20,5 +20,6 @@ export interface SurveySettings {
   sendReminder: boolean
   reminderDate: string
   reminderTime: string
-  showOnFeedAgency: boolean
+  showOnFeedAgency: boolean,
+  selectedUsers: User[]
 }

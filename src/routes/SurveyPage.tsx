@@ -10,7 +10,7 @@ import {
 import Modal from '@/components/Servey-poll/Modal';
 import DropdownFieldModal from '@/components/Servey-poll/DropdownFieldModal';
 import OpenEndedFieldModal from '@/components/Servey-poll/OpenEndedFieldModal';
-import RatingFieldModal from '@/components/Servey-poll/RatingFieldModal'; // ✅ Import rating modal
+import RatingFieldModal from '@/components/Servey-poll/RatingFieldModal';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -98,9 +98,14 @@ export default function SurveyPage() {
     const removeField = (index: number) => {
         setFields((prev) => prev.filter((_, i) => i !== index));
     };
-
-
+    const [title,settile]=useState('')
+    const [description,setdescription]=useState('')
+  
 const handlePublish = () => {
+      const surveyTitle={
+        title:title,
+        description:description
+    }
   const combinedQuestions = [
     ...dropdownFields.map((field, index) => ({
       question: field.question,
@@ -133,10 +138,8 @@ const handlePublish = () => {
   ];
 // Before navigate
 localStorage.setItem("surveyData", JSON.stringify(combinedQuestions));
-navigate("/admin/publish-survey");
-
-
-
+localStorage.setItem("surveyTitle", JSON.stringify(surveyTitle));
+navigate("/admin/publish-survey?flag=survey");
 };
 
 
@@ -150,11 +153,11 @@ navigate("/admin/publish-survey");
                         <div className="grid grid-cols-1 max-w-2xl  sm:grid-cols-2 lg:grid-cols-1 gap-4 p-6">
                             <div className='flex gap-4'>
                                 <label className="text-lg mt-3 font-medium text-[rgba(78,83,177,1)] min-w-max">Survey Title</label>
-                                <input className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 lg:ml-10 text-sm" />
+                                <input onChange={(e)=>settile(e.target.value)} className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 lg:ml-10 text-sm" />
                             </div>
                             <div className='flex gap-4'>
                                 <label className="text-lg mt-3  text-[rgba(78,83,177,1)]">Description</label>
-                                <input className="w-full mt-1 border border-gray-300 lg:ml-10 rounded-md px-3 py-2 text-sm" />
+                                <input onChange={(e)=>setdescription(e.target.value)} className="w-full mt-1 border border-gray-300 lg:ml-10 rounded-md px-3 py-2 text-sm" />
                             </div>
                         </div>
 
