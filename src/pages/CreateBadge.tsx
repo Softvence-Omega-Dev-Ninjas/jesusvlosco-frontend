@@ -33,7 +33,7 @@ export default function CreateBadge() {
   const [selectedBadge, setSelectedBadge] = useState<number | null>(null);
   const [badgeTitle, setBadgeTitle] = useState("");
   const [category, setCategory] = useState("");
-
+  console.log({badgeTitle, category})
   return (
     <div className="min-h-screen ">
       {/* header  */}

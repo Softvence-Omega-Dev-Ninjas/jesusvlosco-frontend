@@ -252,8 +252,7 @@ const routes = createBrowserRouter([
         element: <SidebarSetting></SidebarSetting>,
       },
 
-      { path: "add-user", element: <AddUserProfile /> },
-      // { path: "sidebar-settings", element: <SidebarSetting /> },
+      // { path: "add-user", element: <AddUserProfile /> },
     ],
   },
 

@@ -227,7 +227,7 @@ export default function RecognitionTable() {
                   className="border-b py-4 border-[#C5C5C5] hover:bg-gray-50"
                 >
                   {/* Date Column */}
-                  <td className="p-4 text-gray-600 text-sm">{activity.date}</td>
+                  <td className="p-4 text-gray-600 text-sm">{activity?.date}</td>
 
                   {/* Sent to Column */}
                   <td className="p-4 ">

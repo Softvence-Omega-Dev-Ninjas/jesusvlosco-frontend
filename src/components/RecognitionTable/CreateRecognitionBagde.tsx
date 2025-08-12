@@ -108,12 +108,6 @@ const CreateRecognitionBagde = () => {
   window.location.href = "/admin/badge-library";
   };
 
-  // const handleDelete = (badgeId: string) => {
-  //   console.log(`Delete badge: ${badgeId}`);
-  //   setOpenModal(null);
-    
-  //   // Add your delete logic here
-  // };
   const handleDelete = (badgeId: string) => {
   Swal.fire({
     title: "Are you sure?",
