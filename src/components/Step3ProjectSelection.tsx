@@ -1,5 +1,6 @@
 // src/components/Step3ProjectSelection.tsx
 import React, { useState, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Define the interface for a Project object
 interface Project {
@@ -19,6 +20,7 @@ const projects: Project[] = [ // Explicitly type the projects array
 ];
 
 const Step3ProjectSelection: React.FC<Step3ProjectSelectionProps> = ({ onSelectProject }) => {
+    const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState<string>(''); // Type searchTerm as string
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null); // Type selectedProjectId as string or null
 
@@ -30,6 +32,9 @@ const Step3ProjectSelection: React.FC<Step3ProjectSelectionProps> = ({ onSelectP
         setSelectedProjectId(project.id);
         onSelectProject(project); // Pass the selected project back to the parent
     };
+    const handleClick = () => {
+        navigate("/admin")
+    }
 
     return (
         <div className="text-center">
@@ -67,7 +72,8 @@ const Step3ProjectSelection: React.FC<Step3ProjectSelectionProps> = ({ onSelectP
                 {filteredProjects.map((project: Project) => ( // Type project in map callback
                     <button
                         key={project.id}
-                        onClick={() => handleProjectClick(project)}
+                        onClick={() => { handleProjectClick(project), handleClick() }}
+
                         className={`w-full flex items-center justify-between p-3 border rounded-md transition duration-200
               ${selectedProjectId === project.id ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:bg-gray-50'}`}
                     >
