@@ -6,6 +6,20 @@ import { useCreateSurveyMutation } from "@/store/api/admin/survey/servey";
 
 
 
+
+const combineDateAndTimeToISO = (dateStr?: string, timeStr?: string) => {
+  if (!dateStr || !timeStr) return null; // guard for empty, null, undefined
+  const dateTimeString = `${dateStr}T${timeStr}:00`;
+
+  const combined = new Date(dateTimeString);
+
+  if (isNaN(combined.getTime())) {
+    return null; // invalid date-time combo
+  }
+
+  return combined.toISOString();
+};
+
 export const useSurveyState = () => {
     const [createSurvey] = useCreateSurveyMutation();
     const [currentStep, setCurrentStep] = useState(0);
@@ -57,8 +71,8 @@ export const useSurveyState = () => {
             questions:savedData,
             isForAll:isForAll,
             publishNow:settings.publishNow,
-            publishTime:new Date(settings.publishDate + "T" + settings.publishTime).toISOString(),
-            reminderTime:new Date(settings.reminderDate + "T" + settings.reminderTime).toISOString()
+ publishTime: combineDateAndTimeToISO(settings.publishDate, settings.publishTime),
+    reminderTime: combineDateAndTimeToISO(settings.reminderDate, settings.reminderTime),
         };
         console.log(surveyData)
         try {
