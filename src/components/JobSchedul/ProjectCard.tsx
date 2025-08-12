@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Plus, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useGetAllTeamDataQuery } from '@/store/api/admin/shift-sheduling/getAllTeamApi';
+
 
 // Define the Project interface here, as ProjectCard directly uses it
 interface Project {
@@ -20,8 +20,7 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, toggleMoreModal, isMoreModalOpen }) => {
 
-   const {data}=useGetAllTeamDataQuery(undefined)
-  console.log(data)
+ 
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
