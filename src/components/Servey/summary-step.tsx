@@ -1,19 +1,19 @@
-"use client";
-
 import type React from "react";
 import { SurveySettings } from "./types/survey";
 import { useLocation } from "react-router-dom";
+import { useCreateSurveyMutation } from "@/store/api/admin/survey/servey";
 
 interface SummaryStepProps {
   settings: SurveySettings;
-  onConfirm: () => void;
 }
 
 export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
+  const [createSurvey] = useCreateSurveyMutation();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const flag = searchParams.get("flag");
   console.log(flag);
+  console.log("Settings===========>", settings);
   // const navigate = useNavigate();
 
   // The passed state
@@ -32,9 +32,52 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
     });
   };
 
-  const onConfirm = () => {
+  let isForAll: boolean;
+  if (settings.assignBy === "all") {
+    isForAll = true;
+  } else {
+    isForAll = false;
+  }
+  const handleSurveyPublish = async () => {
+    const savedData = JSON.parse(localStorage.getItem("surveyData") || "null");
+    const savedTitleData = JSON.parse(localStorage.getItem("surveyTitle") || "null");
+
+    const surveyData = {
+      title: savedTitleData.title,
+      description: savedTitleData.description,
+      employees: settings.selectedUsers,
+      questions: savedData,
+      isForAll: isForAll,
+      publishNow: settings.publishNow,
+      publishTime: settings.publishTime,
+      reminderTime: new Date(settings.reminderDate + "T" + settings.reminderTime).toISOString(),
+    };
+    console.log(surveyData);
+    try {
+      const result = await createSurvey(surveyData).unwrap();
+      console.log("Survey successfully created:", result);
+    } catch (err) {
+      console.error("Failed to create survey:", err);
+    }
+  };
+
+  const handlePoolPublish = () => {
     console.log(settings);
     console.log("polllData", pollData);
+    const poolInfo = {
+      title: pollData.title,
+      description: pollData.description,
+      employees: settings.selectedUsers,
+      questions: pollData.question,
+      isForAll: isForAll,
+      showOnFeed: settings.showOnFeed,
+      shouldNotify: settings.notifyPushUp,
+      publishDateTimeISO: settings.publishNow ? new Date().toISOString() : settings.publishTime,
+      reminderDateTimeISO: settings.sendReminder ? new Date(`${settings.reminderDate}T${settings.reminderTime}`).toISOString() : null,
+      // publishTime: settings.publishNow ? new Date().toISOString() : new Date(settings.publishDate + "T" + settings.publishTime).toISOString(),
+      // reminderTime: settings.sendReminder ? new Date(settings.reminderDate + "T" + settings.reminderTime).toISOString() : null,
+    };
+    console.log("poolInfo=========>", poolInfo);
   };
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-0">
@@ -64,13 +107,13 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
 
       <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
         <button
-          onClick={onConfirm}
+          // onClick={onConfirm}
           className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors order-1 sm:order-2"
         >
           Cancel
         </button>
         <button
-          onClick={onConfirm}
+          onClick={flag === "pool" ? handlePoolPublish : handleSurveyPublish}
           className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0 order-2 sm:order-1"
         >
           Confirm survey

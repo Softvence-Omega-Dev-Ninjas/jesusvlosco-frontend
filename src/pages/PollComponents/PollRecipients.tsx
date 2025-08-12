@@ -1,5 +1,6 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { SurveySettings } from "@/components/Servey/types/survey";
 
 type UserProfile = {
   address: string;
@@ -46,7 +47,7 @@ export function formatDateToDDMMYYYY(isoDate?: string): string {
   return `${day}/${month}/${year}`;
 }
 
-  const PollRecipients = () => {
+const PollRecipients = ({ settings }: { settings: SurveySettings }) => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -70,6 +71,9 @@ export function formatDateToDDMMYYYY(isoDate?: string): string {
   const isAllSelected = usersData?.data && selectedUserIds.length === usersData?.data?.length && usersData?.data?.length > 0;
 
   console.log("==========>", selectedUserIds);
+  useEffect(() => {
+    settings.selectedUsers = [...selectedUserIds];
+  }, [selectedUserIds]);
 
   return (
     <div className="min-h-screen p-2 sm:p-4 lg:p-8 font-sans bg-[#FAFBFF]">
