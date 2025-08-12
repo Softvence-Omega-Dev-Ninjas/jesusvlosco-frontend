@@ -8,6 +8,7 @@ import bage6 from "@/assets/bage6.png";
 import bage7 from "@/assets/bage7.png";
 import bage8 from "@/assets/bage8.png";
 import Swal from "sweetalert2";
+import { useGetAllBadgeQuery } from "@/store/api/admin/recognation/recognationApi";
 
 const CreateRecognitionBagde = () => {
   // const [selectedBadge, setSelectedBadge] = useState("promotion");
@@ -20,6 +21,8 @@ const CreateRecognitionBagde = () => {
   const [allowInteraction, setAllowInteraction] = useState(false);
   const [openModal, setOpenModal] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading} = useGetAllBadgeQuery(null)
+  console.log({data, isLoading})
 
   const badges = [
     {

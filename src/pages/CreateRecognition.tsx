@@ -4,6 +4,8 @@ import user from "@/assets/user1.png";
 import CreateRecognitionBagde from "@/components/RecognitionTable/CreateRecognitionBagde";
 import SummeryTab from "@/components/RecognitionTable/SummeryTab";
 import { useNavigate } from "react-router-dom";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { formatDateToMDY } from "@/utils/formatDateToMDY";
 
 const steps = [
   { id: 1, name: "Recipients", current: true },
@@ -179,6 +181,8 @@ const filterOptions = [
 
 export default function CreateRecognition() {
   const [currentStep, setCurrentStep] = useState(1);
+  const {data} = useGetAllUserQuery(null)
+  console.log({data})
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState(filterOptions);
@@ -187,25 +191,23 @@ export default function CreateRecognition() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
+
       setSelectedEmployees(employees.map((_, index) => index.toString()));
     } else {
       setSelectedEmployees([]);
     }
   };
 
-  const handleSelectEmployee = (index: string, checked: boolean) => {
+  const handleSelectEmployee = (index: string, checked: boolean, id: string) => {
+    console.log({checked, index, id})
     if (checked) {
-      setSelectedEmployees([...selectedEmployees, index]);
+      setSelectedEmployees([...selectedEmployees, id]);
     } else {
-      setSelectedEmployees(selectedEmployees.filter((id) => id !== index));
+      setSelectedEmployees(selectedEmployees.filter((el) => el !== id));
     }
   };
 
-  // const handleNextStep = () => {
-  //   if (currentStep < 3) {
-  //     setCurrentStep(currentStep + 1);
-  //   }
-  // };
+
   const handleNextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -288,7 +290,7 @@ export default function CreateRecognition() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {employees.map((employee, index) => (
+                {data?.data.map((employee: any, index: number) => (
                   <tr
                     key={index}
                     className="hover:bg-gray-50 border-0 py-2 cursor-pointer"
@@ -297,39 +299,41 @@ export default function CreateRecognition() {
                       <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        checked={selectedEmployees.includes(index.toString())}
+                        checked={selectedEmployees.includes(employee?.id.toString())}
                         onChange={(e) =>
                           handleSelectEmployee(
                             index.toString(),
-                            e.target.checked
+                            e.target.checked,
+                            employee?.id
                           )
                         }
                       />
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-900">
-                      {employee.id}
+                      {employee?.employeeID}
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-3">
-                          <img src={employee.avatar} alt="" />
+                          <img src={employee?.avatar} alt="" />
                         </div>
                         <span className="text-sm font-medium text-gray-900">
-                          {employee.name}
+                          {employee?.profile?.firstName} {employee?.profile?.lastName}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee.email}
+                      {employee?.email}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee.phone}
+                      {employee?.phone}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee.department}
+                      {employee?.profile?.department}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee.lastLogin}
+                      {formatDateToMDY(   employee.lastLoginAt)}
+                   
                     </td>
                   </tr>
                 ))}
