@@ -19,6 +19,7 @@ import user4 from "../assets/user4.png";
 import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
 import { Link } from "react-router-dom";
+import { useGetAllUserDataQuery } from "@/store/api/admin/shift-sheduling/getAllUser";
 
 interface Employee {
   id: number;
@@ -291,6 +292,10 @@ const OverviewProject = () => {
     }
     return years;
   };
+
+
+  const{data}=useGetAllUserDataQuery(undefined)
+  console.log(data)
 
   return (
     <div className="min-h-screen">

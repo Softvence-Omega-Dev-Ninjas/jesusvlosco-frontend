@@ -3,6 +3,7 @@ import { Plus, Search } from "lucide-react";
 import ProjectCard from "@/components/JobSchedul/ProjectCard";
 import Modals from "@/components/JobSchedul/Modals";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
+import { useDeleteProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 
 interface Project {
   id: number;
@@ -236,7 +237,9 @@ const JobSchedulingLobby: React.FC = () => {
     showProjectDropdown,
     showMembersDropdown,
   ]);
+  
 
+  
   const closeAllOtherModals = () => {
     setOpenMoreModalId(null);
     setMoreModalPosition(null);
@@ -297,12 +300,21 @@ const JobSchedulingLobby: React.FC = () => {
     setShowDeleteConfirmModal(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (projectIdToDelete !== null) {
+  const handleConfirmDelete = async () => {
+  if (projectIdToDelete !== null) {
+    try {
+      await deleteProject(projectIdToDelete).unwrap();
+
+      await refetch();
+      // On success, update local state by removing deleted project
       setProjects((prev) => prev.filter((p) => p.id !== projectIdToDelete));
+       closeAllOtherModals();
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      // Optionally show error notification here
     }
-    closeAllOtherModals();
-  };
+  }
+};
 
   const handleAddNewClick = () => {
     closeAllOtherModals();
@@ -339,13 +351,32 @@ const JobSchedulingLobby: React.FC = () => {
     closeAllOtherModals();
   };
 
-  const filteredProjects = projects.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
  
   const {data}=useGetAllTeamDataQuery(undefined)
 console.log(data)
+
+
+const{data:allProjects, refetch}=useGetAllProjectsQuery(undefined)
+ console.log(allProjects)
+
+ const projectsArray = allProjects?.data?.projects ?? [];
+
+const mappedProjects: Project[] = projectsArray.map((proj: any) => ({
+  id: proj.id,
+  name: proj.title || "Untitled Project",
+  assigned: (proj.projectUsers && proj.projectUsers.length > 0)
+    ? proj.projectUsers.map((user: any) => user.image || `https://placehold.co/40x40/cccccc/000000?text=U`)
+    : (proj.team?.image ? [proj.team.image] : [`https://placehold.co/40x40/cccccc/000000?text=U`]),
+  admins: proj.manager ? [proj.manager.image || `https://placehold.co/40x40/cccccc/000000?text=M`] : [],
+}));
+  // Search filtering on mappedProjects
+  const filteredProjects = mappedProjects.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [deleteProject] = useDeleteProjectMutation();
+  console.log(deleteProject)
 
 
 
@@ -449,4 +480,4 @@ console.log(data)
   );
 };
 
-export default JobSchedulingLobby;
+export default JobSchedulingLobby;   

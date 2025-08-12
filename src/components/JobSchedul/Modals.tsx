@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Plus, X } from "lucide-react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
-import { useCreateProjectMutation } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { useCreateProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 
 interface Member {
   id: string;
@@ -99,6 +99,8 @@ const Modals: React.FC<ModalsProps> = ({
 
   // Create Project Mutation hook
   const [createProject, { isLoading, isError, error }] = useCreateProjectMutation();
+  const{data:allProjects, refetch}=useGetAllProjectsQuery(undefined)
+  console.log(allProjects)
 
   const [selectedCreateProjectId, setSelectedCreateProjectId] =
     useState<string>("");
@@ -136,55 +138,54 @@ const Modals: React.FC<ModalsProps> = ({
   }, [data, selectedCreateProjectId]);
 
   // Confirm handler for creating project - calls API
- const handleCreateNewConfirmInternal = async () => {
-  if (!newProjectName.trim()) {
-    alert("Please enter project name");
-    return;
-  }
-  if (!selectedCreateProjectId) {
-    alert("Please select a team");
-    return;
-  }
-  if (selectedCreateMembers.length === 0) {
-    alert("Please select at least one member");
-    return;
-  }
-  if (!location.trim()) {
-    alert("Please enter location");
-    return;
-  }
+  const handleCreateNewConfirmInternal = async () => {
+    if (!newProjectName.trim()) {
+      alert("Please enter project name");
+      return;
+    }
+    if (!selectedCreateProjectId) {
+      alert("Please select a team");
+      return;
+    }
+    if (selectedCreateMembers.length === 0) {
+      alert("Please select at least one member");
+      return;
+    }
+    if (!location.trim()) {
+      alert("Please enter location");
+      return;
+    }
 
-  try {
-    // Take first selected member as manager
-    const managerId = selectedCreateMembers[0];
+    try {
+      await createProject({
+  title: newProjectName.trim(),
+  teamId: selectedCreateProjectId,
+  members: selectedCreateMembers,
+  managerId: selectedCreateMembers[0], 
+  projectLocation: location.trim(),
+}).unwrap();
+refetch()
 
-    await createProject({
-      title: newProjectName,                  // matches API
-      teamId: selectedCreateProjectId,        // team
-      managerId,                              // must be UUID
-      members: selectedCreateMembers,         // still send members array if API supports it
-      projectLocation: location.trim(),       // matches API
-    }).unwrap();
+      alert("Project created successfully!");
+      
+      setShowCreateNewModal(false);
 
-    alert("Project created successfully!");
-    setShowCreateNewModal(false);
+      // Reset fields
+      setNewProjectName("");
+      setSelectedCreateProjectId("");
+      setSelectedCreateProjectName("");
+      setSelectedCreateMembers([]);
+      setLocation("");
+      setShowProjectDropdown(false);
+      setShowMembersDropdown(false);
+    } catch (err) {
+     alert(
+  "Failed to create project: " +
+  ((err as any)?.data?.message || (err as any)?.error || "Unknown error")
+);
 
-    // Reset fields
-    setNewProjectName("");
-    setSelectedCreateProjectId("");
-    setSelectedCreateProjectName("");
-    setSelectedCreateMembers([]);
-    setLocation("");
-    setShowProjectDropdown(false);
-    setShowMembersDropdown(false);
-  } catch (err) {
-    alert(
-      "Failed to create project: " +
-      ((err as any)?.data?.message || (err as any)?.error || "Unknown error")
-    );
-  }
-};
-
+    }
+  };
 
   return (
     <>
@@ -203,7 +204,7 @@ const Modals: React.FC<ModalsProps> = ({
           </button>
           <button
             className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-red-600"
-            onClick={() => handleDeleteClick(openMoreModalId)}
+          onClick={() => handleDeleteClick(openMoreModalId)}
           >
             Delete
           </button>
@@ -211,41 +212,55 @@ const Modals: React.FC<ModalsProps> = ({
       )}
 
       {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-40 p-4">
-          <div
-            ref={editModalRef}
-            className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border relative"
-          >
-            <button
-              onClick={() => {
-                setShowEditModal(false);
-                setEditModalProjectName("");
-                setSelectedProjectIdForEdit(null);
-              }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X size={20} />
-            </button>
-            <h3 className="text-xl font-bold mb-6 text-center">
-              Title this scheduler
-            </h3>
-            <input
-              type="text"
-              placeholder="Project 1"
-              value={editModalProjectName}
-              onChange={(e) => setEditModalProjectName(e.target.value)}
-              className="w-full px-4 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-center text-lg"
-            />
-            <button
-              onClick={handleConfirmEdit}
-              className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg"
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      )}
+    {showEditModal && (
+  <>
+    {/* Backdrop */}
+    <div
+      className="fixed inset-0 bg-black bg-opacity-30 z-40"
+      onClick={() => {
+        setShowEditModal(false);
+        setEditModalProjectName("");
+        setSelectedProjectIdForEdit(null);
+      }}
+    />
+
+    {/* Modal */}
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div
+        ref={editModalRef}
+        className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border relative"
+        onClick={(e) => e.stopPropagation()} 
+      >
+        <button
+          onClick={() => {
+            setShowEditModal(false);
+            setEditModalProjectName("");
+            setSelectedProjectIdForEdit(null);
+          }}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          aria-label="Close Edit Modal"
+        >
+          <X size={20} />
+        </button>
+        <h3 className="text-xl font-bold mb-6 text-center">Title this scheduler</h3>
+        <input
+          type="text"
+          placeholder="Project 1"
+          value={editModalProjectName}
+          onChange={(e) => setEditModalProjectName(e.target.value)}
+          className="w-full px-4 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-center text-lg"
+          autoFocus
+        />
+        <button
+          onClick={handleConfirmEdit}
+          className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </>
+)}
 
       {/* Delete Confirm Modal */}
       {showDeleteConfirmModal && (
