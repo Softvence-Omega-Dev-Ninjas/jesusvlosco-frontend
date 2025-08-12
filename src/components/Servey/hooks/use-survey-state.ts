@@ -2,11 +2,12 @@ import { useState,} from "react";
 
 import { defaultSurveySettings } from "../data/survey-data";
 import { SurveySettings } from "../types/survey";
-import { useCreateProjectMutation } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { useCreateSurveyMutation } from "@/store/api/admin/survey/servey";
+
 
 
 export const useSurveyState = () => {
-    const [createSurvey] = useCreateProjectMutation();
+    const [createSurvey] = useCreateSurveyMutation();
     const [currentStep, setCurrentStep] = useState(0);
     const [settings, setSettings] = useState<SurveySettings>(defaultSurveySettings);
 
@@ -56,8 +57,8 @@ export const useSurveyState = () => {
             questions:savedData,
             isForAll:isForAll,
             publishNow:settings.publishNow,
-            publishTime:settings.publishDate,
-            reminderTime:settings.reminderDate
+            publishTime:new Date(settings.publishDate + "T" + settings.publishTime).toISOString(),
+            reminderTime:new Date(settings.reminderDate + "T" + settings.reminderTime).toISOString()
         };
         console.log(surveyData)
         try {
