@@ -29,6 +29,8 @@ export default function PollPage() {
     setShowModal(false)
     navigate('/admin/poll-template')
   }
+
+
   const handlePublishPoll = () => {
     console.log('Publish Poll clicked', {
       pollTitle,
@@ -36,12 +38,16 @@ export default function PollPage() {
       questions,
     })
   }
+
+
   const handleCancelPoll = () => {
     setPollTitle('')
     setPollDescription('')
     setQuestions([{ id: 1, text: '', options: ['', '', '', ''] }])
     setShowModal(true)
   }
+
+
   const handleAddOption = (qIdx: number) => {
     const newQuestions = [...questions]
     newQuestions[qIdx].options.push('')
@@ -52,6 +58,7 @@ export default function PollPage() {
     newQuestions[qIdx].options.splice(oIdx, 1)
     setQuestions(newQuestions)
   }
+  
   const handleOptionChange = (qIdx: number, oIdx: number, value: string) => {
     const newQuestions = [...questions]
     newQuestions[qIdx].options[oIdx] = value

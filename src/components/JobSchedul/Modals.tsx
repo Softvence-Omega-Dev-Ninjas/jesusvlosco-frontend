@@ -361,13 +361,13 @@ refetch()
                     <button
                       key={p.id}
                       onClick={() => {
-                        setSelectedCreateProjectName(p.id); // show team name
+                        setSelectedCreateProjectName(p.name); // show team name
                         setSelectedCreateProjectId(p.id); // store id
                         setShowProjectDropdown(false);
                       }}
                       className="block w-full px-4 py-2 text-left hover:bg-gray-100"
                     >
-                      {p.id}
+                      {p.name}
                     </button>
                   ))}
                 </div>
