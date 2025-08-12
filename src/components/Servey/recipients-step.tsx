@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useMemo } from "react"
-import { Search } from "lucide-react"
 import { User } from "./types/survey"
 import PollRecipients from "@/pages/PollComponents/PollRecipients"
 

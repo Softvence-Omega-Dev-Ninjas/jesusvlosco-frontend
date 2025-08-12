@@ -35,7 +35,7 @@ export const PublishSurvey: React.FC = () => {
        return (
           <RecipientsStep
             users={mockUsers}
-            selectedUsers={settings.selectedUsers}
+            selectedUsers={settings.employees || []}
             onUserSelectionChange={handleUserSelectionChange}
           />
         )
