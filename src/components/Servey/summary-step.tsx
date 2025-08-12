@@ -1,18 +1,27 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { SurveySettings } from "./types/survey"
-
+import type React from "react";
+import { SurveySettings } from "./types/survey";
+import { useLocation } from "react-router-dom";
 
 interface SummaryStepProps {
-  settings: SurveySettings
-  onConfirm: () => void
+  settings: SurveySettings;
+  onConfirm: () => void;
 }
 
-export const SummaryStep: React.FC<SummaryStepProps> = ({ settings, onConfirm }) => {
+export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const flag = searchParams.get("flag");
+  console.log(flag);
+  // const navigate = useNavigate();
+
+  // The passed state
+  const pollData = location.state;
+  console.log("polllData", pollData);
   const formatDateTime = (date: string, time: string) => {
-    if (!date || !time) return ""
-    const dateObj = new Date(`${date}T${time}`)
+    if (!date || !time) return "";
+    const dateObj = new Date(`${date}T${time}`);
     return dateObj.toLocaleString("en-US", {
       year: "numeric",
       month: "2-digit",
@@ -20,9 +29,13 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings, onConfirm })
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-    })
-  }
+    });
+  };
 
+  const onConfirm = () => {
+    console.log(settings);
+    console.log("polllData", pollData);
+  };
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-0">
       <div className="bg-gray-100 rounded-lg p-6 sm:p-12 text-center">
@@ -34,9 +47,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings, onConfirm })
           <p>
             Asset will be published on{" "}
             <span className="font-medium">
-              {settings.publishNow
-                ? "now"
-                : formatDateTime(settings.publishDate, settings.publishTime) || "21/06/2025 at 16:40"}
+              {settings.publishNow ? "now" : formatDateTime(settings.publishDate, settings.publishTime) || "21/06/2025 at 16:40"}
             </span>
           </p>
 
@@ -66,5 +77,5 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings, onConfirm })
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
