@@ -30,7 +30,7 @@ const EducationForm = ({
   programOptions,
   institutionOptions,
   yearOptions,
-  handleSave,
+ 
   hanldeEducationInfo,
   handleCancel,
   isLoading

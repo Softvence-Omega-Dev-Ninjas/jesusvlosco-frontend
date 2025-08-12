@@ -13,9 +13,9 @@ interface ExperienceFormProps {
   jobTypeOptions: string[];
   setActiveTab: (tabId: string) => void;
   handleSave: (data: Experience[], tabId: string) => void;
-  handleExperience: (data: Experience[]) => void
+  handleExperience: (data: Experience[]) => void;
   handleCancel: (tabId: string) => void;
-  isLoading: boolean
+  isLoading: boolean;
 }
 
 const employmentTypes = [
@@ -31,11 +31,10 @@ const ExperienceForm = ({
   experienceList,
   handleExperienceChange,
   addExperience,
-  jobTypeOptions,
-  handleSave,
+
   handleCancel,
   isLoading,
-  handleExperience
+  handleExperience,
 }: ExperienceFormProps) => {
   const [dropdownStates, setDropdownStates] = useState<
     Record<number, { jobTypeOpen: boolean }>
@@ -60,7 +59,6 @@ const ExperienceForm = ({
   };
 
   const handleAddExperience = () => {
-    
     const newId = Math.max(...experienceList.map((exp) => exp.id)) + 1;
     setDropdownStates((prev) => ({
       ...prev,
@@ -229,6 +227,7 @@ const ExperienceForm = ({
                         e.target.checked
                       );
                       if (e.target.checked) {
+                    // console.log({})
                         handleExperienceChange(experience.id, "endDate", "");
                       }
                     }}
@@ -279,15 +278,14 @@ const ExperienceForm = ({
       </div>
       <div className="flex justify-end gap-4 mt-8">
         <button
-
           onClick={() => {
-            handleExperience(experienceList)
+            handleExperience(experienceList);
             // handleSave(experienceList, "experience")
           }}
           disabled={isLoading}
           className="cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed px-6 py-2 bg-[#4E53B1] text-white rounded-lg  transition-colors"
         >
-          {isLoading ? 'Saving...' : "Save"}
+          {isLoading ? "Saving..." : "Save"}
         </button>
         <button
           onClick={() => handleCancel("experience")}

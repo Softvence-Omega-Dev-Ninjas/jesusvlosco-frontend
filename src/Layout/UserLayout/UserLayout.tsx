@@ -32,7 +32,7 @@ export const UserLayout = () => {
     const showTabButtons = !location.pathname.includes('/user-profile');
 
     return (
-        <div className="md:p-6 mx-3">
+        <div className="md:p-6 mx-3 ">
             {/* The h1 was 'Communication' previously, assuming you want 'User Management' here */}
             <h1 className="text-3xl font-bold mb-6">User Management</h1>
 
@@ -44,22 +44,22 @@ export const UserLayout = () => {
                         <button
                             onClick={() => setActiveTab('user')} // Correctly set to 'user'
                             className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'user' // Condition is now 'user'
-                                ? 'bg-blue-600 text-white shadow-md' // Using blue-600 as per your previous example
+                                ? 'bg-[#4E53B1] text-white shadow-md' // Using blue-600 as per your previous example
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                 }`}
                         >
-                            User
+                            Employee
                         </button>
 
                         {/* Admin Tab Button */}
                         <button
                             onClick={() => setActiveTab('admin')} // Correctly set to 'admin'
                             className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'admin' // Condition is now 'admin'
-                                ? 'bg-blue-600 text-white shadow-md' // Using blue-600 as per your previous example
+                                ? 'bg-[#4E53B1] text-white shadow-md' // Using blue-600 as per your previous example
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                 }`}
                         >
-                            Admin
+                            Admins
                         </button>
                     </div>
 

@@ -5,7 +5,11 @@ const userApi = baseApi.injectEndpoints({
     // Get Api
 
     getAllUser: build.query({
-      query: () => `/admin/user`,
+      // query: () => `/admin/user`,
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams(params).toString();
+        return `/admin/user${queryParams ? `?${queryParams}` : ""}`;
+      },
       providesTags: ["ADMIN_USER"],
     }),
     getUserById: build.query({

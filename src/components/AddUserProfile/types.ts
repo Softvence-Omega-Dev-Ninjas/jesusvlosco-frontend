@@ -49,4 +49,5 @@ export interface Tab {
   label: string;
 }
 
-export type TRole = "SUPER_ADMIN" | "ADMIN" | "USER" | "EMPLOYEE" | "MANAGER";
+export type TRole =  "ADMIN" |  "EMPLOYEE" ;
+// export type TRole = "SUPER_ADMIN" | "ADMIN" | "USER" | "EMPLOYEE" | "MANAGER";

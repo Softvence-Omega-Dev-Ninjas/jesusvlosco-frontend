@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
 import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
+import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
 
 interface Activity {
   date: string;
@@ -21,6 +22,8 @@ interface Activity {
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const {data} = useGetAllRecognationQuery(null)
+  console.log({data})
   const [fromDate, setFromDate] = useState({
     day: "01",
     month: "May",
