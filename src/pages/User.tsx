@@ -11,6 +11,7 @@ import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { PiUserCircleLight } from "react-icons/pi";
+import { formatDateToMDY } from "@/utils/formatDateToMDY";
 
 // Define the type for a User
 interface User {
@@ -487,32 +488,7 @@ const User: React.FC = () => {
 
   type DateOverride = { year: number; month: number; day: number } | null;
 
-  function formatDateToMDY(
-    dateInput: string | number | Date,
-    override: DateOverride = null
-  ) {
-    const original = new Date(dateInput);
-
-    const finalDate = override
-      ? new Date(
-          Date.UTC(
-            override.year,
-            override.month - 1,
-            override.day,
-            original.getUTCHours(),
-            original.getUTCMinutes(),
-            original.getUTCSeconds()
-          )
-        )
-      : original;
-
-    const month = finalDate.getUTCMonth() + 1;
-    const day = finalDate.getUTCDate();
-    const year = String(finalDate.getUTCFullYear()).slice(-2);
-
-    return `${month}/${day}/${year}`;
-  }
-
+ 
   console.log({ team: searchTerm });
   return (
     <div

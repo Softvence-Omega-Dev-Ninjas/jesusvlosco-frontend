@@ -4,10 +4,12 @@ import light from "@/assets/light.png";
 import light2 from "@/assets/light2.png";
 
 import { useState } from "react";
-import { Calendar, ThumbsUp, MessagesSquare } from "lucide-react";
+import { Calendar, ThumbsUp, MessagesSquare, LoaderCircle } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
 import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
 import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
+import { formatDateToMDY } from "@/utils/formatDateToMDY";
+import { PiUserCircleLight } from "react-icons/pi";
 
 interface Activity {
   date: string;
@@ -22,8 +24,8 @@ interface Activity {
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const {data} = useGetAllRecognationQuery(null)
-  console.log({data})
+  const { data, isLoading } = useGetAllRecognationQuery(null);
+  console.log({ data });
   const [fromDate, setFromDate] = useState({
     day: "01",
     month: "May",
@@ -171,14 +173,20 @@ export default function RecognitionTable() {
         {/* Right side - Action buttons */}
         <div className="flex items-center  gap-3 mt-4 md:mt-0">
           <button
-          onClick={() => { window.location.href = "/admin/send-recognition"; }}
-           className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors">
-            Send recognition 
+            onClick={() => {
+              window.location.href = "/admin/send-recognition";
+            }}
+            className="px-4 cursor-pointer  bg-[#4E53B1] text-white text-sm py-3 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Send recognition
           </button>
           <button
-           onClick={() => { window.location.href = "/admin/badge-library"; }}
-           className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors">
-            Badge library 
+            onClick={() => {
+              window.location.href = "/admin/badge-library";
+            }}
+            className="px-4 py-3 cursor-pointer bg-gray-100 text-gray-700 text-sm  rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Badge library
           </button>
         </div>
       </div>
@@ -220,107 +228,134 @@ export default function RecognitionTable() {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {activities.map((activity, index) => (
-                <tr
-                  key={index}
-                  className="border-b py-4 border-[#C5C5C5] hover:bg-gray-50"
-                >
-                  {/* Date Column */}
-                  <td className="p-4 text-gray-600 text-sm">{activity?.date}</td>
+            {isLoading ? (
+              <div className=" absolute inset-0 opacity-80 w-full flex justify-center items-center" ><LoaderCircle size={40} className="animate-spin"/></div>
+            ) : (
+              <tbody>
+                {data?.data?.data?.map((activity: any, index: number) => (
+                  <tr
+                    key={index}
+                    className="border-b py-4 border-[#C5C5C5] hover:bg-gray-50"
+                  >
+                    {/* Date Column */}
+                    <td className="p-4 text-gray-600 text-sm">
+                      {formatDateToMDY(activity?.createdAt!)}
+                    </td>
 
-                  {/* Sent to Column */}
-                  <td className="p-4 ">
-                    <div className="flex items-center justify-center gap-3">
-                      {activity.sentTo.length === 1 ? (
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={
-                              activity.sentTo[0].avatar || "/placeholder.svg"
-                            }
-                            alt={activity.sentTo[0].name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <span className="text-sm  text-[#4E53B1]">
-                            {activity.sentTo[0].name}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center">
-                          <div className="flex -space-x-2">
-                            {activity.sentTo
-                              .slice(0, 3)
-                              .map((user, userIndex) => (
-                                <img
-                                  key={userIndex}
-                                  src={user.avatar || "/placeholder.svg"}
-                                  alt={user.name}
-                                  className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                                />
-                              ))}
-                            {activity.sentTo.length > 3 && (
-                              <div className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center">
-                                <span className="text-gray-600 text-xs ">
-                                  +{activity.sentTo.length - 3}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Type Column */}
-                  <td className="p-4">
-                    <div className="flex items-center justify-center gap-2">
-                      {typeof activity.typeIcon === "string" ? (
-                        <img src={activity.typeIcon} alt="" />
-                      ) : (
-                        activity.typeIcon
-                      )}
-                      <span className="text-sm text-gray-700 ml-2">
-                        {activity.type}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Message Column */}
-                  <td className="p-4 text-gray-600 text-sm text-center">
-                    {activity.message}
-                  </td>
-
-                  {/* Viewer Column */}
-                  <td className="p-4 text-gray-600 text-center text-sm">
-                    {activity.viewer}
-                  </td>
-
-                  {/* Reaction Column */}
-                  <td className="p-4 text-end">
-                    <div className="flex items-center gap-1 justify-end">
-                      <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-                        <ThumbsUp className="w-4 h-4 cursor-pointer text-gray-400 hover:text-blue-500" />
-                      </button>
-                      <span className="text-[#C5C5C5]">|</span>
-                      <button
-                        className="p-1 hover:bg-gray-100 rounded transition-colors relative"
-                        onClick={openReactionModal}
-                      >
-                        <MessagesSquare className="w-4 h-4 cursor-pointer text-black hover:text-blue-500" />
-                        {activity.messageCount > 0 && (
-                          <div className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#D9F0E4] rounded-full flex items-center justify-center">
-                            <span className="text-[#1EBD66] text-xs font-medium leading-none px-1">
-                              {activity.messageCount}
+                    {/* Sent to Column */}
+                    <td className="p-4 ">
+                      <div className="flex items-center justify-center gap-3">
+                        {activity?.recognitionUsers.length === 1 ? (
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={
+                                activity.recognitionUsers[0]?.user?.profile
+                                  ?.profileUrl || "/placeholder.svg"
+                              }
+                              alt={
+                                activity.recognitionUsers[0]?.user?.profile
+                                  ?.firstName
+                              }
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                            <span className="text-sm  text-[#4E53B1]">
+                              {activity.recognitionUsers[0]?.user?.profile
+                                ?.firstName + " " + 
+                                activity.recognitionUsers[0]?.user?.profile
+                                  ?.lastName}
                             </span>
                           </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <div className="flex -space-x-2">
+                              {activity?.recognitionUsers
+                                .slice(0, 3)
+                                .map((user: any, userIndex: number) => (
+                                  <div>
+                                    {user?.profile?.profileUrl ? (
+                                      <img
+                                        key={userIndex}
+                                        src={
+                                          user?.profile?.profileUrl ||
+                                          "/placeholder.svg"
+                                        }
+                                        alt={user?.profile?.firstName}
+                                        className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                                      />
+                                    ) : (
+                                      <PiUserCircleLight size={36} />
+                                    )}
+                                  </div>
+                                ))}
+                              {activity.recognitionUsers.length > 3 && (
+                                <div className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center">
+                                  <span className="text-gray-600 text-xs ">
+                                    +{activity.recognitionUsers.length - 3}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         )}
-                      </button>
-                    </div>
-                  </td>
-                  {/* {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />} */}
-                </tr>
-              ))}
-            </tbody>
+                      </div>
+                    </td>
+
+                    {/* Type Column */}
+                    <td className="p-4">
+                      <div className="flex items-center justify-center gap-2">
+                        {typeof activity?.badge?.iconImage === "string" ? (
+                          <img
+                            src={activity?.badge?.iconImage}
+                            alt=""
+                            className="h-8 w-6"
+                          />
+                        ) : (
+                          activity?.badge?.title
+                        )}
+                        <span className="text-sm text-gray-700 ml-2">
+                          {activity.badge?.category}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Message Column */}
+                    <td className="p-4 text-gray-600 text-sm text-center">
+                      {activity?.message}
+                    </td>
+
+                    {/* Viewer Column */}
+                    <td className="p-4 text-gray-600 text-center text-sm">
+                      {activity?.visibility}
+                    </td>
+
+                    {/* Reaction Column */}
+                    <td className="p-4 text-end">
+                      <div className="flex items-center gap-1 justify-end">
+                        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+                          <ThumbsUp className="w-4 h-4 cursor-pointer text-gray-400 hover:text-blue-500" />
+                        </button>
+                        <span className="text-[#C5C5C5]">|</span>
+                        <button
+                          className="p-1 hover:bg-gray-100 rounded transition-colors relative"
+                          onClick={openReactionModal}
+                        >
+                          <MessagesSquare className="w-4 h-4 cursor-pointer text-black hover:text-blue-500" />
+                          {activity.messageCount > 0 && (
+                            <div className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#D9F0E4] rounded-full flex items-center justify-center">
+                              <span className="text-[#1EBD66] text-xs font-medium leading-none px-1">
+                                {activity.messageCount}
+                              </span>
+                            </div>
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    {/* {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />} */}
+                  </tr>
+                ))}
+             
+              </tbody>
+            )}
           </table>
         </div>
 
@@ -336,7 +371,9 @@ export default function RecognitionTable() {
           isDateInRange={isDateInRange}
         />
         {/* reaction modal  */}
-        {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />}
+        {isReactionModalOpen && (
+          <SendReactionModal onClose={closeReactionModal} />
+        )}
       </div>
     </div>
   );
