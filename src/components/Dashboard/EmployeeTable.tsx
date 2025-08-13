@@ -40,6 +40,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
                     .join("")}
                   imageUrl={employee.avatar}
                   size="lg"
+                  className="flex-shrink-0 h-10 w-10"
                 />
                 <div>
                   <div className="text-[#4E53B1] text-base font-semibold">

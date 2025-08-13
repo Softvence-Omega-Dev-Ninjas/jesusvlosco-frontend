@@ -1,9 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetAllAssignedUsersQuery } from "@/store/api/admin/dashboard/getAllAssignedUsers";
+import {
+  useApproveTimeOffRequestMutation,
+  useDeclineTimeOffRequestMutation,
+  useGetAllTimeOffRequestsQuery,
+} from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import React from "react";
 import { Chat } from "../components/Dashboard/Chat";
 import {
   Achievement,
   ChatMessage,
-  Employee,
   Recognition,
 } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
@@ -16,103 +22,181 @@ import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
 
 const Dashboard: React.FC = () => {
+  const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
+
+  const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
+
+  //assigned employee data call
+  const { data: assignedUsersdata } = useGetAllAssignedUsersQuery({
+    page: 1,
+    limit: 10,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  const employees = React.useMemo(() => {
+    if (!assignedUsersdata) return [];
+
+    return assignedUsersdata.data.map((user: any) => {
+      const name =
+        `${user.profile?.firstName || ""} ${
+          user.profile?.lastName || ""
+        }`.trim() || "Unknown";
+      const role =
+        user.profile?.jobTitle?.replace(/_/g, " ") || user.role || "Unknown";
+      const avatar =
+        user.profile?.profileUrl ||
+        `https://i.pravatar.cc/40?img=${Math.random()}`;
+      const project =
+        user.projects && user.projects.length > 0
+          ? user.projects[0].title
+          : "No Project";
+      const shift =
+        user.shift && user.shift.length > 0 ? user.shift[0] : "Morning";
+
+      const rawDate = user.createdAt || new Date().toISOString();
+      const dateObj = new Date(rawDate);
+      const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(
+        dateObj.getMonth() + 1
+      ).padStart(2, "0")}/${dateObj.getFullYear()}`;
+
+      const time = "9:00am-5:00pm";
+
+      return {
+        id: user.id,
+        name,
+        role,
+        avatar,
+        project,
+        shift,
+        date,
+        time,
+      };
+    });
+  }, [assignedUsersdata]);
+
+
+
+  //time off data call
+  const { data, refetch } = useGetAllTimeOffRequestsQuery({
+    page: 1,
+    limit: 10,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  // Map backend data to UI-friendly shape
+  const timeOffRequests =
+    data?.data?.map((req: any) => ({
+      id: req.id,
+      name: req.user?.profile?.firstName || "Unknown User", // or backend name field
+      avatar:
+        req.user?.profile?.profileUrl ||
+        `https://i.pravatar.cc/40?img=${Math.random()}`,
+      type: req.reason,
+      date: new Date(req.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      status: req.status?.toLowerCase(),
+    })) || [];
+
+  const handleApprove = (id: string, adminNote: string) => {
+    approveTimeOffRequest({ id, adminNote })
+      .unwrap()
+      .then(() => {
+        console.log("Time off request approved:", id, adminNote);
+        refetch();
+      })
+      .catch((err) => {
+        console.error("Failed to approve time off request:", err);
+      });
+  };
+
+  const handleDecline = async (
+    id: string,
+    adminNote: string,
+    status: string
+  ) => {
+    try {
+      const result = await declineTimeOffRequest({
+        id,
+        adminNote,
+        status,
+      }).then(() => {
+        console.log("Time off request declined:", id, adminNote, status);
+        refetch();
+      });
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // Sample data
-  const employees: Employee[] = [
-    {
-      id: "1",
-      name: "Jane Cooper",
-      role: "Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      project: "Metro Shopping Center",
-      shift: "Morning",
-      date: "22/05/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "2",
-      name: "Robert Fox",
-      role: "Construction Site Manager",
-      avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-      project: "Riverside Apartments",
-      shift: "Night",
-      date: "07/02/2025",
-      time: "9:00am-6:00pm",
-    },
-    {
-      id: "3",
-      name: "Esther Howard",
-      role: "Assistant Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-      project: "City Bridge Renovations",
-      shift: "Night",
-      date: "22/06/2025",
-      time: "9:00am-6:00pm",
-    },
-    {
-      id: "4",
-      name: "Desirae Botosh",
-      role: "Superintendent",
-      avatar: "https://randomuser.me/api/portraits/women/4.jpg",
-      project: "Tech Campus Phase 2",
-      shift: "Morning",
-      date: "02/02/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "5",
-      name: "Marley Stanton",
-      role: "Coordinator",
-      avatar: "https://randomuser.me/api/portraits/men/5.jpg",
-      project: "Golden Hills Estates",
-      shift: "Morning",
-      date: "02/02/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "6",
-      name: "Jecy Cooper",
-      role: "Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-      project: "Metro Shopping Center",
-      shift: "Morning",
-      date: "22/05/2025",
-      time: "9:00am-5:00pm",
-    },
-  ];
-
-  const timeOffRequests = [
-    {
-      id: "1",
-      name: "Jane Cooper",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      type: "Doctor's appointment",
-      date: "Mar 25, 2025",
-      status: "pending",
-    },
-    {
-      id: "2",
-      name: "Jenny Wilson",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      type: "Sick leave",
-      date: "Mar 30, 2025",
-      status: "approved",
-    },
-    {
-      id: "3",
-      name: "Kristin Watson",
-      avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-      type: "Personal day",
-      date: "Jun 02, 2025",
-      status: "declined",
-    },
-  ];
-  const handleApprove = (id: string) => {
-    console.log("Dashboard approved request id:", id);
-  };
-
-  const handleDecline = (id: string) => {
-    console.log("Dashboard declined request id:", id);
-  };
+  // const employees: Employee[] = [
+  //   {
+  //     id: "1",
+  //     name: "Jane Cooper",
+  //     role: "Project Manager",
+  //     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+  //     project: "Metro Shopping Center",
+  //     shift: "Morning",
+  //     date: "22/05/2025",
+  //     time: "9:00am-5:00pm",
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Robert Fox",
+  //     role: "Construction Site Manager",
+  //     avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+  //     project: "Riverside Apartments",
+  //     shift: "Night",
+  //     date: "07/02/2025",
+  //     time: "9:00am-6:00pm",
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Esther Howard",
+  //     role: "Assistant Project Manager",
+  //     avatar: "https://randomuser.me/api/portraits/women/3.jpg",
+  //     project: "City Bridge Renovations",
+  //     shift: "Night",
+  //     date: "22/06/2025",
+  //     time: "9:00am-6:00pm",
+  //   },
+  //   {
+  //     id: "4",
+  //     name: "Desirae Botosh",
+  //     role: "Superintendent",
+  //     avatar: "https://randomuser.me/api/portraits/women/4.jpg",
+  //     project: "Tech Campus Phase 2",
+  //     shift: "Morning",
+  //     date: "02/02/2025",
+  //     time: "9:00am-5:00pm",
+  //   },
+  //   {
+  //     id: "5",
+  //     name: "Marley Stanton",
+  //     role: "Coordinator",
+  //     avatar: "https://randomuser.me/api/portraits/men/5.jpg",
+  //     project: "Golden Hills Estates",
+  //     shift: "Morning",
+  //     date: "02/02/2025",
+  //     time: "9:00am-5:00pm",
+  //   },
+  //   {
+  //     id: "6",
+  //     name: "Jecy Cooper",
+  //     role: "Project Manager",
+  //     avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+  //     project: "Metro Shopping Center",
+  //     shift: "Morning",
+  //     date: "22/05/2025",
+  //     time: "9:00am-5:00pm",
+  //   },
+  // ];
 
   const chatMessages: ChatMessage[] = [
     {

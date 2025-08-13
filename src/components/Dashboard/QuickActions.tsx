@@ -18,10 +18,13 @@ export const QuickActions: React.FC = () => {
         </Link>
 
         {/* Add a task button */}
-        <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200">
+        <Link
+          to={"/admin/schedule/shiftschedule"}
+          className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-white border border-gray-200 whitespace-nowrap rounded-lg transition-colors duration-200"
+        >
           <TaskIcon />
           <span className="text-[#4E53B1] font-medium">Add a task</span>
-        </button>
+        </Link>
 
         {/* Send an update button */}
         <Link
@@ -33,10 +36,13 @@ export const QuickActions: React.FC = () => {
         </Link>
 
         {/* Assign button - highlighted */}
-        <button className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-[#4E53B1] text-white whitespace-nowrap rounded-lg transition-colors duration-200">
+        <Link
+          to={"/admin/schedule/shiftschedule"}
+          className="flex items-center justify-center gap-3 px-6 py-4 cursor-pointer bg-[#4E53B1] text-white whitespace-nowrap rounded-lg transition-colors duration-200"
+        >
           <AssignIcon />
           <span className="font-medium">Assign</span>
-        </button>
+        </Link>
       </div>
     </div>
   );
