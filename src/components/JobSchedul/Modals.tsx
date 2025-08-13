@@ -99,6 +99,9 @@ const Modals: React.FC<ModalsProps> = ({
 
   // Create Project Mutation hook
   const [createProject, { isLoading, isError, error }] = useCreateProjectMutation();
+
+  console.log(createProject)
+  
   const{data:allProjects, refetch}=useGetAllProjectsQuery(undefined)
   console.log(allProjects)
 
