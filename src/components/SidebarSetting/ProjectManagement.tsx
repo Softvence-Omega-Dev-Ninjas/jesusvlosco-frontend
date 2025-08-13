@@ -1,6 +1,10 @@
 import { useGetProjectManagementDataQuery } from "@/store/api/admin/settings/getProjectManagementApi";
-import { MapPinIcon, PlusIcon } from "lucide-react";
+import {  PlusIcon } from "lucide-react";
 import React, { useState, useEffect } from "react";
+
+import deleteIcon from '../../assets/delete.png';
+import distanceIcon from '../../assets/distance (1).png';
+import arrowIcon from '../../assets/arrow.png';
 
 interface Project {
   id: string;
@@ -89,44 +93,51 @@ const ProjectManagement: React.FC = () => {
               key={project.id}
               className="flex flex-col md:flex-row items-center"
             >
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-[#484848]">
-                <div>
-                  <label
-                    htmlFor={`project-name-${project.id}`}
-                    className="block text-[#484848] text-sm font-semibold mb-1"
-                  >
-                    Project
-                  </label>
-                  <select
-                    id={`project-name-${project.id}`}
-                    value={project.projectName}
-                    onChange={(e) =>
-                      handleProjectChange(
-                        project.id,
-                        "projectName",
-                        e.target.value
-                      )
-                    }
-                    className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.projectName}>
-                        {p.projectName}
-                      </option>
-                    ))}
-                  </select>
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 w-full text-[#484848]">
+                {/* Project field - 2 columns */}
+                <div className="md:col-span-2">
+  <label
+    htmlFor={`project-name-${project.id}`}
+    className="block text-[#484848] text-sm font-semibold mb-1"
+  >
+    Project
+  </label>
 
-                  <div className="flex items-center text-[#484848] text-sm mt-1">
-                    <MapPinIcon className="h-4 w-4 mr-1 text-gray-500" />
-                    <span>{project.projectLocation}</span>{" "}
-                    {/* This is already mapped */}
-                  </div>
-                </div>
+  <div className="relative w-full">
+    <select
+      id={`project-name-${project.id}`}
+      value={project.projectName}
+      onChange={(e) =>
+        handleProjectChange(project.id, "projectName", e.target.value)
+      }
+      className="appearance-none border border-gray-300 rounded-md p-2 w-full pr-10 focus:ring-blue-500 focus:border-blue-500"
+    >
+      {projects.map((p) => (
+        <option key={p.id} value={p.projectName}>
+          {p.projectName}
+        </option>
+      ))}
+    </select>
 
-                <div>
+    <img
+      className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none "
+      src={arrowIcon}
+      alt="Arrow"
+    />
+  </div>
+
+  <div className="flex items-center text-[#484848] gap-2 mt-2">
+    <img src={distanceIcon} alt="distance"  />
+    <span>{project.projectLocation}</span>
+  </div>
+</div>
+
+
+                {/* Manager field - 3 columns */}
+                <div className="md:col-span-3 flex items-center gap-2">
                   <label
                     htmlFor={`manager-${project.id}`}
-                    className="block text-[#484848] text-sm font-semibold mb-1"
+                    className="text-[#484848] text-sm font-semibold mx-6"
                   >
                     Manager
                   </label>
@@ -142,30 +153,17 @@ const ProjectManagement: React.FC = () => {
                       )
                     }
                     placeholder="Type here"
-                    className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 rounded-md p-2 flex-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <button
                 onClick={() => handleDeleteProject(project.id)}
-                className="p-2 text-red-500 hover:text-red-700 cursor-pointer"
+                className="pl-4 "
                 aria-label="Delete project"
               >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
+                 <img src={deleteIcon} alt="" />
               </button>
             </div>
           ))}
