@@ -1,26 +1,40 @@
 import { EllipsisVertical } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chat } from "./ChatWindow";
+import { useAppSelector } from "@/hooks/useRedux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
+import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
+import { initPrivateMessageListener } from "@/utils/socket";
 
 const ChatConversation = ({
   selectedChat,
+  selectedPrivateChatInfo,
   setShowChatInfo,
   setShowDeleteModal,
   setShowMemberModal,
 }: {
   selectedChat: Chat;
+  selectedPrivateChatInfo: Chat;
   setShowChatInfo: (arg0: boolean) => void;
   setShowDeleteModal: (arg0: boolean) => void;
   setShowMemberModal: (arg0: boolean) => void;
 }) => {
+  const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
 
-  // Handle sending a new message
+  const [sendMessage] = useSendPrivateMessageMutation();
+
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
-    setMessageInput("");
+    const userId = me?.id || "";
 
-    console.log(`Sending message to ${selectedChat.name}: ${messageInput}`);
+    sendMessage({
+      recipientId: selectedPrivateChatInfo.participant.id,
+      messageInput,
+      userId,
+    });
+
+    setMessageInput("");
   };
 
   return (
@@ -29,22 +43,27 @@ const ChatConversation = ({
       <div className="border-b border-gray-200 p-4 flex items-center justify-between">
         <div className="flex items-center">
           <div className="relative">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-white font-medium text-sm">
-                {selectedChat.initials}
-              </span>
-            </div>
-            {selectedChat.online && (
+            <img
+              src={
+                selectedChat?.avatar ||
+                "https://avatar.iran.liara.run/public/boy?username=Ash"
+              }
+              alt={selectedChat?.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            {/* {selectedChat.online && (
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )}
+            )} */}
           </div>
           <div className="ml-3">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {selectedChat.name}
+            <h2 className="text-lg font-semibold text-gray-900 capitalize">
+              {selectedPrivateChatInfo?.participant?.profile?.firstName +
+                " " +
+                selectedPrivateChatInfo?.participant?.profile?.lastName}
             </h2>
-            <p className="text-sm text-green-600">
+            {/* <p className="text-sm text-green-600">
               {selectedChat.online ? "Online" : "Offline"}
-            </p>
+            </p> */}
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -94,29 +113,38 @@ const ChatConversation = ({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {selectedChat.messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex items-start space-x-3 ${
-              message.sender === "me" ? "flex-row-reverse space-x-reverse" : ""
-            }`}
-          >
-            <img
-              src={message.avatar || "/placeholder.svg"}
-              alt="Avatar"
-              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-            />
+        {selectedChat?.messages?.map((message) => {
+          const isMe = message.senderId === me?.id; // currentUserId from auth
+          // console.log(isMe, "isMe");
+          const avatar =
+            message.sender?.profile?.profileUrl ||
+            "https://avatar.iran.liara.run/public/boy?username=Ash";
+
+          return (
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                message.sender === "me"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-900"
+              key={message.id}
+              className={`flex items-start space-x-3 ${
+                isMe ? "flex-row-reverse space-x-reverse" : ""
               }`}
             >
-              <p className="text-sm">{message.text}</p>
+              {/* Avatar */}
+              <img
+                src={avatar}
+                alt={`${message.sender?.profile?.firstName} avatar`}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              />
+
+              {/* Message bubble */}
+              <div
+                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                  isMe ? "bg-primary text-white" : "bg-gray-100 text-gray-900"
+                }`}
+              >
+                <p className="text-sm">{message.content}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Message Input */}
