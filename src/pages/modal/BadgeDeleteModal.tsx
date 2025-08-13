@@ -1,5 +1,5 @@
 import { useDeleteBadgeMutation } from "@/store/api/admin/recognation/recognationApi";
-import { Cross, CrossIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 interface IProp {

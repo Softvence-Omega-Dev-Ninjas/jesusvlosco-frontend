@@ -1,7 +1,3 @@
-import type React from "react";
-import u1 from "@/assets/u1.png";
-import light from "@/assets/light.png";
-import light2 from "@/assets/light2.png";
 
 import { useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare, LoaderCircle } from "lucide-react";
@@ -11,16 +7,7 @@ import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recogna
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
 import { PiUserCircleLight } from "react-icons/pi";
 
-interface Activity {
-  date: string;
-  sentTo: Array<{ name: string; avatar: string }>;
-  type: string;
-  typeIcon: React.ReactNode;
-  message: string;
-  viewer: string;
-  hasReactions: boolean;
-  messageCount: number;
-}
+
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -38,93 +25,6 @@ export default function RecognitionTable() {
   });
   const [selectingFrom, setSelectingFrom] = useState(true);
 
-  const activities: Activity[] = [
-    {
-      date: "6/19/14",
-      sentTo: [
-        { name: "User 1", avatar: u1 },
-        { name: "User 2", avatar: u1 },
-        { name: "User 3", avatar: u1 },
-        { name: "User 4", avatar: u1 },
-      ],
-      type: "Team player",
-      typeIcon: light2,
-      message: "Well-done team",
-      viewer: "All",
-      hasReactions: true,
-      messageCount: 0,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-    {
-      date: "9/18/16",
-      sentTo: [{ name: "Floyd Miles", avatar: u1 }],
-      type: "Creative",
-      typeIcon: light,
-      message: "-----",
-      viewer: "Team A",
-      hasReactions: true,
-      messageCount: 1,
-    },
-  ];
 
   const handleDateClick = (day: number) => {
     const dayStr = String(day).padStart(2, "0");

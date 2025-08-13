@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Settings, ChevronDown, Menu } from 'lucide-react';
+import { Search, Bell, Settings, Menu } from 'lucide-react';
 import UserDropdown from './User/UserDropdown';
 
 interface HeaderProps {

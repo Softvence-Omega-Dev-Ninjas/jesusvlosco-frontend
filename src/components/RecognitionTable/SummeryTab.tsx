@@ -16,7 +16,7 @@ const SummeryTab = ({
   formData,
   selectedBadge,
   selectedUsersData,
-  handleRecognation,
+
 }: IProp) => {
   return (
     <div className=" ">
@@ -41,7 +41,7 @@ const SummeryTab = ({
 
             {/* Right User List */}
             <div className="w-full md:w-1/3 space-y-4 flex flex-col items-center justify-center md:items-start">
-              {selectedUsersData?.map((user: IUser, i: number) => (
+              {selectedUsersData?.map((user: IUser) => (
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-10 w-10">
                     {user?.profile?.profileUrl ? (

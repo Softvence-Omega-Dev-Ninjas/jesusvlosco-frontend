@@ -1,11 +1,4 @@
-import bage1 from "@/assets/bage-1.png";
-import bage2 from "@/assets/bage2.png";
-import bage3 from "@/assets/bage3.png";
-import bage4 from "@/assets/bage4.png";
-import bage5 from "@/assets/bage5.png";
-import bage6 from "@/assets/bage6.png";
-import bage7 from "@/assets/bage7.png";
-import bage8 from "@/assets/bage8.png";
+
 import {
   useAddBadgeMutation,
   useGetAllBadgeQuery,
@@ -13,24 +6,6 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-const badgeImages = [
-  { src: bage1, alt: "Megaphone", color: "bg-pink-200" },
-  { src: bage2, alt: "Lightbulb", color: "bg-yellow-200" },
-  { src: bage3, alt: "Target", color: "bg-blue-200" },
-  { src: bage4, alt: "Lightning", color: "bg-orange-200" },
-  { src: bage5, alt: "Trophy", color: "bg-yellow-200" },
-  { src: bage6, alt: "Gold Medal", color: "bg-yellow-200" },
-  { src: bage7, alt: "Star", color: "bg-purple-200" },
-  { src: bage8, alt: "Medal", color: "bg-yellow-200" },
-  { src: bage1, alt: "Megaphone", color: "bg-pink-200" },
-  { src: bage2, alt: "Lightbulb", color: "bg-yellow-200" },
-  { src: bage3, alt: "Target", color: "bg-blue-200" },
-  { src: bage4, alt: "Lightning", color: "bg-orange-200" },
-  { src: bage5, alt: "Trophy", color: "bg-yellow-200" },
-  { src: bage6, alt: "Gold Medal", color: "bg-yellow-200" },
-  { src: bage7, alt: "Star", color: "bg-purple-200" },
-  { src: bage8, alt: "Medal", color: "bg-yellow-200" },
-];
 
 const badgeCategories = [
   { value: "MILESTONE", label: "Milestone" },

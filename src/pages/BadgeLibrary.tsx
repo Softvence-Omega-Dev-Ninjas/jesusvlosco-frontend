@@ -1,14 +1,7 @@
 import type React from "react";
-import Swal from "sweetalert2";
+
 import { useState, useRef, useEffect } from "react";
-import bage1 from "@/assets/bage-1.png";
-import bage2 from "@/assets/bage2.png";
-import bage3 from "@/assets/bage3.png";
-import bage4 from "@/assets/bage4.png";
-import bage5 from "@/assets/bage5.png";
-import bage6 from "@/assets/bage6.png";
-import bage7 from "@/assets/bage7.png";
-import bage8 from "@/assets/bage8.png";
+
 import { ListFilter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,56 +10,6 @@ import {
 } from "@/store/api/admin/recognation/recognationApi";
 import BadgeDeleteModal from "./modal/BadgeDeleteModal";
 
-const achievementCards = [
-  {
-    id: "promotion",
-    name: "Promotion",
-    icon: bage1,
-    bgColor: "bg-pink-100",
-  },
-  {
-    id: "creative",
-    name: "Creative",
-    icon: bage2,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: "well-done",
-    name: "Well-done!",
-    icon: bage3,
-    bgColor: "bg-blue-100",
-  },
-  {
-    id: "happy-holiday",
-    name: "Happy holiday",
-    icon: bage4,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: "top-performer",
-    name: "Top performer",
-    icon: bage5,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: "creative-star",
-    name: "Creative",
-    icon: bage6,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: "outstanding",
-    name: "Outstanding services",
-    icon: bage7,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: "employee-month",
-    name: "Employee of the month",
-    icon: bage8,
-    bgColor: "bg-purple-100",
-  },
-];
 
 interface DropdownMenuProps {
   isOpen: boolean;
@@ -233,7 +176,7 @@ export function SectionGrid({ cards }: SectionGridProps) {
 
 // main component satrt here
 export default function BadgeLibrary() {
-  const { data, isLoading } = useGetAllBadgeQuery(null);
+  const { data } = useGetAllBadgeQuery(null);
   const groupedBadges = (data?.data ?? []).reduce((acc: any, badge: any) => {
     if (!acc[badge.category]) {
       acc[badge.category] = [];
