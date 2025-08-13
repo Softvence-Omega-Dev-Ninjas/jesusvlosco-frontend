@@ -23,7 +23,6 @@ import user6 from "../assets/user6.png";
 import { Link, useParams } from "react-router-dom";
 import { useGetUsersQuery } from "@/store/api/admin/shift-sheduling/getAllUser";
 
-
 interface Employee {
   id: string;
   profileUrl?: string;
@@ -53,7 +52,7 @@ interface ShiftNotification {
 }
 
 const OverviewProject = () => {
-  const projectId  = useParams().id
+  const projectId = useParams().id;
 
   const [timeOffRequests] = useState<TimeOffRequest[]>([
     {
@@ -181,53 +180,68 @@ const OverviewProject = () => {
   // Helper function to get job title display name
   const getJobTitleDisplay = (jobTitle: string) => {
     const jobTitleMap: { [key: string]: string } = {
-      'FRONT_END_DEVELOPER': 'Frontend Developer',
-      'BACK_END_DEVELOPER': 'Backend Developer',
-      'FULL_STACK_DEVELOPER': 'Full Stack Developer',
-      'PROJECT_MANAGER': 'Project Manager',
-      'DESIGNER': 'Designer',
-      'QA_ENGINEER': 'QA Engineer',
-      'DEVOPS_ENGINEER': 'DevOps Engineer',
-      'BUSINESS_ANALYST': 'Business Analyst',
-      'PRODUCT_MANAGER': 'Product Manager',
-      'SCRUM_MASTER': 'Scrum Master'
+      FRONT_END_DEVELOPER: "Frontend Developer",
+      BACK_END_DEVELOPER: "Backend Developer",
+      FULL_STACK_DEVELOPER: "Full Stack Developer",
+      PROJECT_MANAGER: "Project Manager",
+      DESIGNER: "Designer",
+      QA_ENGINEER: "QA Engineer",
+      DEVOPS_ENGINEER: "DevOps Engineer",
+      BUSINESS_ANALYST: "Business Analyst",
+      PRODUCT_MANAGER: "Product Manager",
+      SCRUM_MASTER: "Scrum Master",
     };
-    return jobTitleMap[jobTitle] || jobTitle?.replace(/_/g, ' ')?.toLowerCase()
-      ?.replace(/\b\w/g, l => l.toUpperCase()) || 'Employee';
+    return (
+      jobTitleMap[jobTitle] ||
+      jobTitle
+        ?.replace(/_/g, " ")
+        ?.toLowerCase()
+        ?.replace(/\b\w/g, (l) => l.toUpperCase()) ||
+      "Employee"
+    );
   };
 
   // Helper function to format date
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     } catch {
-      return 'N/A';
+      return "N/A";
     }
   };
 
   // Process the employees data from API
-  const processedEmployees = data?.data ? data.data.map((user: any, index: number) => {
-    const profile = user.profile;
-    const primaryProject = user.projects?.[0];
-    const additionalProjectsCount = user.projects?.length > 1 ? user.projects.length - 1 : 0;
-    
-    return {
-      id: user.id,
-      name: profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : 'Unknown User',
-      jobTitle: getJobTitleDisplay(profile?.jobTitle),
-      profileUrl: profile?.profileUrl || defaultAvatars[index % defaultAvatars.length],
-      project: primaryProject ? primaryProject.title : 'No Project Assigned',
-      additionalProjects: additionalProjectsCount,
-      shift: "Morning", // Default since shift data structure seems to be empty in the API
-      time: "9:00am-5:00pm", // Default time
-      date: formatDate(user.updatedAt),
-      location: primaryProject?.projectLocation || 'Not specified'
-    };
-  }) : [];
+  const processedEmployees = data?.data
+    ? data.data.map((user: any, index: number) => {
+        const profile = user.profile;
+        const primaryProject = user.projects?.[0];
+        const additionalProjectsCount =
+          user.projects?.length > 1 ? user.projects.length - 1 : 0;
+
+        return {
+          id: user.id,
+          name: profile
+            ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim()
+            : "Unknown User",
+          jobTitle: getJobTitleDisplay(profile?.jobTitle),
+          profileUrl:
+            profile?.profileUrl ||
+            defaultAvatars[index % defaultAvatars.length],
+          project: primaryProject
+            ? primaryProject.title
+            : "No Project Assigned",
+          additionalProjects: additionalProjectsCount,
+          shift: "Morning", // Default since shift data structure seems to be empty in the API
+          time: "9:00am-5:00pm", // Default time
+          date: formatDate(user.updatedAt),
+          location: primaryProject?.projectLocation || "Not specified",
+        };
+      })
+    : [];
 
   // Show loading state
   if (isLoading) {
@@ -245,8 +259,8 @@ const OverviewProject = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">Error loading employees</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-white rounded-lg"
           >
             Retry
@@ -296,7 +310,6 @@ const OverviewProject = () => {
 
                 <Link to={`/admin/schedule/shift-scheduling/${projectId}`}>
                   <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2 bg-primary text-white font-medium rounded-lg transition-colors cursor-pointer">
-
                     <UserPlus />
                     Assign
                   </button>
@@ -326,75 +339,81 @@ const OverviewProject = () => {
               {/* Table Body */}
               <div>
                 {processedEmployees && processedEmployees.length > 0 ? (
-                  processedEmployees.map((employee: Employee, index: number) => (
-                    <div
-                      key={employee.id}
-                      className={`px-5 py-4 border-b-2 border-gray-200 ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                      }`}
-                    >
+                  processedEmployees.map(
+                    (employee: Employee, index: number) => (
                       <div
-                        className="grid items-center"
-                        style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                        key={employee.id}
+                        className={`px-5 py-4 border-b-2 border-gray-200 ${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        }`}
                       >
-                        {/* Employee */}
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                              <img
-                                src={employee.profileUrl}
-                                alt={employee.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = defaultAvatars[index % defaultAvatars.length];
-                                }}
-                              />
+                        <div
+                          className="grid items-center"
+                          style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                        >
+                          {/* Employee */}
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                <img
+                                  src={employee.profileUrl}
+                                  alt={employee.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src =
+                                      defaultAvatars[
+                                        index % defaultAvatars.length
+                                      ];
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-primary">
+                                  {employee.name}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {employee.jobTitle}
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-sm font-medium text-primary">
-                                {employee.name}
+                          </div>
+
+                          {/* Project Name */}
+                          <div>
+                            <div className="text-sm text-gray-700">
+                              {employee.project}
+                              {employee.additionalProjects &&
+                                employee.additionalProjects > 0 && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    +{employee.additionalProjects} more
+                                  </span>
+                                )}
+                            </div>
+                          </div>
+
+                          {/* Shift */}
+                          <div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-gray-500">
+                                {employee.shift}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {employee.jobTitle}
+                                {employee.time}
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Project Name */}
-                        <div>
-                          <div className="text-sm text-gray-700">
-                            {employee.project}
-                            {employee.additionalProjects && employee.additionalProjects > 0 && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                +{employee.additionalProjects} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Shift */}
-                        <div>
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium text-gray-500">
-                              {employee.shift}
+                          {/* Date */}
+                          <div>
+                            <div className="text-sm text-gray-700">
+                              {employee.date}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {employee.time}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Date */}
-                        <div>
-                          <div className="text-sm text-gray-700">
-                            {employee.date}
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  )
                 ) : (
                   <div className="px-5 py-8 text-center text-gray-500">
                     No employees found
