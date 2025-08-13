@@ -1,52 +1,43 @@
-"use client"
+"use client";
 
-import { AssignByStep } from "@/components/Servey/assign-by-step"
-import { mockUsers, surveySteps } from "@/components/Servey/data/survey-data"
-import { useSurveyState } from "@/components/Servey/hooks/use-survey-state"
-import { ProgressSteps } from "@/components/Servey/progress-steps"
-import { PublishSettingsStep } from "@/components/Servey/publish-settings-step"
-import { RecipientsStep } from "@/components/Servey/recipients-step"
-import { SummaryStep } from "@/components/Servey/summary-step"
-import type React from "react"
-
+import { AssignByStep } from "@/components/Servey/assign-by-step";
+import { mockUsers, surveySteps } from "@/components/Servey/data/survey-data";
+import { useSurveyState } from "@/components/Servey/hooks/use-survey-state";
+import { ProgressSteps } from "@/components/Servey/progress-steps";
+import { PublishSettingsStep } from "@/components/Servey/publish-settings-step";
+import { RecipientsStep } from "@/components/Servey/recipients-step";
+import { SummaryStep } from "@/components/Servey/summary-step";
+import type React from "react";
 
 export const PublishSurvey: React.FC = () => {
-  const {
-    currentStep,
-    setCurrentStep,
-    settings,
-    handleNext,
-    handleCancel,
-    handleAssignByChange,
-    handleUserSelectionChange,
-    handleSettingsChange,
-    handleConfirm,
-  } = useSurveyState()
+  const { currentStep, setCurrentStep, settings, handleNext, handleCancel, handleAssignByChange, handleUserSelectionChange, handleSettingsChange } =
+    useSurveyState();
 
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 0:
-        return <AssignByStep assignBy={settings.assignBy} onAssignByChange={handleAssignByChange} />
+        return <AssignByStep assignBy={settings.assignBy} onAssignByChange={handleAssignByChange} />;
       case 1:
-        if(settings.assignBy === "all"){
-          setCurrentStep((prev) => prev + 1)
-          return null
+        if (settings.assignBy === "all") {
+          setCurrentStep((prev) => prev + 1);
+          return null;
         }
-       return (
+        return (
           <RecipientsStep
+            settings={settings}
             users={mockUsers}
             selectedUsers={settings.employees || []}
             onUserSelectionChange={handleUserSelectionChange}
           />
-        )
+        );
       case 2:
-        return <PublishSettingsStep settings={settings} onSettingsChange={handleSettingsChange} />
+        return <PublishSettingsStep settings={settings} onSettingsChange={handleSettingsChange} />;
       case 3:
-        return <SummaryStep settings={settings} onConfirm={handleConfirm} />
+        return <SummaryStep settings={settings} />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
@@ -54,16 +45,13 @@ export const PublishSurvey: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl font-semibold text-[#4E53B1] mb-2">Create New Survey & Poll</h1>
           <p className="text-sm sm:text-base text-gray-600">
-            Design your survey or poll by adding questions, choosing response types, and setting audience and scheduling
-            options
+            Design your survey or poll by adding questions, choosing response types, and setting audience and scheduling options
           </p>
         </div>
 
         <ProgressSteps currentStep={currentStep} steps={surveySteps} />
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-8 mb-6 sm:mb-8">
-          {renderCurrentStep()}
-        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-8 mb-6 sm:mb-8">{renderCurrentStep()}</div>
 
         {currentStep < 3 && (
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-4">
@@ -74,17 +62,14 @@ export const PublishSurvey: React.FC = () => {
             >
               Cancel
             </button>
-            <button
-              onClick={handleNext}
-              className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0"
-            >
+            <button onClick={handleNext} className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0">
               Next
             </button>
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PublishSurvey
+export default PublishSurvey;

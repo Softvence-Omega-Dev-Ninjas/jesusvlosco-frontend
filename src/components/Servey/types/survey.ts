@@ -21,5 +21,5 @@ export interface SurveySettings {
   reminderDate: string
   reminderTime: string
   showOnFeedAgency: boolean,
-  selectedUsers: User[]
+  selectedUsers: string[]
 }
