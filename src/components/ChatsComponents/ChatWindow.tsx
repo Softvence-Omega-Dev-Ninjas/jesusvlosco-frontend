@@ -94,7 +94,7 @@ export default function ResponsiveChatWindow() {
     (chat) => chat.chatId === selectedChatId
   );
 
-  // const selectedPrivateChat =
+  // console.log(privateChats[0]);
 
   // Handle chat selection on mobile
   const handleChatSelect = (chatId: number) => {
@@ -237,7 +237,7 @@ export default function ResponsiveChatWindow() {
                   </p>
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">
-                  {chat.lastMessage || "N/A"}
+                  {chat?.lastMessage?.content || "N/A"}
                 </p>
               </div>
             </div>

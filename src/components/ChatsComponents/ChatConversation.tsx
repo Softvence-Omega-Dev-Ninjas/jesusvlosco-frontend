@@ -4,7 +4,7 @@ import { Chat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
-import { initPrivateMessageListener } from "@/utils/socket";
+import { initPrivateMessageListener, sendPrivateMessage } from "@/utils/socket";
 
 const ChatConversation = ({
   selectedChat,
@@ -21,20 +21,56 @@ const ChatConversation = ({
 }) => {
   const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
+  const [messages, setMessages] = useState(selectedChat?.messages || []);
+
+  useEffect(() => {
+    if (selectedChat?.messages) {
+      setMessages(selectedChat.messages);
+    }
+  }, [selectedChat?.messages]);
+  console.log(messages, "messages");
 
   const [sendMessage] = useSendPrivateMessageMutation();
 
-  const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
-    const userId = me?.id || "";
-
-    sendMessage({
-      recipientId: selectedPrivateChatInfo.participant.id,
-      messageInput,
-      userId,
+  // ✅ Listen for incoming messages in real time
+  useEffect(() => {
+    const cleanup = initPrivateMessageListener((newMessage) => {
+      if (
+        newMessage.senderId === selectedPrivateChatInfo.participant.id ||
+        newMessage.recipientId === selectedPrivateChatInfo.participant.id
+      ) {
+        setMessages((prev) => [...prev, newMessage]);
+        console.log(messages, "messages");
+      }
     });
 
-    setMessageInput("");
+    return cleanup;
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!messageInput.trim()) return;
+
+    const userId = me?.id || "";
+    const recipientId = selectedPrivateChatInfo.participant.id;
+
+    try {
+      // 1️⃣ Send via REST API to save in DB
+      const result = await sendMessage({
+        recipientId,
+        messageInput,
+        userId,
+      }).unwrap();
+
+      // 2️⃣ Optimistically update local state
+      setMessages((prev) => [...prev, result]);
+
+      // 3️⃣ Emit via socket for real-time delivery
+      sendPrivateMessage(recipientId, { content: messageInput }, userId);
+      // console.log(resulttt, "resulttt");
+      setMessageInput("");
+    } catch (error) {
+      console.error("Failed to send private message:", error);
+    }
   };
 
   return (
@@ -113,7 +149,7 @@ const ChatConversation = ({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {selectedChat?.messages?.map((message) => {
+        {messages?.map((message) => {
           const isMe = message.senderId === me?.id; // currentUserId from auth
           // console.log(isMe, "isMe");
           const avatar =

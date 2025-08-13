@@ -1,15 +1,15 @@
 import { io, Socket } from "socket.io-client";
 
-let socket: Socket | null = null;
+export let socket: Socket | null = null;
 
 export const connectPrivateChat = (token: string) => {
   if (socket) return socket;
 
   socket = io("wss://api.lgcglobalcontractingltd.com/js/private", {
     extraHeaders: {
-      Authorization: `Bearer ${token}`,
+      authorization: `Bearer ${token}`,
     },
-    transports: ["websocket"],
+    // transports: ["websocket"],
   });
 
   socket.on("connect", () => {
@@ -26,7 +26,7 @@ export const connectPrivateChat = (token: string) => {
 
   return socket;
 };
-
+console.log(socket, "socket");
 export const initPrivateMessageListener = (onMessage: (msg: any) => void) => {
   if (!socket) {
     console.error("⚠️ Socket not connected");
@@ -49,11 +49,12 @@ export const sendPrivateMessage = (
     return;
   }
 
-  socket.emit("private:send_message", {
+  const result = socket.emit("private:send_message", {
     recipientId,
     dto, // ✅ matches backend expectation
     userId,
   });
+  console.log(result, "result from sendPrivateMessage");
 };
 
 export const onNewPrivateMessage = (callback: (message: any) => void) => {
