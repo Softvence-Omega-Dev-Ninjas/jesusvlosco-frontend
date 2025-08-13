@@ -86,19 +86,19 @@ const Notification: React.FC = () => {
   };
 
   const Toggle: React.FC<{ isOn: boolean; onToggle: () => void }> = ({ isOn, onToggle }) => (
-    <button
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-        isOn ? 'bg-primary' : 'bg-gray-200'
+  <button
+    onClick={onToggle}
+    className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors duration-700 ease-in-out ${
+      isOn ? 'bg-primary' : 'bg-gray-200'
+    }`}
+  >
+    <span
+      className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-700 ease-in-out ${
+        isOn ? 'translate-x-6' : 'translate-x-0'
       }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-          isOn ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
-    </button>
-  );
+    />
+  </button>
+);
 
   const SettingItem: React.FC<{
     icon: React.ReactNode;
@@ -106,8 +106,8 @@ const Notification: React.FC = () => {
     isOn: boolean;
     onToggle: () => void;
   }> = ({ icon, label, isOn, onToggle }) => (
-    <div className="flex items-center justify-between py-4 px-6 border-b border-gray-200 last:border-b-0">
-      <div className="flex items-center space-x-3">
+    <div className="flex items-center justify-between py-4 px-6 border-b-2 border-gray-200 last:border-b-0">
+      <div className="flex items-center space-x-3 mt-6">
         <div className="text-gray-500">{icon}</div>
         <span className="text-gray-700 font-medium">{label}</span>
       </div>
