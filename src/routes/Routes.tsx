@@ -66,11 +66,10 @@ import EmailLogin from "@/pages/email-login/EmailLogin";
 const routes = createBrowserRouter([
   {
     path: "/",
-    element: <Login />,
-  },
+    element: <EmailLogin />,},
   {
     path: "/email-login",
-    element: <EmailLogin />,
+    element:<Login /> ,
   },
 
   // ✅ Admin routes grouped here
@@ -252,8 +251,7 @@ const routes = createBrowserRouter([
         element: <SidebarSetting></SidebarSetting>,
       },
 
-      { path: "add-user", element: <AddUserProfile /> },
-      // { path: "sidebar-settings", element: <SidebarSetting /> },
+      // { path: "add-user", element: <AddUserProfile /> },
     ],
   },
 

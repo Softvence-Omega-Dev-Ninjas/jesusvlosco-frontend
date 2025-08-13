@@ -1,9 +1,23 @@
-import light from "@/assets/light-c.png";
-import user1 from "@/assets/reactionuser2.png";
-import user2 from "@/assets/reactionu1.png";
-import user3 from "@/assets/reaction user 3.png";
-
-const SummeryTab = () => {
+// import light from "@/assets/light-c.png";
+// import user1 from "@/assets/reactionuser2.png";
+// import user2 from "@/assets/reactionu1.png";
+// import user3 from "@/assets/reaction user 3.png";
+import { IBadge, IRecognation } from "@/types/recognation";
+import { IUser } from "@/types/user";
+import { PiUserCircleLight } from "react-icons/pi";
+// import { useAddRecognationMutation } from "@/store/api/admin/recognation/recognationApi";
+interface IProp {
+  formData: IRecognation;
+  selectedBadge: IBadge;
+  selectedUsersData: IUser[];
+  handleRecognation: () => void;
+}
+const SummeryTab = ({
+  formData,
+  selectedBadge,
+  selectedUsersData,
+  handleRecognation,
+}: IProp) => {
   return (
     <div className=" ">
       <div>
@@ -11,34 +25,41 @@ const SummeryTab = () => {
           <div className="flex flex-col md:flex-row mb-6 mt-6 gap-6 items-center md:items-start md:justify-center h-auto md:h-52 text-center md:text-left">
             {/* Left Text */}
             <div className="w-full  md:w-1/3 text-center md:text-end font-semibold text-[#484848] flex items-center justify-center md:justify-end h-full">
-              XYZ recognized
+              {formData?.message}
             </div>
 
             {/* Middle Image */}
             <div className="w-full md:w-1/3 flex justify-center">
               <div className="bg-indigo-100 p-4 rounded-xl">
                 <img
-                  src={light}
+                  src={selectedBadge?.iconImage}
                   alt="Creative"
-                  className="w-full max-w-[150px] mx-auto"
+                  className="w-full max-h-[200px] max-w-[150px] mx-auto"
                 />
               </div>
             </div>
 
             {/* Right User List */}
             <div className="w-full md:w-1/3 space-y-4 flex flex-col items-center justify-center md:items-start">
-              {[
-                { src: user1, name: "Cody Fisher" },
-                { src: user2, name: "Leslie Alexander" },
-                { src: user3, name: "Robert Fox" },
-              ].map(({ src, name }, i) => (
-                <div key={i} className="flex items-center space-y-4 space-x-3">
-                  <img
-                    src={src}
-                    alt={name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <span className="text-gray-800">{name}</span>
+              {selectedUsersData?.map((user: IUser, i: number) => (
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    {user?.profile?.profileUrl ? (
+                      <img
+                        className="h-10 w-10 rounded-full"
+                        src={user?.profile?.profileUrl}
+                        alt={`Avatar of ${user?.profile?.firstName}`}
+                      />
+                    ) : (
+                      <PiUserCircleLight size={36} />
+                    )}
+                  </div>
+                  <div className="ml-3 ">
+                    <div className="text-sm flex items-center gap-2 font-medium text-gray-900">
+                      <p>{user?.profile?.firstName}</p>
+                      <p> {user?.profile?.lastName}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

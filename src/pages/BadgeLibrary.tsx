@@ -1,4 +1,3 @@
-
 import type React from "react";
 import Swal from "sweetalert2";
 import { useState, useRef, useEffect } from "react";
@@ -12,6 +11,11 @@ import bage7 from "@/assets/bage7.png";
 import bage8 from "@/assets/bage8.png";
 import { ListFilter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  
+  useGetAllBadgeQuery,
+} from "@/store/api/admin/recognation/recognationApi";
+import BadgeDeleteModal from "./modal/BadgeDeleteModal";
 
 const achievementCards = [
   {
@@ -66,17 +70,19 @@ const achievementCards = [
 
 interface DropdownMenuProps {
   isOpen: boolean;
+  card: any;
   onClose: () => void;
   onEdit: () => void;
-  onDelete: () => void;
+
   position: { top: number; right: number };
 }
 
 function DropdownMenu({
   isOpen,
+  card,
   onClose,
   onEdit,
-  onDelete,
+
   position,
 }: DropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -114,29 +120,18 @@ function DropdownMenu({
       >
         Edit
       </button>
-      <button
-        onClick={onDelete}
-        className="w-full px-4 py-2 cursor-pointer text-left text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-      >
-        Delete
-      </button>
+      <BadgeDeleteModal card={card} />
     </div>
   );
 }
 
 interface AchievementCardProps {
-  icon: string;
-  label: string;
+  card: any;
   onEdit: () => void;
-  onDelete: () => void;
+
 }
 
-function AchievementCard({
-  icon,
-  label,
-  onEdit,
-  onDelete,
-}: AchievementCardProps) {
+function AchievementCard({ card, onEdit }: AchievementCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
@@ -147,8 +142,8 @@ function AchievementCard({
 
     if (cardRef.current) {
       setMenuPosition({
-        top: 30, // Position below the three dots
-        right: 5, // Small margin from right edge
+        top: 30,
+        right: 5,
       });
     }
 
@@ -160,43 +155,22 @@ function AchievementCard({
     setIsMenuOpen(false);
   };
 
-  const handleDelete = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        onDelete(); // 🔥 Your delete callback
-        setIsMenuOpen(false); // ✅ Close the dropdown/menu
-
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
-    });
-  };
-
   return (
     <div
       ref={cardRef}
-      className="relative p-4 flex flex-col items-center justify-center  hover:border-4   h-[192px]  bg-[#E8E6FF]  hover:border-[#4E53B1] transition-all duration-200 cursor-pointer rounded-xl  "
+      className="relative p-4 flex flex-col items-center justify-center  hover:border-2   h-[192px]  bg-[#E8E6FF]  hover:border-[#4E53B1] transition-all duration-200 cursor-pointer rounded-xl  "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className=" w-20 h-20 flex justify-center items-center">
-        <img src={icon} className="w-full h-full object-contain " alt="" />
+      <div className=" w-28 h-28 flex justify-center items-center">
+        <img
+          src={card?.iconImage}
+          className="w-full h-full object-contain "
+          alt=""
+        />
       </div>
       <span className="text-xs text-center  text-[#4E53B1] font-bold leading-tight px-1 mt-4">
-        {label}
+        {card?.title}
       </span>
 
       {/* Three dots menu */}
@@ -220,9 +194,9 @@ function AchievementCard({
       {/* Dropdown Menu */}
       <DropdownMenu
         isOpen={isMenuOpen}
+        card={card}
         onClose={() => setIsMenuOpen(false)}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         position={menuPosition}
       />
     </div>
@@ -230,29 +204,27 @@ function AchievementCard({
 }
 
 interface SectionGridProps {
-  cards: typeof achievementCards;
+  cards: any;
 }
 
-function SectionGrid({ cards }: SectionGridProps) {
+export function SectionGrid({ cards }: SectionGridProps) {
   const navigate = useNavigate();
   const handleEdit = (cardId: string) => {
     console.log("Edit clicked for:", cardId);
-    navigate(`/admin/edit-badge`); // 👈 Replace with your actual route
+    navigate(`/admin/edit-badge`);
   };
 
-  const handleDelete = (cardLabel: string) => {
-    console.log("Delete clicked for:", cardLabel);
-  };
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4  xl:grid-cols-6 gap-6">
-      {cards.map((card) => (
+      {cards?.map((card: any) => (
         <AchievementCard
+         
           key={card.id}
-          icon={card.icon}
-          label={card.name}
+          card={card}
           onEdit={() => handleEdit(card.id)}
-          onDelete={() => handleDelete(card.id)}
+     
         />
       ))}
     </div>
@@ -261,6 +233,25 @@ function SectionGrid({ cards }: SectionGridProps) {
 
 // main component satrt here
 export default function BadgeLibrary() {
+  const { data, isLoading } = useGetAllBadgeQuery(null);
+  const groupedBadges = (data?.data ?? []).reduce((acc: any, badge: any) => {
+    if (!acc[badge.category]) {
+      acc[badge.category] = [];
+    }
+    acc[badge.category].push(badge);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  const groupedArray = Object.entries(groupedBadges).map(
+    ([category, items]) => ({
+      category,
+      items,
+    })
+  );
+
+  console.log(groupedArray);
+
+  // console.log(groupedBadges);
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen pb-10">
       {/* header section  */}
@@ -295,21 +286,23 @@ export default function BadgeLibrary() {
       </div>
       <div className=" bg-white p-6 shadow-md rounded-xl space-y-6 sm:space-y-8">
         {/* Milestones Section */}
-        <div>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-base sm:text-lg font-semibold ttext-[#4E53B1]">
-              Milestones
-            </h2>
-            <button className="flex items-center cursor-pointer gap-2 px-6 py-3 text-sm text-gray-600 border border-gray-300 bg-transparent rounded-md hover:bg-gray-100 transition-colors">
-              <span className="text-lg mr-3">+</span>
-              <span className="hidden sm:inline">Add Topic</span>
-            </button>
+        {groupedArray?.map((el) => (
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-base sm:text-lg font-semibold ttext-[#4E53B1]">
+                {el?.category}
+              </h2>
+              <button className="flex items-center cursor-pointer gap-2 px-6 py-3 text-sm text-gray-600 border border-gray-300 bg-transparent rounded-md hover:bg-gray-100 transition-colors">
+                <span className="text-lg mr-3">+</span>
+                <span className="hidden sm:inline">Add Topic</span>
+              </button>
+            </div>
+            <SectionGrid cards={el?.items} />
           </div>
-          <SectionGrid cards={achievementCards} />
-        </div>
+        ))}
 
         {/* Good Job Section */}
-        <div>
+        {/* <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base sm:text-lg font-semibold text-[#4E53B1]">
               Good Job !
@@ -320,10 +313,10 @@ export default function BadgeLibrary() {
             </button>
           </div>
           <SectionGrid cards={achievementCards} />
-        </div>
+        </div> */}
 
         {/* Anniversary Section */}
-        <div>
+        {/* <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base sm:text-lg font-semibold text-[#4E53B1]">
               Anniversary :
@@ -334,7 +327,7 @@ export default function BadgeLibrary() {
             </button>
           </div>
           <SectionGrid cards={achievementCards} />
-        </div>
+        </div> */}
       </div>
     </div>
   );

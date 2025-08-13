@@ -245,7 +245,7 @@ const Admin: React.FC = () => {
     };
   }, []);
 
-  // --- Toggle Handlers with Positioning ---
+  
   const toggleFilterColumnModal = () => {
     const newState = !showFilterColumnModal;
     setShowFilterColumnModal(newState);
@@ -403,6 +403,7 @@ const Admin: React.FC = () => {
       {/* Users Table Component */}
       <UsersTable
         users={allUsers}
+        isLoading={isLoading}
         selectedUserIds={selectedUserIds}
         handleHeaderCheckboxChange={handleHeaderCheckboxChange}
         handleUserCheckboxChange={handleUserCheckboxChange}

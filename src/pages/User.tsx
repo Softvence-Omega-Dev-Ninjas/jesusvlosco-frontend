@@ -11,6 +11,7 @@ import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { PiUserCircleLight } from "react-icons/pi";
+import { formatDateToMDY } from "@/utils/formatDateToMDY";
 
 // Define the type for a User
 interface User {
@@ -487,32 +488,7 @@ const User: React.FC = () => {
 
   type DateOverride = { year: number; month: number; day: number } | null;
 
-  function formatDateToMDY(
-    dateInput: string | number | Date,
-    override: DateOverride = null
-  ) {
-    const original = new Date(dateInput);
-
-    const finalDate = override
-      ? new Date(
-          Date.UTC(
-            override.year,
-            override.month - 1,
-            override.day,
-            original.getUTCHours(),
-            original.getUTCMinutes(),
-            original.getUTCSeconds()
-          )
-        )
-      : original;
-
-    const month = finalDate.getUTCMonth() + 1;
-    const day = finalDate.getUTCDate();
-    const year = String(finalDate.getUTCFullYear()).slice(-2);
-
-    return `${month}/${day}/${year}`;
-  }
-
+ 
   console.log({ team: searchTerm });
   return (
     <div
@@ -815,16 +791,12 @@ const User: React.FC = () => {
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative rounded-tr-lg"
                 >
-                  {" "}
-                  {/* Added relative positioning */}
                   <button
-                    ref={tableViewByOptionsButtonRef} // Assign ref to the new button
+                    ref={tableViewByOptionsButtonRef}
                     className="ml-2 flex items-center justify-center p-1 rounded-md hover:bg-gray-100 focus:outline-none cursor-pointer"
-                    onClick={toggleViewByOptionsModal} // Click handler to show modal
+                    onClick={toggleViewByOptionsModal}
                   >
                     <Columns3 className="h-5 w-5" />
-                    {/* Replaced with a more appropriate icon from a library or custom SVG for accuracy */}
-                    {/* Using a generic SVG for a "columns and dropdown" like icon */}
                     <svg
                       className="w-5 h-5 ml-1 text-gray-500"
                       fill="none"
@@ -863,8 +835,8 @@ const User: React.FC = () => {
                         {user?.profile?.profileUrl ? (
                           <img
                             className="h-10 w-10 rounded-full"
-                            src={user.avatar}
-                            alt={`Avatar of ${user.name}`}
+                            src={user?.profile?.profileUrl}
+                            alt={`Avatar of ${user?.profile?.firstName}`}
                             onError={(e) => {
                               (e.target as HTMLImageElement).onerror = null;
                               (
