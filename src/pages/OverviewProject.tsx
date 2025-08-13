@@ -292,7 +292,7 @@ const OverviewProject = () => {
                   </span>
                 </button>
 
-                <Link to="/admin/schedule/shift-scheduling">
+                <Link to="/admin/schedule/shift-scheduling/:id">
                   <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2 bg-primary text-white font-medium rounded-lg transition-colors cursor-pointer">
 
                     <UserPlus />
