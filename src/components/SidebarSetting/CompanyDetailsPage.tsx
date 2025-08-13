@@ -2,6 +2,11 @@ import { useGetCompanyQuery, useUpdateCompanyMutation } from '@/store/api/admin/
 import { useGetUserDataQuery } from '@/store/api/admin/settings/getUser';
 import React, { useEffect, useState } from 'react';
 
+import deleteIcon from '../../assets/delete.png';
+import distanceIcon from '../../assets/distance (1).png';
+import arrowIcon from '../../assets/arrow.png';
+
+ 
 interface ManagerOption {
   id: string;
   name: string;
@@ -150,13 +155,13 @@ const filteredManagers = (branchId: string) => {
       <h2 className="text-xl  mb-6 text-primary">Company Details</h2>
 
       {/* Company Name */}
-      <div className="mb-6">
-        <label htmlFor="companyName" className="block text-gray-700 text-base font-semibold mb-2">Company Name</label>
+      <div className="mb-8">
+        <label htmlFor="companyName" className="block   mb-5">Company Name</label>
         <input
           type="text"
           id="companyName"
           placeholder="Type Here"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-2 border border-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
         />
@@ -164,27 +169,24 @@ const filteredManagers = (branchId: string) => {
 
       {/* Location */}
       <div className="mb-6">
-        <label htmlFor="location" className="block text-gray-700 text-base font-semibold mb-2">Location</label>
+        <label htmlFor="location" className="block   mb-5">Location</label>
         <div className="relative">
           <input
             type="text"
             id="location"
             placeholder="Type Here"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+            className="w-full p-2 border border-gray-300 text-sm  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
-          <svg className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657a8 8 0 1111.314 0z"></path>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          </svg>
+           <img className=" text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" src={distanceIcon} alt="distance" />
         </div>
       </div>
 
       {/* Branch Section */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
-          <label className="block text-gray-700 text-base font-semibold">Branch</label>
+          <label className="block  ">Branch</label>
           <button onClick={handleAddBranch} className="flex items-center text-primary font-semibold text-sm">
             <svg className="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -198,25 +200,29 @@ const filteredManagers = (branchId: string) => {
             <div key={branch.id} className="flex flex-col sm:flex-row items-center gap-4 mb-4 bg-gray-50">
               
               {/* Branch Location */}
-              <div className="relative w-full sm:w-1/2 flex-grow">
-                <label className="block text-gray-700 text-sm font-semibold mb-1">Branch Name</label>
-                <input
+              <div className="relative w-full sm:w-1/2 flex-grow pr-12">
+                <label className="block  text-sm  mb-1">Branch Name</label>
+                <div className='relative'>
+                 <input
                   type="text"
                   placeholder="New York City"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                  className="w-full p-2 border border-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
                   value={branch.location}
                   onChange={(e) => handleBranchChange(branch.id, 'location', e.target.value)}
                 />
+                <img className=" text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" src={distanceIcon} alt="distance" />
+                </div>
+                
               </div>
 
               {/* Manager Dropdown */}
               <div className="relative w-full sm:w-1/2 flex-grow">
                 <div className="flex items-center">
-                  <label className="block text-gray-700 text-sm font-semibold mr-2 whitespace-nowrap">Manager</label>
+                  <label className="block  mr-8 whitespace-nowrap">Manager</label>
                   <input
                     type="text"
                     placeholder="Type Here"
-                    className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                    className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
                     value={activeManagerDropdown === branch.id ? (managerSearchTerm[branch.id] || '') : branch.manager?.name || ''}
                     onChange={(e) => {
                       setManagerSearchTerm(prev => ({ ...prev, [branch.id]: e.target.value }));
@@ -225,9 +231,7 @@ const filteredManagers = (branchId: string) => {
                     onFocus={() => setActiveManagerDropdown(branch.id)}
                     onBlur={() => setTimeout(() => setActiveManagerDropdown(null), 200)}
                   />
-                  <svg className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
+                  <img className=" text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" src={arrowIcon} alt="" />
                 </div>
 
                 {activeManagerDropdown === branch.id && (
@@ -258,10 +262,8 @@ const filteredManagers = (branchId: string) => {
               </div>
 
               {/* Delete Button */}
-              <button onClick={() => handleDeleteBranch(branch.id)} className="p-2 text-red-500 hover:text-red-700">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
+              <button onClick={() => handleDeleteBranch(branch.id)} className="p-2 ">
+                <img src={deleteIcon} alt="" />
               </button>
             </div>
           ))}
