@@ -191,7 +191,7 @@ export default function CreateRecognition() {
   const { data } = useGetAllUserQuery(null);
   const { data: badgeData } = useGetAllBadgeQuery(null);
 
-  const [createRecognation, { isLoading }] = useAddRecognationMutation();
+  const [createRecognation] = useAddRecognationMutation();
   const [formData, setFormData] = useState({
     badgeId: "", // selected badge id
     message: "",

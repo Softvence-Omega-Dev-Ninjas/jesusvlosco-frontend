@@ -1,16 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
-import bage1 from "@/assets/bage-1.png";
-import bage2 from "@/assets/bage2.png";
-import bage3 from "@/assets/bage3.png";
-import bage4 from "@/assets/bage4.png";
-import bage5 from "@/assets/bage5.png";
-import bage6 from "@/assets/bage6.png";
-import bage7 from "@/assets/bage7.png";
-import bage8 from "@/assets/bage8.png";
-import Swal from "sweetalert2";
+import  { useEffect, useRef, useState } from "react";
+
 import { useGetAllBadgeQuery } from "@/store/api/admin/recognation/recognationApi";
 import { IBadge, IRecognation } from "@/types/recognation";
-import { SectionGrid } from "@/pages/BadgeLibrary";
+
 import RecognationCard from "@/pages/recognation/RecognationCard";
 interface IProp {
   formData: IRecognation;
@@ -30,46 +22,7 @@ const CreateRecognitionBagde = ({ formData, handleChange }: IProp) => {
   const { data, isLoading } = useGetAllBadgeQuery(null);
   console.log({ data, isLoading });
   const badgess = data?.data;
-  const badges = [
-    { id: "promotion", name: "Promotion", icon: bage1, bgColor: "bg-pink-100" },
-    { id: "creative", name: "Creative", icon: bage2, bgColor: "bg-purple-100" },
-    {
-      id: "well-done",
-      name: "Well-done!",
-      icon: bage3,
-      bgColor: "bg-blue-100",
-    },
-    {
-      id: "happy-holiday",
-      name: "Happy holiday",
-      icon: bage4,
-      bgColor: "bg-purple-100",
-    },
-    {
-      id: "top-performer",
-      name: "Top performer",
-      icon: bage5,
-      bgColor: "bg-purple-100",
-    },
-    {
-      id: "creative-star",
-      name: "Creative",
-      icon: bage6,
-      bgColor: "bg-purple-100",
-    },
-    {
-      id: "outstanding",
-      name: "Outstanding services",
-      icon: bage7,
-      bgColor: "bg-purple-100",
-    },
-    {
-      id: "employee-month",
-      name: "Employee of the month",
-      icon: bage8,
-      bgColor: "bg-purple-100",
-    },
-  ];
+
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -90,34 +43,8 @@ const CreateRecognitionBagde = ({ formData, handleChange }: IProp) => {
     };
   }, [openModal]);
 
-  const handleThreeDotsClick = (e: React.MouseEvent, badgeId: string) => {
-    e.stopPropagation();
-    setOpenModal(openModal === badgeId ? null : badgeId);
-  };
 
-  const handleEdit = (badgeId: string) => {
-    console.log(`Edit badge: ${badgeId}`);
-    setOpenModal(null);
-    window.location.href = "/admin/badge-library";
-  };
-
-  const handleDelete = (badgeId: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        console.log(`Delete badge: ${badgeId}`);
-        setOpenModal(null);
-        Swal.fire("Deleted!", "The badge has been deleted.", "success");
-      }
-    });
-  };
+ 
 
   const badgeChanged = (id: string) => {
     handleChange("badgeId", id);

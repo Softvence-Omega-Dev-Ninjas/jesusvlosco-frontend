@@ -486,7 +486,7 @@ const User: React.FC = () => {
     { label: "Trainer", value: "Trainer" },
   ];
 
-  type DateOverride = { year: number; month: number; day: number } | null;
+
 
  
   console.log({ team: searchTerm });
