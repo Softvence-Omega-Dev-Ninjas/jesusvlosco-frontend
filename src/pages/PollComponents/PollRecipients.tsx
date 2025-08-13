@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, useEffect } from "react";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { SurveySettings } from "@/components/Servey/types/survey";
+import { FaSpinner } from "react-icons/fa";
 
 type UserProfile = {
   address: string;
@@ -51,7 +52,7 @@ const PollRecipients = ({ settings }: { settings: SurveySettings }) => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: usersData } = useGetAllUserQuery({ searchTerm });
+  const { data: usersData ,isLoading,isFetching} = useGetAllUserQuery({ searchTerm });
 
   const handleCheckboxChange = (id?: string): void => {
     if (!id) return;
@@ -70,11 +71,15 @@ const PollRecipients = ({ settings }: { settings: SurveySettings }) => {
 
   const isAllSelected = usersData?.data && selectedUserIds.length === usersData?.data?.length && usersData?.data?.length > 0;
 
-  console.log("==========>", selectedUserIds);
   useEffect(() => {
     settings.selectedUsers = [...selectedUserIds];
   }, [selectedUserIds]);
 
+  if(isLoading || isFetching){
+    return <div className="w-full h-96 flex justify-center items-center">
+      <FaSpinner className="animate-spin text-blue-300" size={50} />
+    </div>
+  }
   return (
     <div className="min-h-screen p-2 sm:p-4 lg:p-8 font-sans bg-[#FAFBFF]">
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
@@ -272,6 +277,7 @@ const PollRecipients = ({ settings }: { settings: SurveySettings }) => {
       </div>
     </div>
   );
+
 };
 
 export default PollRecipients;

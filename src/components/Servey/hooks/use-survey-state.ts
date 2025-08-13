@@ -3,6 +3,20 @@ import { useState } from "react";
 import { defaultSurveySettings } from "../data/survey-data";
 import { SurveySettings } from "../types/survey";
 
+
+// const combineDateAndTimeToISO = (dateStr?: string, timeStr?: string) => {
+//   if (!dateStr || !timeStr) return null; // guard for empty, null, undefined
+//   const dateTimeString = `${dateStr}T${timeStr}:00`;
+
+//   const combined = new Date(dateTimeString);
+
+//   if (isNaN(combined.getTime())) {
+//     return null; // invalid date-time combo
+//   }
+
+//   return combined.toISOString();
+// };
+
 export const useSurveyState = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [settings, setSettings] = useState<SurveySettings>(defaultSurveySettings);

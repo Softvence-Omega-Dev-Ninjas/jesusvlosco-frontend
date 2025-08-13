@@ -1,7 +1,9 @@
 import type React from "react";
 import { SurveySettings } from "./types/survey";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCreateSurveyMutation } from "@/store/api/admin/survey/servey";
+import { useCreatePoolMutation } from "@/store/api/admin/pool/pool";
+import { toast } from "sonner";
 
 interface SummaryStepProps {
   settings: SurveySettings;
@@ -9,6 +11,8 @@ interface SummaryStepProps {
 
 export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
   const [createSurvey] = useCreateSurveyMutation();
+  const [createPool] = useCreatePoolMutation();
+  const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const flag = searchParams.get("flag");
@@ -39,6 +43,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
     isForAll = false;
   }
   const handleSurveyPublish = async () => {
+    const toastId=toast.loading("Publishing Pool...");
     const savedData = JSON.parse(localStorage.getItem("surveyData") || "null");
     const savedTitleData = JSON.parse(localStorage.getItem("surveyTitle") || "null");
 
@@ -55,36 +60,51 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
     console.log(surveyData);
     try {
       const result = await createSurvey(surveyData).unwrap();
-      console.log("Survey successfully created:", result);
+      if(result?.success===true){
+        toast.success("Survey Published Successfully",{id:toastId})
+        navigate("/admin/survey-poll");
+        
+      }
     } catch (err) {
       console.error("Failed to create survey:", err);
     }
   };
 
-  const handlePoolPublish = () => {
+  const handlePoolPublish = async() => {
+    const toastId=toast.loading("Publishing Pool...");
     console.log(settings);
     console.log("polllData", pollData);
     const poolInfo = {
       title: pollData.title,
       description: pollData.description,
       employees: settings.selectedUsers,
-      questions: pollData.question,
+      question: pollData.question,
+      options: pollData.options,
       isForAll: isForAll,
       showOnFeed: settings.showOnFeed,
       shouldNotify: settings.notifyPushUp,
-      publishDateTimeISO: settings.publishNow ? new Date().toISOString() : settings.publishTime,
-      reminderDateTimeISO: settings.sendReminder ? new Date(`${settings.reminderDate}T${settings.reminderTime}`).toISOString() : null,
-      // publishTime: settings.publishNow ? new Date().toISOString() : new Date(settings.publishDate + "T" + settings.publishTime).toISOString(),
-      // reminderTime: settings.sendReminder ? new Date(settings.reminderDate + "T" + settings.reminderTime).toISOString() : null,
+      publishTime: settings.publishNow ? new Date().toISOString() : settings.publishTime,
+      reminderTime: settings.sendReminder ? new Date(`${settings.reminderDate}T${settings.reminderTime}`).toISOString() : null,
     };
-    console.log("poolInfo=========>", poolInfo);
+       try {
+      const result = await createPool(poolInfo).unwrap();
+      if(result?.success===true){
+         toast.success("Pool Published Successfully",{id:toastId})
+        navigate("/admin/survey-poll");
+      }
+    } catch (err) {
+      console.error("Failed to create survey:", err);
+    }
   };
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-0">
       <div className="bg-gray-100 rounded-lg p-6 sm:p-12 text-center">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">Survey is Live!</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">{flag === "pool" ? "Pool is Live" : "Survey is Live"}</h2>
 
         <p className="text-gray-600 mb-6">"Your survey is live and ready for participation!"</p>
+        <p className="text-gray-600 mb-6">Asset will be published on 21/06/2025 at 16:40</p>
+        <p className="text-gray-600 mb-6">User will be notified :</p>
+        <p className="text-gray-600 mb-6 border  border-gray-300 py-2 rounded-xl">A new update is waiting for you in the XYZ company app</p>
 
         <div className="space-y-3 text-sm text-gray-600">
           <p>
@@ -116,7 +136,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
           onClick={flag === "pool" ? handlePoolPublish : handleSurveyPublish}
           className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0 order-2 sm:order-1"
         >
-          Confirm survey
+          {flag === "pool" ? "Confirm Pool" : "Confirm Survey"}
         </button>
       </div>
     </div>
