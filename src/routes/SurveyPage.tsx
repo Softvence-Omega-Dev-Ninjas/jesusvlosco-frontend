@@ -1,4 +1,4 @@
-// SurveyPage.tsx
+
 import { useState } from "react";
 import { FileText, Star, Trash2, X } from "lucide-react";
 
@@ -46,11 +46,12 @@ export default function SurveyPage() {
   const [dropdownFields, setDropdownFields] = useState<DropdownFieldData[]>([]);
 
   const [showOpenModal, setShowOpenModal] = useState(false);
+
   const [openEndedFields, setOpenEndedFields] = useState<OpenEndedFieldData[]>([]);
+
 
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingFields, setRatingFields] = useState<RatingFieldData[]>([]);
-
   const addField = (type: string) => {
     if (type === "description") {
       setShowDescInput(true);
@@ -78,12 +79,13 @@ export default function SurveyPage() {
   };
 
   const handleSaveOpenEnded = (data: OpenEndedFieldData) => {
-    setOpenEndedFields((prev) => [...prev, data]);
+    setOpenEndedFields((prev) => [...prev, data])
     console.log(data);
   };
 
   const handleSaveRatingField = (data: RatingFieldData) => {
     setRatingFields((prev) => [...prev, data]);
+
     console.log(data);
   };
 
@@ -146,6 +148,7 @@ export default function SurveyPage() {
                 <label className="text-lg mt-3 font-medium text-[rgba(78,83,177,1)] min-w-max">Survey Title</label>
                 <input
                   onChange={(e) => settile(e.target.value)}
+
                   className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 lg:ml-10 text-sm"
                 />
               </div>

@@ -1,7 +1,9 @@
 import { mockEmployeeLeaveData } from "@/assets/mockData"; // adjust path as needed
 import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // adjust path as needed
 import { EmployeeLeave } from "@/types";
+import { CalendarDaysIcon } from "lucide-react";
 import { useState } from "react";
+import { ApproveIcon, DeclineIcon } from "./icons";
 
 type Request = {
   id: string;
@@ -14,8 +16,8 @@ type Request = {
 
 type TimeOffRequestsProps = {
   requests: Request[];
-  onApprove?: (id: string) => void;
-  onDecline?: (id: string) => void;
+  onApprove?: (id: string, adminNote: string) => void;
+  onDecline?: (id: string, adminNote: string, status: string) => void;
 };
 
 const Avatar = ({
@@ -72,6 +74,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function TimeOffRequests({
   requests,
   onApprove,
+  onDecline,
 }: TimeOffRequestsProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] =
@@ -134,20 +137,7 @@ export default function TimeOffRequests({
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"
-                />
-              </svg>
+              <CalendarDaysIcon className="h-4 w-4" />
               {request.date}
             </div>
 
@@ -157,41 +147,26 @@ export default function TimeOffRequests({
 
             {request.status === "pending" && (
               <div className="flex flex-row flex-wrap gap-3 items-center justify-start xl:justify-center">
-                <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm sm:text-base font-medium text-gray-600 transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Deadline
-                </button>
                 <button
-                  onClick={() => onApprove?.(request.id)}
-                  className="flex items-center justify-center gap-2 px-6 py-3 cursor-pointer bg-[#1EBD66] text-white rounded-xl text-sm sm:text-base font-medium transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent modal from opening
+                    onDecline?.(request.id, "Declined by admin", "REJECTED");
+                    console.log("Decline clicked");
+                  }}
+                  className="flex items-center cursor-pointer justify-center gap-2 px-6 py-3 bg-red-100 rounded-xl text-sm sm:text-base font-medium text-red-600 transition-colors hover:bg-red-200"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <DeclineIcon />
+                  Decline
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent modal from opening
+                    onApprove?.(request.id, "Approved by admin");
+                  }}
+                  className="flex items-center justify-center gap-2 px-6 py-3 cursor-pointer bg-[#1EBD66] text-white rounded-xl text-sm sm:text-base font-medium transition-colors hover:bg-[#17a957]"
+                >
+                  <ApproveIcon />
                   Approve
                 </button>
               </div>

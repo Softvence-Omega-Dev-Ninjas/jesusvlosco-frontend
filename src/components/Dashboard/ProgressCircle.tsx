@@ -44,7 +44,8 @@ export const ProgressCircle: React.FC<{
         </svg>
         <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
           <div style={{ color }}>
-            {valuePart} <span className="text-[#484848]">{restPart}</span>
+            <span>{valuePart}</span>
+            <span className="text-[#484848]">{restPart}</span>
           </div>
         </div>
       </div>
