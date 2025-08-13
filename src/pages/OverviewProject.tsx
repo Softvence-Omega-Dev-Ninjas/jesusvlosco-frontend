@@ -18,8 +18,9 @@ import user3 from "../assets/user3.png";
 import user4 from "../assets/user4.png";
 import user5 from "../assets/user5.png";
 import user6 from "../assets/user6.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useGetAllUserDataQuery } from "@/store/api/admin/shift-sheduling/getAllUser";
+
 
 interface Employee {
   id: number;
@@ -49,6 +50,8 @@ interface ShiftNotification {
 }
 
 const OverviewProject = () => {
+  const projectId = useParams().id;
+  console.log(projectId)
   const [employees] = useState<Employee[]>([
     {
       id: 1,
@@ -335,7 +338,7 @@ const OverviewProject = () => {
                   </span>{" "}
                   {/* Added size for consistency */}
                 </button>
-                <Link to="/admin/schedule/shift-scheduling">
+                <Link to={`/admin/schedule/shift-scheduling/${projectId}`}>
                   <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2  bg-primary text-white  font-medium rounded-lg  transition-colors  cursor-pointer">
                     <UserPlus />
                     Assign

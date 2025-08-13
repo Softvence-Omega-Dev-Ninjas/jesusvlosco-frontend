@@ -7,7 +7,7 @@ import { Eye, Pencil } from "lucide-react";
 const SurveyAndPoll: React.FC = () => {
     const navigate = useNavigate();
 
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleChange= (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = e.target.value.toLowerCase();
         navigate(`/admin/survey-poll-page/${selected}`);
     };

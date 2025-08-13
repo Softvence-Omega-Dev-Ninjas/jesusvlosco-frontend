@@ -23,7 +23,7 @@ import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
 import PollPage from "@/pages/PollPage";
 import PollTemplate from "@/pages/PollTemplate";
-import PublishPoll from "@/pages/PublishPoll";
+// import PublishPoll from "@/pages/PublishPoll";
 import PublishSurvey from "@/pages/PublishSurvey";
 import RecognitionTable from "@/pages/RecognitionTable";
 import Schedule from "@/pages/Schedule";
@@ -187,7 +187,7 @@ const routes = createBrowserRouter([
           { path: "overviewProjects/:id", element: <OverviewProject /> },
           // { path: "timeclock", element: <TimeClock /> },
           {
-            path: 'shift-scheduling',
+            path: 'shift-scheduling/:id',
             element: <ShiftScheduling />
           },
           {
@@ -223,7 +223,7 @@ const routes = createBrowserRouter([
         path: "survey-template",
         element: <SurveyTemplate onBackToPollCreation={() => { }} />,
       },
-      { path: "publish-poll", element: <PublishPoll /> },
+      { path: "publish-poll", element: <PublishSurvey /> },
       {
         path: "poll-template",
         element: <PollTemplate onBackToPollCreation={() => { }} />,
