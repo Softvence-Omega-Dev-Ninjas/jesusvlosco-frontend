@@ -8,22 +8,117 @@ import {
     HiOutlineChevronUp,
 } from "react-icons/hi";
 import { CiCirclePlus } from "react-icons/ci";
+import { useGetAllShiftsQuery } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 
-interface WeeklyScheduleGridProps {
-    publishedShifts: {
-        employeeName: string;
-        date: string;
-        startTime: string;
-        endTime: string;
-        location: string;
-        tasksDone: boolean;
-        status: 'published' | 'draft';
-    }[];
+interface User {
+    id: string;
+    email: string;
+    role?: string;
+    profile?: {
+        firstName?: string;
+        lastName?: string;
+    };
 }
 
-const WeeklyScheduleGrid: FC<WeeklyScheduleGridProps> = ({ publishedShifts }) => {
+interface ShiftData {
+    id?: string;
+    allDay: boolean;
+    createdAt: string;
+    date: string; // ISO format: "2025-08-12T08:00:00.000Z"
+    endTime: string; // ISO format: "2025-08-12T16:00:00.000Z"
+    job: string;
+    location: string;
+    note: string;
+    shiftActivity: unknown[];
+    shiftStatus: 'PUBLISHED' | 'DRAFT' | 'TEMPLATE';
+    shiftTask: unknown[];
+    shiftTitle: string;
+    startTime: string; // ISO format: "2025-08-12T08:00:00.000Z"
+    updatedAt: string;
+    users: Array<{
+        createdAt: string;
+        email: string;
+        employeeId: string;
+        id: string;
+        isLogin: boolean;
+        isVerified: boolean;
+        lastLoginAt: string;
+        otpExpiresAt: string | null;
+        password: string;
+        phone: string;
+        pinCode: string;
+        role: string;
+        updatedAt: string;
+        profile: {
+            address: string;
+            city: string;
+            country: string;
+            createdAt: string;
+            department: string;
+            dob: string;
+            firstName: string;
+            gender: string;
+            id: string;
+            jobTitle: string;
+            lastName: string;
+            nationality: string;
+            profileUrl: string;
+            updatedAt: string;
+        };
+    }>;
+}
+
+const WeeklyScheduleGrid = () => {
+    // Note: We're fetching shift data directly from API instead of using props
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+    const getShifts = useGetAllShiftsQuery({});
+    const users = useGetAllUserQuery({});
+    const userList = users?.data?.data || [];
+    console.log("UserList", userList);
+    console.log('=== DEBUGGING SHIFTS ===');
+    console.log('getShifts:', getShifts);
+    console.log('getShifts.data:', getShifts.data);
+    console.log('getShifts.data?.data:', getShifts.data?.data);
+    console.log('Is Array?:', Array.isArray(getShifts.data?.data));
+    console.log('Length:', getShifts.data?.data?.length);
+    
+    if (getShifts.data?.data && getShifts.data.data.length > 0) {
+        console.log('First shift:', getShifts.data.data[0]);
+    }
+
+    // Utility functions for handling ISO date formats
+    const parseISODate = (isoString: string): Date | null => {
+        try {
+            const date = new Date(isoString);
+            return isNaN(date.getTime()) ? null : date;
+        } catch {
+            return null;
+        }
+    };
+
+    const isSameDay = (date1: Date, date2: Date): boolean => {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        );
+    };
+
+    // Format ISO datetime to time string in AM/PM format
+    const formatTimeFromISO = (isoString: string): string => {
+        const date = parseISODate(isoString);
+        if (!date) return isoString; // Return original if parsing fails
+        
+        // Return in 12-hour format with AM/PM
+        return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+    };
+
 
     const getDaysForWeek = (): { day: string; date: string; fullDate: Date }[] => {
         const days = [];
@@ -67,27 +162,50 @@ const WeeklyScheduleGrid: FC<WeeklyScheduleGridProps> = ({ publishedShifts }) =>
         setCurrentDate(newDate);
     };
 
-    const getShiftForDay = (employeeName: string, dayDate: Date) => {
-        return publishedShifts.find(shift => {
-            const shiftDate = new Date(shift.date);
-            return (
-                shift.employeeName === employeeName &&
-                shiftDate.getFullYear() === dayDate.getFullYear() &&
-                shiftDate.getMonth() === dayDate.getMonth() &&
-                shiftDate.getDate() === dayDate.getDate()
-            );
+    // Get all shifts for a specific day (can return multiple shifts)
+    const getShiftsForUserAndDay = (dayDate: Date, userId: string): ShiftData[] => {
+        console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
+        
+        // Safety check: ensure data exists and is an array
+        if (!getShifts.data || !Array.isArray(getShifts.data)) {
+            console.log('❌ No data available or not an array');
+            return [];
+        }
+
+        const matchingShifts = getShifts.data.filter((shift: ShiftData) => {
+            // Parse ISO format date (e.g., "2025-08-12T08:00:00.000Z")
+            const shiftDate = parseISODate(shift.date);
+            
+            if (!shiftDate) {
+                console.warn('❌ Invalid date format in shift:', shift.date);
+                return false;
+            }
+
+            // Check if the date matches AND if the shift belongs to this user
+            const isDateMatch = isSameDay(shiftDate, dayDate);
+            const isUserMatch = shift.users.some(user => user.id === userId);
+
+            if (isDateMatch && isUserMatch) {
+                console.log('✅ USER SHIFT MATCH FOUND!', {
+                    userId,
+                    shiftDate: shift.date,
+                    shiftStatus: shift.shiftStatus,
+                    employee: shift.users?.[0]?.profile?.firstName || 'No name'
+                });
+            }
+
+            return isDateMatch && isUserMatch;
         });
+
+        console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
+        return matchingShifts;
     };
-
-    // Exact employee names (must match with EmployeeAvailability)
-    const defaultEmployees = [
-        "Sarah Johnson", "Mike Chen", "Emma Willson",
-        "David Rodriguez", "Lisa Thompson", "Guy Hawkins",
-        "Wade Warren", "Esther Howard", "Savannah Nguyen",
-    ];
-
-    const uniqueEmployees = defaultEmployees;
     const days = getDaysForWeek();
+    
+    console.log('=== WEEK DAYS ===');
+    days.forEach((day, index) => {
+        console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
+    });
 
     return (
         <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm overflow-x-auto">
@@ -183,7 +301,9 @@ const WeeklyScheduleGrid: FC<WeeklyScheduleGridProps> = ({ publishedShifts }) =>
             </div>
 
             <div className="min-w-max mt-6">
+                {/* Header row with day names */}
                 <div className="grid grid-cols-7 gap-2 text-sm font-medium text-[rgba(78,83,177,1)] mb-2">
+                    {/* Day columns */}
                     {days.map((day, i) => (
                         <div key={i} className="text-center whitespace-nowrap">
                             {day.day} {day.date}
@@ -191,41 +311,56 @@ const WeeklyScheduleGrid: FC<WeeklyScheduleGridProps> = ({ publishedShifts }) =>
                     ))}
                 </div>
 
-                {uniqueEmployees.map((emp, rowIdx) => (
-                    <div key={rowIdx} className="grid grid-cols-7 gap-2 mb-2">
-                        {days.map((day, colIdx) => {
-                            const shift = getShiftForDay(emp, day.fullDate);
-                            return (
-                                <div
-                                    key={colIdx}
-                                    className={`min-h-[100px]  lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative ${shift
-                                        ? shift.status === "published"
-                                            ? "bg-indigo-200 border border-[rgba(78,83,177,1)]"
-                                            : "bg-white border-2 border-indigo-400"
-                                        : "border border-dashed border-gray-300 bg-white flex items-center justify-center"
-                                        }`}
-                                >
-                                    {!shift && <CiCirclePlus className="text-2xl text-black" />}
-                                    {shift && (
-                                        <>
-                                            <p className="text-xs mt-4 px-1 font-medium text-indigo-800 mb-3 text-center">
-                                                {shift.startTime} - {shift.endTime}
-                                            </p>
-                                            <p className="text-xs text-center text-gray-500">{shift.location}</p>
-                                            {shift.status === "published" && shift.tasksDone && (
-                                                <div className="flex "> <div>
-                                                    <img className="mt-2.5 lg:ml-6 " src="../src/assets/task.png" alt="" /></div>
-                                                    <p className="text-xs  text-center text-[rgba(78,83,177,1)] bg-indigo-200 inline-block px-2 py-0.5 rounded-full mt-2">
-                                                        Tasks Done
-                                                    </p></div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ))}
+                {/* Multiple rows - one for each user */}
+                <div className="space-y-2">
+                    {userList.map((user: User, rowIdx: number) => (
+                        <div key={user.id || rowIdx} className="grid grid-cols-7 gap-2">
+                            {/* 7 day columns for this user */}
+                            {days.map((day, colIdx) => {
+                                const shiftsForUserAndDay = getShiftsForUserAndDay(day.fullDate, user.id);
+                                // Get only the last shift if multiple shifts exist for this user on this day
+                                const lastShift = shiftsForUserAndDay.length > 0 ? shiftsForUserAndDay[shiftsForUserAndDay.length - 1] : null;
+                                
+                                return (
+                                    <div key={`${rowIdx}-${colIdx}`} className="space-y-2">
+                                        {lastShift ? (
+                                            <div
+                                                className={`min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative ${
+                                                    lastShift.shiftStatus === "PUBLISHED"
+                                                        ? "bg-indigo-200 border border-[rgba(78,83,177,1)]"
+                                                        : "bg-white border-2 border-indigo-400"
+                                                }`}
+                                            >
+                                                <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
+                                                    {formatTimeFromISO(lastShift.startTime)} - {formatTimeFromISO(lastShift.endTime)}
+                                                </p>
+                                                <p className="text-xs text-center text-gray-500 mb-1">{lastShift.location}</p>
+                                                <p className="text-xs text-center text-gray-700 font-medium">
+                                                    {user.profile?.firstName || user.email?.split('@')[0] || 'Unknown'}
+                                                </p>
+                                                <p className="text-xs text-center text-blue-600">
+                                                    Status: {lastShift.shiftStatus}
+                                                </p>
+                                                {lastShift.shiftStatus === "PUBLISHED" && lastShift.shiftTask.length > 0 && (
+                                                    <div className="flex justify-center mt-1">
+                                                        <p className="text-xs text-center text-[rgba(78,83,177,1)] bg-indigo-100 inline-block px-2 py-0.5 rounded-full">
+                                                            Tasks Done
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            /* Empty cell with consistent styling */
+                                            <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
+                                                <CiCirclePlus className="text-2xl text-gray-400 hover:text-gray-600" />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
             </div>
         </section>
     );

@@ -187,7 +187,7 @@ const routes = createBrowserRouter([
           { path: "overviewProjects/:id", element: <OverviewProject /> },
           // { path: "timeclock", element: <TimeClock /> },
           {
-            path: 'shift-scheduling',
+            path: 'shift-scheduling/:id',
             element: <ShiftScheduling />
           },
           {
