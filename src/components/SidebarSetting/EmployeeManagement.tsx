@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useGetEmployeeManagementQuery } from "@/store/api/admin/settings/employeeManagementApi";
+import { useDeleteUserMutation } from "@/store/api/admin/settings/getUser";
 
 interface EmployeeProfile {
   firstName: string;
@@ -21,18 +22,27 @@ interface Employee {
 // Main App component
 const EmployeeManagement = () => {
   // State for form inputs (optional for this design, but good practice)
-  const [employeeName, setEmployeeName] = useState("");
+   const [employeeName, setEmployeeName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
 
   const { data } = useGetEmployeeManagementQuery(undefined);
-  console.log(data);
-  // Inside your component, before the return statement:
+  const [deleteUser] = useDeleteUserMutation();
 
-  // Filter employees based on the inputs
+  // Local state to manage employees list for instant UI update after delete
+  const [localEmployees, setLocalEmployees] = useState<Employee[]>([]);
+
+  // On data change, update localEmployees state
+  useEffect(() => {
+    if (data?.data) {
+      setLocalEmployees(data.data);
+    }
+  }, [data]);
+
+  // Filter employees based on inputs and localEmployees state
   const filteredEmployees =
-    data?.data?.filter((employee: Employee) => {
+    localEmployees.filter((employee: Employee) => {
       // Check employee name (first + last)
       const fullName = `${employee.profile?.firstName || ""} ${
         employee.profile?.lastName || ""
@@ -78,6 +88,26 @@ const EmployeeManagement = () => {
       setSelectedIds([...selectedIds, id]);
     }
   };
+
+  // Delete handler
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await deleteUser(id).unwrap();
+      alert("User deleted successfully");
+
+      // Remove deleted user from localEmployees state
+      setLocalEmployees((prev) => prev.filter((emp) => emp.id !== id));
+
+      // Also update selectedIds if needed
+      setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      alert("Delete failed");
+    }
+  };
+
+  
 
   return (
     <div className="min-h-screen   font-inter">
@@ -281,7 +311,10 @@ const EmployeeManagement = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="px-4 py-2 rounded-lg bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                      <button
+                      
+                       onClick={() => handleDelete(employee.id)}
+                      className="px-4 py-2 rounded-lg bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                         Remove
                       </button>
                     </td>
