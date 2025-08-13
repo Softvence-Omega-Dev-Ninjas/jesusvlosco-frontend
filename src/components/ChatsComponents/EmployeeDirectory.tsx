@@ -64,7 +64,7 @@ export default function EmployeeDirectory() {
   const handleEmail = (employee: Employee) => {
     window.open(`mailto:${employee.email}`);
   };
-
+    
   return (
     <div className="max-w-4xl mx-auto bg-gray-50 min-h-screen">
       {/* Header */}

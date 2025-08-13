@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Chat } from "../../pages/Chats";
 import { CompanyUpdate } from "../../pages/CompanyUpdate";
-import EmployeeDirectory from "@/components/ChatsComponents/EmployeeDirectory";
+import RecognitionTable from "@/pages/RecognitionTable";
 
 export const Communication = () => {
   const [activeTab, setActiveTab] = useState("chat");
@@ -10,15 +10,7 @@ export const Communication = () => {
 
   const renderContent = () => {
     if (location.pathname.includes("/recognition")) {
-      return (
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-3">Recognition Content</h2>
-          <p className="text-gray-700">
-            This section displays content specific to Recognition. The
-            tab-switching UI is hidden for this specific route.
-          </p>
-        </div>
-      );
+      return <RecognitionTable></RecognitionTable>;
     }
 
     // If not on the /recognition path, proceed with tab-switching logic
@@ -34,15 +26,15 @@ export const Communication = () => {
   const showTabButtons = !location.pathname.includes("/recognition");
 
   return (
-    <div className="md:p-6 mx-2 flex">
+    <div className="py-4">
       {/* Conditionally render tab buttons */}
-      <div className="w-[80%] pr-4 border-r border-website-color-border">
+      <div>
         {showTabButtons && (
           <div className="flex flex-col md:flex-row justify-between space-x-2 mb-6">
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab("chat")}
-                className={`md:py-2 md:px-4 whitespace-nowrap  text-lg rounded-md transition duration-200 ${
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${
                   activeTab === "chat"
                     ? "bg-primary text-white shadow-md"
                     : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -53,7 +45,7 @@ export const Communication = () => {
 
               <button
                 onClick={() => setActiveTab("community")}
-                className={`md:py-2 md:px-4 whitespace-nowrap text-lg rounded-md transition duration-200 ${
+                className={`py-1 px-3 md:py-2 md:px-4 whitespace-nowrap md:text-lg rounded-md transition duration-200 ${
                   activeTab === "community"
                     ? "bg-primary text-white shadow-md"
                     : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -64,15 +56,9 @@ export const Communication = () => {
             </div>
           </div>
         )}
-
-        {/* Conditionally render content based on activeTab or location */}
-        <div>{renderContent()}</div>
       </div>
-
-      {/* Right side section - Employee Directory */}
-      <div className="pl-4 pt-3">
-        <EmployeeDirectory />
-      </div>
+      {/* Conditionally render content based on activeTab or location */}
+      <div>{renderContent()}</div>
     </div>
   );
 };
