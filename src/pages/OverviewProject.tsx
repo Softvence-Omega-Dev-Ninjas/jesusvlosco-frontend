@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   RefreshCw,
   UserPlus,
   MoreHorizontal,
   LucideCalendarDays,
-  LucideCheck,
   X,
   ChevronDown,
   Tally1,
@@ -21,7 +21,13 @@ import user6 from "../assets/user6.png";
 
 import { Link, useParams } from "react-router-dom";
 import { useGetUsersQuery } from "@/store/api/admin/shift-sheduling/getAllUser";
-
+import TimeOffRequests from "@/components/Dashboard/TimeOffRequests";
+import { ShiftNotifications } from "@/components/Dashboard/ShiftNotifications";
+import {
+  useApproveTimeOffRequestMutation,
+  useDeclineTimeOffRequestMutation,
+  useGetAllTimeOffRequestsQuery,
+} from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 
 interface Employee {
   id: string;
@@ -35,72 +41,68 @@ interface Employee {
   additionalProjects?: number;
 }
 
-interface TimeOffRequest {
-  id: number;
-  name: string;
-  avatar: string;
-  type: string;
-  date: string;
-  status: "Pending" | "Approved" | "Declined";
-}
-
-interface ShiftNotification {
-  id: number;
-  message: string;
-  time: string;
-  type: "schedule" | "assignment";
-}
-
 const OverviewProject = () => {
-  const projectId  = useParams().id
+  const projectId = useParams().id;
 
-  const [timeOffRequests] = useState<TimeOffRequest[]>([
-    {
-      id: 1,
-      name: "Jane Cooper",
-      avatar: user1,
-      type: "Doctor's appointment",
-      date: "Mar 16, 2025",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Jenny Wilson",
-      avatar: user2,
-      type: "Sick leave",
-      date: "Mar 30, 2025",
-      status: "Approved",
-    },
-    {
-      id: 3,
-      name: "Kristin Watson",
-      avatar: user3,
-      type: "Personal day",
-      date: "Jun 02, 2025",
-      status: "Declined",
-    },
-  ]);
+  const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
 
-  const [notifications] = useState<ShiftNotification[]>([
-    {
-      id: 1,
-      message: "New shift schedule has been published",
-      time: "Yesterday",
-      type: "schedule",
-    },
-    {
-      id: 2,
-      message: "Robert Fox has been assigned to the closing shift",
-      time: "1 hour ago",
-      type: "assignment",
-    },
-    {
-      id: 3,
-      message: "New shift schedule has been published",
-      time: "Yesterday",
-      type: "schedule",
-    },
-  ]);
+  const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
+
+  const { data: timeOff, refetch } = useGetAllTimeOffRequestsQuery({
+    page: 1,
+    limit: 10,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  // Map backend data to UI-friendly shape
+  const timeOffRequests =
+    timeOff?.data?.map((req: any) => ({
+      id: req.id,
+      name: req.user?.profile?.firstName || "Unknown User", // or backend name field
+      avatar:
+        req.user?.profile?.profileUrl ||
+        `https://i.pravatar.cc/40?img=${Math.random()}`,
+      type: req.reason,
+      date: new Date(req.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      status: req.status?.toLowerCase(),
+    })) || [];
+
+  const handleApprove = (id: string, adminNote: string) => {
+    approveTimeOffRequest({ id, adminNote })
+      .unwrap()
+      .then(() => {
+        console.log("Time off request approved:", id, adminNote);
+        refetch();
+      })
+      .catch((err) => {
+        console.error("Failed to approve time off request:", err);
+      });
+  };
+
+  const handleDecline = async (
+    id: string,
+    adminNote: string,
+    status: string
+  ) => {
+    try {
+      const result = await declineTimeOffRequest({
+        id,
+        adminNote,
+        status,
+      }).then(() => {
+        console.log("Time off request declined:", id, adminNote, status);
+        refetch();
+      });
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // State for the calendar modal visibility
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -180,53 +182,68 @@ const OverviewProject = () => {
   // Helper function to get job title display name
   const getJobTitleDisplay = (jobTitle: string) => {
     const jobTitleMap: { [key: string]: string } = {
-      'FRONT_END_DEVELOPER': 'Frontend Developer',
-      'BACK_END_DEVELOPER': 'Backend Developer',
-      'FULL_STACK_DEVELOPER': 'Full Stack Developer',
-      'PROJECT_MANAGER': 'Project Manager',
-      'DESIGNER': 'Designer',
-      'QA_ENGINEER': 'QA Engineer',
-      'DEVOPS_ENGINEER': 'DevOps Engineer',
-      'BUSINESS_ANALYST': 'Business Analyst',
-      'PRODUCT_MANAGER': 'Product Manager',
-      'SCRUM_MASTER': 'Scrum Master'
+      FRONT_END_DEVELOPER: "Frontend Developer",
+      BACK_END_DEVELOPER: "Backend Developer",
+      FULL_STACK_DEVELOPER: "Full Stack Developer",
+      PROJECT_MANAGER: "Project Manager",
+      DESIGNER: "Designer",
+      QA_ENGINEER: "QA Engineer",
+      DEVOPS_ENGINEER: "DevOps Engineer",
+      BUSINESS_ANALYST: "Business Analyst",
+      PRODUCT_MANAGER: "Product Manager",
+      SCRUM_MASTER: "Scrum Master",
     };
-    return jobTitleMap[jobTitle] || jobTitle?.replace(/_/g, ' ')?.toLowerCase()
-      ?.replace(/\b\w/g, l => l.toUpperCase()) || 'Employee';
+    return (
+      jobTitleMap[jobTitle] ||
+      jobTitle
+        ?.replace(/_/g, " ")
+        ?.toLowerCase()
+        ?.replace(/\b\w/g, (l) => l.toUpperCase()) ||
+      "Employee"
+    );
   };
 
   // Helper function to format date
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     } catch {
-      return 'N/A';
+      return "N/A";
     }
   };
 
   // Process the employees data from API
-  const processedEmployees = data?.data ? data.data.map((user: any, index: number) => {
-    const profile = user.profile;
-    const primaryProject = user.projects?.[0];
-    const additionalProjectsCount = user.projects?.length > 1 ? user.projects.length - 1 : 0;
-    
-    return {
-      id: user.id,
-      name: profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : 'Unknown User',
-      jobTitle: getJobTitleDisplay(profile?.jobTitle),
-      profileUrl: profile?.profileUrl || defaultAvatars[index % defaultAvatars.length],
-      project: primaryProject ? primaryProject.title : 'No Project Assigned',
-      additionalProjects: additionalProjectsCount,
-      shift: "Morning", // Default since shift data structure seems to be empty in the API
-      time: "9:00am-5:00pm", // Default time
-      date: formatDate(user.updatedAt),
-      location: primaryProject?.projectLocation || 'Not specified'
-    };
-  }) : [];
+  const processedEmployees = data?.data
+    ? data.data.map((user: any, index: number) => {
+        const profile = user.profile;
+        const primaryProject = user.projects?.[0];
+        const additionalProjectsCount =
+          user.projects?.length > 1 ? user.projects.length - 1 : 0;
+
+        return {
+          id: user.id,
+          name: profile
+            ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim()
+            : "Unknown User",
+          jobTitle: getJobTitleDisplay(profile?.jobTitle),
+          profileUrl:
+            profile?.profileUrl ||
+            defaultAvatars[index % defaultAvatars.length],
+          project: primaryProject
+            ? primaryProject.title
+            : "No Project Assigned",
+          additionalProjects: additionalProjectsCount,
+          shift: "Morning", // Default since shift data structure seems to be empty in the API
+          time: "9:00am-5:00pm", // Default time
+          date: formatDate(user.updatedAt),
+          location: primaryProject?.projectLocation || "Not specified",
+        };
+      })
+    : [];
 
   // Show loading state
   if (isLoading) {
@@ -244,8 +261,8 @@ const OverviewProject = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">Error loading employees</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-primary text-white rounded-lg"
           >
             Retry
@@ -295,7 +312,6 @@ const OverviewProject = () => {
 
                 <Link to={`/admin/schedule/shift-scheduling/${projectId}`}>
                   <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2 bg-primary text-white font-medium rounded-lg transition-colors cursor-pointer">
-
                     <UserPlus />
                     Assign
                   </button>
@@ -325,75 +341,81 @@ const OverviewProject = () => {
               {/* Table Body */}
               <div>
                 {processedEmployees && processedEmployees.length > 0 ? (
-                  processedEmployees.map((employee: Employee, index: number) => (
-                    <div
-                      key={employee.id}
-                      className={`px-5 py-4 border-b-2 border-gray-200 ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                      }`}
-                    >
+                  processedEmployees.map(
+                    (employee: Employee, index: number) => (
                       <div
-                        className="grid items-center"
-                        style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                        key={employee.id}
+                        className={`px-5 py-4 border-b-2 border-gray-200 ${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        }`}
                       >
-                        {/* Employee */}
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                              <img
-                                src={employee.profileUrl}
-                                alt={employee.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = defaultAvatars[index % defaultAvatars.length];
-                                }}
-                              />
+                        <div
+                          className="grid items-center"
+                          style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                        >
+                          {/* Employee */}
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                <img
+                                  src={employee.profileUrl}
+                                  alt={employee.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src =
+                                      defaultAvatars[
+                                        index % defaultAvatars.length
+                                      ];
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-primary">
+                                  {employee.name}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {employee.jobTitle}
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-sm font-medium text-primary">
-                                {employee.name}
+                          </div>
+
+                          {/* Project Name */}
+                          <div>
+                            <div className="text-sm text-gray-700">
+                              {employee.project}
+                              {employee.additionalProjects &&
+                                employee.additionalProjects > 0 && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    +{employee.additionalProjects} more
+                                  </span>
+                                )}
+                            </div>
+                          </div>
+
+                          {/* Shift */}
+                          <div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-gray-500">
+                                {employee.shift}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {employee.jobTitle}
+                                {employee.time}
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Project Name */}
-                        <div>
-                          <div className="text-sm text-gray-700">
-                            {employee.project}
-                            {employee.additionalProjects && employee.additionalProjects > 0 && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                +{employee.additionalProjects} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Shift */}
-                        <div>
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium text-gray-500">
-                              {employee.shift}
+                          {/* Date */}
+                          <div>
+                            <div className="text-sm text-gray-700">
+                              {employee.date}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {employee.time}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Date */}
-                        <div>
-                          <div className="text-sm text-gray-700">
-                            {employee.date}
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  )
                 ) : (
                   <div className="px-5 py-8 text-center text-gray-500">
                     No employees found
@@ -407,117 +429,13 @@ const OverviewProject = () => {
         {/* Right Sidebar (will not dim) */}
         <div className="border-t border-gray-200 w-full lg:border-t-0 col-span-3 mt-4">
           {/* Time-off Requests */}
-          <div className="mb-8 p-6 lg:p-0">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 px-3">
-                Time-off requests
-              </h3>
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-                <LoaderCircle />
-              </button>
-            </div>
 
-            <div className="space-y-4 p-2">
-              {timeOffRequests.map((request) => (
-                <Link
-                  to="/schedule/timeoffrequest"
-                  key={request.id}
-                  className="block transition-transform hover:scale-[1.01]"
-                >
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
-                    {/* Avatar */}
-                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                      <img
-                        src={request.avatar}
-                        alt={request.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {request.name}
-                        </p>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            request.status === "Pending"
-                              ? "bg-orange-200 text-orange-800"
-                              : request.status === "Approved"
-                              ? "bg-green-500 text-white"
-                              : "bg-red-500 text-white"
-                          }`}
-                        >
-                          {request.status}
-                        </span>
-                      </div>
-
-                      <div className="-ml-10 mt-5">
-                        {request.date && (
-                          <p className="text-sm text-gray-600 mb-1">
-                            <LucideCalendarDays
-                              size={14}
-                              className="inline-block mr-1"
-                            />
-                            {request.date}
-                          </p>
-                        )}
-                        <p className="text-sm font-medium text-gray-900 mb-2">
-                          {request.type}
-                        </p>
-
-                        {request.status === "Pending" && (
-                          <div className="flex items-center justify-between pt-2">
-                            <button className="flex gap-2 border border-gray-200 p-2 rounded-md">
-                              <LucideCalendarDays />
-                              Deadline
-                            </button>
-                            <button className="bg-green-500 flex gap-2 p-2 rounded-md text-white">
-                              <LucideCheck />
-                              Approve
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-
-              <div className="text-center pt-2">
-                <button className="text-sm text-primary font-medium">
-                  End of Requests
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Shift Notifications */}
-          <div className="p-6 lg:p-0">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 px-3">
-              Shift Notification
-            </h3>
-            <div className="space-y-4 p-2">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="p-3 bg-gray-100 rounded-lg"
-                >
-                  <p className="text-sm font-medium text-gray-900 mb-1">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-gray-500">{notification.time}</p>
-                </div>
-              ))}
-
-              <div className="text-center pt-2">
-                <button className="text-sm text-primary font-medium">
-                  End of notification
-                </button>
-              </div>
-            </div>
-          </div>
+          <TimeOffRequests
+            requests={timeOffRequests}
+            onApprove={handleApprove}
+            onDecline={handleDecline}
+          />
+          <ShiftNotifications />
         </div>
       </div>
 

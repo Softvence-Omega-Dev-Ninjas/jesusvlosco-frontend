@@ -11,7 +11,7 @@ export default function AdminProfile() {
   return (
     <div className=" max-w-7xl mx-auto px-6  ">
       {/* Personal Information Section */}
-      <div className=" border border-gray-200 rounded-md mb-4">
+      <div className=" border border-gray-200 rounded-2xl mb-4">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -75,7 +75,7 @@ export default function AdminProfile() {
       </div>
 
       {/* Password Section */}
-      {/* <div className=" rounded-md  border border-gray-200 mb-6">
+      <div className=" rounded-2xl border border-gray-200 mb-6">
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div>
@@ -87,10 +87,10 @@ export default function AdminProfile() {
             </button>
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Link Accounts Section */}
-      <div className=" rounded-lg  border border-gray-200">
+      <div className=" rounded-2xl  border border-gray-200">
         <div className="p-6">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-[#484848]">Link accounts</h2>

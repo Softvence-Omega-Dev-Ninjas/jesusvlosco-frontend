@@ -126,7 +126,7 @@ const EmployeeManagement = () => {
             <div className="mb-3">
               <label
                 htmlFor="employeeName"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-primary mb-3"
               >
                 Name
               </label>
@@ -134,7 +134,7 @@ const EmployeeManagement = () => {
                 type="text"
                 id="employeeName"
                 name="employeeName"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 mb-6 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="Search by name"
                 value={employeeName}
                 onChange={(e) => setEmployeeName(e.target.value)}
@@ -145,7 +145,7 @@ const EmployeeManagement = () => {
             <div>
               <label
                 htmlFor="employeeId"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-primary mb-3"
               >
                 Employee ID
               </label>
@@ -161,7 +161,7 @@ const EmployeeManagement = () => {
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-primary mb-2">
+          <h3 className="text-lg font-semibold text-primary mb-6">
             Employee Login Information
           </h3>
           <div className="mb-10">
@@ -169,7 +169,7 @@ const EmployeeManagement = () => {
             <div className="mb-3">
               <label
                 htmlFor="contactNumber"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-primary mb-3"
               >
                 Contact Number
               </label>
@@ -177,7 +177,7 @@ const EmployeeManagement = () => {
                 type="text"
                 id="contactNumber"
                 name="contactNumber"
-                className="mt-1 block w-full border border-gray-300 text-[#484848] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 mb-6 block w-full border border-gray-300 text-[#484848] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="000-xxx-xxxx"
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
@@ -188,7 +188,7 @@ const EmployeeManagement = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-primary mb-1"
+                className="block text-sm font-medium text-primary mb-3"
               >
                 E-mail
               </label>
@@ -314,7 +314,7 @@ const EmployeeManagement = () => {
                       <button
                       
                        onClick={() => handleDelete(employee.id)}
-                      className="px-4 py-2 rounded-lg bg-pink-100 text-red-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                      className="px-6 py-2 rounded-2xl bg-[#FFE6E7] text-[#DC1E28] cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                         Remove
                       </button>
                     </td>
