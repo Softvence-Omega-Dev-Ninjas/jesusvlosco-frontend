@@ -8,9 +8,6 @@ import {
   EllipsisVertical,
   Settings,
 } from "lucide-react";
-import personImg from "@/assets/chat-person.jpg";
-import ChatInfoSidebar from "./ChatInfoSidebar";
-import ChatDeleteModal from "./ChatDeleteModal";
 import ChatConversation from "./ChatConversation";
 import MemberSelectorModal from "./MemberSelectorModal";
 import { useNavigate } from "react-router-dom";
@@ -18,11 +15,7 @@ import {
   useGetChatByIdQuery,
   useGetPrivateChatQuery,
 } from "@/store/api/private-chat/privateChatApi";
-import {
-  connectPrivateChat,
-  initPrivateMessageListener,
-  onNewPrivateMessage,
-} from "@/utils/socket";
+import { connectPrivateChat } from "@/utils/socket";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 
@@ -64,22 +57,13 @@ export default function ResponsiveChatWindow() {
 
   const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
 
-  const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<ChatMessage[]>([]);
+  // const [message, setMessage] = useState("");
+  // const [chat, setChat] = useState<ChatMessage[]>([]);
   const token = user?.accessToken as string;
 
   // Connect to the private chat socket when the component mounts
   useEffect(() => {
     connectPrivateChat(token);
-
-    onNewPrivateMessage((newMsg) => {
-      setChat((prev) => [...prev, newMsg]);
-    });
-
-    // Initialize private message listener
-    initPrivateMessageListener((msg) => {
-      setChat((prev) => [...prev, msg]);
-    });
   }, [token]);
 
   // console.log(privateChats, "data");
@@ -94,7 +78,7 @@ export default function ResponsiveChatWindow() {
     (chat) => chat.chatId === selectedChatId
   );
 
-  // console.log(privateChats[0]);
+  // const selectedPrivateChat =
 
   // Handle chat selection on mobile
   const handleChatSelect = (chatId: number) => {
@@ -237,7 +221,7 @@ export default function ResponsiveChatWindow() {
                   </p>
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">
-                  {chat?.lastMessage?.content || "N/A"}
+                  {/* {chat.lastMessage || "N/A"} */}
                 </p>
               </div>
             </div>

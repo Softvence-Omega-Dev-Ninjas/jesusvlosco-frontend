@@ -1,13 +1,13 @@
 import { io, Socket } from "socket.io-client";
 
-export let socket: Socket | null = null;
+let socket: Socket | null = null;
 
 export const connectPrivateChat = (token: string) => {
   if (socket) return socket;
 
   socket = io("wss://api.lgcglobalcontractingltd.com/js/private", {
     extraHeaders: {
-      authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     // transports: ["websocket"],
   });
@@ -26,7 +26,7 @@ export const connectPrivateChat = (token: string) => {
 
   return socket;
 };
-console.log(socket, "socket");
+
 export const initPrivateMessageListener = (onMessage: (msg: any) => void) => {
   if (!socket) {
     console.error("⚠️ Socket not connected");
@@ -49,12 +49,11 @@ export const sendPrivateMessage = (
     return;
   }
 
-  const result = socket.emit("private:send_message", {
+  socket.emit("private:send_message", {
     recipientId,
     dto, // ✅ matches backend expectation
     userId,
   });
-  console.log(result, "result from sendPrivateMessage");
 };
 
 export const onNewPrivateMessage = (callback: (message: any) => void) => {

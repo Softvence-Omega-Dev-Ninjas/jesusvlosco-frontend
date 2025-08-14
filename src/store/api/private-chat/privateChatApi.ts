@@ -46,19 +46,11 @@ const privateChatApi = baseApi.injectEndpoints({
           const { data: savedMessage } = await queryFulfilled;
 
           // Emit over socket for recipient real-time update
-          sendPrivateMessage(
-            recipientId,
-            { content: messageInput },
-            userId,
-            file
-          );
-
-          // Optimistic UI update (so sender sees the message instantly)
-          // dispatch(
-          //   privateChatSlice.actions.addMessage({
-          //     conversationId: savedMessage.conversationId,
-          //     message: savedMessage,
-          //   })
+          // sendPrivateMessage(
+          //   recipientId,
+          //   { content: messageInput },
+          //   userId,
+          //   file
           // );
         } catch (error) {
           console.error("Failed to send private message:", error);

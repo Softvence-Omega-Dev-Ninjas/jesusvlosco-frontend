@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Chat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
-import { initPrivateMessageListener, sendPrivateMessage } from "@/utils/socket";
+import axios from "axios";
+import { initPrivateMessageListener } from "@/utils/socket";
 
 const ChatConversation = ({
   selectedChat,
@@ -25,53 +25,46 @@ const ChatConversation = ({
 
   useEffect(() => {
     if (selectedChat?.messages) {
-      setMessages(selectedChat.messages);
+      setMessages(selectedChat?.messages);
     }
   }, [selectedChat?.messages]);
-  console.log(messages, "messages");
-
-  const [sendMessage] = useSendPrivateMessageMutation();
-
-  // ✅ Listen for incoming messages in real time
-  useEffect(() => {
-    const cleanup = initPrivateMessageListener((newMessage) => {
-      if (
-        newMessage.senderId === selectedPrivateChatInfo.participant.id ||
-        newMessage.recipientId === selectedPrivateChatInfo.participant.id
-      ) {
-        setMessages((prev) => [...prev, newMessage]);
-        console.log(messages, "messages");
-      }
-    });
-
-    return cleanup;
-  }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim()) return;
-
+    if (messageInput.trim() === "") return;
     const userId = me?.id || "";
-    const recipientId = selectedPrivateChatInfo.participant.id;
+    const recipientId = selectedPrivateChatInfo.participant.id || "";
+
+    const formData = new FormData();
+    formData.append("content", messageInput);
+    formData.append("userId", userId);
+
+    // if (file) {
+    //   formData.append("file", file);
+    // }
 
     try {
-      // 1️⃣ Send via REST API to save in DB
-      const result = await sendMessage({
-        recipientId,
-        messageInput,
-        userId,
-      }).unwrap();
-
-      // 2️⃣ Optimistically update local state
-      setMessages((prev) => [...prev, result]);
-
-      // 3️⃣ Emit via socket for real-time delivery
-      sendPrivateMessage(recipientId, { content: messageInput }, userId);
-      // console.log(resulttt, "resulttt");
-      setMessageInput("");
+      await axios.post(
+        `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${me?.accessToken}`,
+          },
+        }
+      );
     } catch (error) {
-      console.error("Failed to send private message:", error);
+      console.log(error);
     }
   };
+  useEffect(() => {
+    initPrivateMessageListener((newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+    });
+  }, []);
+
+  if (messages.length === 0 || !messages) {
+    return "No messages";
+  }
 
   return (
     <div className="flex-1 flex flex-col">
@@ -148,7 +141,7 @@ const ChatConversation = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[300px]">
         {messages?.map((message) => {
           const isMe = message.senderId === me?.id; // currentUserId from auth
           // console.log(isMe, "isMe");
@@ -184,7 +177,7 @@ const ChatConversation = ({
       </div>
 
       {/* Message Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
+      <div className="bg-white border-t border-gray-200 p-4 sticky bottom-0">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <input
