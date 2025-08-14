@@ -188,7 +188,7 @@ const filterOptions = [
 
 export default function CreateRecognition() {
   const [currentStep, setCurrentStep] = useState(1);
-  const { data } = useGetAllUserQuery(null);
+  const { data } = useGetAllUserQuery({limit: 20});
   const { data: badgeData } = useGetAllBadgeQuery(null);
 
   const [createRecognation] = useAddRecognationMutation();

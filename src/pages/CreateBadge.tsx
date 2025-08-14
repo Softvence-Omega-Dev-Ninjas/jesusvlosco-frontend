@@ -1,11 +1,10 @@
-
 import {
   useAddBadgeMutation,
   useGetAllBadgeQuery,
 } from "@/store/api/admin/recognation/recognationApi";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-
 
 const badgeCategories = [
   { value: "MILESTONE", label: "Milestone" },
@@ -18,7 +17,9 @@ const badgeCategories = [
 ];
 
 export default function CreateBadge() {
- 
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get("category");
+  console.log({category})
   const [badgeTitle, setBadgeTitle] = useState("");
   const { data, isLoading } = useGetAllBadgeQuery(null);
   const badges = data?.data;
@@ -100,19 +101,15 @@ export default function CreateBadge() {
                 id="category"
                 name="category"
                 required
-              
+                value={category!}
                 className=" w-full px-3 py-3 border text-[#484848] border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-back cursor-pointer focus:border-back"
               >
-                <option disabled value="">
+                <option disabled >
                   Select category
                 </option>
                 {badgeCategories.map((el) => (
                   <option value={el.value}>{el.label}</option>
                 ))}
-                {/*               
-                <option value="award">Award</option>
-                <option value="milestone">Milestone</option>
-                <option value="recognition">Recognition</option> */}
               </select>
             </div>
 
@@ -182,7 +179,6 @@ export default function CreateBadge() {
             {badges?.map((badge: any, index: number) => (
               <button
                 key={index}
-               
                 className={`w-full aspect-square hover:ring-4 hover:ring-[#4E53B1] hover:ring-offset-2 rounded-xl bg-[#E8E6FF] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer p-3 `}
               >
                 <img
