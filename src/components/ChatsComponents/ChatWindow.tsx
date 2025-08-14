@@ -8,26 +8,36 @@ import {
   EllipsisVertical,
   Settings,
 } from "lucide-react";
-
-import personImg from "@/assets/chat-person.jpg";
-
-import ChatInfoSidebar from "./ChatInfoSidebar";
-import ChatDeleteModal from "./ChatDeleteModal";
 import ChatConversation from "./ChatConversation";
 import MemberSelectorModal from "./MemberSelectorModal";
 import { useNavigate } from "react-router-dom";
+import {
+  useGetChatByIdQuery,
+  useGetPrivateChatQuery,
+} from "@/store/api/private-chat/privateChatApi";
+import { connectPrivateChat } from "@/utils/socket";
+import { useAppSelector } from "@/hooks/useRedux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 
 // Define types for better type safety
 interface ChatMessage {
   id: number;
   text: string;
-  sender: "me" | "other";
+  sender: {
+    profile: {
+      profileUrl: string;
+      firstName: string;
+    };
+  };
   avatar: string;
   time: string;
+  senderId: string;
+  content: string;
 }
 
 export interface Chat {
   id: number;
+  chatId: string;
   name: string;
   message: string;
   time: string;
@@ -36,221 +46,60 @@ export interface Chat {
   messages: ChatMessage[];
   initials: string;
   online: boolean;
+  participant: {
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      profileUrl: string;
+    };
+  };
+  updatedAt: string;
 }
 
 export default function ResponsiveChatWindow() {
   const navigate = useNavigate();
   const chatTabs = ["All", "Unread", "Team"];
   const [activeChatTab, setActiveChatTab] = useState("All");
-  const [selectedChatId, setSelectedChatId] = useState<number>(1);
+  const [selectedChatId, setSelectedChatId] = useState<string>();
   const [showChatInfo, setShowChatInfo] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddMemberModal, setShowMemberModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const user = useAppSelector(selectUser);
+  console.log(showChatInfo, showDeleteModal);
+
+  const { data: conversationsData } = useGetPrivateChatQuery([]);
+  const privateChats = conversationsData?.data || [];
+  // console.log(privateChats, "private chats");
+
+  const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
+
+  // const [message, setMessage] = useState("");
+  // const [chat, setChat] = useState<ChatMessage[]>([]);
+  const token = user?.accessToken as string;
+
+  // Connect to the private chat socket when the component mounts
+  useEffect(() => {
+    connectPrivateChat(token);
+  }, [token]);
+
+  // console.log(privateChats, "data");
 
   // Mobile view state - controls which panel is visible on mobile
   const [mobileView, setMobileView] = useState<"list" | "chat" | "info">(
     "list"
   );
-  console.log(mobileView);
-  // Replace the static chats array with state
-  const [chats, setChats] = useState<Chat[]>([
-    {
-      id: 1,
-      name: "Project ABC",
-      message: "Going great! Just finished the wireframes.",
-      time: "2 min ago",
-      avatar: personImg,
-      unread: true,
-      initials: "PA",
-      online: true,
-      messages: [
-        {
-          id: 1,
-          text: "Hey! How is the new project coming along?",
-          sender: "other",
-          avatar: personImg,
-          time: "2 min ago",
-        },
-        {
-          id: 2,
-          text: "Going great! Just finished the wireframes. Will share them with you shortly.",
-          sender: "me",
-          avatar: personImg,
-          time: "1 min ago",
-        },
-        {
-          id: 3,
-          text: "That's awesome! When do you think we can review them?",
-          sender: "other",
-          avatar: personImg,
-          time: "Just now",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      message: "Thanks for the project update!",
-      time: "5 min ago",
-      avatar: personImg,
-      unread: false,
-      initials: "SJ",
-      online: true,
-      messages: [
-        {
-          id: 1,
-          text: "Hi there! I wanted to check in about the design review.",
-          sender: "other",
-          avatar: personImg,
-          time: "10 min ago",
-        },
-        {
-          id: 2,
-          text: "I've completed the initial mockups for the landing page.",
-          sender: "me",
-          avatar: personImg,
-          time: "8 min ago",
-        },
-        {
-          id: 3,
-          text: "Thanks for the project update!",
-          sender: "other",
-          avatar: personImg,
-          time: "5 min ago",
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Design Team",
-      message: "Let's schedule a meeting for tomorrow.",
-      time: "1 hour ago",
-      avatar: personImg,
-      unread: true,
-      initials: "DT",
-      online: false,
-      messages: [
-        {
-          id: 1,
-          text: "We need to discuss the new brand guidelines.",
-          sender: "other",
-          avatar: personImg,
-          time: "2 hours ago",
-        },
-        {
-          id: 2,
-          text: "I agree. I have some ideas I'd like to share.",
-          sender: "me",
-          avatar: personImg,
-          time: "1.5 hours ago",
-        },
-        {
-          id: 3,
-          text: "Let's schedule a meeting for tomorrow.",
-          sender: "other",
-          avatar: personImg,
-          time: "1 hour ago",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Marketing Team",
-      message: "Campaign results are looking good!",
-      time: "3 hours ago",
-      avatar: personImg,
-      unread: false,
-      initials: "MT",
-      online: true,
-      messages: [
-        {
-          id: 1,
-          text: "Have you seen the latest campaign metrics?",
-          sender: "other",
-          avatar: personImg,
-          time: "4 hours ago",
-        },
-        {
-          id: 2,
-          text: "Not yet, can you share them with me?",
-          sender: "me",
-          avatar: personImg,
-          time: "3.5 hours ago",
-        },
-        {
-          id: 3,
-          text: "Campaign results are looking good! We've exceeded our targets by 15%.",
-          sender: "other",
-          avatar: personImg,
-          time: "3 hours ago",
-        },
-      ],
-    },
-    {
-      id: 5,
-      name: "John Smith",
-      message: "Can we discuss the budget for Q3?",
-      time: "Yesterday",
-      avatar: personImg,
-      unread: false,
-      initials: "JS",
-      online: false,
-      messages: [
-        {
-          id: 1,
-          text: "Hi, I'm working on the quarterly budget report.",
-          sender: "other",
-          avatar: personImg,
-          time: "Yesterday",
-        },
-        {
-          id: 2,
-          text: "Great, do you need any input from my team?",
-          sender: "me",
-          avatar: personImg,
-          time: "Yesterday",
-        },
-        {
-          id: 3,
-          text: "Can we discuss the budget for Q3? I have some concerns about the allocation.",
-          sender: "other",
-          avatar: personImg,
-          time: "Yesterday",
-        },
-      ],
-    },
-  ]);
-
-  // Add this function after the state declarations
-  const handleDeleteChat = () => {
-    const updatedChats = chats.filter((chat) => chat.id !== selectedChatId);
-    setChats(updatedChats);
-    // If we deleted the currently selected chat, select the first remaining chat
-    if (updatedChats.length > 0) {
-      setSelectedChatId(updatedChats[0].id);
-    }
-    // Close the modal and sidebar
-    setShowDeleteModal(false);
-    setShowChatInfo(false);
-    // Return to chat list on mobile
-    setMobileView("list");
-  };
-
-  // Filter chats based on active tab
-  const filteredChats = chats.filter((chat) => {
-    if (activeChatTab === "All") return true;
-    if (activeChatTab === "Unread") return chat.unread;
-    if (activeChatTab === "Team") return chat.name.includes("Team");
-    return true;
-  });
 
   // Find the selected chat
-  const selectedChat =
-    chats.find((chat) => chat.id === selectedChatId) || chats[0];
+  const selectedChat = privateChats?.find(
+    (chat: Chat) => chat.chatId === selectedChatId
+  );
+
+  // const selectedPrivateChat =
 
   // Handle chat selection on mobile
-  const handleChatSelect = (chatId: number) => {
+  const handleChatSelect = (chatId: string) => {
     setSelectedChatId(chatId);
     setMobileView("chat");
   };
@@ -281,7 +130,7 @@ export default function ResponsiveChatWindow() {
   }, [setShowDropdown]);
 
   // Add this condition before the return statement to handle empty chat list
-  if (chats.length === 0) {
+  if (privateChats.length === 0) {
     return (
       <div className="flex h-screen border border-gray-200 rounded-none md:rounded-2xl overflow-hidden items-center justify-center">
         <div className="text-center p-4">
@@ -351,18 +200,22 @@ export default function ResponsiveChatWindow() {
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredChats.map((chat) => (
+          {privateChats.map((chat: Chat) => (
             <div
-              key={chat.id}
+              key={chat.chatId}
               className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${
-                selectedChatId === chat.id && "bg-indigo-50 hover:bg-indigo-50"
+                selectedChatId === chat.chatId &&
+                "bg-indigo-50 hover:bg-indigo-50"
               }`}
-              onClick={() => handleChatSelect(chat.id)}
+              onClick={() => handleChatSelect(chat.chatId)}
             >
               <div className="relative">
                 <img
-                  src={chat.avatar || "/placeholder.svg?height=48&width=48"}
-                  alt={chat.name}
+                  src={
+                    chat.participant.profile.profileUrl ||
+                    "https://avatar.iran.liara.run/public/boy?username=Ash"
+                  }
+                  alt={chat.participant.profile.firstName}
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 {chat.online && (
@@ -376,15 +229,17 @@ export default function ResponsiveChatWindow() {
               </div>
               <div className="ml-3 flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {chat.name}
+                  <p className="text-sm font-medium text-gray-900 truncate capitalize">
+                    {chat.participant.profile.firstName +
+                      " " +
+                      chat.participant.profile.lastName}
                   </p>
                   <p className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                    {chat.time}
+                    {new Date(chat.updatedAt).toDateString()}
                   </p>
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">
-                  {chat.message}
+                  {/* {chat.lastMessage || "N/A"} */}
                 </p>
               </div>
             </div>
@@ -409,18 +264,21 @@ export default function ResponsiveChatWindow() {
           <div className="flex items-center flex-1">
             <img
               src={
-                selectedChat?.avatar || "/placeholder.svg?height=40&width=40"
+                selectedChat?.avatar ||
+                "https://avatar.iran.liara.run/public/boy?username=Ash"
               }
               alt={selectedChat?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
             <div className="ml-3">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {selectedChat?.name}
+              <h2 className="text-lg font-semibold text-gray-900 capitalize">
+                {selectedChat?.participant?.profile?.firstName +
+                  " " +
+                  selectedChat?.participant?.profile?.lastName}
               </h2>
-              <p className="text-sm text-gray-500">
+              {/* <p className="text-sm text-gray-500">
                 {selectedChat?.online ? "Online" : "Offline"}
-              </p>
+              </p> */}
             </div>
           </div>
           <div className="flex items-center space-x-2 relative">
@@ -474,55 +332,61 @@ export default function ResponsiveChatWindow() {
 
         {/* Desktop Chat Conversation */}
         <div className="hidden md:flex flex-1">
-          <ChatConversation
-            selectedChat={selectedChat}
-            setShowChatInfo={setShowChatInfo}
-            setShowDeleteModal={setShowDeleteModal}
-            setShowMemberModal={setShowMemberModal}
-          />
+          {selectedChatId ? (
+            <ChatConversation
+              selectedChat={privateChatData}
+              selectedPrivateChatInfo={selectedChat}
+              setShowChatInfo={setShowChatInfo}
+              setShowDeleteModal={setShowDeleteModal}
+              setShowMemberModal={setShowMemberModal}
+            />
+          ) : (
+            // <div>Hello world</div>
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-gray-500">Select a chat to start messaging</p>
+            </div>
+          )}
         </div>
 
         {/* Mobile Chat Messages */}
         <div className="lg:hidden flex-1 flex flex-col">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {selectedChat?.messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.sender === "me" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {privateChatData?.messages?.map((message: ChatMessage) => {
+              const isMe = message.senderId === user?.id; // currentUserId from auth
+              // console.log(isMe, "isMe");
+              const avatar =
+                message.sender?.profile?.profileUrl ||
+                "https://avatar.iran.liara.run/public/boy?username=Ash";
+
+              return (
                 <div
-                  className={`flex items-end space-x-2 max-w-xs lg:max-w-md ${
-                    message.sender === "me"
-                      ? "flex-row-reverse space-x-reverse"
-                      : ""
+                  key={message.id}
+                  className={`flex items-start space-x-3 ${
+                    isMe ? "flex-row-reverse space-x-reverse" : ""
                   }`}
                 >
-                  {message.sender === "other" && (
-                    <img
-                      src={
-                        message.avatar || "/placeholder.svg?height=32&width=32"
-                      }
-                      alt="Avatar"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  )}
+                  {/* Avatar */}
+                  <img
+                    src={avatar}
+                    alt={`${message.sender?.profile?.firstName} avatar`}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                  />
+
+                  {/* Message bubble */}
                   <div
-                    className={`px-4 py-2 rounded-2xl ${
-                      message.sender === "me"
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                      isMe
                         ? "bg-primary text-white"
                         : "bg-gray-100 text-gray-900"
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm">{message.content}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Mobile Message Input */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex items-center space-x-2">
               <input
@@ -545,7 +409,7 @@ export default function ResponsiveChatWindow() {
       </div>
 
       {/* Chat Info Sidebar - Hidden on mobile when in list/chat view */}
-      {showChatInfo && (
+      {/* {showChatInfo && (
         <div className={`${mobileView === "info" ? "flex" : "hidden"} md:flex`}>
           <ChatInfoSidebar
             selectedChat={selectedChat}
@@ -553,16 +417,16 @@ export default function ResponsiveChatWindow() {
             setMobileView={setMobileView}
           />
         </div>
-      )}
+      )} */}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <ChatDeleteModal
           selectedChat={selectedChat}
           setShowDeleteModal={setShowDeleteModal}
           handleDeleteChat={handleDeleteChat}
         />
-      )}
+      )} */}
 
       {showAddMemberModal && (
         <MemberSelectorModal setShowMemberModal={setShowMemberModal} />
