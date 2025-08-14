@@ -52,11 +52,14 @@ const recognationApi = baseApi.injectEndpoints({
       invalidatesTags: ["BADGE"],
     }),
     updateBadge: build.mutation({
-      query: (credentials) => ({
-        url: `/admin/recognition/badge-update/${credentials?.id}`,
-        method: "PATCH",
-        body: credentials,
-      }),
+      query: (credentials) => {
+        console.log({ credentials });
+        return {
+          url: `/admin/recognition/badge-update/${credentials?.id}`,
+          method: "PATCH",
+          body: credentials?.body,
+        };
+      },
       invalidatesTags: ["BADGE"],
     }),
     deleteBadge: build.mutation({
@@ -77,6 +80,12 @@ const recognationApi = baseApi.injectEndpoints({
       },
       providesTags: ["BADGE"],
     }),
+    getSingleBadge: build.query({
+      query: (data) => {
+        return `/admin/recognition/single/${data?.id}`;
+      },
+      // providesTags: ["BADGE"],
+    }),
   }),
 });
 
@@ -92,4 +101,5 @@ export const {
   useDeleteBadgeMutation,
   useGetAllBadgeQuery,
   useUpdateBadgeMutation,
+  useGetSingleBadgeQuery,
 } = recognationApi;

@@ -271,15 +271,21 @@ const JobSchedulingLobby: React.FC = () => {
     }
   };
 
-  const handleEditClick = (projectId: number) => {
-    closeAllOtherModals();
-    const p = projects.find((proj) => proj.id === projectId);
-    if (p) {
-      setEditModalProjectName(p.name);
-      setSelectedProjectIdForEdit(projectId);
-      setShowEditModal(true);
-    }
-  };
+const handleEditClick = (projectId: number) => {
+  // এখানে full closeAllOtherModals() না ডেকে, শুধু other modal state গুলো রিসেট করো
+  setOpenMoreModalId(null);
+  setMoreModalPosition(null);
+  setShowDeleteConfirmModal(false);
+  setProjectIdToDelete(null);
+  setShowCreateNewModal(false);
+
+  const p = projects.find((proj) => proj.id === projectId);
+  if (p) {
+    setEditModalProjectName(p.name);
+    setSelectedProjectIdForEdit(projectId);
+    setShowEditModal(true); // modal খুলবে
+  }
+};
 
   const handleConfirmEdit = () => {
     if (selectedProjectIdForEdit !== null) {

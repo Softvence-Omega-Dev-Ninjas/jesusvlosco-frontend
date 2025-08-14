@@ -173,7 +173,7 @@ const routes = createBrowserRouter([
       },
       { path: "send-recognition", element: <CreateRecognition /> },
       { path: "badge-library", element: <BadgeLibrary /> },
-      { path: "edit-badge", element: <EditBadge /> },
+      { path: "edit-badge/:id", element: <EditBadge /> },
       { path: "create-badge", element: <CreateBadge /> },
 
       {
