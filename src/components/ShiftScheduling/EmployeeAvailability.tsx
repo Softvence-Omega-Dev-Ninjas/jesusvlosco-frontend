@@ -11,26 +11,7 @@ import { useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 
 import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
-
-
-interface User {
-    id?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    status?: string;
-    profileUrl?: string;
-    avatar?: string;
-    name?: string;
-    title?: string;
-    department?: string;
-    offDay?: string;
-    profile?: {
-        firstName?: string;
-        jobTitle?: string;
-        department?: string;
-    };
-}
+import { TUser } from "@/types/usertype";
 
 interface ShiftFormData {
     currentUserId?: string;
@@ -130,6 +111,7 @@ const EmployeeAvailability = () => {
     const [newTask, setNewTask] = useState("");
     const [showInput, setShowInput] = useState(false);
     const [userIds, setUserIds] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [createShift] = useCreateShiftMutation();
 
     // React Hook Form setup
@@ -159,9 +141,22 @@ const EmployeeAvailability = () => {
     });
 
     const users = useGetAllUserQuery({});
-    const userList = users?.data?.data || [];
+    const userList = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
+    
+    // Filter users based on search term
+    const filteredUserList = userList.filter((user: TUser) => {
+        if (!searchTerm) return true; // If no search term, show all users
+        
+        const firstName = user.profile?.firstName?.toLowerCase() || "";
+        const jobTitle = user.profile?.jobTitle?.toLowerCase() || "";
+        const searchLower = searchTerm.toLowerCase();
+        
+        return firstName.includes(searchLower) || jobTitle.includes(searchLower);
+    });
+    
     console.log("UserList data:", userList);
     console.log("UserList length:", userList.length);
+    console.log("Filtered UserList length:", filteredUserList.length);
 
     const toggleTask = (task: string) => {
         setCheckedTasks(prev => {
@@ -264,51 +259,59 @@ const EmployeeAvailability = () => {
     };
 
     return (
-        <aside className="w-full mt-10 mb-12 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
+        <aside className="w-full  rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[rgba(78,83,177,1)] text-lg font-bold">Employee Availability</h2>
                 <span className="text-xs text-green-600 bg-green-100 rounded-full px-2 py-0.5">
-                    {userList.length} active
+                    {filteredUserList.length} active
                 </span>
             </div>
             <div className="relative mb-4">
                 <input
                     type="text"
-                    placeholder="Search"
-                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm"
+                    placeholder="Search by name or job title"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-0"
                 />
                 <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
             </div>
-            <ul className="space-y-3">
-                {userList?.map((emp: User, idx: number) => (
+            <ul className="space-y-3 mt-10 h-full">
+                {filteredUserList.length === 0 && searchTerm ? (
+                    <li className="text-center py-8 text-gray-500">
+                        <p>No employees found matching "{searchTerm}"</p>
+                        <p className="text-sm mt-1">Try searching by first name or job title</p>
+                    </li>
+                ) : (
+                    filteredUserList?.map((emp: TUser, idx: number) => (
                     <li
                         key={idx}
-                        className="relative flex items-center mt-4 gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-sm"
+                        className="relative flex items-center mt-3 gap-3 border border-gray-300 rounded-lg min-h-[100px] px-3 py-3.5 hover:shadow-sm "
                     >
                         <img
-                            src={emp.profileUrl || 'https://i.pravatar.cc/100?img=1'}
-                            alt={emp.profile?.firstName || emp.name || "User"}
+                            src={emp.profile.profileUrl || 'https://i.pravatar.cc/100?img=1'}
+                            alt={emp.profile.firstName || "User"}
                             className="w-10 h-10  rounded-full object-cover"
                         />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
                                 <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.profile?.firstName}</span>
                                 <EmployeeCardPopup
-                                    name={emp.profile?.firstName || emp?.name || "Unknown"}
-                                    title={emp.profile?.jobTitle || emp?.title || "No title"}
-                                    department={emp.profile?.department || emp.department || "No department"}
+                                    name={emp.profile?.firstName ||  "Unknown"}
+                                    title={emp.profile?.jobTitle || "No title"}
+                                    department={emp.profile?.department ||  "No department"}
                                     email={emp.email || "No email"}
                                     phone={emp.phone || "No phone"}
-                                    avatar={emp.profileUrl || emp?.avatar || `https://i.pravatar.cc/100?img=1`}
+                                    avatar={emp.profile.profileUrl || `https://i.pravatar.cc/100?img=1`}
                                     role={emp.role || "Employee"}
                                 />
                             </div>
                             
                             <p
-                                className={`text-xs mb-1 ${emp.status === 'Available' ? 'text-green-600' : 'text-red-600'
+                                className={`text-xs mb-1 ${emp.shift.length === 0 ? 'text-green-600' : 'text-red-600'
                                     }`}
                             >
-                                {emp.status === 'Available' ? '' : ''} {emp.status}
+                                {emp.shift.length === 0 ? 'Available' : 'Busy'} 
                             </p>
 
 
@@ -317,10 +320,10 @@ const EmployeeAvailability = () => {
                                     <BsStopwatch />
                                 </button>
                                 {/* <TiEqualsOutline className="text-lg" /> */}
-                                <ShiftTemplateDropdown />
-                                <span className="text-lg font-medium">1</span>
+                                <ShiftTemplateDropdown shiftTemplates={emp.shift} />
+                                <span className="text-lg font-medium">{emp.shift.length}</span>
                             </div>
-                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.offDay}</p>
+                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.payroll?.offDay.map((day: string) => day).join(", ") || "Update Info"}</p>
                         </div>
 
                         {openIndex === idx && (
@@ -567,7 +570,8 @@ const EmployeeAvailability = () => {
                             </div>
                         )}
                     </li>
-                ))}
+                    ))
+                )}
             </ul>
         </aside>
     
