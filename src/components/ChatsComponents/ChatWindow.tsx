@@ -23,13 +23,21 @@ import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 interface ChatMessage {
   id: number;
   text: string;
-  sender: "me" | "other";
+  sender: {
+    profile: {
+      profileUrl: string;
+      firstName: string;
+    };
+  };
   avatar: string;
   time: string;
+  senderId: string;
+  content: string;
 }
 
 export interface Chat {
   id: number;
+  chatId: string;
   name: string;
   message: string;
   time: string;
@@ -38,18 +46,28 @@ export interface Chat {
   messages: ChatMessage[];
   initials: string;
   online: boolean;
+  participant: {
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      profileUrl: string;
+    };
+  };
+  updatedAt: string;
 }
 
 export default function ResponsiveChatWindow() {
   const navigate = useNavigate();
   const chatTabs = ["All", "Unread", "Team"];
   const [activeChatTab, setActiveChatTab] = useState("All");
-  const [selectedChatId, setSelectedChatId] = useState<number>();
+  const [selectedChatId, setSelectedChatId] = useState<string>();
   const [showChatInfo, setShowChatInfo] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddMemberModal, setShowMemberModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const user = useAppSelector(selectUser);
+  console.log(showChatInfo, showDeleteModal);
 
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data || [];
@@ -75,13 +93,13 @@ export default function ResponsiveChatWindow() {
 
   // Find the selected chat
   const selectedChat = privateChats?.find(
-    (chat) => chat.chatId === selectedChatId
+    (chat: Chat) => chat.chatId === selectedChatId
   );
 
   // const selectedPrivateChat =
 
   // Handle chat selection on mobile
-  const handleChatSelect = (chatId: number) => {
+  const handleChatSelect = (chatId: string) => {
     setSelectedChatId(chatId);
     setMobileView("chat");
   };
@@ -182,7 +200,7 @@ export default function ResponsiveChatWindow() {
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
-          {privateChats.map((chat) => (
+          {privateChats.map((chat: Chat) => (
             <div
               key={chat.chatId}
               className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${
@@ -333,7 +351,7 @@ export default function ResponsiveChatWindow() {
         {/* Mobile Chat Messages */}
         <div className="lg:hidden flex-1 flex flex-col">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {privateChatData?.messages?.map((message) => {
+            {privateChatData?.messages?.map((message: ChatMessage) => {
               const isMe = message.senderId === user?.id; // currentUserId from auth
               // console.log(isMe, "isMe");
               const avatar =
