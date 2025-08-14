@@ -61,6 +61,7 @@ import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import EmailLogin from "@/pages/email-login/EmailLogin";
+import CreateTeam from "@/pages/Admin/CreateTeam";
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
@@ -205,6 +206,7 @@ const routes = createBrowserRouter([
       },
 
       { path: "survey-poll", element: <SurveyMainPage /> },
+      { path: "create-team", element: <CreateTeam /> },
       { path: "survey-response", element: <SurveyResponse /> },
       { path: "survey-details/", element: <SurveyDetails /> },
       // dynamic
