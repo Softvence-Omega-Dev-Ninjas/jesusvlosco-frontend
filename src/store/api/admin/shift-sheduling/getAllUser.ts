@@ -1,14 +1,13 @@
 import { baseApi } from "../../baseApi";
 
-
-const getAllUserApi = baseApi.injectEndpoints({
+export const getUserApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllUserData: builder.query({
-      query: () => ({
-        url: "/admin/user",
-        method: "GET",
-      }),
+    getUsers: builder.query({
+      query: () => '/admin/user?assigned=false&page=1&limit=10',
+      providesTags: ['ADMIN_USER'], 
     }),
   }),
+  overrideExisting: false,
 });
-export const { useGetAllUserDataQuery } =  getAllUserApi
+
+export const { useGetUsersQuery } = getUserApi;

@@ -1,27 +1,51 @@
 
-import { FC, useState } from "react";
+import {  useState } from "react";
 import { BsStopwatch } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { Tab } from "@headlessui/react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import ShiftTemplateDropdown from "./ShiftTemplateDropdown";
 import EmployeeCardPopup from "./EmployeeCardPopup";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 
-interface EmployeeAvailabilityProps {
-    addPublishedShift: (shift: any) => void;
+import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
+import { TUser } from "@/types/usertype";
+
+interface ShiftFormData {
+    currentUserId?: string;
+    currentProjectId?: string;
+    date: string; // Will be "YYYY-MM-DD" format from date input
+    startTime: string; // Will be "HH:MM" format from time input  
+    endTime: string; // Will be "HH:MM" format from time input
+    shiftTitle: string;
+    job: string;
+    location: string;
+    note: string;
+    allDay: boolean;
+    userIds: string[];
+    taskIds: string[];
+    shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
+    saveAsTemplate: boolean;
 }
 
-const employees = [
-    { name: "Sarah Johnson", status: "Available", role: "Manager", offDay: "Friday", avatar: 1 },
-    { name: "Mike Chen", status: "Busy", role: "Superintendent", offDay: "Sunday", avatar: 2 },
-    { name: "Emma Willson", status: "Available", role: "Associate", offDay: "Friday", avatar: 3 },
-    { name: "David Rodriguez", status: "Available", role: "Sales", offDay: "Sunday", avatar: 4 },
-    { name: "Lisa Thompson", status: "Busy", role: "Team Lead", offDay: "Friday", avatar: 5 },
-    { name: "Guy Hawkins", status: "Available", role: "Supervisor", offDay: "Sunday", avatar: 6 },
-    { name: "Wade Warren", status: "Busy", role: "Coordinator", offDay: "Friday", avatar: 7 },
-    { name: "Esther Howard", status: "Available", role: "Manager", offDay: "Friday", avatar: 8 },
-    { name: "Savannah Nguyen", status: "Busy", role: "Manager", offDay: "Friday", avatar: 9 },
-];
+interface ShiftAPIData {
+    currentUserId: string;
+    currentProjectId: string;
+    date: string; // "2025-08-07T08:00:00.000Z" format for API
+    shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
+    startTime: string; // "2025-08-07T08:00:00.000Z" format for API
+    endTime: string; // "2025-08-07T16:00:00.000Z" format for API
+    shiftTitle: string;
+    allDay: boolean;
+    job: string;
+    userIds: string[];
+    taskIds: string[];
+    location: string;
+    note: string;
+    saveAsTemplate: boolean;
+}
 
 const tasksList = [
     "Metro Shopping Center",
@@ -79,25 +103,67 @@ const activityLog = [
     }
 ];
 
-const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift }) => {
+const EmployeeAvailability = () => {
+    const currentProjectId = useParams().id;
+    
     const [openIndex, setOpenIndex] = useState<number | null>(null);
-    const [checkedTasks, setCheckedTasks] = useState<string[]>(["Metro Shopping Center", "Riverside Apartments"]);
+    const [checkedTasks, setCheckedTasks] = useState<string[]>(["e8b962e7-467f-46f2-a9e6-c927adadba32"]);
     const [newTask, setNewTask] = useState("");
     const [showInput, setShowInput] = useState(false);
-    const [shiftDetails, setShiftDetails] = useState({
-        date: "2025-06-10",
-        startTime: "09:00",
-        endTime: "17:00",
-        title: "",
-        job: "",
-        location: "Parksid Retreat",
-        description: ""
+    const [userIds, setUserIds] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [createShift] = useCreateShiftMutation();
+
+    // React Hook Form setup
+    const { 
+        control, 
+        handleSubmit, 
+        setValue, 
+        getValues, 
+        reset 
+    } = useForm<ShiftFormData>({
+        defaultValues: {
+            currentUserId: userIds[0] || "",
+            currentProjectId: currentProjectId || "",
+            date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+            startTime: "08:00", // Time input format
+            endTime: "16:00", // Time input format
+            shiftTitle: "",
+            job: "",
+            location: "",
+            note: "",
+            allDay: false,
+            userIds: [], // Use the same initial value
+            taskIds: [],
+            shiftStatus: "DRAFT",
+            saveAsTemplate: false
+        }
     });
 
+    const users = useGetAllUserQuery({});
+    const userList = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
+    
+    // Filter users based on search term
+    const filteredUserList = userList.filter((user: TUser) => {
+        if (!searchTerm) return true; // If no search term, show all users
+        
+        const firstName = user.profile?.firstName?.toLowerCase() || "";
+        const jobTitle = user.profile?.jobTitle?.toLowerCase() || "";
+        const searchLower = searchTerm.toLowerCase();
+        
+        return firstName.includes(searchLower) || jobTitle.includes(searchLower);
+    });
+    
+    console.log("UserList data:", userList);
+    console.log("UserList length:", userList.length);
+    console.log("Filtered UserList length:", filteredUserList.length);
+
     const toggleTask = (task: string) => {
-        setCheckedTasks(prev =>
-            prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task]
-        );
+        setCheckedTasks(prev => {
+            const newTasks = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
+            setValue("taskIds", newTasks);
+            return newTasks;
+        });
     };
 
     const handleAddTask = () => {
@@ -108,126 +174,160 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
         }
     };
 
-    const handleSaveDraft = () => {
-        const employeeName = openIndex !== null ? employees[openIndex].name : "Unknown";
-        const newShift = {
-            employeeName,
-            date: shiftDetails.date,
-            startTime: `${shiftDetails.startTime}am`,
-            endTime: `${shiftDetails.endTime}pm`,
-            location: shiftDetails.location,
-            tasksDone: checkedTasks.length > 0,
-            status: 'draft'
+    // Form submission handlers
+    const onSubmit = (data: ShiftFormData, status: "PUBLISHED" | "DRAFT" | "TEMPLATE") => {
+        // Helper function to convert date and time to ISO format
+        const convertToISOString = (date: string, time: string) => {
+            // Combine date (YYYY-MM-DD) and time (HH:MM) into ISO format
+            return `${date}T${time}:00.000Z`;
         };
 
-        addPublishedShift(newShift);
+        // Convert form data to API format
+        const formData: ShiftAPIData = {
+            currentUserId: userIds[0] || "", // Use the first userId as currentUserId
+            currentProjectId: currentProjectId || data.currentProjectId || "",
+            date: convertToISOString(data.date, data.startTime), // Use start time for date
+            shiftStatus: status,
+            startTime: convertToISOString(data.date, data.startTime),
+            endTime: convertToISOString(data.date, data.endTime),
+            shiftTitle: data.shiftTitle,
+            allDay: data.allDay,
+            job: data.job,
+            location: data.location,
+            note: data.note,
+            saveAsTemplate: status === "TEMPLATE",
+            taskIds: checkedTasks,
+            userIds: userIds, // Use the current state to ensure latest values
+        };
+        
+        console.log(`Submitting form with status: ${status}`, formData);
+        // Call the mutation trigger to create the shift
+        createShift(formData);
         setOpenIndex(null);
+        
+        // Optionally reset form after submission
+        if (status === "PUBLISHED") {
+            reset();
+            setCheckedTasks([]);
+        }
+        setUserIds([]); // Clear userIds after submission
+    };
+
+    const handleSaveDraft = () => {
+        const formData = getValues();
+        onSubmit(formData, "DRAFT");
     };
 
     const handlePublish = () => {
-        const employeeName = openIndex !== null ? employees[openIndex].name : "Unknown";
-        const newShift = {
-            employeeName,
-            date: shiftDetails.date,
-            startTime: `${shiftDetails.startTime}am`,
-            endTime: `${shiftDetails.endTime}pm`,
-            location: shiftDetails.location,
-            tasksDone: checkedTasks.length > 0,
-            status: 'published'
-        };
+        const formData = getValues();
+        onSubmit(formData, "PUBLISHED");
+    };
 
-        addPublishedShift(newShift);
-        setOpenIndex(null);
+    const handleAssignUser = (userId: string, idx: number) => {
+        console.log("handleAssignUser called with:", userId, idx);
+        
+        // Check if user is already assigned
+        if (userIds.includes(userId)) {
+            console.log("User already assigned:", userId);
+            setOpenIndex(idx); // Still open the popup even if already assigned
+            return;
+        }
+        
+        // Update local state
+        const newUserIds = [...userIds, userId];
+        setUserIds(newUserIds);
+        
+        // Update React Hook Form field with the new array
+        setValue("userIds", newUserIds);
+        
+        // Set the open index to show the popup
+        setOpenIndex(idx);
+        
+        console.log("User assigned successfully:", userId, "New userIds:", newUserIds);
     };
 
     const handleSaveTemplate = () => {
-        alert("Shift saved as template");
+        const formData = getValues();
+        onSubmit(formData, "TEMPLATE");
     };
 
     const handleDelete = () => {
-        alert("Shift deleted");
+        reset();
+        setCheckedTasks([]);
         setOpenIndex(null);
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setShiftDetails(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        alert("Form cleared");
     };
 
     return (
-        <aside className="w-full mt-10 mb-12 rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
+        <aside className="w-full  rounded-2xl lg:w-1/3 xl:w-1/4 bg-white border-r border-gray-200 p-4 relative">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[rgba(78,83,177,1)] text-lg font-bold">Employee Availability</h2>
                 <span className="text-xs text-green-600 bg-green-100 rounded-full px-2 py-0.5">
-                    {employees.filter(e => e.status === 'Available').length} active
+                    {filteredUserList.length} active
                 </span>
             </div>
             <div className="relative mb-4">
                 <input
                     type="text"
-                    placeholder="Search"
-                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm"
+                    placeholder="Search by name or job title"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-0"
                 />
                 <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
             </div>
-            <ul className="space-y-3">
-                {employees.map((emp, idx) => (
+            <ul className="space-y-3 mt-10 h-full">
+                {filteredUserList.length === 0 && searchTerm ? (
+                    <li className="text-center py-8 text-gray-500">
+                        <p>No employees found matching "{searchTerm}"</p>
+                        <p className="text-sm mt-1">Try searching by first name or job title</p>
+                    </li>
+                ) : (
+                    filteredUserList?.map((emp: TUser, idx: number) => (
                     <li
                         key={idx}
-                        className="relative flex items-start mt-4 gap-3 border border-gray-300 rounded-lg p-3 hover:shadow-sm"
+                        className="relative flex items-center mt-3 gap-3 border border-gray-300 rounded-lg min-h-[100px] px-3 py-3.5 hover:shadow-sm "
                     >
                         <img
-                            src={`https://i.pravatar.cc/40?img=${emp.avatar}`}
-                            alt={emp.name}
-                            className="w-10 h-10 lg:mt-8 rounded-full object-cover"
+                            src={emp.profile.profileUrl || 'https://i.pravatar.cc/100?img=1'}
+                            alt={emp.profile.firstName || "User"}
+                            className="w-10 h-10  rounded-full object-cover"
                         />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.name}</span>
-                                {/* <span className="text-[10px] border rounded-full px-2 py-0.5 text-indigo-700 border-indigo-200">
-                                {emp.role}
-                            </span> */}
+                                <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.profile?.firstName}</span>
                                 <EmployeeCardPopup
-                                    name={emp.name}
-                                    title={emp.role}
-                                    department="Sales"
-                                    email={`${emp.name.split(" ").join(".")}@company.com`}
-                                    phone="+1 (555) 234-5678"
-                                    avatar={`https://i.pravatar.cc/100?img=${emp.avatar}`}
-                                    role={emp.role}
+                                    name={emp.profile?.firstName ||  "Unknown"}
+                                    title={emp.profile?.jobTitle || "No title"}
+                                    department={emp.profile?.department ||  "No department"}
+                                    email={emp.email || "No email"}
+                                    phone={emp.phone || "No phone"}
+                                    avatar={emp.profile.profileUrl || `https://i.pravatar.cc/100?img=1`}
+                                    role={emp.role || "Employee"}
                                 />
                             </div>
                             
                             <p
-                                className={`text-xs mb-1 ${emp.status === 'Available' ? 'text-green-600' : 'text-red-600'
+                                className={`text-xs mb-1 ${emp.shift.length === 0 ? 'text-green-600' : 'text-red-600'
                                     }`}
                             >
-                                {emp.status === 'Available' ? '' : ''} {emp.status}
+                                {emp.shift.length === 0 ? 'Available' : 'Busy'} 
                             </p>
 
 
-                            {/* Floating Templates tab */}
-                            {/* <div className="fixed top-120 right-0 h-34 w-4 sm:w-6 md:w-8 lg:w-8 bg-[rgba(78,83,177,1)] text-white text-[20px] font-semibold flex items-center justify-center cursor-pointer rounded-l-md">
-                                <span className="transform -rotate-90 whitespace-nowrap">Templates</span>
-                            </div> */}
-
-
                             <div className="flex items-center gap-2 mb-1 text-sm text-gray-600 mt-1">
-                                <button onClick={() => setOpenIndex(idx)} className="text-lg">
+                                <button onClick={() => handleAssignUser(emp.id as string, idx)} className="text-lg">
                                     <BsStopwatch />
                                 </button>
                                 {/* <TiEqualsOutline className="text-lg" /> */}
-                                <ShiftTemplateDropdown />
-                                <span className="text-lg font-medium">1</span>
+                                <ShiftTemplateDropdown shiftTemplates={emp.shift} />
+                                <span className="text-lg font-medium">{emp.shift.length}</span>
                             </div>
-                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.offDay}</p>
+                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.payroll?.offDay.map((day: string) => day).join(", ") || "Update Info"}</p>
                         </div>
 
                         {openIndex === idx && (
-                            <div className="absolute top-14 left-0 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 w-[560px]">
+                            <div className="absolute -top-50 left-1/2 -translate-x-1/2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 w-[560px]">
                                 <button
                                     onClick={() => setOpenIndex(null)}
                                     className="absolute top-2 right-3 text-gray-500 hover:text-gray-700 text-xl"
@@ -249,110 +349,153 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                                     </Tab.List>
                                     <Tab.Panels>
                                         <Tab.Panel>
-                                            <div className="space-y-3 mt-12 text-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <label>Date</label>
-                                                    <input
-                                                        type="date"
-                                                        name="date"
-                                                        value={shiftDetails.date}
-                                                        onChange={handleInputChange}
-                                                        className="border border-gray-300 px-2 py-1 rounded-md"
+
+                                            {/* React Hook Form implementation */}
+                                            <form onSubmit={handleSubmit((data) => onSubmit(data, "PUBLISHED"))}>
+                                                <div className="space-y-3 mt-12 text-sm">
+                                                    <div className="flex items-center justify-between">
+                                                        <label>Date</label>
+                                                        <Controller
+                                                            name="date"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <input
+                                                                // Date input accepts YYYY-MM-DD format and will be converted to 2025-08-07T08:00:00.000Z format on submission
+                                                                    type="date" 
+                                                                    {...field}
+                                                                    className="border border-gray-300 px-2 py-1 rounded-md"
+                                                                />
+                                                            )}
+                                                        />
+                                                        <div className="flex items-center gap-2">
+                                                            <span>All Day</span>
+                                                            <Controller
+                                                                name="allDay"
+                                                                control={control}
+                                                                render={({ field }) => (
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        checked={field.value}
+                                                                        onChange={field.onChange}
+                                                                        className="accent-[rgba(78,83,177,1)] w-4 h-4" 
+                                                                    />
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-3 mt-12 mb-6 items-center">
+                                                        <label>Start</label>
+                                                        <Controller
+                                                            name="startTime"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <input
+                                                                    type="time"
+                                                                    {...field}
+                                                                    className="border border-gray-300 px-2 py-1 rounded-md"
+                                                                />
+                                                            )}
+                                                        />
+                                                        <label>End</label>
+                                                        <Controller
+                                                            name="endTime"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <input
+                                                                    type="time"
+                                                                    {...field}
+                                                                    className="border border-gray-300 px-2 py-1 rounded-md"
+                                                                />
+                                                            )}
+                                                        />
+                                                        <span className="ml-auto">08:00 Hours</span>
+                                                    </div>
+                                                    <Controller
+                                                        name="shiftTitle"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Shift Title"
+                                                                {...field}
+                                                                className="w-full border border-gray-300 rounded-md p-2"
+                                                            />
+                                                        )}
                                                     />
-                                                    <div className="flex items-center gap-2">
-                                                        <span>All Day</span>
-                                                        <input type="checkbox" checked className="accent-[rgba(78,83,177,1)] w-4 h-4" />
+                                                    <Controller
+                                                        name="job"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Job"
+                                                                {...field}
+                                                                className="w-full border border-gray-300 rounded-md p-2"
+                                                            />
+                                                        )}
+                                                    />
+                                
+                                                    <Controller
+                                                        name="location"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Type location"
+                                                                {...field}
+                                                                className="w-full border mt-2 border-gray-300 rounded-md p-2"
+                                                            />
+                                                        )}
+                                                    />
+                                                    <Controller
+                                                        name="note"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <textarea
+                                                                placeholder="Type Description"
+                                                                {...field}
+                                                                rows={3}
+                                                                className="w-full border border-gray-300 rounded-md p-2"
+                                                            />
+                                                        )}
+                                                    />
+                                                    <div className="text-gray-400 text-sm italic">📎 Attachment</div>
+                                                    <div className="flex items-center mt-8 justify-between">
+                                                        <p>Shift Tasks <span className="text-gray-400 ml-4">{checkedTasks.length > 0 ? `${checkedTasks.length} tasks selected` : "No tasks created"}</span></p>
+                                                        <a href="#" className="text-[rgba(78,83,177,1)] text-sm">View shift tasks</a>
+                                                    </div>
+                                                    <div className="flex mt-12 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-lg text-sm"
+                                                            onClick={handlePublish}
+                                                        >
+                                                            Publish
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="border border-indigo-300 px-4 py-2 text-[rgba(78,83,177,1)] rounded-lg min-w-max text-sm"
+                                                            onClick={handleSaveDraft}
+                                                        >
+                                                            Save Draft
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="border border-indigo-300 px-4 text-[rgba(78,83,177,1)]  min-w-max py-2 rounded-lg text-sm"
+                                                            onClick={handleSaveTemplate}
+                                                        >
+                                                            Save as Template
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="text-red-500 ml-auto text-xl"
+                                                            onClick={handleDelete}
+                                                        >
+                                                            <RiDeleteBin6Line />
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-3 mt-12 mb-6 items-center">
-                                                    <label>Start</label>
-                                                    <input
-                                                        type="time"
-                                                        name="startTime"
-                                                        value={shiftDetails.startTime}
-                                                        onChange={handleInputChange}
-                                                        className="border border-gray-300 px-2 py-1 rounded-md"
-                                                    />
-                                                    <label>End</label>
-                                                    <input
-                                                        type="time"
-                                                        name="endTime"
-                                                        value={shiftDetails.endTime}
-                                                        onChange={handleInputChange}
-                                                        className="border border-gray-300 px-2 py-1 rounded-md"
-                                                    />
-                                                    <span className="ml-auto">08:00 Hours</span>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    name="title"
-                                                    placeholder="Shift Title"
-                                                    value={shiftDetails.title}
-                                                    onChange={handleInputChange}
-                                                    className="w-full border border-gray-300 rounded-md p-2"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    name="job"
-                                                    placeholder="Job"
-                                                    value={shiftDetails.job}
-                                                    onChange={handleInputChange}
-                                                    className="w-full border border-gray-300 rounded-md p-2"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Select Users"
-                                                    className="w-full border border-gray-300 rounded-md p-2"
-                                                />
-                                                <a href="#" className="text-[rgba(78,83,177,1)] text-sm underline">Add User</a>
-                                                <input
-                                                    type="text"
-                                                    name="location"
-                                                    placeholder="Type location"
-                                                    value={shiftDetails.location}
-                                                    onChange={handleInputChange}
-                                                    className="w-full border mt-2 border-gray-300 rounded-md p-2"
-                                                />
-                                                <textarea
-                                                    name="description"
-                                                    placeholder="Type Description"
-                                                    value={shiftDetails.description}
-                                                    onChange={handleInputChange}
-                                                    rows={3}
-                                                    className="w-full border border-gray-300 rounded-md p-2"
-                                                ></textarea>
-                                                <div className="text-gray-400 text-sm italic">📎 Attachment</div>
-                                                <div className="flex items-center mt-8 justify-between">
-                                                    <p>Shift Tasks <span className="text-gray-400 ml-4">No tasks created</span></p>
-                                                    <a href="#" className="text-[rgba(78,83,177,1)] text-sm">View shift tasks</a>
-                                                </div>
-                                                <div className="flex mt-12 gap-2">
-                                                    <button
-                                                        className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-lg text-sm"
-                                                        onClick={handlePublish}
-                                                    >
-                                                        Publish
-                                                    </button>
-                                                    <button
-                                                        className="border border-indigo-300 px-4 py-2 text-[rgba(78,83,177,1)] rounded-lg min-w-max text-sm"
-                                                        onClick={handleSaveDraft}
-                                                    >
-                                                        Save Draft
-                                                    </button>
-                                                    <button
-                                                        className="border border-indigo-300 px-4 text-[rgba(78,83,177,1)]  min-w-max py-2 rounded-lg text-sm"
-                                                        onClick={handleSaveTemplate}
-                                                    >
-                                                        Save as Template
-                                                    </button>
-                                                    <button
-                                                        className="text-red-500 ml-auto text-xl"
-                                                        onClick={handleDelete}
-                                                    >
-                                                        <RiDeleteBin6Line />
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            </form>
                                         </Tab.Panel>
 
                                         <Tab.Panel>
@@ -427,7 +570,8 @@ const EmployeeAvailability: FC<EmployeeAvailabilityProps> = ({ addPublishedShift
                             </div>
                         )}
                     </li>
-                ))}
+                    ))
+                )}
             </ul>
         </aside>
     

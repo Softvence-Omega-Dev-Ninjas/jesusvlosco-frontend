@@ -38,6 +38,7 @@ const OpenEndedFieldModal: React.FC<OpenEndedFieldModalProps> = ({
       };
 
       const handleConfirm = () => {
+            console.log(fieldData)
             onSave(fieldData);
             onClose();
       };

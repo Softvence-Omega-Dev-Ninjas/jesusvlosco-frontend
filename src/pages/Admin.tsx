@@ -16,6 +16,7 @@ import UsersTable from "@/components/Admin/UsersTable";
 import FilterColumnModal from "@/components/Admin/FilterColumnModal";
 import { Link } from "react-router-dom";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import Pagination from "@/utils/Pagination";
 
 // --- START: New definitions for Filter Options ---
 
@@ -186,10 +187,22 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
-  const { data, isLoading } = useGetAllUserQuery({ role: "ADMIN" });
-  const allUsers = data?.data;
-  console.log({allUsers, isLoading})
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const { data, isLoading, isFetching } = useGetAllUserQuery({
+    role: "ADMIN",
+    page: currentPage,
+    limit,
+    searchTerm,
+  });
+  const allUsers = data?.data;
+  console.log({ allUsers, isLoading });
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // fetch new data here from API using `page`
+  };
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   // State for column filter modal
@@ -245,7 +258,6 @@ const Admin: React.FC = () => {
     };
   }, []);
 
-  // --- Toggle Handlers with Positioning ---
   const toggleFilterColumnModal = () => {
     const newState = !showFilterColumnModal;
     setShowFilterColumnModal(newState);
@@ -328,7 +340,7 @@ const Admin: React.FC = () => {
   };
 
   const isAnyModalOpen = showFilterColumnModal || showActionDropdown;
-
+  console.log({ data });
   return (
     <div
       ref={mainContainerRef}
@@ -403,6 +415,8 @@ const Admin: React.FC = () => {
       {/* Users Table Component */}
       <UsersTable
         users={allUsers}
+        isLoading={isLoading}
+        isFetching={isFetching}
         selectedUserIds={selectedUserIds}
         handleHeaderCheckboxChange={handleHeaderCheckboxChange}
         handleUserCheckboxChange={handleUserCheckboxChange}
@@ -410,6 +424,14 @@ const Admin: React.FC = () => {
         toggleFilterColumnModal={toggleFilterColumnModal}
         filterColumnButtonRef={filterColumnButtonRef}
       />
+
+      {!isLoading && allUsers?.length !== 0 && (
+        <Pagination
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          totalPages={data?.metadata?.totalPage}
+        />
+      )}
 
       {/* Filter Column Modal Component */}
       <FilterColumnModal

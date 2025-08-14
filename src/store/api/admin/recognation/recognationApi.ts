@@ -9,7 +9,7 @@ const recognationApi = baseApi.injectEndpoints({
         const queryParams = new URLSearchParams(params).toString();
         return `/admin/recognition${queryParams ? `?${queryParams}` : ""}`;
       },
-      // providesTags: ["ADMIN_USER"],
+      providesTags: ["RECOGNATION"],
     }),
 
     getRecognationById: build.query({
@@ -21,6 +21,7 @@ const recognationApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: ["RECOGNATION"],
     }),
 
     updateRecognition: build.mutation({
@@ -29,6 +30,7 @@ const recognationApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: credential,
       }),
+      invalidatesTags: ["RECOGNATION"],
     }),
 
     deleteRecognition: build.mutation({
@@ -37,6 +39,7 @@ const recognationApi = baseApi.injectEndpoints({
         method: "DELETE",
         body: credential,
       }),
+      invalidatesTags: ["RECOGNATION"],
     }),
 
     // Badge  Api
@@ -46,20 +49,26 @@ const recognationApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: ["BADGE"],
     }),
     updateBadge: build.mutation({
-      query: (credentials) => ({
-        url: `/admin/recognition/badge-update/${credentials?.id}`,
-        method: "PATCH",
-        body: credentials,
-      }),
+      query: (credentials) => {
+        console.log({ credentials });
+        return {
+          url: `/admin/recognition/badge-update/${credentials?.id}`,
+          method: "PATCH",
+          body: credentials?.body,
+        };
+      },
+      invalidatesTags: ["BADGE"],
     }),
     deleteBadge: build.mutation({
       query: (credentials) => ({
         url: `/admin/recognition/badge-delete/${credentials?.id}`,
         method: "DELETE",
-        body: credentials,
+        // body: credentials,
       }),
+      invalidatesTags: ["BADGE"],
     }),
 
     getAllBadge: build.query({
@@ -69,6 +78,13 @@ const recognationApi = baseApi.injectEndpoints({
           queryParams ? `?${queryParams}` : ""
         }`;
       },
+      providesTags: ["BADGE"],
+    }),
+    getSingleBadge: build.query({
+      query: (data) => {
+        return `/admin/recognition/single/${data?.id}`;
+      },
+      // providesTags: ["BADGE"],
     }),
   }),
 });
@@ -85,4 +101,5 @@ export const {
   useDeleteBadgeMutation,
   useGetAllBadgeQuery,
   useUpdateBadgeMutation,
+  useGetSingleBadgeQuery,
 } = recognationApi;

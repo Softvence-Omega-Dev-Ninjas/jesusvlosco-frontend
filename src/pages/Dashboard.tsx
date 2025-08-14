@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetAllAssignedUsersQuery } from "@/store/api/admin/dashboard/getAllAssignedUsers";
+import {
+  useApproveTimeOffRequestMutation,
+  useDeclineTimeOffRequestMutation,
+  useGetAllTimeOffRequestsQuery,
+} from "@/store/api/admin/dashboard/TimeOffRequestsApi";
+import { LoaderCircle } from "lucide-react";
 import React from "react";
 import { Chat } from "../components/Dashboard/Chat";
-import {
-  Achievement,
-  ChatMessage,
-  Employee,
-  Recognition,
-} from "../components/Dashboard/dashboard";
+import { Achievement, ChatMessage } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
-import { MapLocation } from "../components/Dashboard/MapLocation";
+import MapLocation  from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { RecognitionEngagement } from "../components/Dashboard/RecognitionEngagement";
 import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
@@ -16,102 +19,114 @@ import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
 
 const Dashboard: React.FC = () => {
-  // Sample data
-  const employees: Employee[] = [
-    {
-      id: "1",
-      name: "Jane Cooper",
-      role: "Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      project: "Metro Shopping Center",
-      shift: "Morning",
-      date: "22/05/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "2",
-      name: "Robert Fox",
-      role: "Construction Site Manager",
-      avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-      project: "Riverside Apartments",
-      shift: "Night",
-      date: "07/02/2025",
-      time: "9:00am-6:00pm",
-    },
-    {
-      id: "3",
-      name: "Esther Howard",
-      role: "Assistant Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-      project: "City Bridge Renovations",
-      shift: "Night",
-      date: "22/06/2025",
-      time: "9:00am-6:00pm",
-    },
-    {
-      id: "4",
-      name: "Desirae Botosh",
-      role: "Superintendent",
-      avatar: "https://randomuser.me/api/portraits/women/4.jpg",
-      project: "Tech Campus Phase 2",
-      shift: "Morning",
-      date: "02/02/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "5",
-      name: "Marley Stanton",
-      role: "Coordinator",
-      avatar: "https://randomuser.me/api/portraits/men/5.jpg",
-      project: "Golden Hills Estates",
-      shift: "Morning",
-      date: "02/02/2025",
-      time: "9:00am-5:00pm",
-    },
-    {
-      id: "6",
-      name: "Jecy Cooper",
-      role: "Project Manager",
-      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-      project: "Metro Shopping Center",
-      shift: "Morning",
-      date: "22/05/2025",
-      time: "9:00am-5:00pm",
-    },
-  ];
+  const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
 
-  const timeOffRequests = [
-    {
-      id: "1",
-      name: "Jane Cooper",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      type: "Doctor's appointment",
-      date: "Mar 25, 2025",
-      status: "pending",
-    },
-    {
-      id: "2",
-      name: "Jenny Wilson",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      type: "Sick leave",
-      date: "Mar 30, 2025",
-      status: "approved",
-    },
-    {
-      id: "3",
-      name: "Kristin Watson",
-      avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-      type: "Personal day",
-      date: "Jun 02, 2025",
-      status: "declined",
-    },
-  ];
-  const handleApprove = (id: string) => {
-    console.log("Dashboard approved request id:", id);
+  const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
+
+  //assigned employee data call
+  const { data: assignedUsersdata } = useGetAllAssignedUsersQuery({
+    page: 1,
+    limit: 10,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  const employees = React.useMemo(() => {
+    if (!assignedUsersdata) return [];
+
+    return assignedUsersdata.data.map((user: any) => {
+      const name =
+        `${user.profile?.firstName || ""} ${
+          user.profile?.lastName || ""
+        }`.trim() || "Unknown";
+      const role =
+        user.profile?.jobTitle?.replace(/_/g, " ") || user.role || "Unknown";
+      const avatar =
+        user.profile?.profileUrl ||
+        `https://i.pravatar.cc/40?img=${Math.random()}`;
+      const project =
+        user.projects && user.projects.length > 0
+          ? user.projects[0].title
+          : "No Project";
+      const shift =
+        user.shift && user.shift.length > 0 ? user.shift[0] : "Morning";
+
+      const rawDate = user.createdAt || new Date().toISOString();
+      const dateObj = new Date(rawDate);
+      const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(
+        dateObj.getMonth() + 1
+      ).padStart(2, "0")}/${dateObj.getFullYear()}`;
+
+      const time = "9:00am-5:00pm";
+
+      return {
+        id: user.id,
+        name,
+        role,
+        avatar,
+        project,
+        shift,
+        date,
+        time,
+      };
+    });
+  }, [assignedUsersdata]);
+
+  //time off data call
+  const { data: timeOffRequestsData, refetch } = useGetAllTimeOffRequestsQuery({
+    page: 1,
+    limit: 10,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  //time off data map backend data to UI-friendly shape
+  const timeOffRequests =
+    timeOffRequestsData?.data?.map((req: any) => ({
+      id: req.id,
+      name: req.user?.profile?.firstName || "Unknown User", // or backend name field
+      avatar:
+        req.user?.profile?.profileUrl ||
+        `https://i.pravatar.cc/40?img=${Math.random()}`,
+      type: req.reason,
+      date: new Date(req.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      status: req.status?.toLowerCase(),
+    })) || [];
+
+  const handleApprove = (id: string, adminNote: string) => {
+    approveTimeOffRequest({ id, adminNote })
+      .unwrap()
+      .then(() => {
+        console.log("Time off request approved:", id, adminNote);
+        refetch();
+      })
+      .catch((err) => {
+        console.error("Failed to approve time off request:", err);
+      });
   };
 
-  const handleDecline = (id: string) => {
-    console.log("Dashboard declined request id:", id);
+  const handleDecline = async (
+    id: string,
+    adminNote: string,
+    status: string
+  ) => {
+    try {
+      const result = await declineTimeOffRequest({
+        id,
+        adminNote,
+        status,
+      }).then(() => {
+        console.log("Time off request declined:", id, adminNote, status);
+        refetch();
+      });
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const chatMessages: ChatMessage[] = [
@@ -187,57 +202,6 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const recognitions: Recognition[] = [
-    {
-      id: "1",
-      from: "Team Members",
-      avatar: "TM",
-      type: "Team player",
-      message: "Well-done team",
-      viewer: "All",
-    },
-    {
-      id: "2",
-      from: "Floyd Miles",
-      avatar: "FM",
-      type: "Creative",
-      message: "Innovative solution for client presentation",
-      viewer: "Team A",
-    },
-    {
-      id: "3",
-      from: "Sarah Johnson",
-      avatar: "SJ",
-      type: "Leadership",
-      message: "Excellent project management skills",
-      viewer: "Management",
-    },
-    {
-      id: "4",
-      from: "Mike Chen",
-      avatar: "MC",
-      type: "Creative",
-      message: "Outstanding design work",
-      viewer: "Team B",
-    },
-    {
-      id: "5",
-      from: "Lisa Anderson",
-      avatar: "LA",
-      type: "Collaboration",
-      message: "Great cross-team coordination",
-      viewer: "All Teams",
-    },
-    {
-      id: "6",
-      from: "Sarah Johnson",
-      avatar: "SJ",
-      type: "Leadership",
-      message: "Excellent project management skills",
-      viewer: "Management",
-    },
-  ];
-
   const achievements: Achievement[] = [
     { id: "1", title: "Team Player", date: "June 17, 2025", recipient: "You" },
     {
@@ -266,6 +230,14 @@ const Dashboard: React.FC = () => {
     },
   ];
 
+  if (!timeOffRequestsData || !assignedUsersdata) {
+    return (
+      <div className="flex justify-center items-center p-10">
+        <LoaderCircle size={40} className="animate-spin text-gray-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pt-4 w-full mx-auto">
       <div className="w-full mx-auto">
@@ -275,7 +247,8 @@ const Dashboard: React.FC = () => {
             <QuickActions />
             <SurveyPoll />
             <EmployeeTable employees={employees} />
-            <RecognitionTable recognitions={recognitions} />
+            {/* <RecognitionTable recognitions={recognitions} /> */}
+            <RecognitionTable />
             <MapLocation />
           </div>
 

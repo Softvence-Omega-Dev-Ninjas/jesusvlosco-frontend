@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Bell, Settings, ChevronDown, Menu } from 'lucide-react';
+import { Search, Bell, Settings, Menu } from 'lucide-react';
+import UserDropdown from './User/UserDropdown';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -7,7 +8,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2">
+    <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2">
       <div className="flex items-center justify-between">
         {/* Mobile menu button */}
         <button
@@ -53,7 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </button>
 
           {/* User profile */}
-          <div className="flex items-center space-x-3 cursor-pointer group">
+          <UserDropdown />
+          {/* <div className="flex items-center space-x-3 cursor-pointer group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">NB</span>
             </div>
@@ -61,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">Natasha Bunny</p>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-blue-600" />
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

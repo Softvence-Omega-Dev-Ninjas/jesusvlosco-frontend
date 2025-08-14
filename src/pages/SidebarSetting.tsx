@@ -44,14 +44,14 @@ const SidebarSetting: React.FC = () => {
       {/* Header Tabs Container */}
       <div className="mb-6">
   {/* Tab buttons */}
-  <div className="flex justify-evenly items-center  font-semibold text-gray-600  w-full ">
+  <div className="flex justify-evenly items-center   text-[#484848]  w-full ">
     {tabs.map((tab) => (
       <button
         key={tab}
         onClick={() => setActiveTab(tab)}
         className={`px-4 py-2 transition-colors duration-200 ease-in-out w-full text-center 
           ${activeTab === tab
-            ? 'text-indigo-700 border-b-2 border-indigo-700'
+            ? 'text-[#484848] font-semibold border-b-2 border-[#4E53B1]'
             : 'text-gray-600 hover:text-gray-800'}
         `}
       >
@@ -60,7 +60,7 @@ const SidebarSetting: React.FC = () => {
     ))}
   </div>
   {/* Divider line */}
-  <div className="w-full h-px bg-gray-200 mt-2"></div>
+  <div className="w-full h-px bg-gray-200 "></div>
 </div>
 
       {/* Main Content Area */}
