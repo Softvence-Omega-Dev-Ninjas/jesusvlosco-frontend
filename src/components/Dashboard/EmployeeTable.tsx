@@ -6,6 +6,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
   employees,
 }) => {
   const shouldScroll = employees.length > 5;
+  console.log(employees, "employees");
 
   return (
     <div className="rounded-2xl overflow-hidden w-full">
@@ -58,7 +59,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
 
               <div>
                 <div className="text-base font-normal text-[#484848]">
-                  {employee.shift}
+                  {employee?.shift}
                 </div>
                 <div className="text-sm font-normal text-gray-500 mt-1">
                   {employee.time}
