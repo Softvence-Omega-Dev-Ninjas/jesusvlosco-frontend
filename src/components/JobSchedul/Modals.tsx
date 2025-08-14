@@ -127,18 +127,20 @@ const Modals: React.FC<ModalsProps> = ({
 
   // Members of the selected team
   const allMembers: Member[] = useMemo(() => {
-    const selectedTeam = data?.data?.teams?.find(
-      (t: any) => t.id === selectedCreateProjectId
-    );
-    return (
-      selectedTeam?.members?.map((m: any) => ({
-        id: m.user.id,
-        name: m.user.name,
-        role: m.user.role,
-        avatar: m.user.image,
-      })) || []
-    );
-  }, [data, selectedCreateProjectId]);
+  const selectedTeam = data?.data?.teams?.find(
+    (t: any) => t.id === selectedCreateProjectId
+  );
+
+  return (
+    selectedTeam?.members?.map((m: any) => ({
+      id: m.user.id, // will be sent to API
+      name: `${m.user.profile.firstName} ${m.user.profile.lastName}`, // shown in UI
+      role: m.user.role,
+      avatar: m.user.profile.profileUrl || m.user.image || "", // fallback
+    })) || []
+  );
+}, [data, selectedCreateProjectId]);
+
 
   // Confirm handler for creating project - calls API
   const handleCreateNewConfirmInternal = async () => {
@@ -387,14 +389,15 @@ refetch()
                 onClick={() => setShowMembersDropdown((prev) => !prev)}
                 className="w-full px-4 py-2 border rounded-lg bg-white text-left flex justify-between items-center text-lg focus:ring-1 focus:ring-blue-400"
               >
-                {selectedCreateMembers.length
-    ? selectedCreateMembers
-        .map((id) => {
-          const mem = allMembers.find((m) => m.id === id);
-          return mem ? `${mem.id} ` : id;
-        })
-        .join(", ")
-    : "Select member"}
+               {selectedCreateMembers.length
+  ? selectedCreateMembers
+      .map((id) => {
+        const mem = allMembers.find((m) => m.id === id);
+        return mem ? mem.name : id; // show name instead of id
+      })
+      .join(", ")
+  : "Select member"}
+
                 <svg
                   className={`fill-current h-4 w-4 transform ${
                     showMembersDropdown ? "rotate-180" : "rotate-0"
@@ -416,7 +419,7 @@ refetch()
                       className="flex items-center w-full py-2 hover:bg-gray-100"
                     >
                       <div className="flex-1">
-                        <div className="font-medium">{mem.id}</div>
+                        <div className="font-medium">{mem.name}</div>
                       </div>
                       {selectedCreateMembers.includes(mem.id) && (
                         <svg
