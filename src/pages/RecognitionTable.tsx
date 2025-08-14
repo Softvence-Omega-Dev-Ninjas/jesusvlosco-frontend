@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare, LoaderCircle } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
@@ -6,13 +5,21 @@ import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
 import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
 import { PiUserCircleLight } from "react-icons/pi";
-
-
+import Pagination from "@/utils/Pagination";
+import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const { data, isLoading } = useGetAllRecognationQuery(null);
-  console.log({ data });
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const { data, isLoading, isFetching } = useGetAllRecognationQuery({
+    page: currentPage,
+    limit,
+  });
+  console.log({ isFetching, isLoading });
+  const recognation = data?.data?.data;
+  const meta = data?.data?.meta;
+  console.log({ recognation, meta });
   const [fromDate, setFromDate] = useState({
     day: "01",
     month: "May",
@@ -24,7 +31,6 @@ export default function RecognitionTable() {
     year: "2025",
   });
   const [selectingFrom, setSelectingFrom] = useState(true);
-
 
   const handleDateClick = (day: number) => {
     const dayStr = String(day).padStart(2, "0");
@@ -47,6 +53,11 @@ export default function RecognitionTable() {
     const fromDay = Number.parseInt(fromDate.day);
     const toDay = Number.parseInt(toDate.day);
     return day >= fromDay && day <= toDay;
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // fetch new data here from API using `page`
   };
 
   // send reaction modul
@@ -104,8 +115,8 @@ export default function RecognitionTable() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto ">
-          <table className="w-full">
+        <div className="overflow-x-auto  ">
+          <table className="w-full ">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left p-4 font-medium text-gray-700 text-sm">
@@ -129,10 +140,12 @@ export default function RecognitionTable() {
               </tr>
             </thead>
             {isLoading ? (
-              <div className=" absolute inset-0 opacity-80 w-full flex justify-center items-center" ><LoaderCircle size={40} className="animate-spin"/></div>
+              <div className=" absolute inset-0 opacity-80 w-full flex justify-center items-center">
+                <LoaderCircle size={40} className="animate-spin" />
+              </div>
             ) : (
-              <tbody>
-                {data?.data?.data?.map((activity: any, index: number) => (
+              <tbody className="relative">
+                {recognation?.map((activity: any, index: number) => (
                   <tr
                     key={index}
                     className="border-b py-4 border-[#C5C5C5] hover:bg-gray-50"
@@ -160,7 +173,8 @@ export default function RecognitionTable() {
                             />
                             <span className="text-sm  text-[#4E53B1]">
                               {activity.recognitionUsers[0]?.user?.profile
-                                ?.firstName + " " + 
+                                ?.firstName +
+                                " " +
                                 activity.recognitionUsers[0]?.user?.profile
                                   ?.lastName}
                             </span>
@@ -253,10 +267,17 @@ export default function RecognitionTable() {
                     {/* {isReactionModalOpen && <SendReactionModal onClose={closeReactionModal} />} */}
                   </tr>
                 ))}
-             
+                {!isLoading && isFetching && <TableLoadingSpinner />}
               </tbody>
             )}
           </table>
+          {/* Overlay Loader */}
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={meta?.totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
 
         {/* Date Range Picker Modal */}

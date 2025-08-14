@@ -3,7 +3,7 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 
 import { ListFilter } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   
   useGetAllBadgeQuery,
@@ -154,7 +154,7 @@ export function SectionGrid({ cards }: SectionGridProps) {
   const navigate = useNavigate();
   const handleEdit = (cardId: string) => {
     console.log("Edit clicked for:", cardId);
-    navigate(`/admin/edit-badge`);
+    navigate(`/admin/edit-badge/${cardId}`);
   };
 
 
@@ -235,10 +235,10 @@ export default function BadgeLibrary() {
               <h2 className="text-base sm:text-lg font-semibold ttext-[#4E53B1]">
                 {el?.category}
               </h2>
-              <button className="flex items-center cursor-pointer gap-2 px-6 py-3 text-sm text-gray-600 border border-gray-300 bg-transparent rounded-md hover:bg-gray-100 transition-colors">
+              <Link to={`/admin/create-badge?category=${el?.category}`} className="flex items-center cursor-pointer gap-2 px-6 py-3 text-sm text-gray-600 border border-gray-300 bg-transparent rounded-md hover:bg-gray-100 transition-colors">
                 <span className="text-lg mr-3">+</span>
                 <span className="hidden sm:inline">Add Topic</span>
-              </button>
+              </Link>
             </div>
             <SectionGrid cards={el?.items} />
           </div>

@@ -12,6 +12,8 @@ import user6 from "../assets/user6.png";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { PiUserCircleLight } from "react-icons/pi";
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
+import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
+import Pagination from "@/utils/Pagination";
 
 // Define the type for a User
 interface User {
@@ -164,10 +166,18 @@ const initialUsers: User[] = [
 //testing component
 const User: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
-  const { data, isLoading } = useGetAllUserQuery({ role: "EMPLOYEE" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const { data, isLoading, isFetching } = useGetAllUserQuery({
+    role: "EMPLOYEE",
+    page: currentPage,
+    limit,
+    searchTerm,
+  });
   const allUsers = data?.data;
   console.log({ data, isLoading });
-  const [searchTerm, setSearchTerm] = useState<string>(""); // ✅ search term state
+  // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
     useState<boolean>(false);
@@ -286,6 +296,11 @@ const User: React.FC = () => {
       setViewByOptionsModalTopPosition(null);
     }
     if (showActionModal) setShowActionModal(false);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // fetch new data here from API using `page`
   };
 
   // --- Search filter logic ---
@@ -486,9 +501,6 @@ const User: React.FC = () => {
     { label: "Trainer", value: "Trainer" },
   ];
 
-
-
- 
   console.log({ team: searchTerm });
   return (
     <div
@@ -731,152 +743,185 @@ const User: React.FC = () => {
             />
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg"
-                >
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
-                    checked={isHeaderCheckboxChecked}
-                    onChange={handleHeaderCheckboxChange}
-                    ref={(input) => {
-                      if (input) {
-                        input.indeterminate = isHeaderCheckboxIndeterminate;
-                      }
-                    }}
-                  />
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  ID
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Email
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Phone
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Department
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Last Login
-                </th>
+          <>
+          {
+            allUsers && allUsers.length ===0 ? 
+             <div className="flex flex-col items-center justify-center py-10 text-center text-gray-500">
+      {/* Icon */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-16 h-16 mb-4 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15.75 9V5.25m0 0L12 2.25 8.25 5.25m7.5 0h-7.5m7.5 0V9m-7.5 0V5.25M3 9.75h18M3 19.5h18"
+        />
+      </svg>
 
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative rounded-tr-lg"
-                >
-                  <button
-                    ref={tableViewByOptionsButtonRef}
-                    className="ml-2 flex items-center justify-center p-1 rounded-md hover:bg-gray-100 focus:outline-none cursor-pointer"
-                    onClick={toggleViewByOptionsModal}
+      {/* Message */}
+      <p className="text-lg font-medium">No records match your search.</p>
+      <span className="text-sm text-gray-400">Try adjusting your filters or adding new data.</span>
+    </div> :  <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg"
                   >
-                    <Columns3 className="h-5 w-5" />
-                    <svg
-                      className="w-5 h-5 ml-1 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      ></path>
-                    </svg>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {allUsers?.map((user: any) => (
-                <tr key={user.email} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
-                      checked={selectedUserIds.includes(user?.id)} // Control checked state
-                      onChange={(e) => handleUserCheckboxChange(e, user?.id)} // Add individual handler
+                      checked={isHeaderCheckboxChecked}
+                      onChange={handleHeaderCheckboxChange}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = isHeaderCheckboxIndeterminate;
+                        }
+                      }}
                     />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {user?.employeeID}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        {user?.profile?.profileUrl ? (
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={user?.profile?.profileUrl}
-                            alt={`Avatar of ${user?.profile?.firstName}`}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).onerror = null;
-                              (
-                                e.target as HTMLImageElement
-                              ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
-                                .charAt(0)
-                                .toUpperCase()}`;
-                            }}
-                          />
-                        ) : (
-                          <PiUserCircleLight size={36} />
-                        )}
-                      </div>
-                      <div className="ml-3 ">
-                        <div className="text-sm flex items-center gap-2 font-medium text-gray-900">
-                          <p>{user?.profile?.firstName}</p>
-                          <p> {user?.profile?.lastName}</p>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    ID
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Name
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Email
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Phone
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Department
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Last Login
+                  </th>
+
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative rounded-tr-lg"
+                  >
+                    <button
+                      ref={tableViewByOptionsButtonRef}
+                      className="ml-2 flex items-center justify-center p-1 rounded-md hover:bg-gray-100 focus:outline-none cursor-pointer"
+                      onClick={toggleViewByOptionsModal}
+                    >
+                      <Columns3 className="h-5 w-5" />
+                      <svg
+                        className="w-5 h-5 ml-1 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200 relative">
+                {allUsers?.map((user: any) => (
+                  <tr key={user.email} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
+                        checked={selectedUserIds.includes(user?.id)} // Control checked state
+                        onChange={(e) => handleUserCheckboxChange(e, user?.id)} // Add individual handler
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user?.employeeID}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          {user?.profile?.profileUrl ? (
+                            <img
+                              className="h-10 w-10 rounded-full"
+                              src={user?.profile?.profileUrl}
+                              alt={`Avatar of ${user?.profile?.firstName}`}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).onerror = null;
+                                (
+                                  e.target as HTMLImageElement
+                                ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                                  .charAt(0)
+                                  .toUpperCase()}`;
+                              }}
+                            />
+                          ) : (
+                            <PiUserCircleLight size={36} />
+                          )}
+                        </div>
+                        <div className="ml-3 ">
+                          <div className="text-sm flex items-center gap-2 font-medium text-gray-900">
+                            <p>{user?.profile?.firstName}</p>
+                            <p> {user?.profile?.lastName}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user?.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user?.phone}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user?.profile?.department}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDateToMDY(user?.lastLoginAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user?.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user?.phone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user?.profile?.department}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDateToMDY(user?.lastLoginAt)}
+                    </td>
+                  </tr>
+                ))}
+                {!isLoading && isFetching && <TableLoadingSpinner />}
+              </tbody>
+            </table>
+          }
+           
+          </>
         )}
       </div>
-
+      {!isLoading && allUsers?.length !== 0 &&  (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={data?.metadata?.totalPage}
+          onPageChange={handlePageChange}
+        />
+      )}
       {/* View by Options Modal - now a direct child of the main container, right-aligned */}
       {showViewByOptionsModal && viewByOptionsModalTopPosition !== null && (
         <div
