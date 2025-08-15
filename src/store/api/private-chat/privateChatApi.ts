@@ -1,4 +1,4 @@
-import { sendPrivateMessage } from "@/utils/socket";
+// import { sendPrivateMessage } from "@/utils/socket";
 import { baseApi } from "../baseApi";
 
 const privateChatApi = baseApi.injectEndpoints({
@@ -39,11 +39,14 @@ const privateChatApi = baseApi.injectEndpoints({
         };
       },
       async onQueryStarted(
-        { recipientId, messageInput, userId, file },
-        { dispatch, queryFulfilled }
+        // { recipientId, messageInput, userId, file },
+        // {
+        //    dispatch,
+        //    queryFulfilled 
+        //   }
       ) {
         try {
-          const { data: savedMessage } = await queryFulfilled;
+          // const { data: savedMessage } = await queryFulfilled;
 
           // Emit over socket for recipient real-time update
           // sendPrivateMessage(
