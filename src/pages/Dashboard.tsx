@@ -10,7 +10,7 @@ import React from "react";
 import { Chat } from "../components/Dashboard/Chat";
 import { Achievement, ChatMessage } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
-import MapLocation  from "../components/Dashboard/MapLocation";
+import MapLocation from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { RecognitionEngagement } from "../components/Dashboard/RecognitionEngagement";
 import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
@@ -49,7 +49,9 @@ const Dashboard: React.FC = () => {
           ? user.projects[0].title
           : "No Project";
       const shift =
-        user.shift && user.shift.length > 0 ? user.shift[0] : "Morning";
+        user.shift && user.shift.length > 0
+          ? user.shift[0]?.shiftTitle
+          : "Morning";
 
       const rawDate = user.createdAt || new Date().toISOString();
       const dateObj = new Date(rawDate);
@@ -57,8 +59,26 @@ const Dashboard: React.FC = () => {
         dateObj.getMonth() + 1
       ).padStart(2, "0")}/${dateObj.getFullYear()}`;
 
-      const time = "9:00am-5:00pm";
+      const start =
+        user.shift && user.shift.length > 0 && user.shift[0].startTime;
+      const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
 
+      const startFormatted = new Date(start)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
+      const endFormatted = new Date(end)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
+
+      const time = `${startFormatted}-${endFormatted}`;
       return {
         id: user.id,
         name,

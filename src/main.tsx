@@ -8,12 +8,12 @@ import { persistor, store } from "./store/store.ts";
 import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "sonner";
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <RouterProvider router={routes} />
-        <Toaster richColors position="top-center" />
-      </PersistGate>
-    </Provider>
-  </StrictMode>
+  // <StrictMode>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <RouterProvider router={routes} />
+      <Toaster richColors position="top-center" />
+    </PersistGate>
+  </Provider>
+  // </StrictMode>
 );
