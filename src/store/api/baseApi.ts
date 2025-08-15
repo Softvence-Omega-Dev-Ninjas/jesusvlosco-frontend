@@ -6,9 +6,8 @@ export const baseApi = createApi({
     // baseUrl: "http://localhost:5005/js",
     baseUrl: "https://api.lgcglobalcontractingltd.com/js",
     prepareHeaders: (headers, { getState }) => {
-      
       const token = (getState() as RootState).user.user?.accessToken || "";
-      console.log({ token });
+      // console.log({ token });
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -16,6 +15,6 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["BLOG", "EditedContent", "ADMIN_USER", "BADGE", 'RECOGNATION', 'ShiftScheduling'],
+  tagTypes: ["BLOG", "EditedContent", "ADMIN_USER", "BADGE", 'RECOGNATION', 'ShiftScheduling', 'Team'],
   endpoints: () => ({}),
 });

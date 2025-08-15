@@ -517,6 +517,27 @@ const User: React.FC = () => {
             All Employee Information In One Place
           </p>
         </div>
+       <div className="flex gap-3 items-center">
+         <Link
+          to={"/admin/create-team"}
+          className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            ></path>
+          </svg>
+          Create Team
+        </Link>
         <Link
           to={"/admin/add-user?role=EMPLOYEE"}
           className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
@@ -537,6 +558,7 @@ const User: React.FC = () => {
           </svg>
           Add User
         </Link>
+       </div>
       </header>
 
       {/* Control Bar */}

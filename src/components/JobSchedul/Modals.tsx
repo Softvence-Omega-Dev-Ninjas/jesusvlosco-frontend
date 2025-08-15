@@ -1,7 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { Plus, X } from "lucide-react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
+<<<<<<< HEAD
 import { useCreateProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { Link } from "react-router-dom";
+=======
+import {
+  useCreateProjectMutation,
+  useGetAllProjectsQuery,
+} from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+>>>>>>> 8617b12b60e8d0fa8e53cb6727e25bccd1c643e2
 
 interface Member {
   id: string;
@@ -98,12 +106,13 @@ const Modals: React.FC<ModalsProps> = ({
   const { data } = useGetAllTeamDataQuery(undefined);
 
   // Create Project Mutation hook
-  const [createProject, { isLoading, isError, error }] = useCreateProjectMutation();
+  const [createProject, { isLoading, isError, error }] =
+    useCreateProjectMutation();
 
-  console.log(createProject)
-  
-  const{data:allProjects, refetch}=useGetAllProjectsQuery(undefined)
-  console.log(allProjects)
+  console.log(createProject);
+
+  const { data: allProjects, refetch } = useGetAllProjectsQuery(undefined);
+  console.log(allProjects);
 
   const [selectedCreateProjectId, setSelectedCreateProjectId] =
     useState<string>("");
@@ -130,12 +139,13 @@ const Modals: React.FC<ModalsProps> = ({
     const selectedTeam = data?.data?.teams?.find(
       (t: any) => t.id === selectedCreateProjectId
     );
+
     return (
       selectedTeam?.members?.map((m: any) => ({
-        id: m.user.id,
-        name: m.user.name,
+        id: m.user.id, // will be sent to API
+        name: `${m.user.profile.firstName} ${m.user.profile.lastName}`, // shown in UI
         role: m.user.role,
-        avatar: m.user.image,
+        avatar: m.user.profile.profileUrl || m.user.image || "", // fallback
       })) || []
     );
   }, [data, selectedCreateProjectId]);
@@ -161,16 +171,16 @@ const Modals: React.FC<ModalsProps> = ({
 
     try {
       await createProject({
-  title: newProjectName.trim(),
-  teamId: selectedCreateProjectId,
-  members: selectedCreateMembers,
-  managerId: selectedCreateMembers[0], 
-  projectLocation: location.trim(),
-}).unwrap();
-refetch()
+        title: newProjectName.trim(),
+        teamId: selectedCreateProjectId,
+        members: selectedCreateMembers,
+        managerId: selectedCreateMembers[0],
+        projectLocation: location.trim(),
+      }).unwrap();
+      refetch();
 
       alert("Project created successfully!");
-      
+
       setShowCreateNewModal(false);
 
       // Reset fields
@@ -182,11 +192,12 @@ refetch()
       setShowProjectDropdown(false);
       setShowMembersDropdown(false);
     } catch (err) {
-     alert(
-  "Failed to create project: " +
-  ((err as any)?.data?.message || (err as any)?.error || "Unknown error")
-);
-
+      alert(
+        "Failed to create project: " +
+          ((err as any)?.data?.message ||
+            (err as any)?.error ||
+            "Unknown error")
+      );
     }
   };
 
@@ -200,14 +211,14 @@ refetch()
           style={{ top: moreModalPosition.top, left: moreModalPosition.left }}
         >
           <button
-            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
+            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm cursor-pointer"
             onClick={() => handleEditClick(openMoreModalId)}
           >
             Edit
           </button>
           <button
-            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-red-600"
-          onClick={() => handleDeleteClick(openMoreModalId)}
+            className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-red-600 cursor-pointer"
+            onClick={() => handleDeleteClick(openMoreModalId)}
           >
             Delete
           </button>
@@ -215,55 +226,58 @@ refetch()
       )}
 
       {/* Edit Modal */}
-    {showEditModal && (
-  <>
-    {/* Backdrop */}
-    <div
-      className="fixed inset-0 bg-black bg-opacity-30 z-40"
-      onClick={() => {
-        setShowEditModal(false);
-        setEditModalProjectName("");
-        setSelectedProjectIdForEdit(null);
-      }}
-    />
+      {showEditModal && (
+        <>
+          {/* Backdrop */}
+          <div
+          className="fixed bg-white  w-32  py-1 z-30"
+         
+            onClick={() => {
+              setShowEditModal(false);
+              setEditModalProjectName("");
+              setSelectedProjectIdForEdit(null);
+            }}
+          />
 
-    {/* Modal */}
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div
-        ref={editModalRef}
-        className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border relative"
-        onClick={(e) => e.stopPropagation()} 
-      >
-        <button
-          onClick={() => {
-            setShowEditModal(false);
-            setEditModalProjectName("");
-            setSelectedProjectIdForEdit(null);
-          }}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-          aria-label="Close Edit Modal"
-        >
-          <X size={20} />
-        </button>
-        <h3 className="text-xl font-bold mb-6 text-center">Title this scheduler</h3>
-        <input
-          type="text"
-          placeholder="Project 1"
-          value={editModalProjectName}
-          onChange={(e) => setEditModalProjectName(e.target.value)}
-          className="w-full px-4 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-center text-lg"
-          autoFocus
-        />
-        <button
-          onClick={handleConfirmEdit}
-          className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg"
-        >
-          Confirm
-        </button>
-      </div>
-    </div>
-  </>
-)}
+          {/* Modal */}
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div
+              ref={editModalRef}
+              className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm border relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditModalProjectName("");
+                  setSelectedProjectIdForEdit(null);
+                }}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                aria-label="Close Edit Modal"
+              >
+                <X size={20} />
+              </button>
+              <h3 className="text-xl font-bold mb-6 text-center">
+                Title this scheduler
+              </h3>
+              <input
+                type="text"
+                placeholder="Project 1"
+                value={editModalProjectName}
+                onChange={(e) => setEditModalProjectName(e.target.value)}
+                className="w-full px-4 py-2 mb-6 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-center text-lg"
+                autoFocus
+              />
+              <button
+                onClick={handleConfirmEdit}
+                className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium text-lg cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Delete Confirm Modal */}
       {showDeleteConfirmModal && (
@@ -372,7 +386,11 @@ refetch()
                     >
                       {p.name}
                     </button>
+                    
                   ))}
+                  <Link to={`/admin/create-team`} className="block w-full px-4 py-2 text-blue-500 text-left hover:bg-gray-100">
+                      Create Team
+                    </Link>
                 </div>
               )}
             </div>
@@ -388,13 +406,14 @@ refetch()
                 className="w-full px-4 py-2 border rounded-lg bg-white text-left flex justify-between items-center text-lg focus:ring-1 focus:ring-blue-400"
               >
                 {selectedCreateMembers.length
-    ? selectedCreateMembers
-        .map((id) => {
-          const mem = allMembers.find((m) => m.id === id);
-          return mem ? `${mem.id} ` : id;
-        })
-        .join(", ")
-    : "Select member"}
+                  ? selectedCreateMembers
+                      .map((id) => {
+                        const mem = allMembers.find((m) => m.id === id);
+                        return mem ? mem.name : id; // show name instead of id
+                      })
+                      .join(", ")
+                  : "Select member"}
+
                 <svg
                   className={`fill-current h-4 w-4 transform ${
                     showMembersDropdown ? "rotate-180" : "rotate-0"
@@ -416,7 +435,7 @@ refetch()
                       className="flex items-center w-full py-2 hover:bg-gray-100"
                     >
                       <div className="flex-1">
-                        <div className="font-medium">{mem.id}</div>
+                        <div className="font-medium">{mem.name}</div>
                       </div>
                       {selectedCreateMembers.includes(mem.id) && (
                         <svg
@@ -481,7 +500,8 @@ refetch()
 
             {isError && (
               <p className="text-red-500 mt-2">
-                Error: {(error as any)?.data?.message || "Failed to create project"}
+                Error:{" "}
+                {(error as any)?.data?.message || "Failed to create project"}
               </p>
             )}
           </div>
