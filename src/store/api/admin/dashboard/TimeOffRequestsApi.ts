@@ -15,6 +15,30 @@ const timeOffRequestsApi = baseApi.injectEndpoints({
       }),
     }),
 
+    getSingleTimeOffRequest: builder.query({
+      query: ({ page = 1, limit = 10, userId, startDate, endDate }) => {
+        console.log("Query Params:", {
+          page,
+          limit,
+          userId,
+          startDate,
+          endDate,
+        });
+
+        return {
+          url: `/admin/time-off-request/all-requests`,
+          method: "GET",
+          params: {
+            page,
+            limit,
+            userId,
+            startDate,
+            endDate,
+          },
+        };
+      },
+    }),
+
     approveTimeOffRequest: builder.mutation({
       query: (body) => {
         return {
@@ -48,4 +72,5 @@ export const {
   useGetAllTimeOffRequestsQuery,
   useApproveTimeOffRequestMutation,
   useDeclineTimeOffRequestMutation,
+  useGetSingleTimeOffRequestQuery,
 } = timeOffRequestsApi;
