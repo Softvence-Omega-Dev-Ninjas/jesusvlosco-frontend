@@ -34,7 +34,7 @@ import SurveyDetails from "@/pages/SurveyDetails";
 import SurveyMainPage from "@/pages/SurveyMainPage";
 import SurveyResponse from "@/pages/SurveyResponse";
 import SurveyTemplate from "@/pages/SurveyTemplate";
-import TaskAndProject from "@/pages/TaskAndProject";
+// import TaskAndProject from "@/pages/TaskAndProject/";
 
 import TimeOffRequest from "@/pages/TimeOffRequest";
 import TimeSheet from "@/pages/TimeSheet";
@@ -61,15 +61,21 @@ import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import EmailLogin from "@/pages/email-login/EmailLogin";
+
+import CreateTeam from "@/pages/Admin/CreateTeam";
+
+import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
+
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
   {
     path: "/",
-    element: <EmailLogin />,},
+    element: <EmailLogin />,
+  },
   {
     path: "/email-login",
-    element:<Login /> ,
+    element: <Login />,
   },
 
   // ✅ Admin routes grouped here
@@ -111,9 +117,7 @@ const routes = createBrowserRouter([
           },
           {
             path: "user-overviewProjects/:id",
-            element: (
-              <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>
-            ),
+            element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>,
           },
           { path: "user-timeclock", element: <UserTimeClock /> },
 
@@ -180,14 +184,13 @@ const routes = createBrowserRouter([
         path: "schedule",
         element: <Schedule />,
         children: [
-
           { path: "shiftschedule", element: <JobSchedulingLobby /> },
           //dynamic routes
           { path: "overviewProjects/:id", element: <OverviewProject /> },
           // { path: "timeclock", element: <TimeClock /> },
           {
-            path: 'shift-scheduling/:id',
-            element: <ShiftScheduling />
+            path: "shift-scheduling/:id",
+            element: <ShiftScheduling />,
           },
           {
             path: "timesheet",
@@ -205,6 +208,7 @@ const routes = createBrowserRouter([
       },
 
       { path: "survey-poll", element: <SurveyMainPage /> },
+      { path: "create-team", element: <CreateTeam /> },
       { path: "survey-response", element: <SurveyResponse /> },
       { path: "survey-details/", element: <SurveyDetails /> },
       // dynamic

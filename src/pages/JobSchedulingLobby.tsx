@@ -3,7 +3,7 @@ import { Plus, Search } from "lucide-react";
 import ProjectCard from "@/components/JobSchedul/ProjectCard";
 import Modals from "@/components/JobSchedul/Modals";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
-import { useDeleteProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { useDeleteProjectMutation, useGetAllProjectsQuery, useUpdateProjectTitleMutation } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 
 interface Project {
   id: number;
@@ -271,34 +271,50 @@ const JobSchedulingLobby: React.FC = () => {
     }
   };
 
+
+
+
+const [updateProjectTitle]=useUpdateProjectTitleMutation()
+
 const handleEditClick = (projectId: number) => {
-  // এখানে full closeAllOtherModals() না ডেকে, শুধু other modal state গুলো রিসেট করো
+  // Close other modals
   setOpenMoreModalId(null);
   setMoreModalPosition(null);
   setShowDeleteConfirmModal(false);
   setProjectIdToDelete(null);
   setShowCreateNewModal(false);
+  setNewProjectName("");
+  setSelectedCreateMembers([]);
+  setShowProjectDropdown(false);
+  setShowMembersDropdown(false);
 
-  const p = projects.find((proj) => proj.id === projectId);
-  if (p) {
-    setEditModalProjectName(p.name);
+  // Find the project from mappedProjects (which contains the API data)
+  const project = mappedProjects.find((proj) => proj.id === projectId);
+  
+  if (project) {
+    setEditModalProjectName(project.name); 
     setSelectedProjectIdForEdit(projectId);
-    setShowEditModal(true); // modal খুলবে
+    setShowEditModal(true);
+  } else {
+    console.warn(`Project with ID ${projectId} not found`);
   }
 };
 
-  const handleConfirmEdit = () => {
-    if (selectedProjectIdForEdit !== null) {
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === selectedProjectIdForEdit
-            ? { ...p, name: editModalProjectName }
-            : p
-        )
-      );
+  const handleConfirmEdit = async () => {
+  if (selectedProjectIdForEdit !== null) {
+    try {
+      await updateProjectTitle({
+        projectId: selectedProjectIdForEdit,
+        title: editModalProjectName,
+      }).unwrap();
+      await refetch();
+      closeAllOtherModals();
+    } catch (error) {
+      console.error("Failed to update project title:", error);
     }
-    closeAllOtherModals();
-  };
+  }
+};
+
 
   const handleDeleteClick = (projectId: number) => {
     closeAllOtherModals();
@@ -464,15 +480,12 @@ const mappedProjects: Project[] = projectsArray.map((proj: any) => ({
         showCreateNewModal={showCreateNewModal}
         newProjectName={newProjectName}
         setNewProjectName={setNewProjectName}
-      
-        
         selectedCreateMembers={selectedCreateMembers}
         setSelectedCreateMembers={setSelectedCreateMembers}
         handleSelectMember={handleSelectMember}
         handleCreateNewConfirm={handleCreateNewConfirm}
         setShowCreateNewModal={setShowCreateNewModal}
         createNewModalRef={createNewModalRef}
-   
         showProjectDropdown={showProjectDropdown}
         setShowProjectDropdown={setShowProjectDropdown}
         projectDropdownRef={projectDropdownRef}

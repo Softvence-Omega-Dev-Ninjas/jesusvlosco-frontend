@@ -6,9 +6,12 @@ import user1 from "@/assets/reactionuser2.png";
 import user2 from "@/assets/reactionu1.png";
 import user3 from "@/assets/reaction user 3.png";
 import Swal from "sweetalert2";
+import { PiUserCircleLight } from "react-icons/pi";
+import { useAddCommentMutation } from "@/store/api/admin/recognation/recognationApi";
 
 interface SendReactionModalProps {
   onClose: () => void;
+  recognation: any;
 }
 
 interface Reaction {
@@ -28,7 +31,10 @@ interface Comment {
 
 const EMOJI_OPTIONS = ["👍", "❤️", "😊", "🎉", "👏"];
 
-const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
+const SendReactionModal: React.FC<SendReactionModalProps> = ({
+  onClose,
+  recognation,
+}) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([
@@ -110,9 +116,17 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
     setShowEmojiPicker(null);
   };
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const [addComment, { isLoading }] = useAddCommentMutation();
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log({ recognitionId: recognation?.id, data: {comment: commentText }});
     if (commentText.trim()) {
+      const result = await addComment({
+        recognitionId: recognation?.id,
+        data: commentText,
+      });
+      console.log({ result });
+      return;
       const newComment: Comment = {
         id: `comment-${Date.now()}`,
         author: "Current User",
@@ -244,21 +258,50 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({ onClose }) => {
 
                 <div className="flex items-center justify-between">
                   {/* Company Name */}
-                  <div className="text-gray-700 font-medium">XYZ Company</div>
+                  <div className="text-gray-700 font-medium">
+                    {recognation?.message}
+                  </div>
 
                   {/* Lightbulb Icon */}
                   <div className="relative cursor-pointer">
-                    <img src={light} alt="" />
+                    <img
+                      src={recognation?.badge?.iconImage}
+                      alt=""
+                      className="max-w-[50px]"
+                    />
                   </div>
 
                   {/* Recognized People */}
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full cursor-pointer">
-                        <img src={user1} alt="" />
-                      </Avatar>
-                      <span className="text-gray-700 text-sm">Cody Fisher</span>
-                    </div>
+                    {recognation?.recognitionUsers?.map(
+                      ({ user }: { user: any }) => (
+                        <div className="flex items-center gap-2 ">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            {user?.profile?.profileUrl ? (
+                              <img
+                                className="h-10 w-10 rounded-full"
+                                src={user?.profile?.profileUrl}
+                                alt={`Avatar of ${user?.profile?.firstName}`}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).onerror = null;
+                                  (
+                                    e.target as HTMLImageElement
+                                  ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                                    .charAt(0)
+                                    .toUpperCase()}`;
+                                }}
+                              />
+                            ) : (
+                              <PiUserCircleLight size={36} />
+                            )}
+                          </div>
+                          <span className="text-gray-700 truncate max-w-[130px] text-sm">
+                            {user?.profile?.firstName + user?.profile?.lastName}
+                          </span>
+                        </div>
+                      )
+                    )}
+
                     <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
                         <img src={user2} alt="" />
