@@ -86,6 +86,15 @@ const recognationApi = baseApi.injectEndpoints({
       },
       // providesTags: ["BADGE"],
     }),
+
+    // Comments
+    addComment: build.mutation({
+      query: (credentials) => ({
+        url: `/recognition/comments/${credentials?.recognitionId}`,
+        method: "POST",
+        body: credentials?.data,
+      }),
+    }),
   }),
 });
 
@@ -102,4 +111,7 @@ export const {
   useGetAllBadgeQuery,
   useUpdateBadgeMutation,
   useGetSingleBadgeQuery,
+
+  // Comment
+  useAddCommentMutation
 } = recognationApi;

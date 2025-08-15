@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare, LoaderCircle } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
 import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
@@ -10,26 +10,68 @@ import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  // Get today's date
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const today = new Date();
+  const [selectedRecognation, setSelectedRecognation] = useState({});
+  console.log({selectedRecognation})
+  // Get date 10 days ago
+  const tenDaysAgo = new Date();
+  tenDaysAgo.setDate(today.getDate() - 10);
+
+  const [fromDate, setFromDate] = useState({
+    day: "01",
+    month: "May",
+    year: String(today.getFullYear()),
+  });
+
+  const [toDate, setToDate] = useState({
+    day: String(today.getDate()).padStart(2, "0"),
+    month: monthNames[today.getMonth()],
+    year: String(today.getFullYear()),
+  });
+  const toISO = (dateObj: { day: string; month: string; year: string }) =>
+    new Date(`${dateObj.day} ${dateObj.month} ${dateObj.year}`).toISOString();
+
+  const [datas, setDatas] = useState({
+    fromDate: toISO(fromDate),
+    toDate: toISO(toDate),
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const { data, isLoading, isFetching } = useGetAllRecognationQuery({
     page: currentPage,
     limit,
+    startDate: datas?.fromDate,
+    endDate: datas?.toDate,
   });
   console.log({ isFetching, isLoading });
   const recognation = data?.data?.data;
   const meta = data?.data?.meta;
   console.log({ recognation, meta });
-  const [fromDate, setFromDate] = useState({
-    day: "01",
-    month: "May",
-    year: "2025",
-  });
-  const [toDate, setToDate] = useState({
-    day: "08",
-    month: "May",
-    year: "2025",
-  });
+
+  // Update ISO dates whenever fromDate or toDate changes
+  useEffect(() => {
+    setDatas({
+      fromDate: toISO(fromDate),
+      toDate: toISO(toDate),
+    });
+  }, [fromDate, toDate]);
+
+  console.log(datas);
   const [selectingFrom, setSelectingFrom] = useState(true);
 
   const handleDateClick = (day: number) => {
@@ -251,7 +293,10 @@ export default function RecognitionTable() {
                         <span className="text-[#C5C5C5]">|</span>
                         <button
                           className="p-1 hover:bg-gray-100 rounded transition-colors relative"
-                          onClick={openReactionModal}
+                          onClick={() => {
+                            openReactionModal();
+                            setSelectedRecognation(activity);
+                          }}
                         >
                           <MessagesSquare className="w-4 h-4 cursor-pointer text-black hover:text-blue-500" />
                           {activity.messageCount > 0 && (
@@ -293,7 +338,7 @@ export default function RecognitionTable() {
         />
         {/* reaction modal  */}
         {isReactionModalOpen && (
-          <SendReactionModal onClose={closeReactionModal} />
+          <SendReactionModal recognation={selectedRecognation} onClose={closeReactionModal} />
         )}
       </div>
     </div>
