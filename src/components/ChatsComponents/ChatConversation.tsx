@@ -52,6 +52,8 @@ const ChatConversation = ({
           },
         }
       );
+
+      setMessageInput("");
     } catch (error) {
       console.log(error);
     }
@@ -59,12 +61,13 @@ const ChatConversation = ({
   useEffect(() => {
     initPrivateMessageListener((newMessage) => {
       setMessages((prev) => [...prev, newMessage]);
+      // setMessageInput("");
     });
   }, []);
 
-  if (messages.length === 0 || !messages) {
-    return "No messages";
-  }
+  // if (messages.length === 0 || !messages) {
+  //   return "No messages";
+  // }
 
   return (
     <div className="flex-1 flex flex-col">
