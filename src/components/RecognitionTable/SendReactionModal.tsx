@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Edit, Trash2, Eye, Send } from "lucide-react";
 import { useState } from "react";
-import light from "@/assets/reaction light.png";
 import user1 from "@/assets/reactionuser2.png";
 import user2 from "@/assets/reactionu1.png";
 import user3 from "@/assets/reaction user 3.png";
@@ -11,7 +11,8 @@ import { useAddCommentMutation } from "@/store/api/admin/recognation/recognation
 
 interface SendReactionModalProps {
   onClose: () => void;
-  recognation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  recognation?: any;
 }
 
 interface Reaction {
@@ -116,10 +117,13 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
     setShowEmojiPicker(null);
   };
 
-  const [addComment, { isLoading }] = useAddCommentMutation();
+  const [addComment] = useAddCommentMutation();
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ recognitionId: recognation?.id, data: {comment: commentText }});
+    console.log({
+      recognitionId: recognation?.id,
+      data: { comment: commentText },
+    });
     if (commentText.trim()) {
       const result = await addComment({
         recognitionId: recognation?.id,
