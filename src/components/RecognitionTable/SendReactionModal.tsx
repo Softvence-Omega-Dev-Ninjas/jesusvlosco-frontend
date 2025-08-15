@@ -11,7 +11,6 @@ import { useAddCommentMutation } from "@/store/api/admin/recognation/recognation
 
 interface SendReactionModalProps {
   onClose: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recognation?: any;
 }
 
