@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Plus, X } from "lucide-react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
 import { useCreateProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { Link } from "react-router-dom";
 
 interface Member {
   id: string;
@@ -374,7 +375,11 @@ refetch()
                     >
                       {p.name}
                     </button>
+                    
                   ))}
+                  <Link to={`/admin/create-team`} className="block w-full px-4 py-2 text-blue-500 text-left hover:bg-gray-100">
+                      Create Team
+                    </Link>
                 </div>
               )}
             </div>
