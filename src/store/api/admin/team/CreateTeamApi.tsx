@@ -8,6 +8,7 @@ const teamApi = baseApi.injectEndpoints({
       query: (body) => ({
         url: "admin/team",
         method: "POST",
+        
         body,
       }),
       invalidatesTags: ['Team', 'ADMIN_USER'],

@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, DefaultValues } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export type FormValues = {
-  name: string;
-  description: string;
-  department: "IT" | "DEVELOPMENT" | "HR" | "FINANCE" | "MARKETING" | "SEALS";
-  image?: FileList | null;
-};
+const createTeamSchema = z.object({
+  name: z.string().min(2, "Team name is required"),
+  description: z.string().min(10, "Write at least 10 characters"),
+  department: z.enum(["IT", "DEVELOPMENT", "HR", "FINANCE", "MARKETING", "SEALS"]),
+  image: z.any().optional(),
+});
+
+export type FormValues = z.infer<typeof createTeamSchema> & { image?: FileList | null };
 
 const departmentOptions: FormValues["department"][] = [
   "IT",
@@ -34,6 +38,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    resolver: zodResolver(createTeamSchema),
     defaultValues: defaultValues as DefaultValues<FormValues> | undefined,
     mode: "onTouched",
   });

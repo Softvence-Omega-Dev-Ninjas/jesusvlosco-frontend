@@ -2,13 +2,19 @@ import CreateTeamForm, {
   FormValues,
 } from "@/components/CreateTeam/CreateTeamForm";
 import SelectUsersComponent from "@/components/CreateTeam/SelectUsersComponent";
+import { useCreateTeamMutation } from "@/store/api/admin/team/CreateTeamApi";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { TUser } from "@/types/usertype";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const CreateTeam: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
+  const [createTeam] = useCreateTeamMutation();
   const getUsers = useGetAllUserQuery({});
+  const navigate = useNavigate();
+  
   const userList =
     getUsers?.data?.data?.filter((user: TUser) => user.role != "ADMIN") || [];
   console.log(userList);
@@ -22,22 +28,52 @@ const CreateTeam: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     const file = data.image?.[0] || null;
-    const payload = {
-      title: data.name,
-      description: data.description,
-      department: data.department,
-      image: file,
-      members: teamMembers,
-    } as const;
+    if (teamMembers.length < 2) {
+      Swal.fire("Please select at least two team members.");
+      return;
+    }
+    console.log(teamMembers)
+    // Build multipart FormData
+    const fd = new FormData();
+    fd.append("title", data.name);
+    fd.append("description", data.description);
+    fd.append("department", data.department);
 
-    console.log("Create Team payload:", payload);
-    console.log("File:", file);
-    console.log("Selected team members:", teamMembers);
+    if (file) {
+      fd.append("image", file);
+    }
 
-    // Simulate async save
-    await new Promise((res) => setTimeout(res, 600));
+  // Append members as repeated fields (one entry per member)
+  // (avoid sending JSON string + repeated fields which can confuse backend parsing)
+  teamMembers.forEach((m) => fd.append("members", m));
 
-    alert("Team created (demo). Check console for payload.");
+    try {
+      const result = await createTeam(fd).unwrap();
+      console.log("createTeam result:", result);
+      const normalizeMessage = (m: unknown) => {
+        if (!m) return undefined;
+        if (Array.isArray(m)) return (m as unknown[]).join(" \n");
+        if (typeof m === "string") return m;
+        try {
+          return JSON.stringify(m);
+        } catch {
+          return String(m as unknown);
+        }
+      };
+
+      if (result?.success) {
+        Swal.fire("Team created", "Team was created successfully.", "success");
+        navigate(-1);
+      } else {
+        const msg = normalizeMessage(result?.message) || "Failed to create team";
+        Swal.fire("Error", msg, "error");
+      }
+    } catch (err) {
+      console.error("createTeam error", err);
+      const maybe = err as unknown as { data?: { message?: string }; message?: string };
+      const message = maybe?.data?.message || maybe?.message || "Failed to create team";
+      Swal.fire("Error", message, "error");
+    }
   };
 
   return (

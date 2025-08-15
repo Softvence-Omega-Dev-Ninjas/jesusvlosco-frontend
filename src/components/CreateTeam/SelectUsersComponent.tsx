@@ -18,7 +18,7 @@ const SelectUsersComponent: React.FC<SelectUsersProps> = ({
         Select Team Members
       </h2>
       <div className="max-h-max overflow-y-auto pt-5">
-        <div className="grid grid-col-2 md:grid-cols-3 gap-3">
+        <div className="flex flex-wrap gap-3">
           {userList.map((user: TUser) => (
             <div
               key={user.id}
