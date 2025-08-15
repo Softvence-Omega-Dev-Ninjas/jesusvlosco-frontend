@@ -1,10 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { Plus, X } from "lucide-react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
+<<<<<<< HEAD
+import { useCreateProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { Link } from "react-router-dom";
+=======
 import {
   useCreateProjectMutation,
   useGetAllProjectsQuery,
 } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+>>>>>>> 8617b12b60e8d0fa8e53cb6727e25bccd1c643e2
 
 interface Member {
   id: string;
@@ -381,7 +386,11 @@ const Modals: React.FC<ModalsProps> = ({
                     >
                       {p.name}
                     </button>
+                    
                   ))}
+                  <Link to={`/admin/create-team`} className="block w-full px-4 py-2 text-blue-500 text-left hover:bg-gray-100">
+                      Create Team
+                    </Link>
                 </div>
               )}
             </div>

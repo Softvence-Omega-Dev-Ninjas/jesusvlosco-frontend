@@ -480,15 +480,12 @@ const mappedProjects: Project[] = projectsArray.map((proj: any) => ({
         showCreateNewModal={showCreateNewModal}
         newProjectName={newProjectName}
         setNewProjectName={setNewProjectName}
-      
-        
         selectedCreateMembers={selectedCreateMembers}
         setSelectedCreateMembers={setSelectedCreateMembers}
         handleSelectMember={handleSelectMember}
         handleCreateNewConfirm={handleCreateNewConfirm}
         setShowCreateNewModal={setShowCreateNewModal}
         createNewModalRef={createNewModalRef}
-   
         showProjectDropdown={showProjectDropdown}
         setShowProjectDropdown={setShowProjectDropdown}
         projectDropdownRef={projectDropdownRef}
