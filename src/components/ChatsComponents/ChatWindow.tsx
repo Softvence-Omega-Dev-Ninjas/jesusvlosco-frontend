@@ -18,6 +18,8 @@ import {
 import { connectPrivateChat } from "@/utils/socket";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
+import { formatDistanceToNow } from "date-fns";
+import axios from "axios";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -38,6 +40,9 @@ interface ChatMessage {
 export interface Chat {
   id: number;
   chatId: string;
+  lastMessage: {
+    content: string;
+  };
   name: string;
   message: string;
   time: string;
@@ -67,24 +72,19 @@ export default function ResponsiveChatWindow() {
   const [showAddMemberModal, setShowMemberModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const user = useAppSelector(selectUser);
+  const [messageInput, setMessageInput] = useState("");
   console.log(showChatInfo, showDeleteModal);
 
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data || [];
-  // console.log(privateChats, "private chats");
 
   const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
-
-  // const [message, setMessage] = useState("");
-  // const [chat, setChat] = useState<ChatMessage[]>([]);
   const token = user?.accessToken as string;
 
   // Connect to the private chat socket when the component mounts
   useEffect(() => {
     connectPrivateChat(token);
   }, [token]);
-
-  // console.log(privateChats, "data");
 
   // Mobile view state - controls which panel is visible on mobile
   const [mobileView, setMobileView] = useState<"list" | "chat" | "info">(
@@ -95,8 +95,6 @@ export default function ResponsiveChatWindow() {
   const selectedChat = privateChats?.find(
     (chat: Chat) => chat.chatId === selectedChatId
   );
-
-  // const selectedPrivateChat =
 
   // Handle chat selection on mobile
   const handleChatSelect = (chatId: string) => {
@@ -145,6 +143,38 @@ export default function ResponsiveChatWindow() {
       </div>
     );
   }
+
+  const handleSendMessage = async () => {
+    if (messageInput.trim() === "") return;
+    const userId = user?.id || "";
+    const recipientId = selectedChat.participant.id || "";
+
+    const formData = new FormData();
+    formData.append("content", messageInput);
+    formData.append("userId", userId);
+
+    // if (file) {
+    //   formData.append("file", file);
+    // }
+
+    try {
+      await axios.post(
+        `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.accessToken}`,
+          },
+        }
+      );
+
+      setMessageInput("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(privateChats);
 
   return (
     <div className="flex h-screen border-0 md:border border-gray-200 rounded-none md:rounded-2xl overflow-hidden">
@@ -235,11 +265,13 @@ export default function ResponsiveChatWindow() {
                       chat.participant.profile.lastName}
                   </p>
                   <p className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                    {new Date(chat.updatedAt).toDateString()}
+                    {formatDistanceToNow(new Date(chat?.updatedAt), {
+                      addSuffix: true,
+                    })}
                   </p>
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">
-                  {/* {chat.lastMessage || "N/A"} */}
+                  {chat.lastMessage?.content || "N/A"}
                 </p>
               </div>
             </div>
@@ -349,7 +381,7 @@ export default function ResponsiveChatWindow() {
         </div>
 
         {/* Mobile Chat Messages */}
-        <div className="lg:hidden flex-1 flex flex-col">
+        <div className="lg:hidden flex-1 flex flex-col max-h-[calc(100vh-170px)]">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {privateChatData?.messages?.map((message: ChatMessage) => {
               const isMe = message.senderId === user?.id; // currentUserId from auth
@@ -391,10 +423,15 @@ export default function ResponsiveChatWindow() {
             <div className="flex items-center space-x-2">
               <input
                 type="text"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <button className="p-2 bg-primary text-white rounded-full hover:bg-indigo-600 transition-colors">
+              <button
+                onClick={handleSendMessage}
+                className="p-2 bg-primary text-white rounded-full hover:bg-indigo-600 transition-colors"
+              >
                 <svg
                   className="w-5 h-5"
                   fill="currentColor"
