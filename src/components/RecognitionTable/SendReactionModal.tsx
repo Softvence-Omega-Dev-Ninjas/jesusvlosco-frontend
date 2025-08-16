@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Edit, Trash2, Eye, Send } from "lucide-react";
 import { useState } from "react";
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 
 interface SendReactionModalProps {
   onClose: () => void;
-  recognation: any;
+  recognation?: any;
 }
 
 interface Reaction {
@@ -144,6 +145,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
     setShowEmojiPicker(null);
   };
+
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
