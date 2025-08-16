@@ -1,6 +1,4 @@
-import { mockEmployeeLeaveData } from "@/assets/mockData"; // adjust path as needed
 import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // adjust path as needed
-import { EmployeeLeave } from "@/types";
 import { CalendarDaysIcon } from "lucide-react";
 import { useState } from "react";
 import { ApproveIcon, DeclineIcon } from "./icons";
@@ -12,6 +10,7 @@ type Request = {
   date: string;
   type: string;
   status: "pending" | "approved" | "declined" | string;
+  userId: string;
 };
 
 type TimeOffRequestsProps = {
@@ -77,28 +76,16 @@ export default function TimeOffRequests({
   onDecline,
 }: TimeOffRequestsProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedEmployee, setSelectedEmployee] =
-    useState<EmployeeLeave | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<string | undefined>(
+    ""
+  );
 
   const openModal = (req?: Request) => {
-    if (!req) {
-      setSelectedEmployee(mockEmployeeLeaveData[0]);
-      setIsModalOpen(true);
-      return;
-    }
+    if (!req) return;
 
-    const emp = mockEmployeeLeaveData.find(
-      (e) => e.employeeName.toLowerCase() === req.name.toLowerCase()
-    );
-
-    if (emp) {
-      setSelectedEmployee(emp);
-    } else {
-      setSelectedEmployee(mockEmployeeLeaveData[0]);
-    }
+    setSelectedEmployee(req.userId);
     setIsModalOpen(true);
   };
-
   const shouldScroll = requests.length > 2;
 
   return (
