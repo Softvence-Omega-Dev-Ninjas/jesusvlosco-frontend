@@ -76,65 +76,15 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
   ]);
   console.log({ recognation });
   const handleEmojiSelect = async (commentId: string, emoji: string) => {
-    setComments((prevComments) =>
-      prevComments.map((comment) => {
-        if (comment.id === commentId) {
-          const existingReaction = comment.reactions.find(
-            (r) => r.emoji === emoji
-          );
-          if (existingReaction) {
-            // If user already reacted with this emoji, remove it
-            if (existingReaction.users.includes("Current User")) {
-              return {
-                ...comment,
-                reactions: comment.reactions
-                  .map((r) =>
-                    r.emoji === emoji
-                      ? {
-                          ...r,
-                          count: r.count - 1,
-                          users: r.users.filter((u) => u !== "Current User"),
-                        }
-                      : r
-                  )
-                  .filter((r) => r.count > 0),
-              };
-            } else {
-              // Add user to existing reaction
-              return {
-                ...comment,
-                reactions: comment.reactions.map((r) =>
-                  r.emoji === emoji
-                    ? {
-                        ...r,
-                        count: r.count + 1,
-                        users: [...r.users, "Current User"],
-                      }
-                    : r
-                ),
-              };
-            }
-          } else {
-            // Create new reaction
-            return {
-              ...comment,
-              reactions: [
-                ...comment.reactions,
-                { emoji, count: 1, users: ["Current User"] },
-              ],
-            };
-          }
-        }
-        return comment;
-      })
-    );
+    console.log({ commentId, emoji });
+    //  return;
 
     try {
       const result = await addComment({
         recognitionId: recognation?.id,
-        data: { reaction: emoji },
+        data: { reaction: emoji, parentCommentId: commentId },
       }).unwrap();
-      console.log({result})
+      console.log({ result });
       if (result?.success) {
         toast.success(result?.message || "Reaction added successfully");
       }
@@ -145,7 +95,6 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
     setShowEmojiPicker(null);
   };
-
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,25 +156,27 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
   const ReactionDisplay = ({ reactions }: { reactions: Reaction[] }) => {
     if (reactions.length === 0) return null;
-const reactionSummary = reactions?.reduce((acc, curr: any) => {
-  const match = reactionsWithEmoji.find((item) => item.label === curr.reaction);
-  if (!match) return acc;
+    const reactionSummary = reactions?.reduce((acc, curr: any) => {
+      const match = reactionsWithEmoji.find(
+        (item) => item.label === curr.reaction
+      );
+      if (!match) return acc;
 
-  const existing = acc.find((item) => item.label === curr.reaction);
-  if (existing) {
-    existing.count += 1;
-  } else {
-    acc.push({
-      label: curr.reaction,
-      emoji: match.emoji,
-      count: 1,
-    });
-  }
+      const existing = acc.find((item) => item.label === curr.reaction);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        acc.push({
+          label: curr.reaction,
+          emoji: match.emoji,
+          count: 1,
+        });
+      }
 
-  return acc;
-}, [] as { label: string; emoji: string; count: number }[]);
+      return acc;
+    }, [] as { label: string; emoji: string; count: number }[]);
 
-console.log(reactionSummary);
+    console.log(reactionSummary);
     return (
       <div className="flex h-6  items-center  gap-2 mb-2">
         {reactionSummary.map((reaction) => (
@@ -348,21 +299,6 @@ console.log(reactionSummary);
                         </div>
                       )
                     )}
-
-                    {/* <div className="flex items-center gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full">
-                        <img src={user2} alt="" />
-                      </Avatar>
-                      <span className="text-gray-700 text-sm">
-                        Leslie Alexander
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full">
-                        <img src={user3} alt="" />
-                      </Avatar>
-                      <span className="text-gray-700 text-sm">Robert Fox</span>
-                    </div> */}
                   </div>
                 </div>
               </div>
