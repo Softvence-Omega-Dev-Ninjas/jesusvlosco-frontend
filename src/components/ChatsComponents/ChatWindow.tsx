@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import {
   ArrowLeft,
   Search,
@@ -14,12 +14,13 @@ import { useNavigate } from "react-router-dom";
 import {
   useGetChatByIdQuery,
   useGetPrivateChatQuery,
+  useSendPrivateMessageMutation,
 } from "@/store/api/private-chat/privateChatApi";
 import { connectPrivateChat } from "@/utils/socket";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import { formatDistanceToNow } from "date-fns";
-import axios from "axios";
+import Swal from "sweetalert2";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -62,7 +63,7 @@ export interface Chat {
   updatedAt: string;
 }
 
-export default function ResponsiveChatWindow() {
+export default forwardRef<{ openChatWithUser: (userId: string) => void }>(function ResponsiveChatWindow(_props, ref) {
   const navigate = useNavigate();
   const chatTabs = ["All", "Unread", "Team"];
   const [activeChatTab, setActiveChatTab] = useState("All");
@@ -71,15 +72,79 @@ export default function ResponsiveChatWindow() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddMemberModal, setShowMemberModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
+  
+  // Add the send message mutation
+  const [sendPrivateMessage] = useSendPrivateMessageMutation();
+  
   console.log(showChatInfo, showDeleteModal);
 
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data || [];
 
+  const filteredChats = privateChats.filter((chat: Chat) => {
+     return chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+  });
+
+    console.log("Filtered Chats:", filteredChats);
   const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
   const token = user?.accessToken as string;
+
+  // Expose openChatWithUser method to parent component
+  useImperativeHandle(ref, () => ({
+    openChatWithUser: async (userId: string) => {
+      // First check if there's already a chat with this user
+      const existingChat = privateChats.find((chat: Chat) => 
+        chat.participant.id === userId
+      );
+      console.log("Existing Chat:", existingChat);
+      console.log("User ID:", userId);
+
+      if (existingChat) {
+        // If chat exists, select it
+        setSelectedChatId(existingChat.chatId);
+        setMobileView("chat");
+      } else {
+        // If no chat exists, create a new one by sending the first message
+        try {
+          const result = await sendPrivateMessage({
+            recipientId: userId,
+            messageInput: '...', // Initial greeting message
+            userId: user?.id || '',
+            file: undefined
+          }).unwrap();
+
+          Swal.fire({
+            icon: "success",
+            title: "Chat Initiated",
+            text: "You are connected to this user",
+          });
+          // After successfully sending the first message, find the new chat
+          // The API should return the chatId or we can refetch the chat list
+          if (result?.message?.conversationId) {
+            setSelectedChatId(result.message.conversationId);
+            setMobileView("chat");
+          } else {
+            // If chatId is not returned, wait a bit and refetch chats to find the new one
+            setTimeout(() => {
+              // The chat list will be automatically updated due to RTK Query cache invalidation
+              const newChat = privateChats.find((chat: Chat) => 
+                chat.participant.id === userId
+              );
+              if (newChat) {
+                setSelectedChatId(newChat.chatId);
+                setMobileView("chat");
+              }
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('Error creating chat:', error);
+        }
+      }
+    }
+  }));
 
   // Connect to the private chat socket when the component mounts
   useEffect(() => {
@@ -130,7 +195,7 @@ export default function ResponsiveChatWindow() {
   // Add this condition before the return statement to handle empty chat list
   if (privateChats.length === 0) {
     return (
-      <div className="flex h-screen border border-gray-200 rounded-none md:rounded-2xl overflow-hidden items-center justify-center">
+      <div className="flex border border-gray-200 rounded-none md:rounded-2xl overflow-hidden items-center justify-center">
         <div className="text-center p-4">
           <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -148,26 +213,17 @@ export default function ResponsiveChatWindow() {
     if (messageInput.trim() === "") return;
     const userId = user?.id || "";
     const recipientId = selectedChat.participant.id || "";
-
-    const formData = new FormData();
-    formData.append("content", messageInput);
-    formData.append("userId", userId);
-
-    // if (file) {
-    //   formData.append("file", file);
-    // }
+    console.log(`Sending message to ${recipientId}: ${messageInput}`);
 
     try {
-      await axios.post(
-        `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.accessToken}`,
-          },
-        }
-      );
 
+       const result = await sendPrivateMessage({
+            recipientId: recipientId,
+            messageInput: messageInput, // Initial greeting message
+            userId: userId || '',
+            file: undefined
+          }).unwrap();
+      console.log("Message sent successfully:", result);
       setMessageInput("");
     } catch (error) {
       console.log(error);
@@ -177,7 +233,7 @@ export default function ResponsiveChatWindow() {
   console.log(privateChats);
 
   return (
-    <div className="flex h-screen border-0 md:border border-gray-200 rounded-none md:rounded-2xl overflow-hidden">
+    <div className="flex min-h-[500px] border-0 md:border border-gray-200 rounded-none md:rounded-2xl overflow-hidden">
       {/* Left Sidebar - Chat List */}
       <div
         className={`${
@@ -204,6 +260,8 @@ export default function ResponsiveChatWindow() {
             <input
               type="text"
               placeholder="Search conversation"
+                 value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 md:py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -229,8 +287,8 @@ export default function ResponsiveChatWindow() {
         </div>
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto">
-          {privateChats.map((chat: Chat) => (
+        <div className="flex-1 overflow-y-auto max-h-[400px]">
+          {filteredChats.map((chat: Chat) => (
             <div
               key={chat.chatId}
               className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${
@@ -470,4 +528,4 @@ export default function ResponsiveChatWindow() {
       )}
     </div>
   );
-}
+});

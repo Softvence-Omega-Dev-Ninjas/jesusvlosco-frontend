@@ -8,6 +8,7 @@ const privateChatApi = baseApi.injectEndpoints({
         url: `/private-chat`,
         method: "GET",
       }),
+      providesTags: ['PRIVATE_CHAT'],
     }),
 
     getChatById: build.query({
@@ -18,6 +19,10 @@ const privateChatApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: (_result, _error, chatId) => [
+        { type: 'PRIVATE_CHAT', id: chatId },
+        'PRIVATE_CHAT'
+      ],
     }),
     // recipientId: selectedPrivateChatInfo.participant.id,
     //       messageInput,
@@ -38,6 +43,7 @@ const privateChatApi = baseApi.injectEndpoints({
           body: formData,
         };
       },
+      invalidatesTags: ['PRIVATE_CHAT'],
       async onQueryStarted(
         // { recipientId, messageInput, userId, file },
         // {
