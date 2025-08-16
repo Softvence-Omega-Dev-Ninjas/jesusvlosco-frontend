@@ -44,6 +44,14 @@ const authApi = baseApi.injectEndpoints({
         body: credentials?.formData,
       }),
     }),
+    updateRole: build.mutation({
+      query: (credentials) => ({
+        url: `/admin/user/${credentials?.userId}/role`,
+        method: "PATCH",
+        body: credentials?.data,
+      }),
+      invalidatesTags: ["ADMIN_USER"],
+    }),
     getProfile: build.query({
       query: (credentials) => ({
         url: `/admin/user/id/${credentials?.id}`,
@@ -59,5 +67,6 @@ export const {
   usePhoneLoginMutation,
   useVarifyPhoneLoginMutation,
   useUpdateProfileMutation,
-  useGetProfileQuery
+  useGetProfileQuery,
+  useUpdateRoleMutation,
 } = authApi;

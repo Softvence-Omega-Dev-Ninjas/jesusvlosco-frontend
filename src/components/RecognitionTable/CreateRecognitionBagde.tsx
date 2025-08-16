@@ -1,4 +1,5 @@
-import  { useEffect, useRef, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useRef, useState } from "react";
 
 import { useGetAllBadgeQuery } from "@/store/api/admin/recognation/recognationApi";
 import { IBadge, IRecognation } from "@/types/recognation";
@@ -23,7 +24,6 @@ const CreateRecognitionBagde = ({ formData, handleChange }: IProp) => {
   console.log({ data, isLoading });
   const badgess = data?.data;
 
-
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,16 +43,13 @@ const CreateRecognitionBagde = ({ formData, handleChange }: IProp) => {
     };
   }, [openModal]);
 
-
- 
-
   const badgeChanged = (id: string) => {
     handleChange("badgeId", id);
     // console.log()
   };
 
   return (
-    <div className="min-h-screen bg-white p-4">
+    <div className="min-h-screen  bg-white p-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <h2 className="text-lg font-medium text-[#4E53B1]">Select badge:</h2>
