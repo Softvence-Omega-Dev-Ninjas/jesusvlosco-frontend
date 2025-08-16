@@ -65,7 +65,6 @@ import EmailLogin from "@/pages/email-login/EmailLogin";
 import CreateTeam from "@/pages/Admin/CreateTeam";
 
 import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
-
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([

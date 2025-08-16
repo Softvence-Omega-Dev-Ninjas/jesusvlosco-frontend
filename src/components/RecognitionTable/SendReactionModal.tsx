@@ -7,7 +7,11 @@ import user2 from "@/assets/reactionu1.png";
 import user3 from "@/assets/reaction user 3.png";
 import Swal from "sweetalert2";
 import { PiUserCircleLight } from "react-icons/pi";
-import { useAddCommentMutation } from "@/store/api/admin/recognation/recognationApi";
+import {
+  useAddCommentMutation,
+  useGetAllCommentQuery,
+} from "@/store/api/admin/recognation/recognationApi";
+import { toast } from "sonner";
 
 interface SendReactionModalProps {
   onClose: () => void;
@@ -29,14 +33,23 @@ interface Comment {
   image: string;
 }
 
-const EMOJI_OPTIONS = ["👍", "❤️", "😊", "🎉", "👏"];
+const reactionsWithEmoji = [
+  { label: "LIKE", emoji: "👍" },
+  { label: "LOVE_FACE", emoji: "❤️" },
+  { label: "SMILE_FACE", emoji: "😊" },
+  { label: "WOW_FACE", emoji: "😮" },
+  { label: "SAD_FACE", emoji: "😢" },
+  { label: "CELEBRATION", emoji: "🎉" },
+];
 
 const SendReactionModal: React.FC<SendReactionModalProps> = ({
   onClose,
   recognation,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+  console.log({ showEmojiPicker });
   const [commentText, setCommentText] = useState("");
+  const [addComment] = useAddCommentMutation();
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "leslie-comment",
@@ -55,12 +68,14 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
       image: user3,
     },
   ]);
-
+  const { data } = useGetAllCommentQuery({ id: recognation?.id });
+  const commentss = data?.data?.comments;
+  console.log({ commentss });
   const [postReactions] = useState<Reaction[]>([
     { emoji: "😊", count: 1, users: ["Current User"] },
   ]);
-
-  const handleEmojiSelect = (commentId: string, emoji: string) => {
+  console.log({ recognation });
+  const handleEmojiSelect = async (commentId: string, emoji: string) => {
     setComments((prevComments) =>
       prevComments.map((comment) => {
         if (comment.id === commentId) {
@@ -113,10 +128,25 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
         return comment;
       })
     );
+
+    try {
+      const result = await addComment({
+        recognitionId: recognation?.id,
+        data: { reaction: emoji },
+      }).unwrap();
+      console.log({result})
+      if (result?.success) {
+        toast.success(result?.message || "Reaction added successfully");
+      }
+    } catch (error: any) {
+      console.log({ error });
+      toast.error(error?.message || "Something went wrong");
+    }
+
     setShowEmojiPicker(null);
   };
 
-  const [addComment] = useAddCommentMutation();
+
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({
@@ -124,11 +154,19 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
       data: { comment: commentText },
     });
     if (commentText.trim()) {
-      const result = await addComment({
-        recognitionId: recognation?.id,
-        data: commentText,
-      });
-      console.log({ result });
+      try {
+        const result = await addComment({
+          recognitionId: recognation?.id,
+          data: { comment: commentText },
+        }).unwrap();
+        console.log({ result });
+        if (result?.success) {
+          toast.success(result?.message || "Comment added successfully");
+        }
+      } catch (error: any) {
+        console.log({ error });
+        toast.error(error?.message || "Something went wrong");
+      }
       return;
       const newComment: Comment = {
         id: `comment-${Date.now()}`,
@@ -154,13 +192,13 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
     return (
       <div className="absolute bottom-full mb-2 bg-black border border-gray-200 rounded-full shadow-lg p-2 flex gap-2 z-10">
-        {EMOJI_OPTIONS.map((emoji) => (
+        {reactionsWithEmoji.map((emoji) => (
           <button
-            key={emoji}
-            onClick={() => onSelect(emoji)}
+            key={emoji.label}
+            onClick={() => onSelect(emoji.label)}
             className="w-8 h-8 flex items-center cursor-pointer justify-center hover:bg-gray-100 rounded text-lg transition-colors"
           >
-            {emoji}
+            {emoji.emoji}
           </button>
         ))}
       </div>
@@ -169,35 +207,41 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
   const ReactionDisplay = ({ reactions }: { reactions: Reaction[] }) => {
     if (reactions.length === 0) return null;
+const reactionSummary = reactions?.reduce((acc, curr: any) => {
+  const match = reactionsWithEmoji.find((item) => item.label === curr.reaction);
+  if (!match) return acc;
 
+  const existing = acc.find((item) => item.label === curr.reaction);
+  if (existing) {
+    existing.count += 1;
+  } else {
+    acc.push({
+      label: curr.reaction,
+      emoji: match.emoji,
+      count: 1,
+    });
+  }
+
+  return acc;
+}, [] as { label: string; emoji: string; count: number }[]);
+
+console.log(reactionSummary);
     return (
-      <div className="flex items-center gap-2 mb-2">
-        {reactions.map((reaction) => (
+      <div className="flex h-6  items-center  gap-2 mb-2">
+        {reactionSummary.map((reaction) => (
           <div
             key={reaction.emoji}
             className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1"
           >
-            <span className="text-sm cursor-pointer">{reaction.emoji}</span>
+            <span className="text-sm cursor-pointer lowercase">
+              {reaction.emoji}
+            </span>
             <span className="text-xs text-gray-600">{reaction.count}</span>
           </div>
         ))}
       </div>
     );
   };
-
-  const Avatar = ({
-    children,
-    className = "",
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
-    <div
-      className={`relative inline-flex items-center justify-center overflow-hidden ${className}`}
-    >
-      {children}
-    </div>
-  );
 
   const handleDelete = () => {
     Swal.fire({
@@ -219,14 +263,14 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 bg-opacity-40 z-50 flex justify-end">
+    <div className="fixed inset-0 bg-black/50  bg-opacity-40 z-50 flex justify-end">
       {/* Clickable backdrop to close modal */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Right-side panel with full height and desired width */}
-      <div className="relative z-60 h-screen w-full max-w-lg shadow-lg ">
+      <div className="relative z-60 min-h-screen w-full max-w-lg shadow-lg ">
         {/* ✅ Your content goes here */}
-        <div className="overflow-y-auto h-full  ">
+        <div className="overflow-y-auto h-full bg-white ">
           <div className="  p-6  h-full bg-white  ">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 border-b pb-3 border-[#C5C5C5]">
@@ -305,7 +349,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
                       )
                     )}
 
-                    <div className="flex items-center gap-3 ">
+                    {/* <div className="flex items-center gap-3 ">
                       <Avatar className="w-8 h-8 rounded-full">
                         <img src={user2} alt="" />
                       </Avatar>
@@ -318,7 +362,7 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
                         <img src={user3} alt="" />
                       </Avatar>
                       <span className="text-gray-700 text-sm">Robert Fox</span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -348,9 +392,9 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
             </div>
 
             {/* Comments */}
-            <div className="space-y-6 mb-8 cursor-pointer">
-              {comments.map((comment) => (
-                <div key={comment.id} className=" ">
+            <div className="space-y-6  mb-8 cursor-pointer">
+              {commentss?.map((comment: any) => (
+                <div key={comment.id} className="overflow-y-auto ">
                   {/* Comment Content */}
                   <div
                     className={`${
@@ -362,17 +406,35 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
                     } rounded-lg p-4 `}
                   >
                     <div className="flex items-start gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full">
-                        <img src={comment.image} alt={comment.author} />
-                      </Avatar>
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {comment?.user?.profile?.profileUrl ? (
+                          <img
+                            className="h-10 w-10 rounded-full"
+                            src={comment?.user?.profile?.profileUrl}
+                            alt={`Avatar of ${comment?.user?.profile?.firstName}`}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).onerror = null;
+                              (
+                                e.target as HTMLImageElement
+                              ).src = `https://placehold.co/40x40/cccccc/000000?text=${comment?.user.firstName
+                                .charAt(0)
+                                .toUpperCase()}`;
+                            }}
+                          />
+                        ) : (
+                          <PiUserCircleLight size={36} />
+                        )}
+                      </div>
                       <div className="flex-1">
                         <div className="font-medium text-gray-800 text-sm mb-1">
-                          {comment.author}
+                          {comment.user?.firstName +
+                            " " +
+                            comment?.user?.lastName}
                         </div>
                         <div className="text-gray-700 text-sm mb-2">
-                          {comment.content}
+                          {comment?.comment}
                         </div>
-                        <ReactionDisplay reactions={comment.reactions} />
+                        <ReactionDisplay reactions={comment?.reactions} />
                       </div>
                     </div>
                   </div>

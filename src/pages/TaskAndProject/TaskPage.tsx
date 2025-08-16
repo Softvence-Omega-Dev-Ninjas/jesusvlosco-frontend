@@ -12,16 +12,7 @@ interface TaskPageProps {
   onAddTask: () => void;
 }
 
-export default function TaskPage({
-  projects,
-  activeTab,
-  groupBy,
-  selectedTasks,
-  toggleTask,
-  isTaskSelected,
-  onAddTask,
-}: TaskPageProps) {
-  console.log(selectedTasks);
+export default function TaskPage({ projects, activeTab, groupBy, toggleTask, isTaskSelected, onAddTask }: TaskPageProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="p-6">

@@ -205,7 +205,7 @@ export const RecognitionTable: React.FC = () => {
 
       {/* Reaction Modal */}
       {isReactionModalOpen && (
-        <SendReactionModal onClose={closeReactionModal} />
+        <SendReactionModal recognation={recognitions[0]} onClose={closeReactionModal} />
       )}
     </div>
   );
