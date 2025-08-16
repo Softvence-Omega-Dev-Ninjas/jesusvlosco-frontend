@@ -1,72 +1,46 @@
 import { useState } from "react";
 import messageIcon from "@/assets/message-icon.svg";
 import personImg from "@/assets/chat-person.jpg";
+import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { TUser } from "@/types/usertype";
 
-interface Employee {
-  id: number;
-  name: string;
-  title: string;
-  department: string;
-  avatar: string;
-  email: string;
-  phone: string;
+interface EmployeeDirectoryProps {
+  onChatWithUser?: (userId: string) => void;
 }
 
-export default function EmployeeDirectory() {
+export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryProps) {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Sample employee data
-  const employees: Employee[] = [
-    {
-      id: 1,
-      name: "Kathryn Murphy",
-      title: "Product manager",
-      department: "Product",
-      avatar: "/placeholder.svg?height=80&width=80",
-      email: "kathryn.murphy@company.com",
-      phone: "+1 (555) 123-4567",
-    },
-    {
-      id: 2,
-      name: "John Smith",
-      title: "Software Engineer",
-      department: "Engineering",
-      avatar: "/placeholder.svg?height=80&width=80",
-      email: "john.smith@company.com",
-      phone: "+1 (555) 234-5678",
-    },
-    {
-      id: 3,
-      name: "Sarah Johnson",
-      title: "UX Designer",
-      department: "Design",
-      avatar: "/placeholder.svg?height=80&width=80",
-      email: "sarah.johnson@company.com",
-      phone: "+1 (555) 345-6789",
-    },
-  ];
+   const users = useGetAllUserQuery({});
+      const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
+      console.log(employees);
 
   const filteredEmployees = employees.filter(
-    (employee) =>
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.department.toLowerCase().includes(searchTerm.toLowerCase())
+    (employee: TUser) =>
+      employee.profile?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.profile?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.profile?.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleChat = (employee: Employee) => {
-    console.log(`Starting chat with ${employee.name}`);
+  const handleChat = (employee: TUser) => {
+    console.log(`Starting chat with ${employee.profile?.firstName || "Employee"}`);
+    console.log("Selected User:", employee.id);
+    
+    // Call the parent's chat handler if provided
+    if (onChatWithUser) {
+      onChatWithUser(employee.id);
+    }
   };
 
-  const handleCall = (employee: Employee) => {
+  const handleCall = (employee: TUser) => {
     window.open(`tel:${employee.phone}`);
   };
 
-  const handleEmail = (employee: Employee) => {
+  const handleEmail = (employee: TUser) => {
     window.open(`mailto:${employee.email}`);
   };
     
   return (
-    <div className="max-w-4xl mx-auto bg-gray-50 min-h-screen">
+    <div className="max-w-4xl mx-auto bg-gray-50 overflow-y-auto max-h-[700px]">
       {/* Header */}
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">
         Employee Directory
@@ -102,7 +76,7 @@ export default function EmployeeDirectory() {
 
       {/* Employee Grid */}
       <div className="grid grid-cols-1 gap-6">
-        {filteredEmployees.map((employee) => (
+        {filteredEmployees.map((employee: TUser) => (
           <div
             key={employee.id}
             className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
@@ -111,16 +85,16 @@ export default function EmployeeDirectory() {
             <div className="flex items-start space-x-4 mb-6">
               <img
                 src={personImg}
-                alt={employee.name}
+                alt={employee.profile?.firstName || "Employee Avatar"}
                 className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {employee.name}
+                  {employee.profile?.firstName + " " + employee.profile?.lastName}
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">{employee.title}</p>
+                <p className="text-sm text-gray-600 mt-1">{employee.profile?.jobTitle}</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {employee.department}
+                  {employee.profile?.department}
                 </p>
               </div>
             </div>

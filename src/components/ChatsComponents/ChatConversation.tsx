@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Chat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-import axios from "axios";
 import { initPrivateMessageListener } from "@/utils/socket";
+import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
 
 const ChatConversation = ({
   selectedChat,
@@ -23,6 +23,7 @@ const ChatConversation = ({
   const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState(selectedChat?.messages || []);
+    const [sendPrivateMessage] = useSendPrivateMessageMutation();
 
   useEffect(() => {
     if (selectedChat?.messages) {
@@ -55,15 +56,23 @@ const ChatConversation = ({
     // }
 
     try {
-      await axios.post(
-        `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${me?.accessToken}`,
-          },
-        }
-      );
+
+      const result = await sendPrivateMessage({
+            recipientId: recipientId,
+            messageInput: messageInput, // Initial greeting message
+            userId: userId || '',
+            file: undefined
+          }).unwrap();
+          console.log(result)
+      // await axios.post(
+      //   `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
+      //   formData,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${me?.accessToken}`,
+      //     },
+      //   }
+      // );
 
       setMessageInput("");
     } catch (error) {
@@ -146,9 +155,9 @@ const ChatConversation = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-170px)]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(70vh-170px)]">
         {messages?.map((message) => {
-          const isMe = message.senderId === me?.id; // currentUserId from auth
+          const isMe = message.senderId === me?.id; 
           // console.log(isMe, "isMe");
           const avatar =
             message.sender?.profile?.profileUrl ||
