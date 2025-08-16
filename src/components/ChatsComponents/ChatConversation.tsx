@@ -1,5 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
@@ -19,6 +19,7 @@ const ChatConversation = ({
   setShowDeleteModal: (arg0: boolean) => void;
   setShowMemberModal: (arg0: boolean) => void;
 }) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
   const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState(selectedChat?.messages || []);
@@ -28,6 +29,17 @@ const ChatConversation = ({
       setMessages(selectedChat?.messages);
     }
   }, [selectedChat?.messages]);
+
+  useEffect(() => {
+    initPrivateMessageListener((newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Scrolls to the bottom when messages change or on mount
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (messageInput.trim() === "") return;
@@ -52,19 +64,12 @@ const ChatConversation = ({
           },
         }
       );
+
+      setMessageInput("");
     } catch (error) {
       console.log(error);
     }
   };
-  useEffect(() => {
-    initPrivateMessageListener((newMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
-    });
-  }, []);
-
-  if (messages.length === 0 || !messages) {
-    return "No messages";
-  }
 
   return (
     <div className="flex-1 flex flex-col">
@@ -160,7 +165,9 @@ const ChatConversation = ({
               <img
                 src={avatar}
                 alt={`${message.sender?.profile?.firstName} avatar`}
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                className={`w-8 h-8 rounded-full object-cover flex-shrink-0 ${
+                  isMe && "hidden"
+                }`}
               />
 
               {/* Message bubble */}
@@ -171,6 +178,7 @@ const ChatConversation = ({
               >
                 <p className="text-sm">{message.content}</p>
               </div>
+              <div ref={bottomRef} />
             </div>
           );
         })}
