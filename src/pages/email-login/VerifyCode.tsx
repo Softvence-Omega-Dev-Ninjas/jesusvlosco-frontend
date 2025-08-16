@@ -53,7 +53,7 @@ const VerifyCode: React.FC<Step2VerifyCodeProps> = ({ email, setStep }) => {
         );
         setStep(3);
       } 
-      console.log(result);
+      console.log(result.data.token);
     } catch (error: any) {
         toast.error(error?.data?.message)
         console.log(error)

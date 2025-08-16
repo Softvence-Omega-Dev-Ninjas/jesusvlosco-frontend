@@ -115,7 +115,10 @@ const Dashboard: React.FC = () => {
         year: "numeric",
       }),
       status: req.status?.toLowerCase(),
+      userId: req.userId,
     })) || [];
+
+;
 
   const handleApprove = (id: string, adminNote: string) => {
     approveTimeOffRequest({ id, adminNote })

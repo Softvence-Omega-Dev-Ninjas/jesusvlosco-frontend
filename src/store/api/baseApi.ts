@@ -24,7 +24,7 @@ export const baseApi = createApi({
     "ShiftScheduling",
     "Team",
     "COMMENT",
-    "USER",
+    "PRIVATE_CHAT",
   ],
   endpoints: () => ({}),
 });
