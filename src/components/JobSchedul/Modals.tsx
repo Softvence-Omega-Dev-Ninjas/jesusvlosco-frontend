@@ -1,8 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { Plus, X } from "lucide-react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
+
 import { useCreateProjectMutation, useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { Link } from "react-router-dom";
+
+
+
 
 
 interface Member {
@@ -188,9 +192,9 @@ const Modals: React.FC<ModalsProps> = ({
     } catch (err) {
       alert(
         "Failed to create project: " +
-          ((err as any)?.data?.message ||
-            (err as any)?.error ||
-            "Unknown error")
+        ((err as any)?.data?.message ||
+          (err as any)?.error ||
+          "Unknown error")
       );
     }
   };
@@ -224,8 +228,8 @@ const Modals: React.FC<ModalsProps> = ({
         <>
           {/* Backdrop */}
           <div
-          className="fixed bg-white  w-32  py-1 z-30"
-         
+            className="fixed bg-white  w-32  py-1 z-30"
+
             onClick={() => {
               setShowEditModal(false);
               setEditModalProjectName("");
@@ -355,9 +359,8 @@ const Modals: React.FC<ModalsProps> = ({
               >
                 {selectedCreateProjectName || "Select Team"}
                 <svg
-                  className={`fill-current h-4 w-4 transform ${
-                    showProjectDropdown ? "rotate-180" : "rotate-0"
-                  }`}
+                  className={`fill-current h-4 w-4 transform ${showProjectDropdown ? "rotate-180" : "rotate-0"
+                    }`}
                   viewBox="0 0 20 20"
                 >
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828L6.757 7.586L5.343 9z" />
@@ -380,11 +383,11 @@ const Modals: React.FC<ModalsProps> = ({
                     >
                       {p.name}
                     </button>
-                    
+
                   ))}
                   <Link to={`/admin/create-team`} className="block w-full px-4 py-2 text-blue-500 text-left hover:bg-gray-100">
-                      Create Team
-                    </Link>
+                    Create Team
+                  </Link>
                 </div>
               )}
             </div>
@@ -401,17 +404,16 @@ const Modals: React.FC<ModalsProps> = ({
               >
                 {selectedCreateMembers.length
                   ? selectedCreateMembers
-                      .map((id) => {
-                        const mem = allMembers.find((m) => m.id === id);
-                        return mem ? mem.name : id; // show name instead of id
-                      })
-                      .join(", ")
+                    .map((id) => {
+                      const mem = allMembers.find((m) => m.id === id);
+                      return mem ? mem.name : id; // show name instead of id
+                    })
+                    .join(", ")
                   : "Select member"}
 
                 <svg
-                  className={`fill-current h-4 w-4 transform ${
-                    showMembersDropdown ? "rotate-180" : "rotate-0"
-                  }`}
+                  className={`fill-current h-4 w-4 transform ${showMembersDropdown ? "rotate-180" : "rotate-0"
+                    }`}
                   viewBox="0 0 20 20"
                 >
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828L6.757 7.586L5.343 9z" />

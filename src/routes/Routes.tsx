@@ -61,7 +61,9 @@ import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import EmailLogin from "@/pages/email-login/EmailLogin";
+
 import CreateTeam from "@/pages/Admin/CreateTeam";
+
 import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
 // import EmailLogin from "@/pages/EmailLogin";
 
@@ -221,12 +223,12 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
+        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
       },
       { path: "publish-poll", element: <PublishSurvey /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => {}} />,
+        element: <PollTemplate onBackToPollCreation={() => { }} />,
       },
 
       { path: "tasks-projects", element: <TaskAndProject /> },
