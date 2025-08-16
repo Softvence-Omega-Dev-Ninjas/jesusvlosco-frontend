@@ -1,4 +1,5 @@
-import { EmployeeLeave, LeaveRequest } from "@/types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetSingleTimeOffRequestQuery } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import React, { useState } from "react";
 import {
   ApprovedIcon,
@@ -11,7 +12,7 @@ import {
 import ShiftCalendar from "./ShiftCalendar"; // Import ShiftCalendar component
 
 interface EmployeeDetailModalProps {
-  employee: EmployeeLeave | null;
+  employee: string | null;
   onClose: () => void;
 }
 
@@ -32,7 +33,15 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     endDate: new Date(2025, 11, 31), // Default: 31/12/2025
   });
 
-  if (!employee) return null;
+  const { data, isLoading } = useGetSingleTimeOffRequestQuery({
+    page: 1,
+    limit: 10,
+    userId: employee,
+  });
+
+  console.log(data, "tested");
+
+  // if (!employee) return null;
 
   // Format date range for display
   const formatDateRange = (): string => {
@@ -55,6 +64,13 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     setDateRange(selectedRange);
     setIsCalendarOpen(false); // Close calendar after selection
   };
+
+  // if (isLoading)
+  //   return (
+  //     <div className="text-2xl flex items-center justify-center">
+  //       Loading...
+  //     </div>
+  //   );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end p-4">
@@ -108,8 +124,11 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
           )}
 
           {/* Leave Requests */}
-          {employee.leaveRequests.length > 0 ? (
-            employee.leaveRequests.map((request: LeaveRequest) => (
+
+          {isLoading ? (
+            <p className="text-center text-gray-500">Loading...</p>
+          ) : data?.data?.length > 0 ? (
+            data.data.map((request: any) => (
               <div
                 key={request.id}
                 className="p-4 rounded-lg border border-[#4E53B1] mb-4"
@@ -118,15 +137,17 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                 <div className="flex items-center mb-4">
                   <img
                     className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                    src={employee.avatar}
-                    alt={employee.employeeName}
+                    src={request.user.profile.profileUrl}
+                    alt={request.user.profile.firstName}
                   />
                   <div className="ml-3">
                     <p className="text-sm font-semibold text-[#4E53B1]">
-                      {employee.employeeName}
+                      {request.user.profile.firstName}{" "}
+                      {request.user.profile.lastName}
                     </p>
                     <p className="text-xs text-[#4E53B1]">
-                      Requested on {request.requestedDate}
+                      Requested on{" "}
+                      {new Date(request.createdAt).toLocaleDateString("en-US")}
                     </p>
                   </div>
                 </div>
@@ -139,7 +160,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                       Time off type
                     </span>
                     <span className="text-[#4E53B1] font-bold">
-                      {request.type}
+                      {request.reason}
                     </span>
                     <div className="flex justify-end">
                       <span
@@ -157,11 +178,32 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                   {/* Dates */}
                   <div className="grid grid-cols-3 items-center bg-[#EDEEF7] p-4 rounded-md">
                     <span className="font-medium text-[#949494]">Dates</span>
-                    <span className="text-[#4E53B1] font-bold">
-                      {request.dates}
+                    <span className="text-[#4E53B1] font-bold whitespace-nowrap">
+                      {new Date(request.startDate).toLocaleDateString("en-US")}{" "}
+                      <span> - </span>{" "}
+                      {new Date(request.endDate).toLocaleDateString("en-US")}
                     </span>
                     <div className="flex justify-end">
-                      <span className="text-[#4E53B1]">{request.duration}</span>
+                      {/* <span className="text-[#4E53B1]">{request.duration}</span> */}
+                      <span className="text-[#4E53B1] font-semibold">
+                        <span className="text-[#4E53B1] font-semibold">
+                          {(() => {
+                            const startTime = new Date(
+                              request.startDate
+                            ).getTime();
+                            const endTime = new Date(request.endDate).getTime();
+
+                            if (isNaN(startTime) || isNaN(endTime)) {
+                              return "Invalid date";
+                            }
+
+                            const diffTime = endTime - startTime;
+                            const diffDays =
+                              Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                            return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
+                          })()}
+                        </span>
+                      </span>
                     </div>
                   </div>
 
@@ -169,18 +211,18 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                   <div className="grid grid-cols-3 items-center bg-[#EDEEF7] p-4 rounded-md">
                     <span className="font-medium text-[#949494]">Note</span>
                     <span className="text-[#4E53B1] font-bold">
-                      {request.note}
+                      {request.reason}
                     </span>
                   </div>
 
                   {/* Admin Note */}
-                  {request.adminNote && (
+                  {request?.adminNote && (
                     <div className="grid grid-cols-3 items-center bg-[#EDEEF7] p-4 rounded-md">
                       <span className="font-medium text-[#949494]">
                         Admin note
                       </span>
                       <span className="font-bold text-[#4E53B1] col-span-2">
-                        {request.adminNote}
+                        {request?.adminNote}
                       </span>
                     </div>
                   )}
@@ -189,7 +231,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                 {/* Status Footer */}
                 <div
                   className={`mt-4 p-3 rounded-md text-center font-semibold ${
-                    request.status === "Approved"
+                    request.status === "APPROVED"
                       ? "bg-[#4E53B1] text-white"
                       : "bg-[#DC1E28] text-white"
                   }`}
