@@ -1,10 +1,10 @@
 import { baseApi } from "../../baseApi";
 
-const projectApi = baseApi.injectEndpoints({
+export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // POST - Create project
     createProject: builder.mutation({
-      query: (body) => ({
+      query: (body: Record<string, any>) => ({
         url: "/admin/project",
         method: "POST",
         body,
@@ -15,13 +15,13 @@ const projectApi = baseApi.injectEndpoints({
     getAllProjects: builder.query({
       query: (params?: Record<string, any>) => {
         const queryParams = new URLSearchParams();
-
-        Object.entries(params || {}).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            queryParams.append(key, String(value)); 
-          }
-        });
-
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+              queryParams.append(key, String(value));
+            }
+          });
+        }
         return {
           url: `/admin/project?${queryParams.toString()}`,
           method: "GET",
@@ -29,13 +29,29 @@ const projectApi = baseApi.injectEndpoints({
       },
     }),
 
+    // DELETE - Delete a project
     deleteProject: builder.mutation<void, number | string>({
       query: (id) => ({
         url: `/admin/project/${id}`,
         method: "DELETE",
       }),
     }),
+
+    // PATCH - Update project title
+    updateProjectTitle: builder.mutation< void,{ projectId: number | string; title: string }>({
+      query: ({ projectId, title }) => ({
+        url: `/admin/project/${projectId}/update-title`,
+        method: "PATCH",
+        body: { title },
+      }),
+    }),
   }),
+  
 });
 
-export const { useCreateProjectMutation, useGetAllProjectsQuery,useDeleteProjectMutation } = projectApi;
+export const {
+  useCreateProjectMutation,
+  useGetAllProjectsQuery,
+  useDeleteProjectMutation,
+  useUpdateProjectTitleMutation,
+} = projectApi;

@@ -1,0 +1,103 @@
+import { IProject } from "@/types/taskTypes";
+
+export const projects: IProject[] = [
+  {
+    id: "1",
+    name: "Metro Shopping Center",
+    tasks: [
+      {
+        id: "1-1",
+        name: "Metro Shopping Center",
+        status: "Open",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "1-2",
+        name: "Metro Shopping Center",
+        status: "Draft",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "1-3",
+        name: "Metro Shopping Center",
+        status: "Done",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Riverside Apartments",
+    tasks: [
+      {
+        id: "2-1",
+        name: "Riverside Apartments",
+        status: "Open",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "2-2",
+        name: "Riverside Apartments",
+        status: "Done",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Wade Warren", avatar: "WW" },
+      },
+      {
+        id: "2-3",
+        name: "Riverside Apartments",
+        status: "Done",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+    ],
+  },
+  {
+    id: "3",
+    name: "Tech Campus Phase 2",
+    tasks: [
+      {
+        id: "3-1",
+        name: "Tech Campus Phase 2",
+        status: "Open",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "3-2",
+        name: "Tech Campus Phase 2",
+        status: "Open",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Jane Cooper", avatar: "JC" },
+      },
+      {
+        id: "3-3",
+        name: "Tech Campus Phase 2",
+        status: "Done",
+        label: "General Tasks",
+        startTime: "23/06/25 at 12:00 am",
+        dueDate: "23/06/25 at 12:00 am",
+        assignedTo: { name: "Mike Chen", avatar: "MC" },
+      },
+    ],
+  },
+];

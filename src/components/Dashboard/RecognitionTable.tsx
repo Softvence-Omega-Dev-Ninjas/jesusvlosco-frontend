@@ -1,86 +1,79 @@
-import { Award, Lightbulb } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
+import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
 import React, { useState } from "react";
-import CommentModal from "./CommentModal";
-import { Recognition } from "./dashboard";
-import { CommentIcon, LikeIcon, TeamplayerIcon } from "./icons";
+import { PiUserCircleLight } from "react-icons/pi";
+import { CommentIcon, LikeIcon } from "./icons";
 
-export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
-  recognitions,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export const RecognitionTable: React.FC = () => {
+  const { data } = useGetAllRecognationQuery(null);
+  const [isReactionModalOpen, setIsReactionModalOpen] = useState(false);
 
-  const getTypeIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "team player":
-        return <TeamplayerIcon />;
-      case "creative":
-        return <Lightbulb className="w-6 h-6 text-yellow-500" />;
-      default:
-        return <Award className="w-6 h-6 text-orange-500" />;
-    }
-  };
+  const openReactionModal = () => setIsReactionModalOpen(true);
+  const closeReactionModal = () => setIsReactionModalOpen(false);
 
-  const getAvatarGroup = (recognition: Recognition) => {
-    const teamAvatars = [
-      "https://randomuser.me/api/portraits/women/1.jpg",
-      "https://randomuser.me/api/portraits/men/2.jpg",
-      "https://randomuser.me/api/portraits/women/3.jpg",
-      "https://randomuser.me/api/portraits/men/4.jpg",
-    ];
-
-    if (
-      recognition.from === "Team player" ||
-      recognition.type === "Team player"
-    ) {
+  const getAvatarGroup = (recognitionUsers: any[]) => {
+    if (recognitionUsers.length === 1) {
+      const user = recognitionUsers[0]?.user?.profile;
       return (
-        <div className="flex items-center -space-x-2">
-          {teamAvatars.map((avatar, index) => (
-            <div key={index} className="relative">
-              <img
-                src={avatar}
-                alt={`Team member ${index + 1}`}
-                className="w-10 h-10 rounded-full border-2 border-white object-cover"
-              />
-            </div>
-          ))}
-          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border-2 border-white">
-            <span className="text-xs font-semibold text-gray-700">+</span>
-          </div>
+        <div className="flex items-center gap-3">
+          {user?.profileUrl ? (
+            <img
+              src={user.profileUrl}
+              alt={user?.firstName}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <PiUserCircleLight size={40} />
+          )}
+          <span className="text-base font-normal text-[#4E53B1]">
+            {user?.firstName} {user?.lastName}
+          </span>
         </div>
       );
     }
 
-    const individualAvatars = [
-      "https://randomuser.me/api/portraits/women/5.jpg",
-      "https://randomuser.me/api/portraits/men/6.jpg",
-      "https://randomuser.me/api/portraits/women/7.jpg",
-      "https://randomuser.me/api/portraits/men/8.jpg",
-      "https://randomuser.me/api/portraits/women/9.jpg",
-    ];
-
-    const randomAvatar =
-      individualAvatars[Math.floor(Math.random() * individualAvatars.length)];
-
     return (
-      <div className="flex items-center gap-3">
-        <img
-          src={randomAvatar}
-          alt={recognition.from}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <span className="text-base font-normal text-[#4E53B1]">
-          {recognition.from}
-        </span>
+      <div className="flex items-center -space-x-2">
+        {recognitionUsers.slice(0, 3).map((ru, i) => {
+          const profile = ru?.user?.profile;
+          return profile?.profileUrl ? (
+            <img
+              key={i}
+              src={profile.profileUrl}
+              alt={profile?.firstName}
+              className="w-10 h-10 rounded-full border-2 border-white object-cover"
+            />
+          ) : (
+            <PiUserCircleLight key={i} size={40} />
+          );
+        })}
+        {recognitionUsers.length > 3 && (
+          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border-2 border-white">
+            <span className="text-xs font-semibold text-gray-700">
+              +{recognitionUsers.length - 3}
+            </span>
+          </div>
+        )}
       </div>
     );
   };
 
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center p-10">
+  //       <LoaderCircle size={40} className="animate-spin text-gray-500" />
+  //     </div>
+  //   );
+  // }
+
+  const recognitions = data?.data?.data || [];
   const shouldScroll = recognitions.length > 5;
 
   return (
     <div className="relative rounded-2xl overflow-hidden w-full">
       {/* Header */}
-      <div className="px-4 sm:px-6 py-4">
+      <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
         <h2 className="text-2xl font-bold text-[#4E53B1]">Recognition</h2>
       </div>
 
@@ -98,46 +91,56 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
             <div>Viewer</div>
             <div>Reaction</div>
           </div>
-          {recognitions.map((recognition) => (
+
+          {recognitions.map((activity: any, idx: number) => (
             <div
-              key={recognition.id}
+              key={idx}
               className="px-6 py-4 grid grid-cols-5 gap-4 items-center hover:bg-gray-50 transition-colors"
             >
-              <div className="flex items-center">
-                {getAvatarGroup(recognition)}
-              </div>
+              {/* Sent to */}
+              <div>{getAvatarGroup(activity?.recognitionUsers || [])}</div>
 
+              {/* Badge Icon */}
               <div className="flex items-center gap-4">
-                {getTypeIcon(recognition.type)}
+                {activity?.badge?.iconImage ? (
+                  <img
+                    src={activity.badge.iconImage}
+                    alt={activity?.badge?.category}
+                    className="h-8 w-8 object-contain"
+                  />
+                ) : (
+                  <span className="text-gray-500">—</span>
+                )}
                 <span className="text-base font-normal text-[#484848]">
-                  {recognition.type}
+                  {activity?.badge?.category}
                 </span>
               </div>
 
-              <div className="flex items-center">
-                <span className="text-base font-normal text-[#484848] break-words">
-                  {recognition.message || "-----"}
-                </span>
+              {/* Message */}
+              <div className="text-base font-normal text-[#484848] break-words">
+                {activity?.message || "-----"}
               </div>
 
-              <div className="flex items-center">
-                <span className="text-base font-normal text-[#484848] break-words">
-                  {recognition.viewer}
-                </span>
+              {/* Viewer */}
+              <div className="text-base font-normal text-[#484848] break-words">
+                {activity?.visibility}
               </div>
 
+              {/* Reactions */}
               <div className="flex items-center gap-2">
                 <button className="flex items-center cursor-pointer gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
                   <LikeIcon />
                 </button>
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={openReactionModal}
                   className="flex relative items-center cursor-pointer gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                 >
                   <CommentIcon />
-                  <span className="text-xs absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1.5 py-0.5 rounded-full">
-                    1
-                  </span>
+                  {activity?.messageCount > 0 && (
+                    <span className="text-xs absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1.5 py-0.5 rounded-full">
+                      {activity?.messageCount}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -147,55 +150,51 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
 
       {/* Mobile Card View */}
       <div className="lg:hidden divide-y divide-gray-200 max-h-[80vh] overflow-y-auto px-2">
-        {recognitions.map((recognition) => (
-          <div
-            key={recognition.id}
-            className="py-4 hover:bg-gray-50 transition-colors"
-          >
+        {recognitions.map((activity: any, idx: number) => (
+          <div key={idx} className="py-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-3 mb-3">
-              {getAvatarGroup(recognition)}
+              {getAvatarGroup(activity?.recognitionUsers || [])}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  {getTypeIcon(recognition.type)}
+                  {activity?.badge?.iconImage && (
+                    <img
+                      src={activity.badge.iconImage}
+                      alt={activity?.badge?.category}
+                      className="h-8 w-8 object-contain"
+                    />
+                  )}
                   <span className="text-xs font-medium text-[#484848]">
-                    {recognition.type}
+                    {activity?.badge?.category}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2 pl-14 text-xs">
-              <div className="flex justify-between items-start gap-4">
-                <span className="text-gray-500 whitespace-nowrap">
-                  Message:
-                </span>
-                <span className="text-[#484848] font-medium break-words text-right flex-1">
-                  {recognition.message || "-----"}
-                </span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Message:</span>
+                <span>{activity?.message || "-----"}</span>
               </div>
-              <div className="flex justify-between items-start gap-4">
-                <span className="text-gray-500 whitespace-nowrap">Viewer:</span>
-                <span className="text-[#484848] text-right break-words flex-1">
-                  {recognition.viewer}
-                </span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Viewer:</span>
+                <span>{activity?.visibility}</span>
               </div>
-              <div className="flex justify-between items-center gap-4">
-                <span className="text-gray-500 whitespace-nowrap">
-                  Reactions:
-                </span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Reactions:</span>
                 <div className="flex items-center gap-3">
                   <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
                     <LikeIcon />
-                    <span className="text-xs text-green-600">1</span>
                   </button>
                   <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={openReactionModal}
                     className="relative flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                   >
                     <CommentIcon />
-                    <span className="text-[10px] absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1 py-0.5 rounded-full">
-                      1
-                    </span>
+                    {activity?.messageCount > 0 && (
+                      <span className="text-[10px] absolute top-0 right-0 text-[#1EBD66] bg-[#D9F0E4] px-1 py-0.5 rounded-full">
+                        {activity?.messageCount}
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -204,25 +203,9 @@ export const RecognitionTable: React.FC<{ recognitions: Recognition[] }> = ({
         ))}
       </div>
 
-      {/* Right Slide Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="fixed inset-0 bg-black/30"
-            onClick={() => setIsModalOpen(false)}
-          ></div>
-          <div className="relative w-full max-w-xl h-full bg-white shadow-xl overflow-y-auto">
-            <button
-              className="absolute cursor-pointer top-4 right-4 z-10 text-gray-500 hover:text-gray-700"
-              onClick={() => setIsModalOpen(false)}
-            >
-              ✕
-            </button>
-            <div className="p-6">
-              <CommentModal />
-            </div>
-          </div>
-        </div>
+      {/* Reaction Modal */}
+      {isReactionModalOpen && (
+        <SendReactionModal recognation={recognitions[0]} onClose={closeReactionModal} />
       )}
     </div>
   );

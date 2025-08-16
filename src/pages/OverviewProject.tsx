@@ -173,7 +173,7 @@ const OverviewProject = () => {
   };
 
   // API call
-  const { data, isLoading, error } = useGetUsersQuery(undefined);
+  const { data, isLoading, error } = useGetUsersQuery({ });
   console.log(data);
 
   // Default avatar images array for fallback
