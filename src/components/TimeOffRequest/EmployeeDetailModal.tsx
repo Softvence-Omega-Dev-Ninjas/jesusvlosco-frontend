@@ -158,12 +158,12 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                     <div className="flex justify-end">
                       <span
                         className={`px-4 py-0.5 text-xs font-semibold rounded-sm ${
-                          request.status === "Approved"
+                          request.status === "APPROVED"
                             ? "bg-[#4E53B1] text-white"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {request.status === "Approved" ? "Paid" : "Unpaid"}
+                        {request.status === "APPROVED" ? "Paid" : "Unpaid"}
                       </span>
                     </div>
                   </div>
