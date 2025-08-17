@@ -43,7 +43,7 @@ export const Chat = () => {
         </div>
 
         {/* Add your chat interface here */}
-        <ChatWindow ref={chatWindowRef} />
+        <ChatWindow  ref={chatWindowRef} />
       </div>
       {/* Right side section - Employee Directory */}
       <div className="pl-4">
@@ -61,7 +61,7 @@ export const Chat = () => {
         {/* User Modal */}
       {showUserModal && (
         <div className="fixed inset-0 bg-white/50 drop-shadow-xl bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <UserModal setShowUserModal={setShowUserModal} />
+          <UserModal  onChatWithUser={handleChatWithUser} setShowUserModal={setShowUserModal} />
         </div>
       )}
     </div>
