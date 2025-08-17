@@ -38,7 +38,6 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
   );
   const [, setIsSelectingRange] = useState<boolean>(false);
 
-
   const periods: string[] = ["Today", "Last 8 days", "Last month"];
   const months: string[] = [
     "Jan",
@@ -249,7 +248,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
           >
             <X size={20} />
           </button>
@@ -267,7 +266,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
       <div className="relative mb-6">
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+          className="w-full flex cursor-pointer items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
         >
           <div className="flex space-x-6">
             {periods.map((period) => (
@@ -292,7 +291,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
               <button
                 key={period}
                 onClick={() => handlePeriodSelect(period)}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                className="w-full px-4 cursor-pointer py-2 text-left text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
               >
                 {period}
               </button>
@@ -304,7 +303,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
                 setSelectedStartDate(null);
                 setSelectedEndDate(null);
               }}
-              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 border-t border-gray-100 rounded-b-lg"
+              className="w-full px-4 cursor-pointer py-2 text-left text-sm hover:bg-gray-50 border-t border-gray-100 rounded-b-lg"
             >
               Custom Range
             </button>
@@ -316,7 +315,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => navigateMonth("prev")}
-          className="p-1 hover:bg-gray-100 rounded"
+          className="p-1 hover:bg-gray-100 rounded cursor-pointer"
         >
           <ChevronLeft size={16} className="text-gray-600" />
         </button>
@@ -325,7 +324,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
         </h3>
         <button
           onClick={() => navigateMonth("next")}
-          className="p-1 hover:bg-gray-100 rounded"
+          className="p-1 hover:bg-gray-100 rounded cursor-pointer"
         >
           <ChevronRight size={16} className="text-gray-600" />
         </button>
@@ -357,7 +356,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
                     handleDateClick(day.fullDate, day.isCurrentMonth)
                   }
                   className={`
-                    text-center py-2 text-sm rounded-md transition-colors relative
+                    text-center py-2 text-sm rounded-md transition-colors relative cursor-pointer
                     ${
                       day.isCurrentMonth
                         ? isSelected
@@ -383,7 +382,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
               key={month}
               onClick={() => navigateToMonth(index)}
               className={`
-                text-xs px-2 py-1 rounded text-left
+                text-xs px-2 py-1 rounded text-left cursor-pointer
                 ${
                   index === currentMonth
                     ? "bg-gray-900 text-white font-medium"
@@ -401,14 +400,14 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
       <div className="flex space-x-3 mt-6">
         <button
           onClick={handleClearSelection}
-          className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          className="flex-1 px-4 py-2 text-sm cursor-pointer font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
         >
           Clear
         </button>
         <button
           onClick={handleApplySelection}
           disabled={!selectedStartDate || !selectedEndDate}
-          className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-400 hover:bg-orange-500 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+          className="flex-1 px-4 py-2 text-sm cursor-pointer font-medium text-white bg-orange-400 hover:bg-orange-500 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
         >
           Apply
         </button>
