@@ -333,13 +333,6 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
             </div>
           </div>
           <div className="flex items-center space-x-2 relative">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Phone className="w-5 h-5 text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Video className="w-5 h-5 text-gray-600" />
-            </button>
-
             <button
               onClick={() => setShowDropdown(true)}
               className="p-2 hover:bg-gray-100 rounded-full"

@@ -16,7 +16,8 @@ const UserDropdown: React.FC = () => {
   // console.log({data})
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  console.log({ user });
+  console.log(user)
+  console.log(user?.accessToken);
   // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

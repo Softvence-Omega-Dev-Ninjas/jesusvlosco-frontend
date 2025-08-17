@@ -5,6 +5,8 @@ import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { TUser } from "@/types/usertype";
 import { useNavigate } from "react-router-dom";
 import { HiOutlineUserAdd } from "react-icons/hi";
+import { useAppSelector } from "@/hooks/useRedux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 
 
 export default function UserModal({
@@ -15,7 +17,8 @@ export default function UserModal({
   onChatWithUser: (userId: string) => void
 }) {
   const navigate = useNavigate();
-const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+   const user = useAppSelector(selectUser);
   const users = useGetAllUserQuery({});
   const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
   console.log(employees);
@@ -60,13 +63,17 @@ const [searchTerm, setSearchTerm] = useState("");
           />
         </div>
 
-        <button
-          onClick={() => navigate("/admin/add-user")}
-          className="flex items-center gap-2 text-primary transition-colors font-semibold cursor-pointer"
-        >
-         <HiOutlineUserAdd />
-          New User
-        </button>
+       {
+         user?.role === "ADMIN" && (
+           <button
+             onClick={() => navigate("/admin/add-user")}
+             className="flex items-center gap-2 text-primary transition-colors font-semibold cursor-pointer"
+           >
+             <HiOutlineUserAdd />
+             New User
+           </button>
+         )
+       }
 
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-gray-700">Suggested</h3>
