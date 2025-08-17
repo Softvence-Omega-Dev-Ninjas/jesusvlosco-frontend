@@ -40,7 +40,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
   };
     
   return (
-    <div className="max-w-4xl mx-auto bg-gray-50 overflow-y-auto max-h-[700px]">
+    <div className="max-w-4xl w-full mx-auto bg-gray-50 overflow-y-auto max-h-[700px] p-2 rounded-md">
       {/* Header */}
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">
         Employee Directory

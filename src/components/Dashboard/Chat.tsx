@@ -3,47 +3,13 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
+import { TChat, TPrivateChat } from "@/types/chatType";
+// import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
+// team tab removed - no team API used here
 
 // Chat interface matching ChatWindow types
-interface ChatMessage {
-  id: number;
-  text: string;
-  sender: {
-    profile: {
-      profileUrl: string;
-      firstName: string;
-    };
-  };
-  avatar: string;
-  time: string;
-  senderId: string;
-  content: string;
-}
 
-export interface Chat {
-  id: number;
-  chatId: string;
-  lastMessage: {
-    content: string;
-  };
-  name: string;
-  message: string;
-  time: string;
-  avatar: string;
-  unread: boolean;
-  messages: ChatMessage[];
-  initials: string;
-  online: boolean;
-  participant: {
-    id: string;
-    profile: {
-      firstName: string;
-      lastName: string;
-      profileUrl: string;
-    };
-  };
-  updatedAt: string;
-}
+
 
 // Props interface for the Chat component
 interface ChatProps {
@@ -58,26 +24,26 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   const [searchTerm, setSearchTerm] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
-  const tabs = ["All", "Unread", "Team"];
+  const tabs = ["All", "Unread"];
 
   // Fetch private chats using Redux
   const { data: conversationsData } = useGetPrivateChatQuery([]);
-  const privateChats = conversationsData?.data || [];
+  const privateChats = conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
+  console.log(privateChats, "Private Chats Data in Chat");
 
-  
   // Filter chats based on search term and active tab
-  const filteredChats = privateChats.filter((chat: Chat) => {
-    const matchesSearch = 
+  const filteredChats = privateChats.filter((chat: TPrivateChat) => {
+    const matchesSearch =
       chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       chat.participant.profile.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (chat.lastMessage?.content || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesTab = activeTab === "All" || 
-      (activeTab === "Unread" && chat.unread) ||
-      (activeTab === "Team");
+    const matchesTab = activeTab === "All" || (activeTab === "Unread" && chat.unread);
 
     return matchesSearch && matchesTab;
   });
+
+  // No team tab - only private chats
 
   // Prevent scroll chaining: when user scrolls inside chat list, don't let page scroll
   useEffect(() => {
@@ -186,7 +152,7 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
           }}
         >
           <div className="space-y-1">
-            {filteredChats.map((chat: Chat) => (
+            {filteredChats.map((chat: TPrivateChat) => (
               <div
                 key={chat.chatId}
                 className={`flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer group ${
@@ -195,8 +161,6 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
                   selectedChatId === chat.chatId ? "bg-indigo-50 hover:bg-indigo-50" : ""
                 }`}
                 onClick={() => {
-                  // console.log("Chat clicked with chatId:", chat.chatId);
-                  // console.log("handleChatSelect function exists:", !!handleChatSelect);
                   handleChatSelect?.(chat.chatId);
                 }}
               >

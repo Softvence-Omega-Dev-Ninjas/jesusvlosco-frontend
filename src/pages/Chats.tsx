@@ -1,13 +1,13 @@
 import ChatWindow from "@/components/ChatsComponents/ChatWindow";
 import EmployeeDirectory from "@/components/ChatsComponents/EmployeeDirectory";
-import TeamModal from "@/components/ChatsComponents/TeamModal";
 import UserModal from "@/components/ChatsComponents/UserModal";
 import { PenLine } from "lucide-react";
 import { useState, useRef } from "react";
 
 export const Chat = () => {
-  const [showTeamModal, setShowTeamModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+
+  // console.log(user);
   const chatWindowRef = useRef<{ openChatWithUser: (userId: string) => void } | null>(null);
 
   const handleChatWithUser = (userId: string) => {
@@ -27,12 +27,6 @@ export const Chat = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-            onClick={() => setShowTeamModal(true)}
-            className="bg-primary hover:bg-primary/90 text-sm md:text-base transition-colors p-3 cursor-pointer px-4 flex items-center gap-2 rounded-lg text-white min-w-max"
-          >
-            <PenLine className="size-4 md:size-5" /> New Team Chat
-          </button>
           <button
             onClick={() => setShowUserModal(true)}
             className="bg-primary hover:bg-primary/90 text-sm md:text-base transition-colors p-3 cursor-pointer px-4 flex items-center gap-2 rounded-lg text-white min-w-max"
@@ -49,15 +43,6 @@ export const Chat = () => {
       <div className="pl-4">
         <EmployeeDirectory onChatWithUser={handleChatWithUser} />
       </div>
-
-    
-      {/* Team Modal */}
-      {showTeamModal && (
-        <div className="fixed inset-0 bg-white/50 drop-shadow-xl bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <TeamModal setShowTeamModal={setShowTeamModal} />
-        </div>
-      )}
-
         {/* User Modal */}
       {showUserModal && (
         <div className="fixed inset-0 bg-white/50 drop-shadow-xl bg-opacity-50 z-50 flex items-center justify-center p-4">
