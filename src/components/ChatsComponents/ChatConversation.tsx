@@ -1,6 +1,6 @@
 import { EllipsisVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Chat } from "./ChatWindow";
+import { TChat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import { initPrivateMessageListener } from "@/utils/socket";
@@ -13,8 +13,8 @@ const ChatConversation = ({
   setShowDeleteModal,
   setShowMemberModal,
 }: {
-  selectedChat: Chat;
-  selectedPrivateChatInfo: Chat;
+  selectedChat: TChat;
+  selectedPrivateChatInfo: TChat;
   setShowChatInfo: (arg0: boolean) => void;
   setShowDeleteModal: (arg0: boolean) => void;
   setShowMemberModal: (arg0: boolean) => void;
@@ -51,9 +51,6 @@ const ChatConversation = ({
     formData.append("content", messageInput);
     formData.append("userId", userId);
 
-    // if (file) {
-    //   formData.append("file", file);
-    // }
 
     try {
 
@@ -64,15 +61,6 @@ const ChatConversation = ({
             file: undefined
           }).unwrap();
           console.log(result)
-      // await axios.post(
-      //   `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
-      //   formData,
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${me?.accessToken}`,
-      //     },
-      //   }
-      // );
 
       setMessageInput("");
     } catch (error) {
@@ -94,9 +82,7 @@ const ChatConversation = ({
               alt={selectedChat?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
-            {/* {selectedChat.online && (
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )} */}
+        
           </div>
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-900 capitalize">
@@ -104,9 +90,7 @@ const ChatConversation = ({
                 " " +
                 selectedPrivateChatInfo?.participant?.profile?.lastName}
             </h2>
-            {/* <p className="text-sm text-green-600">
-              {selectedChat.online ? "Online" : "Offline"}
-            </p> */}
+  
           </div>
         </div>
         <div className="flex items-center space-x-2">

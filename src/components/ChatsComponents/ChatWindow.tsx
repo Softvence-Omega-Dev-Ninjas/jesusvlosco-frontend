@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import {
   ArrowLeft,
-  Search,
   Phone,
   Video,
   MessageCircle,
   EllipsisVertical,
-  Settings,
 } from "lucide-react";
 import ChatConversation from "./ChatConversation";
 import MemberSelectorModal from "./MemberSelectorModal";
@@ -19,8 +17,9 @@ import {
 import { connectPrivateChat } from "@/utils/socket";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-import { formatDistanceToNow } from "date-fns";
+// import { formatDistanceToNow } from "date-fns";
 import Swal from "sweetalert2";
+import Chat from "../Dashboard/Chat";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -38,7 +37,7 @@ interface ChatMessage {
   content: string;
 }
 
-export interface Chat {
+export interface TChat {
   id: number;
   chatId: string;
   lastMessage: {
@@ -65,14 +64,14 @@ export interface Chat {
 
 export default forwardRef<{ openChatWithUser: (userId: string) => void }>(function ResponsiveChatWindow(_props, ref) {
   const navigate = useNavigate();
-  const chatTabs = ["All", "Unread", "Team"];
-  const [activeChatTab, setActiveChatTab] = useState("All");
+  // const chatTabs = ["All", "Unread", "Team"];
+  // const [activeChatTab, setActiveChatTab] = useState("All");
   const [selectedChatId, setSelectedChatId] = useState<string>();
   const [showChatInfo, setShowChatInfo] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddMemberModal, setShowMemberModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
   
@@ -84,11 +83,11 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data || [];
 
-  const filteredChats = privateChats.filter((chat: Chat) => {
-     return chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-  });
+  // const filteredChats = privateChats.filter((chat: Chat) => {
+  //    return chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+  // });
 
-    console.log("Filtered Chats:", filteredChats);
+    // console.log("Filtered Chats:", filteredChats);
   const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
   const token = user?.accessToken as string;
 
@@ -99,8 +98,8 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
       const existingChat = privateChats.find((chat: Chat) => 
         chat.participant.id === userId
       );
-      console.log("Existing Chat:", existingChat);
-      console.log("User ID:", userId);
+      // console.log("Existing Chat:", existingChat);
+      // console.log("User ID:", userId);
 
       if (existingChat) {
         // If chat exists, select it
@@ -163,8 +162,11 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
 
   // Handle chat selection on mobile
   const handleChatSelect = (chatId: string) => {
+    // console.log("handleChatSelect called with chatId:", chatId);
+    // console.log("Setting selectedChatId to:", chatId);
     setSelectedChatId(chatId);
     setMobileView("chat");
+    navigate(`/admin/communication/chat`);
   };
 
   // Handle back navigation on mobile
@@ -174,6 +176,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
   };
 
   const modalRef = useRef<HTMLDivElement>(null);
+  const chatListRef = useRef<HTMLDivElement | null>(null);
 
   // Close on outside click
   useEffect(() => {
@@ -191,6 +194,59 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [setShowDropdown]);
+
+  // Prevent scroll chaining: when user scrolls inside chat list, don't let page scroll
+  useEffect(() => {
+    const el = chatListRef.current;
+    if (!el) return;
+
+    let startY = 0;
+
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollHeight <= el.clientHeight) {
+        // nothing to scroll, prevent page scroll
+        e.preventDefault();
+        return;
+      }
+
+      const deltaY = e.deltaY;
+      const atTop = el.scrollTop === 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+
+      if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
+        e.preventDefault();
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (el.scrollHeight <= el.clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      const currentY = e.touches[0].clientY;
+      const deltaY = startY - currentY;
+      const atTop = el.scrollTop === 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+
+      if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", onWheel as EventListener);
+      el.removeEventListener("touchstart", onTouchStart as EventListener);
+      el.removeEventListener("touchmove", onTouchMove as EventListener);
+    };
+  }, []);
 
   // Add this condition before the return statement to handle empty chat list
   if (privateChats.length === 0) {
@@ -213,7 +269,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
     if (messageInput.trim() === "") return;
     const userId = user?.id || "";
     const recipientId = selectedChat.participant.id || "";
-    console.log(`Sending message to ${recipientId}: ${messageInput}`);
+    // console.log(`Sending message to ${recipientId}: ${messageInput}`);
 
     try {
 
@@ -230,112 +286,17 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
     }
   };
 
-  console.log(privateChats);
+  // console.log(privateChats);
 
   return (
     <div className="flex min-h-[500px] border-0 md:border border-gray-200 rounded-none md:rounded-2xl overflow-hidden">
       {/* Left Sidebar - Chat List */}
-      <div
-        className={`${
-          mobileView === "list" ? "flex" : "hidden"
-        } md:flex w-full md:w-80 border-r border-gray-200 flex-col`}
-      >
-        {/* Header */}
-        <div className="p-4 md:p-6 flex items-center justify-between border-b border-gray-200 md:border-b-0">
-          <h1 className="text-xl md:text-2xl font-semibold text-primary">
-            Chat
-          </h1>
-          <button
-            onClick={() => navigate("/user/user-chat-setting")}
-            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-          >
-            <Settings className="w-5 h-5 text-primary" />
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search conversation"
-                 value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 md:py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="px-4 pb-4">
-          <div className="flex gap-2">
-            {chatTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveChatTab(tab)}
-                className={`flex-1 py-2.5 md:py-2 px-3 text-sm cursor-pointer rounded-full duration-200 ${
-                  activeChatTab === tab
-                    ? "font-medium text-white bg-primary"
-                    : "bg-gray-100 hover:bg-indigo-100"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Chat List */}
-        <div className="flex-1 overflow-y-auto max-h-[400px]">
-          {filteredChats.map((chat: Chat) => (
-            <div
-              key={chat.chatId}
-              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${
-                selectedChatId === chat.chatId &&
-                "bg-indigo-50 hover:bg-indigo-50"
-              }`}
-              onClick={() => handleChatSelect(chat.chatId)}
-            >
-              <div className="relative">
-                <img
-                  src={
-                    chat.participant.profile.profileUrl ||
-                    "https://avatar.iran.liara.run/public/boy?username=Ash"
-                  }
-                  alt={chat.participant.profile.firstName}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                {chat.online && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
-                {chat.unread && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white font-medium">2</span>
-                  </div>
-                )}
-              </div>
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-900 truncate capitalize">
-                    {chat.participant.profile.firstName +
-                      " " +
-                      chat.participant.profile.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                    {formatDistanceToNow(new Date(chat?.updatedAt), {
-                      addSuffix: true,
-                    })}
-                  </p>
-                </div>
-                <p className="text-sm text-gray-500 truncate mt-1">
-                  {chat.lastMessage?.content || "N/A"}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Chat
+        handleChatSelect={handleChatSelect}
+        selectedChatId={selectedChatId}
+        className="hidden md:flex"
+      />
+      
 
       {/* Right Panel - Chat Conversation */}
       <div
