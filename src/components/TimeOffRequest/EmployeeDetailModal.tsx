@@ -7,7 +7,6 @@ import {
   CalendarIcon,
   CanceledIcon,
   CloseIcon,
-  SearchIcon,
 } from "./Icons";
 import ShiftCalendar from "./ShiftCalendar"; // Import ShiftCalendar component
 
@@ -29,19 +28,21 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
   // State to store selected date range
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: new Date(2025, 0, 1), // Default: 01/01/2025
-    endDate: new Date(2025, 11, 31), // Default: 31/12/2025
+    startDate: null, // Default: 01/01/2025
+    endDate: null, // Default: 31/12/2025
   });
 
   const { data, isLoading } = useGetSingleTimeOffRequestQuery({
     page: 1,
     limit: 10,
     userId: employee,
+    startDate: dateRange.startDate
+      ? dateRange.startDate.toISOString()
+      : undefined,
+    endDate: dateRange.endDate ? dateRange.endDate.toISOString() : undefined,
   });
 
-  console.log(data, "tested");
-
-  // if (!employee) return null;
+  console.log(dateRange, "tested");
 
   // Format date range for display
   const formatDateRange = (): string => {
@@ -56,7 +57,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         dateRange.endDate
       )}`;
     }
-    return "Select date range";
+    return `${new Date().toLocaleDateString()}`;
   };
 
   // Handle date range selection from ShiftCalendar
@@ -64,13 +65,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     setDateRange(selectedRange);
     setIsCalendarOpen(false); // Close calendar after selection
   };
-
-  // if (isLoading)
-  //   return (
-  //     <div className="text-2xl flex items-center justify-center">
-  //       Loading...
-  //     </div>
-  //   );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end p-4">
@@ -92,7 +86,7 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
         <div className="p-4 space-y-6">
           {/* Date & Filter Controls */}
           <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4">
               {/* Display Selected Date Range */}
               <span className="text-gray-600 border border-gray-200 rounded-md p-2 font-medium">
                 {formatDateRange()}
@@ -107,9 +101,9 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                 <ArrowDownIcon />
               </button>
             </div>
-            <button className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
+            {/* <button className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
               <SearchIcon />
-            </button>
+            </button> */}
           </div>
 
           {/* ShiftCalendar Modal */}
@@ -165,12 +159,12 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
                     <div className="flex justify-end">
                       <span
                         className={`px-4 py-0.5 text-xs font-semibold rounded-sm ${
-                          request.status === "Approved"
+                          request.status === "APPROVED"
                             ? "bg-[#4E53B1] text-white"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {request.status === "Approved" ? "Paid" : "Unpaid"}
+                        {request.status === "APPROVED" ? "Paid" : "Unpaid"}
                       </span>
                     </div>
                   </div>

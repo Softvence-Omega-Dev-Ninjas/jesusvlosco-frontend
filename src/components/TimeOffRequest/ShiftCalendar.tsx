@@ -25,8 +25,11 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("Last month");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-  const [currentYear, setCurrentYear] = useState<number>(2025);
-  const [currentMonth, setCurrentMonth] = useState<number>(5); // May = 5 (0-indexed)
+
+  const today = new Date();
+  const [currentYear, setCurrentYear] = useState<number>(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState<number>(today.getMonth()); // dynamic
+
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(
     initialDateRange?.startDate || null
   );
@@ -34,6 +37,7 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
     initialDateRange?.endDate || null
   );
   const [, setIsSelectingRange] = useState<boolean>(false);
+
 
   const periods: string[] = ["Today", "Last 8 days", "Last month"];
   const months: string[] = [
@@ -224,7 +228,8 @@ const ShiftCalendar: React.FC<ShiftCalendarProps> = ({
         endDate: selectedEndDate,
       });
     }
-    console.log("Selected Range:", formatDateRange());
+
+    console.log("Selected Range Shiftcalendar.tsx:", formatDateRange());
   };
 
   const calendarDays: CalendarDay[] = generateCalendarDays();
