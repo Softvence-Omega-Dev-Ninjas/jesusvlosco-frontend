@@ -2,16 +2,16 @@
 import React from "react";
 import { Edit, Trash2, Eye, Send } from "lucide-react";
 import { useState } from "react";
-import user1 from "@/assets/reactionuser2.png";
 import user2 from "@/assets/reactionu1.png";
 import user3 from "@/assets/reaction user 3.png";
 import Swal from "sweetalert2";
-import { PiUserCircleLight } from "react-icons/pi";
+// import { PiUserCircleLight } from "react-icons/pi";
 import {
   useAddCommentMutation,
   useGetAllCommentQuery,
 } from "@/store/api/admin/recognation/recognationApi";
 import { toast } from "sonner";
+import CommentCard from "./CommentCard";
 
 interface SendReactionModalProps {
   onClose: () => void;
@@ -49,7 +49,11 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   console.log({ showEmojiPicker });
   const [commentText, setCommentText] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+
   const [addComment] = useAddCommentMutation();
+
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "leslie-comment",
@@ -68,6 +72,30 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
       image: user3,
     },
   ]);
+  console.log({ setComments });
+  const handleReplyComment = async (commentId: string) => {
+    console.log({ commentId });
+
+    if (replyText.trim()) {
+      try {
+        const result = await addComment({
+          recognitionId: recognation?.id,
+          data: { comment: replyText, parentCommentId: commentId },
+        }).unwrap();
+        console.log({ result });
+        if (result?.success) {
+          toast.success(result?.message || "Comment added successfully");
+        }
+      } catch (error: any) {
+        console.log({ error });
+        toast.error(error?.message || "Something went wrong");
+      } finally {
+        setActiveReplyId(null);
+        setReplyText("");
+      }
+      return;
+    }
+  };
   const { data } = useGetAllCommentQuery({ id: recognation?.id });
   const commentss = data?.data?.comments;
   console.log({ commentss });
@@ -76,65 +104,15 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
   ]);
   console.log({ recognation });
   const handleEmojiSelect = async (commentId: string, emoji: string) => {
-    setComments((prevComments) =>
-      prevComments.map((comment) => {
-        if (comment.id === commentId) {
-          const existingReaction = comment.reactions.find(
-            (r) => r.emoji === emoji
-          );
-          if (existingReaction) {
-            // If user already reacted with this emoji, remove it
-            if (existingReaction.users.includes("Current User")) {
-              return {
-                ...comment,
-                reactions: comment.reactions
-                  .map((r) =>
-                    r.emoji === emoji
-                      ? {
-                          ...r,
-                          count: r.count - 1,
-                          users: r.users.filter((u) => u !== "Current User"),
-                        }
-                      : r
-                  )
-                  .filter((r) => r.count > 0),
-              };
-            } else {
-              // Add user to existing reaction
-              return {
-                ...comment,
-                reactions: comment.reactions.map((r) =>
-                  r.emoji === emoji
-                    ? {
-                        ...r,
-                        count: r.count + 1,
-                        users: [...r.users, "Current User"],
-                      }
-                    : r
-                ),
-              };
-            }
-          } else {
-            // Create new reaction
-            return {
-              ...comment,
-              reactions: [
-                ...comment.reactions,
-                { emoji, count: 1, users: ["Current User"] },
-              ],
-            };
-          }
-        }
-        return comment;
-      })
-    );
+    console.log({ commentId, emoji });
+    //  return;
 
     try {
       const result = await addComment({
         recognitionId: recognation?.id,
-        data: { reaction: emoji },
+        data: { reaction: emoji, parentCommentId: commentId },
       }).unwrap();
-      console.log({result})
+      console.log({ result });
       if (result?.success) {
         toast.success(result?.message || "Reaction added successfully");
       }
@@ -145,7 +123,6 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
     setShowEmojiPicker(null);
   };
-
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,16 +145,6 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
         toast.error(error?.message || "Something went wrong");
       }
       return;
-      const newComment: Comment = {
-        id: `comment-${Date.now()}`,
-        author: "Current User",
-        content: commentText.trim(),
-        timestamp: "just now",
-        reactions: [],
-        image: user1, // or another default user image
-      };
-      setComments((prev) => [...prev, newComment]);
-      setCommentText("");
     }
   };
 
@@ -207,25 +174,27 @@ const SendReactionModal: React.FC<SendReactionModalProps> = ({
 
   const ReactionDisplay = ({ reactions }: { reactions: Reaction[] }) => {
     if (reactions.length === 0) return null;
-const reactionSummary = reactions?.reduce((acc, curr: any) => {
-  const match = reactionsWithEmoji.find((item) => item.label === curr.reaction);
-  if (!match) return acc;
+    const reactionSummary = reactions?.reduce((acc, curr: any) => {
+      const match = reactionsWithEmoji.find(
+        (item) => item.label === curr.reaction
+      );
+      if (!match) return acc;
 
-  const existing = acc.find((item) => item.label === curr.reaction);
-  if (existing) {
-    existing.count += 1;
-  } else {
-    acc.push({
-      label: curr.reaction,
-      emoji: match.emoji,
-      count: 1,
-    });
-  }
+      const existing = acc.find((item) => item.label === curr.reaction);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        acc.push({
+          label: curr.reaction,
+          emoji: match.emoji,
+          count: 1,
+        });
+      }
 
-  return acc;
-}, [] as { label: string; emoji: string; count: number }[]);
+      return acc;
+    }, [] as { label: string; emoji: string; count: number }[]);
 
-console.log(reactionSummary);
+    console.log(reactionSummary);
     return (
       <div className="flex h-6  items-center  gap-2 mb-2">
         {reactionSummary.map((reaction) => (
@@ -323,7 +292,7 @@ console.log(reactionSummary);
                     {recognation?.recognitionUsers?.map(
                       ({ user }: { user: any }) => (
                         <div className="flex items-center gap-2 ">
-                          <div className="flex-shrink-0 h-10 w-10">
+                          {/* <div className="flex-shrink-0 h-10 w-10">
                             {user?.profile?.profileUrl ? (
                               <img
                                 className="h-10 w-10 rounded-full"
@@ -341,28 +310,20 @@ console.log(reactionSummary);
                             ) : (
                               <PiUserCircleLight size={36} />
                             )}
+                          </div> */}
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="w-10 h-10 rounded-full font-medium bg-gray-300 flex items-center justify-center">
+                              {user?.profile?.firstName[0]}
+                            </div>
                           </div>
                           <span className="text-gray-700 truncate max-w-[130px] text-sm">
-                            {user?.profile?.firstName + user?.profile?.lastName}
+                            {(user?.profile?.firstName || "") +
+                              " " +
+                              (user?.profile?.lastName || "")}
                           </span>
                         </div>
                       )
                     )}
-
-                    {/* <div className="flex items-center gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full">
-                        <img src={user2} alt="" />
-                      </Avatar>
-                      <span className="text-gray-700 text-sm">
-                        Leslie Alexander
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 ">
-                      <Avatar className="w-8 h-8 rounded-full">
-                        <img src={user3} alt="" />
-                      </Avatar>
-                      <span className="text-gray-700 text-sm">Robert Fox</span>
-                    </div> */}
                   </div>
                 </div>
               </div>
@@ -394,7 +355,7 @@ console.log(reactionSummary);
             {/* Comments */}
             <div className="space-y-6  mb-8 cursor-pointer">
               {commentss?.map((comment: any) => (
-                <div key={comment.id} className="overflow-y-auto ">
+                <div key={comment.id} className=" ">
                   {/* Comment Content */}
                   <div
                     className={`${
@@ -405,27 +366,13 @@ console.log(reactionSummary);
                       comment.author === "Current User" ? "bg-blue-50" : ""
                     } rounded-lg p-4 `}
                   >
-                    <div className="flex items-start gap-3 ">
+                    <div className="flex  items-start gap-3 ">
                       <div className="flex-shrink-0 h-10 w-10">
-                        {comment?.user?.profile?.profileUrl ? (
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={comment?.user?.profile?.profileUrl}
-                            alt={`Avatar of ${comment?.user?.profile?.firstName}`}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).onerror = null;
-                              (
-                                e.target as HTMLImageElement
-                              ).src = `https://placehold.co/40x40/cccccc/000000?text=${comment?.user.firstName
-                                .charAt(0)
-                                .toUpperCase()}`;
-                            }}
-                          />
-                        ) : (
-                          <PiUserCircleLight size={36} />
-                        )}
+                        <div className="w-10 h-10 rounded-full font-medium bg-gray-300 flex items-center justify-center">
+                          {comment.user.firstName[0]}
+                        </div>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 ">
                         <div className="font-medium text-gray-800 text-sm mb-1">
                           {comment.user?.firstName +
                             " " +
@@ -457,7 +404,20 @@ console.log(reactionSummary);
                       >
                         Like
                       </button>
-                      <button className="text-blue-500 hover:text-blue-600 transition-colors cursor-pointer">
+                      <button
+                        onClick={() => {
+                          if (activeReplyId === comment.id) {
+                            // Closing the reply input — clear the text
+                            console.log("serfgs");
+                            setActiveReplyId(null);
+                            setReplyText("");
+                          } else {
+                            // Opening the reply input for this comment
+                            setActiveReplyId(comment.id);
+                          }
+                        }}
+                        className="text-blue-500 hover:text-blue-600 transition-colors cursor-pointer"
+                      >
                         Comment
                       </button>
                     </div>
@@ -465,6 +425,36 @@ console.log(reactionSummary);
                       onSelect={(emoji) => handleEmojiSelect(comment.id, emoji)}
                       isVisible={showEmojiPicker === comment.id}
                     />
+                  </div>
+                  {activeReplyId === comment.id && (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleReplyComment(comment.id);
+                      }}
+                      className="flex mb-3 items-center gap-3"
+                    >
+                      <input
+                        type="text"
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Write Something..."
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!replyText.trim()}
+                        className="p-3 bg-gray-100 cursor-pointer hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                      >
+                        <Send className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </form>
+                  )}
+
+                  <div className="ml-8 space-y-4 ">
+                    {comment?.replies?.map((el: any) => (
+                      <CommentCard comment={el} />
+                    ))}
                   </div>
                 </div>
               ))}

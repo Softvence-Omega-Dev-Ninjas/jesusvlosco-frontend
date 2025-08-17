@@ -26,15 +26,15 @@ export interface FilterOption {
 }
 
 // Define the array of filter options
-export const filterOptions: FilterOption[] = [
-  { label: "ID", checked: true },
-  { label: "User", checked: true },
-  { label: "Email", checked: true },
-  { label: "Phone No", checked: true },
-  { label: "Department", checked: true },
-  { label: "Last Login", checked: true },
-  // Add more filter options here as needed
-];
+// export const filterOptions: FilterOption[] = [
+//   { label: "ID", checked: true },
+//   { label: "User", checked: true },
+//   { label: "Email", checked: true },
+//   { label: "Phone No", checked: true },
+//   { label: "Department", checked: true },
+//   { label: "Last Login", checked: true },
+//   // Add more filter options here as needed
+// ];
 
 // Define the type for a User (exported for use in other components)
 export interface User {
