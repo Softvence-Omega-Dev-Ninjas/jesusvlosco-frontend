@@ -6,7 +6,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
   employees,
 }) => {
   const shouldScroll = employees.length > 5;
-  console.log(employees, "employees");
+  // console.log(employees, "employees");
 
   return (
     <div className="rounded-2xl overflow-hidden w-full">

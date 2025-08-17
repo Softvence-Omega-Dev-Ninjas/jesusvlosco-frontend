@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // TimeOffRequest.tsx
 import { mockEmployeeLeaveData } from "@/assets/mockData";
 import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // Adjust the import path as needed
@@ -10,7 +11,7 @@ const TimeOffRequest: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] =
-    useState<EmployeeLeave | null>(null);
+    useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +42,7 @@ const TimeOffRequest: React.FC = () => {
     }, 300);
   };
 
-  const openModal = (employee: EmployeeLeave) => {
+  const openModal = (employee: any) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
   };
@@ -227,6 +228,7 @@ const TimeOffRequest: React.FC = () => {
       {isModalOpen && (
         <EmployeeDetailModal employee={selectedEmployee} onClose={closeModal} />
       )}
+      {/* testing bug */}
     </>
   );
 };

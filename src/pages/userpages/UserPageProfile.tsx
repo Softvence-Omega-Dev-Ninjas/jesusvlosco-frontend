@@ -5,9 +5,13 @@ import calendar from "../../assets/calendar_month (1).png"
 
 import { BiEditAlt } from "react-icons/bi";
 import {  useRef, useState } from "react";
+import { useAppSelector } from "@/hooks/useRedux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 
 const UserPageProfile = () => {
-
+  const [readOnly, setReadOnly] = useState(true);
+   const user = useAppSelector(selectUser);
+  console.log(user)
    const inputRef1 = useRef<HTMLInputElement>(null);
   const inputRef2 = useRef<HTMLInputElement>(null);
 
@@ -43,7 +47,7 @@ const UserPageProfile = () => {
             <p className="text-gray-600">Senior Software Engineer</p>
           </div>
          </div>
-          <button className="  bg-primary flex gap-2 items-center text-white py-2 px-4 rounded-lg transition-colors cursor-pointer">
+          <button onClick={() => setReadOnly(false)} className="  bg-primary flex gap-2 items-center text-white py-2 px-4 rounded-lg transition-colors cursor-pointer">
             <BiEditAlt size={24} />
             Edit
           </button>

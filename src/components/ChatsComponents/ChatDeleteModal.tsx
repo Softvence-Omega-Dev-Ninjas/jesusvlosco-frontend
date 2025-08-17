@@ -1,11 +1,11 @@
-import { Chat } from "./ChatWindow";
+import { TChat } from "./ChatWindow";
 
 const ChatDeleteModal = ({
   selectedChat,
   setShowDeleteModal,
   handleDeleteChat,
 }: {
-  selectedChat: Chat;
+  selectedChat: TChat;
   setShowDeleteModal: (arg0: boolean) => void;
   handleDeleteChat: () => void;
 }) => {

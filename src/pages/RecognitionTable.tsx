@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Calendar, ThumbsUp, MessagesSquare, LoaderCircle } from "lucide-react";
 import DatePickerModal from "@/components/RecognitionTable/DatePickerModal";
 import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
-import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
+import {
+  useAddCommentMutation,
+  useGetAllRecognationQuery,
+} from "@/store/api/admin/recognation/recognationApi";
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
 import { PiUserCircleLight } from "react-icons/pi";
 import Pagination from "@/utils/Pagination";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
+import { toast } from "sonner";
 
 export default function RecognitionTable() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -27,7 +32,7 @@ export default function RecognitionTable() {
   ];
   const today = new Date();
   const [selectedRecognation, setSelectedRecognation] = useState({});
-  console.log({selectedRecognation})
+  console.log({ selectedRecognation });
   // Get date 10 days ago
   const tenDaysAgo = new Date();
   tenDaysAgo.setDate(today.getDate() - 10);
@@ -107,7 +112,23 @@ export default function RecognitionTable() {
 
   const openReactionModal = () => setIsReactionModalOpen(!false);
   const closeReactionModal = () => setIsReactionModalOpen(false);
-
+  const [addComment] = useAddCommentMutation();
+  const handleLike = async (id: string) => {
+    console.log({ id });
+    try {
+      const result = await addComment({
+        recognitionId: id,
+        data: { reaction: "LIKE" },
+      }).unwrap();
+      console.log({ result });
+      if (result.success) {
+        toast.success("Like added");
+      }
+    } catch (error: any) {
+      console.log({ error });
+      toast.error(error?.message);
+    }
+  };
   return (
     <div>
       {/* <NavLink to={'/send-recognition'}>Send</NavLink> */}
@@ -194,7 +215,7 @@ export default function RecognitionTable() {
                   >
                     {/* Date Column */}
                     <td className="p-4 text-gray-600 text-sm">
-                      {formatDateToMDY(activity?.createdAt!)}
+                      {formatDateToMDY(activity?.createdAt as string)}
                     </td>
 
                     {/* Sent to Column */}
@@ -287,7 +308,10 @@ export default function RecognitionTable() {
                     {/* Reaction Column */}
                     <td className="p-4 text-end">
                       <div className="flex items-center gap-1 justify-end">
-                        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <button
+                          onClick={() => handleLike(activity?.id)}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        >
                           <ThumbsUp className="w-4 h-4 cursor-pointer text-gray-400 hover:text-blue-500" />
                         </button>
                         <span className="text-[#C5C5C5]">|</span>
@@ -338,7 +362,10 @@ export default function RecognitionTable() {
         />
         {/* reaction modal  */}
         {isReactionModalOpen && (
-          <SendReactionModal recognation={selectedRecognation} onClose={closeReactionModal} />
+          <SendReactionModal
+            recognation={selectedRecognation}
+            onClose={closeReactionModal}
+          />
         )}
       </div>
     </div>

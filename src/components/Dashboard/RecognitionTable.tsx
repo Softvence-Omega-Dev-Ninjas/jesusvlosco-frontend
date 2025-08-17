@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SendReactionModal from "@/components/RecognitionTable/SendReactionModal";
-import { useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
+import { useAddCommentMutation, useGetAllRecognationQuery } from "@/store/api/admin/recognation/recognationApi";
 import React, { useState } from "react";
 import { PiUserCircleLight } from "react-icons/pi";
 import { CommentIcon, LikeIcon } from "./icons";
+import { toast } from "sonner";
 
 export const RecognitionTable: React.FC = () => {
   const { data } = useGetAllRecognationQuery(null);
@@ -11,6 +12,25 @@ export const RecognitionTable: React.FC = () => {
 
   const openReactionModal = () => setIsReactionModalOpen(true);
   const closeReactionModal = () => setIsReactionModalOpen(false);
+  const [selectedRecognation, setSelectedRecognation] = useState({});
+
+const [addComment] = useAddCommentMutation();
+  const handleLike = async (id: string) => {
+    console.log({ id });
+    try {
+      const result = await addComment({
+        recognitionId: id,
+        data: { reaction: "LIKE" },
+      }).unwrap();
+      console.log({ result });
+      if (result.success) {
+        toast.success("Like added");
+      }
+    } catch (error: any) {
+      console.log({ error });
+      toast.error(error?.message);
+    }
+  };
 
   const getAvatarGroup = (recognitionUsers: any[]) => {
     if (recognitionUsers.length === 1) {
@@ -128,11 +148,14 @@ export const RecognitionTable: React.FC = () => {
 
               {/* Reactions */}
               <div className="flex items-center gap-2">
-                <button className="flex items-center cursor-pointer gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
+                <button onClick={() => handleLike(activity?.id)} className="flex items-center cursor-pointer gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors">
                   <LikeIcon />
                 </button>
                 <button
-                  onClick={openReactionModal}
+                  onClick={() => {
+                            openReactionModal();
+                            setSelectedRecognation(activity);
+                          }}
                   className="flex relative items-center cursor-pointer gap-1 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
                 >
                   <CommentIcon />
@@ -205,7 +228,7 @@ export const RecognitionTable: React.FC = () => {
 
       {/* Reaction Modal */}
       {isReactionModalOpen && (
-        <SendReactionModal onClose={closeReactionModal} />
+        <SendReactionModal recognation={selectedRecognation} onClose={closeReactionModal} />
       )}
     </div>
   );

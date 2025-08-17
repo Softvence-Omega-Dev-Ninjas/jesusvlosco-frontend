@@ -33,7 +33,6 @@ export const projects: IProject[] = [
         assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
     ],
-    assignedTo: false
   },
   {
     id: "2",
@@ -67,7 +66,6 @@ export const projects: IProject[] = [
         assignedTo: { name: "Jane Cooper", avatar: "JC" },
       },
     ],
-    assignedTo: false
   },
   {
     id: "3",
@@ -101,6 +99,5 @@ export const projects: IProject[] = [
         assignedTo: { name: "Mike Chen", avatar: "MC" },
       },
     ],
-    assignedTo: false
   },
 ];
