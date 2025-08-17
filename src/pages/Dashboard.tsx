@@ -118,8 +118,6 @@ const Dashboard: React.FC = () => {
       userId: req.userId,
     })) || [];
 
-;
-
   const handleApprove = (id: string, adminNote: string) => {
     approveTimeOffRequest({ id, adminNote })
       .unwrap()
@@ -255,7 +253,7 @@ const Dashboard: React.FC = () => {
 
   if (!timeOffRequestsData || !assignedUsersdata) {
     return (
-      <div className="flex justify-center items-center p-10">
+      <div className="flex justify-center items-center p-10 bg-gray-5 min-h-screen">
         <LoaderCircle size={40} className="animate-spin text-gray-500" />
       </div>
     );
