@@ -44,8 +44,7 @@ const Dashboard: React.FC = () => {
       const role =
         user.profile?.jobTitle?.replace(/_/g, " ") || user.role || "Unknown";
       const avatar =
-        user.profile?.profileUrl ||
-        `https://i.pravatar.cc/40?img=${Math.random()}`;
+        user.profile?.profileUrl;
       const project =
         user.projects && user.projects.length > 0
           ? user.projects[0].title
@@ -108,8 +107,7 @@ const Dashboard: React.FC = () => {
       id: req.id,
       name: req.user?.profile?.firstName || "Unknown User", // or backend name field
       avatar:
-        req.user?.profile?.profileUrl ||
-        `https://i.pravatar.cc/40?img=${Math.random()}`,
+        req.user?.profile?.profileUrl,
       type: req.reason,
       date: new Date(req.startDate).toLocaleDateString("en-US", {
         month: "short",
@@ -119,8 +117,6 @@ const Dashboard: React.FC = () => {
       status: req.status?.toLowerCase(),
       userId: req.userId,
     })) || [];
-
-;
 
   const handleChatSelect = () => {
     // console.log("Dashboard - Chat selected:", chatId);
@@ -189,7 +185,7 @@ const Dashboard: React.FC = () => {
 
   if (!timeOffRequestsData || !assignedUsersdata) {
     return (
-      <div className="flex justify-center items-center p-10">
+      <div className="flex justify-center items-center p-10 bg-gray-5 min-h-screen">
         <LoaderCircle size={40} className="animate-spin text-gray-500" />
       </div>
     );
