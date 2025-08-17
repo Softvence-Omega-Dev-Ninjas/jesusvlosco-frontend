@@ -7,8 +7,9 @@ import {
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import { LoaderCircle } from "lucide-react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Chat } from "../components/Dashboard/Chat";
-import { Achievement, ChatMessage } from "../components/Dashboard/dashboard";
+import { Achievement } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
 import MapLocation from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
@@ -19,6 +20,7 @@ import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
 
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
@@ -118,11 +120,18 @@ const Dashboard: React.FC = () => {
       userId: req.userId,
     })) || [];
 
+;
+
+  const handleChatSelect = () => {
+    // console.log("Dashboard - Chat selected:", chatId);
+    navigate(`/admin/communication/chat`);
+  };
+
   const handleApprove = (id: string, adminNote: string) => {
     approveTimeOffRequest({ id, adminNote })
       .unwrap()
       .then(() => {
-        console.log("Time off request approved:", id, adminNote);
+        // console.log("Time off request approved:", id, adminNote);
         refetch();
       })
       .catch((err) => {
@@ -141,7 +150,7 @@ const Dashboard: React.FC = () => {
         adminNote,
         status,
       }).then(() => {
-        console.log("Time off request declined:", id, adminNote, status);
+        // console.log("Time off request declined:", id, adminNote, status);
         refetch();
       });
       console.log(result);
@@ -149,79 +158,6 @@ const Dashboard: React.FC = () => {
       console.log(error);
     }
   };
-
-  const chatMessages: ChatMessage[] = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      avatar: "SJ",
-      imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 2,
-      isActive: true,
-    },
-    {
-      id: "2",
-      name: "Emily Chen",
-      avatar: "EC",
-      imageUrl: "https://randomuser.me/api/portraits/women/15.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 2,
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Michael Davis",
-      avatar: "MD",
-      imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 0,
-      isActive: true,
-    },
-    {
-      id: "4",
-      name: "Jessica Wilson",
-      avatar: "JW",
-      imageUrl: "https://randomuser.me/api/portraits/women/68.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 0,
-      isActive: true,
-    },
-    {
-      id: "5",
-      name: "David Brown",
-      avatar: "DB",
-      imageUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 0,
-      isActive: true,
-    },
-    {
-      id: "6",
-      name: "Lisa Anderson",
-      avatar: "LA",
-      imageUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 0,
-      isActive: true,
-    },
-    {
-      id: "7",
-      name: "Robert Taylor",
-      avatar: "RT",
-      imageUrl: "https://randomuser.me/api/portraits/men/55.jpg",
-      message: "Thanks for the project...",
-      time: "2 min ago",
-      unreadCount: 0,
-      isActive: true,
-    },
-  ];
 
   const achievements: Achievement[] = [
     { id: "1", title: "Team Player", date: "June 17, 2025", recipient: "You" },
@@ -275,7 +211,7 @@ const Dashboard: React.FC = () => {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6 w-full mx-auto">
-            <Chat messages={chatMessages} />
+            <Chat handleChatSelect={handleChatSelect} />
             <TimeOffRequests
               requests={timeOffRequests}
               onApprove={handleApprove}

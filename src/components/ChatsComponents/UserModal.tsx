@@ -9,14 +9,25 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 
 export default function UserModal({
   setShowUserModal,
+  onChatWithUser
 }: {
   setShowUserModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onChatWithUser: (userId: string) => void
 }) {
   const navigate = useNavigate();
 const [searchTerm, setSearchTerm] = useState("");
   const users = useGetAllUserQuery({});
   const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
   console.log(employees);
+
+  const handleChat = (userId: string) => {
+      console.log(`Starting chat with ${userId}`);
+      // Call the parent's chat handler if provided
+      if (onChatWithUser) {
+        onChatWithUser(userId);
+        setShowUserModal(false)
+      }
+    };
 
     const filteredEmployees = employees.filter(
     (employee: TUser) =>
@@ -63,6 +74,7 @@ const [searchTerm, setSearchTerm] = useState("");
             {filteredEmployees.map((contact: TUser) => (
               <div
                 key={contact.id}
+                onClick={() => handleChat(contact.id)}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <div>
