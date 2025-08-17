@@ -65,13 +65,6 @@ const EmployeeDetailModal: React.FC<EmployeeDetailModalProps> = ({
     setIsCalendarOpen(false); // Close calendar after selection
   };
 
-  // if (isLoading)
-  //   return (
-  //     <div className="text-2xl flex items-center justify-center">
-  //       Loading...
-  //     </div>
-  //   );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end p-4">
       <div className="relative bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto transition-all duration-300 ease-out">
