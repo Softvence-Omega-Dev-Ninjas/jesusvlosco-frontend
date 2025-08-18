@@ -12,23 +12,54 @@ const UserPageProfile = () => {
   const [readOnly, setReadOnly] = useState(true);
    const user = useAppSelector(selectUser);
   console.log(user)
-   const inputRef1 = useRef<HTMLInputElement>(null);
-  const inputRef2 = useRef<HTMLInputElement>(null);
+  const dobInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedDate1, setSelectedDate1] = useState("1998-07-25");
-  const [selectedDate2, setSelectedDate2] = useState("1998-07-25");
+  const [selectedDate, setSelectedDate] = useState("1998-07-25");
 
-  const handleIconClick1 = () => inputRef1.current?.showPicker();
-  const handleIconClick2 = () => inputRef2.current?.showPicker();
+  // Form state variables
+  const [formData, setFormData] = useState({
+    firstName: "Leslie",
+    lastName: "Alexander", 
+    gender: "Female",
+    email: user?.email || "email",
+    phoneNumber: "+123 456 789",
+    address: "1901 Thornridge Cir. Shiloh, Hawaii 81063",
+    state: "Los Angelos",
+    country: "America",
+    pinCode: "1203",
+    nationality: "American"
+  });
 
-  const handleDateChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate1(e.target.value);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const handleDateChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate2(e.target.value);
+  const handleSaveSettings = () => {
+    const allFormData = {
+      ...formData,
+      dateOfBirth: selectedDate
+    };
+    
+    console.log("Form Data:", allFormData);
+    
+    // Set back to readonly after saving
+    setReadOnly(true);
+  };
+
+  const handleDobIconClick = () => {
+    if (!readOnly) {
+      dobInputRef.current?.showPicker();
+    }
+  };
+
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate(e.target.value);
   };
   return (
+    <>
     <div className=" mx-auto p-6 min-h-screen mt-4">
 
           <div className="flex items-center justify-between pb-4 mb-4">
@@ -64,109 +95,136 @@ const UserPageProfile = () => {
       <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
           <label className="block text-sm mb-1 text-[#484848]">First name</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="Leslie" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.firstName}
+            onChange={(e) => handleInputChange('firstName', e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Last name</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="Alexander" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.lastName}
+            onChange={(e) => handleInputChange('lastName', e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Gender</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="Female" />
-        </div>
-        <div>
-          <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-  <div className="relative w-full">
-          <input
-            type="text"
-            value={selectedDate1}
-            readOnly
-            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2 pr-10"
-          />
-          <img
-            src={calendar}
-            alt="calendar icon"
-            onClick={handleIconClick1}
-            className="w-6 h-6 absolute right-3 top-2.5 cursor-pointer"
-          />
-          <input
-            ref={inputRef1}
-            type="date"
-            value={selectedDate1}
-            onChange={handleDateChange1}
-            className="absolute inset-0 left-16 md:left-[275px] md:right-0 opacity-0 cursor-pointer"
-            style={{ pointerEvents: "none" }}
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.gender}
+            onChange={(e) => handleInputChange('gender', e.target.value)}
           />
         </div>
-        </div>
+  {/* ...other fields... */}
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Email ID</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="info@example.com" />
+          <input 
+            readOnly={true} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={user?.email}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Phone Number</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="+123 456 789" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.phoneNumber}
+            onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+          />
         </div>
         <div className="">
           <label className="block text-sm mb-1 text-[#484848]">Address</label>
           <input
+            readOnly={readOnly}
             className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2"
-            defaultValue="1901 Thornridge Cir. Shiloh, Hawaii 81063"
+            value={formData.address}
+            onChange={(e) => handleInputChange('address', e.target.value)}
           />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">State</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="Los Angelos" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.state}
+            onChange={(e) => handleInputChange('state', e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Country</label>
           <div className="flex justify-between w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2">
-                      <input className="" defaultValue="America" />
+                      <input 
+                        readOnly={readOnly} 
+                        className="" 
+                        value={formData.country}
+                        onChange={(e) => handleInputChange('country', e.target.value)}
+                      />
                       <img src={distance} alt="" />
 
           </div>
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Pin Code</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="1203" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.pinCode}
+            onChange={(e) => handleInputChange('pinCode', e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Nationality</label>
-          <input className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" defaultValue="American" />
+          <input 
+            readOnly={readOnly} 
+            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2" 
+            value={formData.nationality}
+            onChange={(e) => handleInputChange('nationality', e.target.value)}
+          />
         </div>
         <div>
           <label className="block text-sm mb-1 text-[#484848]">Date of Birth</label>
-  <div className="relative w-full">
-          <input
-            type="text"
-            value={selectedDate2}
-            readOnly
-            className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2 pr-10"
-          />
-          <img
-            src={calendar}
-            alt="calendar icon"
-            onClick={handleIconClick2}
-            className="w-6 h-6 absolute right-3 top-2.5 cursor-pointer"
-          />
-          <input
-            ref={inputRef2}
-            type="date"
-            value={selectedDate2}
-            onChange={handleDateChange2}
-            className="absolute inset-0 left-16 md:left-[275px] md:right-0 opacity-0 cursor-pointer"
-            style={{ pointerEvents: "none" }}
-          />
+          <div className="relative w-full">
+            <input
+              type="text"
+              value={selectedDate}
+              readOnly
+              className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2 pr-10"
+            />
+            <img
+              src={calendar}
+              alt="calendar icon"
+              onClick={handleDobIconClick}
+              className={`w-6 h-6 absolute right-3 top-2.5 ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+            />
+            <input
+              ref={dobInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={handleDobChange}
+              disabled={readOnly}
+              className="absolute inset-0 left-16 md:left-[275px] md:right-0 opacity-0 cursor-pointer"
+              style={{ pointerEvents: readOnly ? "none" : "auto" }}
+            />
+          </div>
         </div>
-   </div>
       </form>
 
-      <div className="mt-8  flex justify-end">
-        <button className="bg-primary text-white px-5 py-2  rounded-lg cursor-pointer ">
+      <div className="mt-8 flex justify-end">
+        <button 
+          onClick={handleSaveSettings}
+          className="bg-primary text-white px-5 py-2 rounded-lg cursor-pointer"
+        >
           Save Settings
         </button>
       </div>
     </div>
+    </>
   );
 };
 
