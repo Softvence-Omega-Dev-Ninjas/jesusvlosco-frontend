@@ -1,179 +1,30 @@
-import { useState } from "react";
+
 import user1 from "@/assets/user1.png";
-import user2 from "@/assets/user2.png";
-import user3 from "@/assets/user3.png";
-import user4 from "@/assets/user4.png";
 import { X } from "lucide-react";
 
-const suggestedContacts = [
-  {
-    name: "Theresa Webb",
-    initials: "TW",
-    bgColor: "bg-orange-500",
-    img: user1,
-  },
-  {
-    name: "Robert Fox",
-    initials: "RF",
-    bgColor: "bg-purple-500",
-    img: user2,
-  },
-  {
-    name: "Arlene McCoy",
-    initials: "AM",
-    bgColor: "bg-yellow-500",
-    img: user3,
-  },
-  {
-    name: "Wade Warren",
-    initials: "WW",
-    bgColor: "bg-blue-500",
-    img: user4,
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { useGetAllTeamsQuery } from "@/store/api/admin/team/CreateTeamApi";
+import { TTeam } from "@/types/teamtype";
+import { useState } from "react";
+
 
 export default function TeamModal({
   setShowTeamModal,
 }: {
   setShowTeamModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [showNewTeam, setShowNewTeam] = useState(false);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const teams = useGetAllTeamsQuery({});
+  const teamList = teams?.data?.data?.teams || [];
+  console.log(teamList);
 
-  if (showNewTeam) {
-    return (
-      <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-200 relative">
-        <span
-          onClick={() => setShowTeamModal(false)}
-          className="absolute top-3 right-3 cursor-pointer"
-        >
-          <X />
-        </span>
-        <div className="p-6 pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowNewTeam(false)}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <h2 className="text-lg font-semibold text-gray-800">New Team</h2>
-          </div>
-        </div>
+  const filteredTeams = teamList.filter((team: TTeam) =>
+    team.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-        <div className="p-6 space-y-6">
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21,15 16,10 5,21" />
-            </svg>
-            Add image
-          </button>
+  
 
-          <div className="space-y-2">
-            <label
-              htmlFor="team-name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Create team name
-            </label>
-            <input
-              id="team-name"
-              type="text"
-              placeholder="Enter team name here"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Choose members
-            </label>
-
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <label
-                  htmlFor="select-team"
-                  className="block text-sm text-gray-600"
-                >
-                  Select Team
-                </label>
-                <div className="relative">
-                  <select
-                    id="select-team"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">Select Team</option>
-                    <option value="marketing">Marketing Team</option>
-                    <option value="development">Development Team</option>
-                    <option value="design">Design Team</option>
-                  </select>
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  htmlFor="select-members"
-                  className="block text-sm text-gray-600"
-                >
-                  Select specific members
-                </label>
-                <div className="relative">
-                  <select
-                    id="select-members"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">Select member</option>
-                    {suggestedContacts.map((contact) => (
-                      <option
-                        key={contact.name}
-                        value={contact.name.toLowerCase().replace(" ", "-")}
-                      >
-                        {contact.name}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-200 relative">
@@ -184,20 +35,22 @@ export default function TeamModal({
         <X />
       </span>
       <div className="p-6 pb-4 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-800">New Message</h2>
+        <h2 className="text-lg font-semibold text-gray-800">New Team Message</h2>
       </div>
 
       <div className="p-6 space-y-6">
         <div>
           <input
             type="text"
-            placeholder="To : Type a name or group"
+             value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="To : Type a name of group"
             className="w-full px-5 py-2.5 bg-[#F5F5F5] rounded-full placeholder:text-[#5B5B5B] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         <button
-          onClick={() => setShowNewTeam(true)}
+          onClick={() => navigate("/admin/create-team")}
           className="flex items-center gap-2 text-primary transition-colors font-semibold cursor-pointer"
         >
           <svg
@@ -219,17 +72,22 @@ export default function TeamModal({
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-gray-700">Suggested</h3>
           <div className="space-y-3">
-            {suggestedContacts.map((contact) => (
+            {filteredTeams?.map((team: TTeam) => (
               <div
-                key={contact.name}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                key={team.id}
+                className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               >
-                <div>
-                  <img src={contact.img} alt="" />
+                <div className="flex items-center gap-3">
+                  <div>
+                  <img className="w-10 h-10 rounded-full" src={team.image || user1} alt="" />
                 </div>
                 <span className="text-sm font-medium text-gray-800">
-                  {contact.name}
+                  {team.title}
                 </span>
+                </div>
+                <div>
+                  <span className="text-sm bg-gray-100 text-gray-800 px-2.5 py-1 rounded-3xl">{team.department}</span>
+                </div>
               </div>
             ))}
           </div>
