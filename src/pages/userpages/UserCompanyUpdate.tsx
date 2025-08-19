@@ -1,5 +1,5 @@
-import AnnouncementForm from "@/components/CompanyUpdate/AnnouncementForm";
-import AnnouncementList from "@/components/CompanyUpdate/AnnouncementList";
+import UserAnnouncementForm from "@/components/UserDashoboard/UserAnnouncementForm";
+import UserAnnouncementList from "@/components/UserDashoboard/UserAnnouncementList";
 import { useState } from "react";
 
 export default function UserCompanyUpdate() {
@@ -31,7 +31,7 @@ export default function UserCompanyUpdate() {
       </div>
 
       <div className="mt-6">
-        {showForm ? <AnnouncementForm /> : <AnnouncementList/>}
+        {showForm ? <UserAnnouncementForm /> : <UserAnnouncementList/>}
       </div>
     </div>
     )

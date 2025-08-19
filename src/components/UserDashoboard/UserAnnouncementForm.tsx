@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import CategoryDropdown from "../CompanyUpdate/CategoryDropdown";
-import DateTimePicker from "../CompanyUpdate/dateTimeform";
+// import CategoryDropdown from "../CompanyUpdate/CategoryDropdown";
+// import DateTimePicker from "../CompanyUpdate/dateTimeform";
 const UserAnnouncementForm: React.FC = () => {
   // const [publishNow, setPublishNow] = useState(true);
   const [fileName, setFileName] = useState("");
@@ -41,7 +41,7 @@ const UserAnnouncementForm: React.FC = () => {
           {/* <select className="w-full p-2 border border-gray-300  rounded-md text-sm">
             <option>Select category</option>
           </select> */}
-          <CategoryDropdown />
+          {/* <CategoryDropdown /> */}
         </div>
         <div className="flex-1">
           <label className="block mb-1 text-sm font-medium">Audience*</label>
@@ -76,7 +76,7 @@ const UserAnnouncementForm: React.FC = () => {
         )}
       </div> */}
 
-      <DateTimePicker />
+      {/* <DateTimePicker /> */}
 
       {/* Attachment */}
       <div className="mb-4 p-4 border border-gray-300  rounded-md text-center text-sm text-gray-500 bg-gray-50">
@@ -117,5 +117,6 @@ const UserAnnouncementForm: React.FC = () => {
     </div>
   );
 };
+// sadasd
 
 export default UserAnnouncementForm;
