@@ -1,14 +1,12 @@
-import React from "react";
-import { FiDownload, FiHeart } from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
+import { Announcement } from "./AnnouncementList";
 
 interface RemotePolicyCardProps {
+  announcement: Announcement;
   onClose: () => void;
 }
 
-const RemotePolicyCard: React.FC<RemotePolicyCardProps> = ({
-  announcement,
-  onClose,
-}) => {
+const RemotePolicyCard = ({ announcement, onClose }: RemotePolicyCardProps) => {
   console.log(announcement, "announcement");
   return (
     <div className="bg-white rounded-xl shadow-md p-6 max-w-8xl mx-auto relative">
@@ -38,7 +36,7 @@ const RemotePolicyCard: React.FC<RemotePolicyCardProps> = ({
             Attachments
           </h4>
           <ul className="space-y-2">
-            {announcement.attachments.map((attachment) => {
+            {/* {announcement.attachments.map((attachment) => {
               <li className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md text-sm">
                 <span>Remote_Work_Policy_2024.pdf</span>
                 <a
@@ -49,7 +47,7 @@ const RemotePolicyCard: React.FC<RemotePolicyCardProps> = ({
                   Download
                 </a>
               </li>;
-            })}
+            })} */}
           </ul>
         </div>
       )}

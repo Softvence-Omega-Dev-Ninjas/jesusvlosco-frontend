@@ -8,68 +8,120 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { ResponsePanel } from "./ResponsePanel";
 import { useFetchAnnouncementQuery } from "@/store/api/admin/announcement/announcementApi";
 
-const announcementsData = [
-  {
-    id: 1,
-    time: "02:0",
+// const announcementsData = [
+//   {
+//     id: 1,
+//     time: "02:0",
 
-    title: "New Leave Policy Effective July 2025",
-    description:
-      "We’ve updated our leave policy to provide more flexible options for parental leave and personal days. Please review the detailed policy...",
-    tags: ["All", "New leave policy update"],
-  },
-  {
-    id: 2,
-    time: "02:00",
-    title: "Upcoming Company Retreat",
-    description:
-      "Our annual company retreat will be held from August 15–17 at Lakeview Resort. Registration opens next week...",
-    tags: ["Team B", "Construction equipment updates"],
-  },
-  {
-    id: 3,
-    time: "03:00",
-    title: "Emergency Evacuation Drill",
-    description:
-      "An emergency evacuation drill will take place at 3:00 to ensure all workers are familiar with the emergency procedures...",
-    tags: ["Team C", "Emergency Alert Update"],
-  },
-  {
-    id: 4,
-    time: "05:00",
-    title: "Team Meeting Scheduled for Next Week: Project 2 Overview",
-    description:
-      "A team meeting will be held to discuss the progress, upcoming tasks, and resource requirements for Project 2. The meeting will also cover ...",
-    tags: ["Team D", "Internal Communication Update"],
-  },
-  {
-    id: 5,
-    time: "02:00",
-    title: "Mandatory Safety Training on Scaffold Safety",
-    description:
-      "All employees are required to attend a safety training session on scaffold safety. This is a mandatory training as part of our ongoing commitments to ...",
-    tags: ["All", "Safety & Compliance Updates"],
-  },
-  {
-    id: 6,
-    time: "02:00",
-    title: "Weather Delay: Heavy Rain Forecasted for March 22–23",
-    description:
-      "Due to the heavy rain forecasted for March 22–23, construction work on Site A will be delayed by 2 days. This may affect our progress on ...",
-    tags: ["All", "Weather & Site Conditions"],
-  },
-];
+//     title: "New Leave Policy Effective July 2025",
+//     description:
+//       "We’ve updated our leave policy to provide more flexible options for parental leave and personal days. Please review the detailed policy...",
+//     tags: ["All", "New leave policy update"],
+//   },
+//   {
+//     id: 2,
+//     time: "02:00",
+//     title: "Upcoming Company Retreat",
+//     description:
+//       "Our annual company retreat will be held from August 15–17 at Lakeview Resort. Registration opens next week...",
+//     tags: ["Team B", "Construction equipment updates"],
+//   },
+//   {
+//     id: 3,
+//     time: "03:00",
+//     title: "Emergency Evacuation Drill",
+//     description:
+//       "An emergency evacuation drill will take place at 3:00 to ensure all workers are familiar with the emergency procedures...",
+//     tags: ["Team C", "Emergency Alert Update"],
+//   },
+//   {
+//     id: 4,
+//     time: "05:00",
+//     title: "Team Meeting Scheduled for Next Week: Project 2 Overview",
+//     description:
+//       "A team meeting will be held to discuss the progress, upcoming tasks, and resource requirements for Project 2. The meeting will also cover ...",
+//     tags: ["Team D", "Internal Communication Update"],
+//   },
+//   {
+//     id: 5,
+//     time: "02:00",
+//     title: "Mandatory Safety Training on Scaffold Safety",
+//     description:
+//       "All employees are required to attend a safety training session on scaffold safety. This is a mandatory training as part of our ongoing commitments to ...",
+//     tags: ["All", "Safety & Compliance Updates"],
+//   },
+//   {
+//     id: 6,
+//     time: "02:00",
+//     title: "Weather Delay: Heavy Rain Forecasted for March 22–23",
+//     description:
+//       "Due to the heavy rain forecasted for March 22–23, construction work on Site A will be delayed by 2 days. This may affect our progress on ...",
+//     tags: ["All", "Weather & Site Conditions"],
+//   },
+// ];
+
+export interface Author {
+  id: string;
+  phone: string;
+  employeeID: number;
+  email: string;
+  role: "ADMIN" | "USER" | string; // extend if you have fixed roles
+  isLogin: boolean;
+  lastLoginAt: string; // ISO date
+  password: string;
+  otp: string | null;
+  otpExpiresAt: string | null;
+  isVerified: boolean;
+  pinCode: string | null;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Count {
+  likedUser: number;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  description: string;
+  publishedNow: boolean;
+  publishedAt: Date; // ISO date or null
+  sendEmailNotification: boolean;
+  enabledReadReceipt: boolean;
+  likeCount: number;
+  viewCount: number;
+  isForAllUsers: boolean;
+  createdBy: string;
+  categoryId: string;
+  time: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  author: Author;
+  category: Category;
+  attachments: File[]; // adjust if backend defines attachment structure
+  _count: Count;
+}
 
 const AnnouncementList: React.FC = () => {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   console.log(selectedId);
-  const [announcementList, setAnnouncementList] = useState([]);
+  const [announcementList, setAnnouncementList] = useState<Announcement[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showDeleteMode, setShowDeleteMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [showResponseId, setShowResponseId] = useState<number | null>(null);
+  const [showResponseId, setShowResponseId] = useState<string | null>(null);
 
   const itemsPerPage = 5;
   const totalPages = Math.ceil(announcementList.length / itemsPerPage);
@@ -99,13 +151,13 @@ const AnnouncementList: React.FC = () => {
     );
   };
 
-  const handleDeleteSelected = () => {
-    setAnnouncementList((prev) =>
-      prev.filter((a) => !selectedIds.includes(a.id))
-    );
-    setSelectedIds([]);
-    setShowDeleteMode(false);
-  };
+  //   const handleDeleteSelected = () => {
+  //     setAnnouncementList((prev) =>
+  //       prev.filter((a) => !selectedIds.includes(a.id))
+  //     );
+  //     setSelectedIds([]);
+  //     setShowDeleteMode(false);
+  //   };
 
   const handleCloseResponse = () => {
     setShowResponseId(null);
@@ -195,7 +247,7 @@ const AnnouncementList: React.FC = () => {
 
       {/* Announcement List or Response Panel */}
       <div className="space-y-4 mb-8">
-        {currentAnnouncements.map((a) => (
+        {currentAnnouncements.map((a: Announcement) => (
           <div
             key={a.id}
             className="bg-white border border-gray-300 rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative"
@@ -208,8 +260,10 @@ const AnnouncementList: React.FC = () => {
                   <div className="absolute left-4 top-10">
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(a.id)}
-                      onChange={() => handleCheckboxChange(a.id)}
+                      checked={selectedIds.includes(a.id as unknown as number)}
+                      onChange={() =>
+                        handleCheckboxChange(a.id as unknown as number)
+                      }
                       className="w-4 mb-6 h-4"
                     />
                     <RiDeleteBin6Line className="mt-0.5" />
@@ -228,11 +282,13 @@ const AnnouncementList: React.FC = () => {
                     >
                       <div className="mt-2 border-r border-gray-300 px-2">
                         <p className="text-sm text-gray-400">
-                          {a.publishedAt > Date.now() ? "Tomorrow" : "Today"}{" "}
+                          {new Date(a.publishedAt).getTime() > Date.now()
+                            ? "Tomorrow"
+                            : "Today"}
                           <br />
                           {a.publishedAt
-                            ? a.publishedAt?.toLocaleString()
-                            : a.createdAt?.toLocaleString()}
+                            ? new Date(a.publishedAt).toLocaleTimeString()
+                            : new Date(a.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
                       <div className="flex-1">
@@ -364,7 +420,7 @@ const AnnouncementList: React.FC = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={() => {
-          handleDeleteSelected();
+          //   handleDeleteSelected();
           setShowModal(false);
         }}
       />
