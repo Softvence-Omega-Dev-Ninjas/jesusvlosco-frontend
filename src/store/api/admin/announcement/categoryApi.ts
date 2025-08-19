@@ -11,7 +11,15 @@ const timeOffRequestsApi = baseApi.injectEndpoints({
         };
       },
     }),
+
+    fetchCategories: builder.query({
+      query: () => ({
+        url: "/admin/announcement/get-categories",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateCategoryMutation } = timeOffRequestsApi;
+export const { useCreateCategoryMutation, useFetchCategoriesQuery } =
+  timeOffRequestsApi;

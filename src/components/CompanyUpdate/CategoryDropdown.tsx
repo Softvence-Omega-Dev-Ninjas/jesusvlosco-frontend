@@ -1,20 +1,43 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  useCreateCategoryMutation,
+  useFetchCategoriesQuery,
+} from "@/store/api/admin/announcement/categoryApi";
+import { useState } from "react";
+import { toast } from "sonner";
 
-const CategoryDropdown: React.FC = () => {
+const CategoryDropdown = ({
+  selectedCategory,
+  setSelectedCategory,
+}: {
+  selectedCategory: any | null;
+  setSelectedCategory: (arg0: string) => void;
+}) => {
   const [showForm, setShowForm] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryDescription, setCategoryDescription] = useState("");
+  const [createCategory] = useCreateCategoryMutation();
+  const { data: categoriesData } = useFetchCategoriesQuery([]);
+  const categories = categoriesData?.data;
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const handleSelect = (category: string) => {
+  const handleSelect = (category: any) => {
     setSelectedCategory(category);
     setDropdownOpen(false);
     setShowForm(false);
   };
 
-  const [categoryName, setCategoryName] = useState("");
-  const [categoryDescription, setCategoryDescription] = useState("");
-  console.log(categoryDescription, categoryName);
+  const handleSubmit = async () => {
+    const { data } = await createCategory({
+      name: categoryName,
+      description: categoryDescription,
+    });
+
+    if (data?.success) {
+      toast.success(data.message);
+    }
+  };
 
   return (
     <div className="relative w-full max-w-md">
@@ -23,26 +46,21 @@ const CategoryDropdown: React.FC = () => {
         onClick={toggleDropdown}
         className="w-full p-2 border border-gray-300 rounded-md text-sm bg-white text-left"
       >
-        {selectedCategory || "Select category"}
+        {selectedCategory?.name || "Select category"}
       </button>
 
       {/* Dropdown Menu */}
       {dropdownOpen && (
         <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded-md shadow z-10 p-2 text-sm space-y-2">
-          {[
-            "Project progress update",
-            "Safety & compliance update",
-            "Labour & workforce updates",
-            "New leave policy update",
-          ].map((item) => (
-            <label key={item} className="flex items-center gap-2">
+          {categories?.map((category: { id: string; name: string }) => (
+            <label key={category?.id} className="flex items-center gap-2">
               <input
                 type="radio"
                 name="category"
-                checked={selectedCategory === item}
-                onChange={() => handleSelect(item)}
+                // checked={selectedCategory?.name === category?.name}
+                onChange={() => handleSelect(category)}
               />
-              {item}
+              {category?.name}
             </label>
           ))}
 
@@ -78,6 +96,7 @@ const CategoryDropdown: React.FC = () => {
           <button
             className="px-4 py-2 text-white bg-indigo-600 rounded-md text-sm hover:bg-indigo-700"
             onClick={() => {
+              handleSubmit();
               setShowForm(false);
               setDropdownOpen(false);
             }}
