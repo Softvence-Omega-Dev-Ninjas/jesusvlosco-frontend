@@ -81,7 +81,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
     // Add the send message mutation
     const [sendPrivateMessage] = useSendPrivateMessageMutation();
 
-    // console.log(showChatInfo, showDeleteModal);
+    console.log(showChatInfo, showDeleteModal);
 
     const { data: conversationsData } = useGetPrivateChatQuery([]);
     const privateChats = conversationsData?.data || [];
