@@ -20,6 +20,7 @@ import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 // import { formatDistanceToNow } from "date-fns";
 import Swal from "sweetalert2";
 import Chat from "../Dashboard/Chat";
+import { TPrivateChat } from "@/types/chatType";
 
 // Define types for better type safety
 interface ChatMessage {
@@ -27,6 +28,7 @@ interface ChatMessage {
   text: string;
   sender: {
     profile: {
+      lastName: string;
       profileUrl: string;
       firstName: string;
     };
@@ -157,7 +159,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
 
   // Find the selected chat
   const selectedChat = privateChats?.find(
-    (chat: Chat) => chat.chatId === selectedChatId
+    (chat: TPrivateChat) => chat.chatId === selectedChatId
   );
 
   // Handle chat selection on mobile
@@ -166,7 +168,9 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
     // console.log("Setting selectedChatId to:", chatId);
     setSelectedChatId(chatId);
     setMobileView("chat");
-    navigate(`/admin/communication/chat`);
+    if(user?.role === "ADMIN"){
+      navigate(`/admin/communication/chat`);
+    }
   };
 
   // Handle back navigation on mobile
