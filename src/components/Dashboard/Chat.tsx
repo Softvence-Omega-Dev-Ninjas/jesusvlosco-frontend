@@ -33,7 +33,7 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   // Fetch private chats using Redux
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
-  console.log(privateChats, "Private Chats Data in Chat");
+  // console.log(privateChats, "Private Chats Data in Chat");
 
   // Filter chats based on search term and active tab
   const filteredChats = privateChats.filter((chat: TPrivateChat) => {

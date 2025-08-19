@@ -16,8 +16,8 @@ const UserDropdown: React.FC = () => {
   // console.log({data})
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  console.log(user)
-  console.log(user?.accessToken);
+  // console.log(user)
+  // console.log(user?.accessToken);
   // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,9 +47,8 @@ const UserDropdown: React.FC = () => {
       >
         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
           <span className="text-white text-sm font-medium">
-            {
-              data?.data?.profile?.firstName[0] + data?.data?.profile?.lastName[0]
-            }
+            {data?.data?.profile?.firstName[0] +
+              data?.data?.profile?.lastName[0]}
           </span>
         </div>
         <div className="hidden sm:block">

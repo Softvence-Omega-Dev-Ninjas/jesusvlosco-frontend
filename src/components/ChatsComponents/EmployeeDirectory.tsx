@@ -12,7 +12,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
    const users = useGetAllUserQuery({limit: 50});
    console.log(users, "Users Data in Employee Directory");
       const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
-      console.log(employees);
+      // console.log(employees);
 
   const lcSearch = searchTerm.toLowerCase();
   const filteredEmployees = employees.filter((employee: TUser) => {
