@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import {
   ArrowLeft,
-  Phone,
-  Video,
+
   MessageCircle,
   EllipsisVertical,
 } from "lucide-react";
@@ -95,7 +94,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(functi
   useImperativeHandle(ref, () => ({
     openChatWithUser: async (userId: string) => {
       // First check if there's already a chat with this user
-      const existingChat = privateChats.find((chat: Chat) => 
+      const existingChat = privateChats.find((chat: TChat) => 
         chat.participant.id === userId
       );
       // console.log("Existing Chat:", existingChat);
