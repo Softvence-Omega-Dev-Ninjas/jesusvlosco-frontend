@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
 import { TChat, TPrivateChat } from "@/types/chatType";
+import { useAppSelector } from "@/hooks/useRedux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 // import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
 // team tab removed - no team API used here
 
@@ -22,6 +24,8 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const user = useAppSelector(selectUser);
+  // console.log(user)
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = ["All", "Unread"];
@@ -29,7 +33,7 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   // Fetch private chats using Redux
   const { data: conversationsData } = useGetPrivateChatQuery([]);
   const privateChats = conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
-  console.log(privateChats, "Private Chats Data in Chat");
+  // console.log(privateChats, "Private Chats Data in Chat");
 
   // Filter chats based on search term and active tab
   const filteredChats = privateChats.filter((chat: TPrivateChat) => {
@@ -98,8 +102,8 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   }, []);
 
   return (
-    <div className={`rounded-2xl p-3 border border-gray-200 ${className}`}>
-      <div className="max-h-140 h-140 overflow-hidden flex flex-col">
+    <div className={`min-w-sm rounded-2xl p-3 border border-gray-200 ${className}`}>
+      <div className="max-h-140 h-140 overflow-hidden flex flex-col w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-bold text-primary">Chat</h3>
@@ -168,7 +172,12 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
                   <img
                     src={
                       chat.participant.profile.profileUrl ||
-                      "https://avatar.iran.liara.run/public/boy?username=Ash"
+                      "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(
+                          chat.participant.profile.firstName +
+                            " " +
+                            chat.participant.profile.lastName
+                        )
                     }
                     alt={chat.participant.profile.firstName}
                     className="w-10 h-10 rounded-full object-cover"

@@ -12,6 +12,7 @@ const UserDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector(selectUser);
+  console.log("Access Token:", user?.accessToken);
   const { data } = useGetProfileQuery({ id: user?.id });
   // console.log({data})
   const dispatch = useAppDispatch();
@@ -40,7 +41,10 @@ const UserDropdown: React.FC = () => {
       {/* Trigger */}
       <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setIsOpen((prev) => !prev)}>
         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-          <span className="text-white text-sm font-medium">{data?.data?.profile?.firstName[0] + data?.data?.profile?.lastName[0]}</span>
+          <span className="text-white text-sm font-medium">
+            {data?.data?.profile?.firstName[0] +
+              data?.data?.profile?.lastName[0]}
+          </span>
         </div>
         <div className="hidden sm:block">
           <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
