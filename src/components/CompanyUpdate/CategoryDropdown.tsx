@@ -12,6 +12,10 @@ const CategoryDropdown: React.FC = () => {
     setShowForm(false);
   };
 
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryDescription, setCategoryDescription] = useState("");
+  console.log(categoryDescription, categoryName);
+
   return (
     <div className="relative w-full max-w-md">
       {/* Dropdown Button */}
@@ -61,11 +65,13 @@ const CategoryDropdown: React.FC = () => {
           <input
             type="text"
             placeholder="Enter category title here"
+            onChange={(e) => setCategoryName(e.target.value)}
             className="w-full mb-4 p-2 border border-gray-300 rounded-md text-sm"
           />
           <label className="block mb-2 text-sm font-medium">Description</label>
           <textarea
             placeholder="Description"
+            onChange={(e) => setCategoryDescription(e.target.value)}
             className="w-full mb-4 p-2 border border-gray-300 rounded-md text-sm"
             rows={3}
           />

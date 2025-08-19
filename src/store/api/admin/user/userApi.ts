@@ -7,9 +7,9 @@ const userApi = baseApi.injectEndpoints({
     getAllUser: build.query({
       // query: () => `/admin/user`,
       query: (params = {}) => {
-        console.log("params", params);
+        // console.log("params", params);
         const queryParams = new URLSearchParams(params).toString();
-        console.log("queryParams===========>", queryParams);
+        // console.log("queryParams===========>", queryParams);
         return `/admin/user${queryParams ? `?${queryParams}` : ""}`;
       },
       providesTags: ["ADMIN_USER"],
