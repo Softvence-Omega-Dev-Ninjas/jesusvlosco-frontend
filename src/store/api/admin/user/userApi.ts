@@ -79,6 +79,17 @@ const userApi = baseApi.injectEndpoints({
       },
     }),
 
+    updateEmployee: build.mutation({
+      query: ({ data }) => {
+        console.log({ data });
+        return {
+          url: `/employee/user/profile`,
+          method: "PATCH",
+          body: data,
+        };
+      },
+    }),
+
     // Payroll
     createUserPayRoll: build.mutation({
       query: ({ data, userId }) => {
@@ -103,7 +114,7 @@ const userApi = baseApi.injectEndpoints({
       invalidatesTags: ["ADMIN_USER"],
     }),
 
-    // Patch Api
+    
   }),
 });
 
@@ -127,4 +138,7 @@ export const {
   // userpayroll
   useCreateOffdayPayRollMutation,
   useCreateUserPayRollMutation,
+
+  // Update employee
+  useUpdateEmployeeMutation,
 } = userApi;

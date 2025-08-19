@@ -12,6 +12,7 @@ const UserDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector(selectUser);
+  console.log("Access Token:", user?.accessToken);
   const { data } = useGetProfileQuery({ id: user?.id });
   // console.log({data})
   const dispatch = useAppDispatch();
