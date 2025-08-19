@@ -1,6 +1,5 @@
 import { useState } from "react";
 import messageIcon from "@/assets/message-icon.svg";
-import personImg from "@/assets/chat-person.jpg";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { TUser } from "@/types/usertype";
 
@@ -9,21 +8,16 @@ interface EmployeeDirectoryProps {
 }
 
 export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-   const users = useGetAllUserQuery({});
+  const [searchTerm, setSearchTerm] = useState(``);
+  // console.log(searchTerm)
+   const users = useGetAllUserQuery({searchTerm: searchTerm});
+  //  console.log(users, "Users Data in Employee Directory");
       const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
-      console.log(employees);
-
-  const filteredEmployees = employees.filter(
-    (employee: TUser) =>
-      employee.profile?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.profile?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.profile?.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      // console.log(employees);
 
   const handleChat = (employee: TUser) => {
-    console.log(`Starting chat with ${employee.profile?.firstName || "Employee"}`);
-    console.log("Selected User:", employee.id);
+    // console.log(`Starting chat with ${employee.profile?.firstName || "Employee"}`);
+    // console.log("Selected User:", employee.id);
     
     // Call the parent's chat handler if provided
     if (onChatWithUser) {
@@ -40,7 +34,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
   };
     
   return (
-    <div className="max-w-4xl w-full mx-auto bg-gray-50 overflow-y-auto max-h-[700px] p-2 rounded-md">
+    <div className="max-w-4xl min-w-sm w-full mx-auto bg-gray-50 overflow-y-auto max-h-[700px] px-2 rounded-md py-3">
       {/* Header */}
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">
         Employee Directory
@@ -75,18 +69,18 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
       </div>
 
       {/* Employee Grid */}
-      <div className="grid grid-cols-1 gap-6">
-        {filteredEmployees.map((employee: TUser) => (
+      <div className="grid grid-cols-1 gap-5">
+        {employees.map((employee: TUser) => (
           <div
             key={employee.id}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+            className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
           >
             {/* Employee Info */}
-            <div className="flex items-start space-x-4 mb-6">
+            <div className="flex items-start space-x-3 mb-3">
               <img
-                src={personImg}
+                src={employee.profile.profileUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(employee.profile.firstName + " " + employee.profile.lastName)}
                 alt={employee.profile?.firstName || "Employee Avatar"}
-                className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
+                className="w-12 h-12 rounded-2xl object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
@@ -100,7 +94,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex justify-around items-center gap-2">
               <button
                 onClick={() => handleChat(employee)}
                 className="bg-primary hover:bg-primary/90 p-3 text-white cursor-pointer rounded-xl transition-colors duration-200 flex items-center justify-center"
@@ -154,7 +148,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
       </div>
 
       {/* No Results */}
-      {filteredEmployees.length === 0 && (
+      {employees.length === 0 && (
         <div className="text-center py-12">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
