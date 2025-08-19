@@ -32,7 +32,11 @@ export const CompanyUpdate = () => {
       </div>
 
       <div className="mt-6">
-        {showForm ? <AnnouncementForm /> : <AnnouncementList />}
+        {showForm ? (
+          <AnnouncementForm setShowForm={setShowForm} />
+        ) : (
+          <AnnouncementList />
+        )}
       </div>
     </div>
   );

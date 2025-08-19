@@ -4,16 +4,14 @@
 //     )
 // }
 
-
-
-import { useState } from "react";
-import { Eye, ThumbsUp, Send } from "lucide-react";
-import Creative from "@/assets/creative.png";
-import WellDone from "@/assets/Well Done!.png";
-import GreatLea from "@/assets/Great Lea.png";
-import TeamPlayer from "@/assets/Team Player.png";
 import down from "@/assets/arrow_drop_down.svg";
 import comment from "@/assets/comment.png";
+import Creative from "@/assets/creative.png";
+import GreatLea from "@/assets/Great Lea.png";
+import TeamPlayer from "@/assets/Team Player.png";
+import WellDone from "@/assets/Well Done!.png";
+import { Eye, Send, ThumbsUp } from "lucide-react";
+import { useState } from "react";
 
 interface Comment {
   id: string;
@@ -475,7 +473,7 @@ function RecognitionPostCard({
             onClick={() => setShowCommentInput(!showCommentInput)}
           >
             {/* <MessageCircle className="w-4 h-4" /> */}
-            <img src={comment} alt="" className="w-4 h-4"/>
+            <img src={comment} alt="" className="w-4 h-4" />
             Comment
           </button>
         </div>
