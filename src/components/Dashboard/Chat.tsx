@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
 import { TChat, TPrivateChat } from "@/types/chatType";
-import { useAppSelector } from "@/hooks/useRedux";
-import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
+// import { useAppSelector } from "@/hooks/useRedux";
+// import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 // import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
 // team tab removed - no team API used here
 
@@ -24,7 +24,7 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const user = useAppSelector(selectUser);
+  // const user = useAppSelector(selectUser);
   // console.log(user)
   const chatListRef = useRef<HTMLDivElement | null>(null);
 

@@ -45,6 +45,13 @@ export const projectApi = baseApi.injectEndpoints({
         body: { title },
       }),
     }),
+
+    getSingleProject: builder.query({
+      query: (id) => ({
+        url: `/admin/project/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
   
 });
@@ -54,4 +61,5 @@ export const {
   useGetAllProjectsQuery,
   useDeleteProjectMutation,
   useUpdateProjectTitleMutation,
+  useGetSingleProjectQuery
 } = projectApi;

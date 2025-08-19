@@ -129,6 +129,30 @@ export interface TShift {
   shiftTitle: string;
   startTime: ISODateString;
 }
+
+export interface TProjectUser {
+  id: string;
+  projectId: string;
+  userId: string;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  user: TUser;
+}
+type TShiftStatus = 'PUBLISHED' | 'DRAFT' | 'CANCELLED' | 'COMPLETED';
+export interface TShiftDTO {
+  id: string;
+  date: string; // ISO date string
+  startTime: string; // ISO date string
+  endTime: string; // ISO date string
+  shiftTitle: string;
+  allDay: boolean;
+  job: string;
+  shiftStatus: TShiftStatus;
+  location: string;
+  note: string | null;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
 // Main User/Employee type
 export interface TUser {
   id: UUID;
@@ -146,7 +170,7 @@ export interface TUser {
   payroll: TPayroll;
   profile: TProfile;
   projects: any[]; // You can define Project type if needed
-  shift: any[]; // You can define Shift type if needed
+  shift: TShift[]; // You can define Shift type if needed
   defaultShifts: any[]; // You can define DefaultShift type if needed
 }
 

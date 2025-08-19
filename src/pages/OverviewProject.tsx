@@ -28,6 +28,8 @@ import {
   useDeclineTimeOffRequestMutation,
   useGetAllTimeOffRequestsQuery,
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
+import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { TProjectUser } from "@/types/usertype";
 
 interface Employee {
   id: string;
@@ -43,7 +45,10 @@ interface Employee {
 
 const OverviewProject = () => {
   const projectId = useParams().id;
-
+  console.log(projectId, "Project ID from URL");
+  const projectInformation = useGetSingleProjectQuery(projectId);
+  const projectUsers = projectInformation.data?.data.projectUsers || [];
+  console.log(projectInformation, "Project Information");
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
 
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
@@ -340,11 +345,11 @@ const OverviewProject = () => {
 
               {/* Table Body */}
               <div>
-                {processedEmployees && processedEmployees.length > 0 ? (
-                  processedEmployees.map(
-                    (employee: Employee, index: number) => (
+                {projectUsers && projectUsers.length > 0 ? (
+                  projectUsers.map(
+                    (employee: TProjectUser, index: number) => (
                       <div
-                        key={employee.id}
+                        key={employee.user.id}
                         className={`px-5 py-4 border-b-2 border-gray-200 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                         }`}
@@ -358,8 +363,13 @@ const OverviewProject = () => {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                                 <img
-                                  src={employee.profileUrl}
-                                  alt={employee.name}
+                                  src={employee.user.profile.profileUrl ||  "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(
+                          employee.user.profile.firstName +
+                            " " +
+                            employee.user.profile.lastName
+                        )}
+                                  alt={employee.user.profile.firstName}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
@@ -372,10 +382,10 @@ const OverviewProject = () => {
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-primary">
-                                  {employee.name}
+                                  {employee.user.profile.firstName}{" "}{employee.user.profile.lastName}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {employee.jobTitle}
+                                  {employee.user.profile.jobTitle}
                                 </div>
                               </div>
                             </div>
@@ -384,13 +394,7 @@ const OverviewProject = () => {
                           {/* Project Name */}
                           <div>
                             <div className="text-sm text-gray-700">
-                              {employee.project}
-                              {employee.additionalProjects &&
-                                employee.additionalProjects > 0 && (
-                                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    +{employee.additionalProjects} more
-                                  </span>
-                                )}
+                              {projectInformation.data?.data.title || "No Project"}
                             </div>
                           </div>
 
@@ -398,11 +402,19 @@ const OverviewProject = () => {
                           <div>
                             <div className="space-y-1">
                               <div className="text-sm font-medium text-gray-500">
-                                {employee.shift}
+                                {employee.user.shift.map((shift) => (
+                                  <div key={shift.id} className="space-y-1">
+                                    <div className="text-xs text-gray-500">
+                                      {shift.shiftTitle}
+                                    </div>
+                                    <div>
+                                      ({shift.startTime} - {shift.endTime})
+                                    </div>
+                                    
+                                  </div>
+                                ))}
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {employee.time}
-                              </div>
+                              
                             </div>
                           </div>
 
