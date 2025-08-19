@@ -114,7 +114,7 @@ export interface Announcement {
 
 const AnnouncementList: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  console.log(selectedId);
+  const [searchValue, setSearchValue] = useState("");
   const [announcementList, setAnnouncementList] = useState<Announcement[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showDeleteMode, setShowDeleteMode] = useState(false);
@@ -133,17 +133,14 @@ const AnnouncementList: React.FC = () => {
   const { data: announcementData } = useFetchAnnouncementQuery({
     page: currentPage,
     limit: 10,
+    searchValue,
   });
-
-  console.log(announcementData);
 
   useEffect(() => {
     if (announcementData) {
       setAnnouncementList(announcementData.data);
     }
-  }, [announcementData, currentPage]);
-
-  console.log(announcementList);
+  }, [announcementData, currentPage, searchValue]);
 
   const handleCheckboxChange = (id: number) => {
     setSelectedIds((prev) =>
@@ -202,6 +199,8 @@ const AnnouncementList: React.FC = () => {
             <input
               type="text"
               placeholder="Search articles"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>

@@ -1,50 +1,67 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// TimeOffRequest.tsx
-import { mockEmployeeLeaveData } from "@/assets/mockData";
-import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal"; // Adjust the import path as needed
-import { EmployeeLeave } from "@/types";
+import EmployeeDetailModal from "@/components/TimeOffRequest/EmployeeDetailModal";
+import { useGetAllTimeOffRequestsAnalysisQuery } from "@/store/api/admin/dashboard/TimeOffRequestsApi"; // adjust import
+import { LoaderCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const TimeOffRequest: React.FC = () => {
-  const [employeeData, setEmployeeData] = useState<EmployeeLeave[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: timeOffRequestsAnalysis,
+    isLoading: apiLoading,
+    isError,
+  } = useGetAllTimeOffRequestsAnalysisQuery({
+    page: 1,
+    limit: 30,
+    status: "DRAFT",
+    orderBy: "asc",
+  });
+
+  const [employeeData, setEmployeeData] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedEmployee, setSelectedEmployee] =
-    useState<string | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+
+  console.log(timeOffRequestsAnalysis);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
-        setEmployeeData(mockEmployeeLeaveData);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleRefresh = () => {
-    setLoading(true);
-    setError(null);
-    setTimeout(() => {
-      setEmployeeData(mockEmployeeLeaveData);
-      setLoading(false);
-    }, 300);
-  };
+    if (timeOffRequestsAnalysis?.data) {
+      const formattedData = timeOffRequestsAnalysis.data.map((user: any) => ({
+        id: user.userId,
+        employeeName: `${user.profile.firstName} ${user.profile.lastName}`,
+        jobTitle: user.profile.jobTitle,
+        avatar: user.profile.profileUrl || "https://via.placeholder.com/40",
+        timeOff: {
+          total: 30,
+          remaining: user.requests.timeOff.remaining,
+        },
+        sickLeave: {
+          total:
+            user.requests.sickLeave.remaining +
+            user.requests.sickLeave.approved.length,
+          remaining: user.requests.sickLeave.remaining,
+        },
+        casualLeave: {
+          total:
+            user.requests.casualLeave.remaining +
+            user.requests.casualLeave.approved.length,
+          remaining: user.requests.casualLeave.remaining,
+        },
+        unpaidLeave: {
+          total:
+            user.requests.unpaidLeave.remaining +
+            user.requests.unpaidLeave.approved.length,
+          remaining: user.requests.unpaidLeave.remaining,
+        },
+        lastStatus: user.lastRequest?.status || "N/A",
+        leaveRequests: user.lastRequest ? [user.lastRequest] : [],
+      }));
+      setEmployeeData(formattedData);
+    }
+  }, [timeOffRequestsAnalysis]);
 
   const openModal = (employee: any) => {
-    setSelectedEmployee(employee);
+    setSelectedEmployee(employee.id);
     setIsModalOpen(true);
+    console.log(employee);
   };
 
   const closeModal = () => {
@@ -52,18 +69,18 @@ const TimeOffRequest: React.FC = () => {
     setSelectedEmployee(null);
   };
 
-  if (loading) {
+  if (apiLoading) {
     return (
-      <div className="p-6 w-full mx-auto text-center text-gray-700">
-        Loading...
+      <div className="flex justify-center items-center p-10 bg-gray-5 min-h-screen">
+        <LoaderCircle size={40} className="animate-spin text-gray-500" />
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="p-6 max-w-5xl mx-auto bg-white rounded-lg shadow-md text-center text-red-600 font-medium">
-        Error: {error}
+        Error fetching data.
       </div>
     );
   }
@@ -75,29 +92,14 @@ const TimeOffRequest: React.FC = () => {
           isModalOpen ? "opacity-50 pointer-events-none" : ""
         }`}
       >
-        {/* top header */}
         <div className="flex justify-between items-center pb-4 mb-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-[#4E53B1]">
             Overview Project 1
           </h2>
           <button
-            onClick={handleRefresh}
+            onClick={() => window.location.reload()} // simple refresh
             className="flex items-center cursor-pointer gap-2 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600 hover:bg-gray-100 transition-colors duration-200"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi bi-arrow-clockwise text-gray-500"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-              />
-              <path d="M8 4.466V.534l2.848 2.842L8 4.466z" />
-            </svg>
             Refresh
           </button>
         </div>
@@ -106,40 +108,22 @@ const TimeOffRequest: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Employee Name
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Time-off
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Sick leave
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Casual leave
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Unpaid leave
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Status
                 </th>
               </tr>
@@ -150,7 +134,7 @@ const TimeOffRequest: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div
                       className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-md -ml-2"
-                      onClick={() => openModal(employee)}
+                      onClick={() => openModal(employee.id)}
                     >
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
@@ -228,7 +212,6 @@ const TimeOffRequest: React.FC = () => {
       {isModalOpen && (
         <EmployeeDetailModal employee={selectedEmployee} onClose={closeModal} />
       )}
-      {/* testing bug */}
     </>
   );
 };

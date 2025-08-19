@@ -22,7 +22,7 @@ const Step1PhoneNumber: React.FC<Step1PhoneNumberProps> = ({
   };
 
   return (
-    <div className="text-center">
+    <div className="text-center bg-white p-10 rounded-2xl">
       <h2 className="text-2xl font-semibold mb-4">Welcome</h2>
       <p className="text-gray-600 mb-6">Log in to your company app</p>
       <form onSubmit={handleSubmit}>
