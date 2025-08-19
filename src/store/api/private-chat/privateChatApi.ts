@@ -1,4 +1,3 @@
-// import { sendPrivateMessage } from "@/utils/socket";
 import { baseApi } from "../baseApi";
 
 const privateChatApi = baseApi.injectEndpoints({
@@ -24,9 +23,6 @@ const privateChatApi = baseApi.injectEndpoints({
         'PRIVATE_CHAT'
       ],
     }),
-    // recipientId: selectedPrivateChatInfo.participant.id,
-    //       messageInput,
-    //       userId,
     sendPrivateMessage: build.mutation({
       query: ({ recipientId, messageInput, userId, file }) => {
         const formData = new FormData();
@@ -44,27 +40,6 @@ const privateChatApi = baseApi.injectEndpoints({
         };
       },
       invalidatesTags: ['PRIVATE_CHAT'],
-      async onQueryStarted(
-        // { recipientId, messageInput, userId, file },
-        // {
-        //    dispatch,
-        //    queryFulfilled 
-        //   }
-      ) {
-        try {
-          // const { data: savedMessage } = await queryFulfilled;
-
-          // Emit over socket for recipient real-time update
-          // sendPrivateMessage(
-          //   recipientId,
-          //   { content: messageInput },
-          //   userId,
-          //   file
-          // );
-        } catch (error) {
-          console.error("Failed to send private message:", error);
-        }
-      },
     }),
   }),
 });

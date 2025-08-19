@@ -57,6 +57,12 @@ const authApi = baseApi.injectEndpoints({
         url: `/admin/user/id/${credentials?.id}`,
       }),
     }),
+    getUserProfile: build.query({
+      query: () => ({
+        url: `/admin/user/me/profile`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -69,4 +75,5 @@ export const {
   useUpdateProfileMutation,
   useGetProfileQuery,
   useUpdateRoleMutation,
+  useGetUserProfileQuery
 } = authApi;

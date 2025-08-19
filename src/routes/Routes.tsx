@@ -65,6 +65,7 @@ import EmailLogin from "@/pages/email-login/EmailLogin";
 import CreateTeam from "@/pages/Admin/CreateTeam";
 
 import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
+import AdminRoute from "./AdminRoutes";
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
@@ -159,7 +160,7 @@ const routes = createBrowserRouter([
 
   {
     path: "/admin",
-    element: <AdminLayout />, // Admin shell with sidebar/header
+    element: <AdminRoute><AdminLayout /></AdminRoute>, // Admin shell with sidebar/header
     children: [
       {
         index: true,
