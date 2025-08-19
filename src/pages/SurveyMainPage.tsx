@@ -12,6 +12,7 @@ import {
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
 import { BiSolidEditAlt } from "react-icons/bi";
+import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
 
 // Interface for Survey data structure (unchanged)
 interface Survey {
@@ -104,81 +105,11 @@ const SurveyMainPage: React.FC = () => {
   );
 
   // Sample data for surveys
-  const surveys: Survey[] = [
-    {
-      id: "1",
-      title: "Employee Satisfaction Survey",
-      createdBy: "HR Manager",
-      startDate: "05/01/2024",
-      endDate: "05/15/2025",
-      status: "Active",
-      assignTo: "+3",
-    },
-    {
-      id: "2",
-      title: "Workplace Safety",
-      createdBy: "Safety Lead",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Completed",
-      assignTo: "Team A", // This will be clickable
-    },
-    {
-      id: "3",
-      title: "Remote Work Feedback",
-      createdBy: "Team Lead",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+5",
-    },
-    {
-      id: "4",
-      title: "Employee Wellness Check",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "Team B", // This will be clickable
-    },
-    {
-      id: "5",
-      title: "Diversity & Inclusion Feedback",
-      createdBy: "HR Manager",
-      startDate: "05/01/2024",
-      endDate: "05/01/2024",
-      status: "Completed",
-      assignTo: "Team C", // This will be clickable
-    },
-    {
-      id: "6",
-      title: "Team Collaboration Survey",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+3",
-    },
-    {
-      id: "7",
-      title: "New Policy Awareness",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Completed",
-      assignTo: "+3",
-    },
-    {
-      id: "8",
-      title: "Employee Engagement Pulse",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+5",
-    },
-  ];
-
+  const { data: surveyData, isLoading, isError } = useGetAllSurveysQuery(null);
+    if (isLoading) return <p>Loading surveys...</p>;
+  if (isError) return <p>Failed to fetch surveys</p>;
+  const surveys = surveyData?.data || [];
+  console.log(surveys[0])
   // NEW: Sample data for team members
   const teamsData: Record<string, TeamMember[]> = {
     "Team A": [
@@ -376,7 +307,7 @@ const SurveyMainPage: React.FC = () => {
   const filterOptions = ["All", "Active", "Completed"];
 
   // Filter surveys based on selected filters (unchanged, with searchTerm integration)
-  const filteredSurveys = surveys.filter((survey) => {
+  const filteredSurveys = surveys?.filter((survey:any) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const matchesSearchTerm = Object.values(survey).some((value) =>
       String(value).toLowerCase().includes(lowerCaseSearchTerm)
@@ -550,7 +481,7 @@ const SurveyMainPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="">
-                {filteredSurveys.map((survey) => (
+                {filteredSurveys?.map((survey:any) => (
                   <tr key={survey.id} className="hover:bg-gray-50">
                     {visibleColumns.map((column) => (
                       <td
@@ -569,8 +500,8 @@ const SurveyMainPage: React.FC = () => {
                           </span>
                         )}
                         {column.id === "createdBy" && survey.createdBy}
-                        {column.id === "startDate" && survey.startDate}
-                        {column.id === "endDate" && survey.endDate}
+                        {column.id === "startDate" && survey.createdAt}
+                        {column.id === "endDate" && survey.publishTime}
                         {column.id === "status" && (
                           <span className={getStatusBadge(survey.status)}>
                             {survey.status}
@@ -579,23 +510,27 @@ const SurveyMainPage: React.FC = () => {
                         {column.id === "assignTo" && (
                           <div className="flex items-center">
                             {/* Conditional rendering for assignTo based on content */}
-                            {survey.assignTo.startsWith("+") ? (
+                            {survey.assignTo/* .startsWith("+") */ ? (
                               <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
-                                {survey.assignTo}
+                                {survey.assignedTo}
                               </span>
                             ) : (
                               // If it's a team name, make it clickable and style it
                               <button
                                 className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:bg-indigo-200"
                                 onClick={() =>
-                                  handleTeamAssignClick(survey.assignTo)
+                                  handleTeamAssignClick(survey.assignedTo)
                                 } // Call the new handler
                               >
-                                {survey.assignTo}
+                                {survey.assignedTo}
                               </button>
                             )}
                           </div>
                         )}
+
+                        <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
+                                {survey.assignTo}
+                              </span>
                         {column.id === "action" && (
                           <div className="flex items-center gap-3">
                             <button
@@ -645,9 +580,7 @@ const SurveyMainPage: React.FC = () => {
                 >
                   <div className="flex flex-col items-center">
                     <div className="text-center  mt-4">
-                      <h4 className="text-xl text-primary">
-                        {stat.title}
-                      </h4>
+                      <h4 className="text-xl text-primary">{stat.title}</h4>
                       <p className="text-xl  my-2 text-primary">
                         {stat.subtitle}
                       </p>
@@ -660,10 +593,12 @@ const SurveyMainPage: React.FC = () => {
                       <p className="  mt-2">{stat.responseRate}</p>
                       <p className=" ">{stat.responseCount}</p>
 
-                      <Link to={"/admin/survey-response"}> <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
-                        View
-                      </button></Link>
-                     
+                      <Link to={"/admin/survey-response"}>
+                        {" "}
+                        <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
+                          View
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -713,11 +648,12 @@ const SurveyMainPage: React.FC = () => {
                         },
                         optionIndex: number
                       ) => (
-                        <div key={optionIndex} className=" border-b-2 border-gray-300 pb-2 mb-2 ">
+                        <div
+                          key={optionIndex}
+                          className=" border-b-2 border-gray-300 pb-2 mb-2 "
+                        >
                           <div className="flex items-center justify-between mb-1 ">
-                            <span className="text-sm ">
-                              {option.label}
-                            </span>
+                            <span className="text-sm ">{option.label}</span>
                             <span className="text-sm font-medium ">
                               {option.percentage}%
                             </span>
