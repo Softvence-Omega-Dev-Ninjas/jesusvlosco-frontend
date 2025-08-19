@@ -3,8 +3,8 @@ import AnnouncementList from "@/components/CompanyUpdate/AnnouncementList";
 import { useState } from "react";
 
 export default function UserCompanyUpdate() {
+
       const [showForm, setShowForm] = useState(false);
-    
       const toggleForm = () => {
         setShowForm(!showForm);
       };
@@ -31,7 +31,7 @@ export default function UserCompanyUpdate() {
       </div>
 
       <div className="mt-6">
-        {showForm ? <AnnouncementForm /> : <AnnouncementList />}
+        {showForm ? <AnnouncementForm /> : <AnnouncementList/>}
       </div>
     </div>
     )
