@@ -78,18 +78,8 @@ const WeeklyScheduleGrid = () => {
   const users = useGetAllUserQuery({});
   const userList =
     users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
-  // console.log("UserList", userList);
-  // console.log('=== DEBUGGING SHIFTS ===');
-  // console.log('getShifts:', getShifts);
   console.log("getShifts.data:", getShifts.data);
-  // console.log('getShifts.data?.data:', getShifts.data?.data);
-  // console.log('Is Array?:', Array.isArray(getShifts.data?.data));
-  // console.log('Length:', getShifts.data?.data?.length);
-
-  // if (getShifts.data?.data && getShifts.data.data.length > 0) {
-  //     console.log('First shift:', getShifts.data.data[0]);
-  // }
-
+  
   // Utility functions for handling ISO date formats
   const parseISODate = (isoString: string): Date | null => {
     try {
