@@ -15,7 +15,7 @@ interface EmployeeDetailModalProps {
   onClose: () => void;
 }
 
-interface DateRange {
+export interface DateRange {
   startDate: Date | null;
   endDate: Date | null;
 }
