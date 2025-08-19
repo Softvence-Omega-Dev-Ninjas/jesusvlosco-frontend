@@ -1,144 +1,120 @@
-import { Settings } from "lucide-react";
-import { useState } from "react";
-import { SearchIcon } from "./icons";
+import { Settings, Search } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
+import { TChat, TPrivateChat } from "@/types/chatType";
+// import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
+// team tab removed - no team API used here
 
-// Mock Avatar component
-type AvatarProps = {
-  initials: string;
-  isActive?: boolean;
-  imageUrl: string;
-};
+// Chat interface matching ChatWindow types
 
-const Avatar = ({ initials, isActive = false, imageUrl }: AvatarProps) => (
-  <div className="relative">
-    <div className="w-10 h-10 rounded-full overflow-hidden">
-      <img
-        src={imageUrl}
-        alt={initials}
-        className="w-full h-full object-cover"
-        onError={(e) => {
-          // Fallback to initials if image fails to load
-          const img = e.target as HTMLImageElement;
-          img.style.display = "none";
-          if (img.nextSibling instanceof HTMLElement) {
-            img.nextSibling.style.display = "flex";
-          }
-        }}
-      />
-      <div
-        className="w-full h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-sm font-medium"
-        style={{ display: "none" }}
-      >
-        {initials}
-      </div>
-    </div>
-    {isActive && (
-      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-    )}
-  </div>
-);
 
-// Mock data
-const chatMessages = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    avatar: "SJ",
-    imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 2,
-    isActive: true,
-  },
-  {
-    id: "2",
-    name: "Emily Chen",
-    avatar: "EC",
-    imageUrl: "https://randomuser.me/api/portraits/women/15.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 2,
-    isActive: true,
-  },
-  {
-    id: "3",
-    name: "Michael Davis",
-    avatar: "MD",
-    imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 0,
-    isActive: true,
-  },
-  {
-    id: "4",
-    name: "Jessica Wilson",
-    avatar: "JW",
-    imageUrl: "https://randomuser.me/api/portraits/women/68.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 0,
-    isActive: true,
-  },
-  {
-    id: "5",
-    name: "David Brown",
-    avatar: "DB",
-    imageUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 0,
-    isActive: true,
-  },
-  {
-    id: "6",
-    name: "Lisa Anderson",
-    avatar: "LA",
-    imageUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 0,
-    isActive: true,
-  },
-  {
-    id: "7",
-    name: "Robert Taylor",
-    avatar: "RT",
-    imageUrl: "https://randomuser.me/api/portraits/men/55.jpg",
-    message: "Thanks for the project...",
-    time: "2 min ago",
-    unreadCount: 0,
-    isActive: true,
-  },
-];
 
-export const Chat = ({ messages = chatMessages }) => {
+// Props interface for the Chat component
+interface ChatProps {
+  handleChatSelect?: (chatId: string) => void;
+  selectedChatId?: string;
+  className?: string;
+}
+
+export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatProps) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const chatListRef = useRef<HTMLDivElement | null>(null);
 
-  const tabs = ["All", "Unread", "Team"];
+  const tabs = ["All", "Unread"];
 
-  const filteredMessages = messages.filter(
-    (message) =>
-      message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.message.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch private chats using Redux
+  const { data: conversationsData } = useGetPrivateChatQuery([]);
+  const privateChats = conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
+  console.log(privateChats, "Private Chats Data in Chat");
+
+  // Filter chats based on search term and active tab
+  const filteredChats = privateChats.filter((chat: TPrivateChat) => {
+    const matchesSearch =
+      chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      chat.participant.profile.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (chat.lastMessage?.content || "").toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesTab = activeTab === "All" || (activeTab === "Unread" && chat.unread);
+
+    return matchesSearch && matchesTab;
+  });
+
+  // No team tab - only private chats
+
+  // Prevent scroll chaining: when user scrolls inside chat list, don't let page scroll
+  useEffect(() => {
+    const el = chatListRef.current;
+    if (!el) return;
+
+    let startY = 0;
+
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollHeight <= el.clientHeight) {
+        e.preventDefault();
+        return;
+      }
+
+      const deltaY = e.deltaY;
+      const atTop = el.scrollTop === 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+
+      if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
+        e.preventDefault();
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (el.scrollHeight <= el.clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      const currentY = e.touches[0].clientY;
+      const deltaY = startY - currentY;
+      const atTop = el.scrollTop === 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+
+      if ((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", onWheel as EventListener);
+      el.removeEventListener("touchstart", onTouchStart as EventListener);
+      el.removeEventListener("touchmove", onTouchMove as EventListener);
+    };
+  }, []);
 
   return (
-    <div className=" rounded-2xl p-3 border border-gray-200">
-      <div className="max-h-140 h-140 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+    <div className={`rounded-2xl p-3 border border-gray-200 ${className}`}>
+      <div className="max-h-140 h-140 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 ">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-bold text-primary">Chat</h3>
-          <Settings className="w-5 h-5 text-gray-400 cursor-pointer hover:text-gray-600" />
+          <button
+            onClick={() => navigate("/user/user-chat-setting")}
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+          >
+            <Settings className="w-5 h-5 text-primary" />
+          </button>
         </div>
 
         {/* Search Input */}
         <div className="mb-4 px-1">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              {/* icon */} <SearchIcon />
-            </div>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search conversation"
@@ -167,49 +143,68 @@ export const Chat = ({ messages = chatMessages }) => {
         </div>
 
         {/* Chat List with Scroll */}
-        <div className="">
+        <div
+          ref={chatListRef}
+          className="flex-1 overflow-y-auto"
+          style={{
+            overscrollBehavior: 'contain' as React.CSSProperties['overscrollBehavior'],
+            touchAction: 'pan-y'
+          }}
+        >
           <div className="space-y-1">
-            {filteredMessages.map((message) => (
+            {filteredChats.map((chat: TPrivateChat) => (
               <div
-                key={message.id}
+                key={chat.chatId}
                 className={`flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer group ${
-                  message.unreadCount > 0 ? "bg-[#EDEEF7]" : ""
+                  chat.unread ? "bg-[#EDEEF7]" : ""
+                } ${
+                  selectedChatId === chat.chatId ? "bg-indigo-50 hover:bg-indigo-50" : ""
                 }`}
+                onClick={() => {
+                  handleChatSelect?.(chat.chatId);
+                }}
               >
-                <Avatar
-                  initials={message.avatar}
-                  isActive={message.isActive}
-                  imageUrl={message.imageUrl}
-                />
+                <div className="relative">
+                  <img
+                    src={
+                      chat.participant.profile.profileUrl ||
+                      "https://avatar.iran.liara.run/public/boy?username=Ash"
+                    }
+                    alt={chat.participant.profile.firstName}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  {chat.online && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
+                  {chat.unread && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white font-medium">2</span>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-gray-900 truncate">
-                      {message.name}
+                    <span className="text-sm font-semibold text-gray-900 truncate capitalize">
+                      {chat.participant.profile.firstName + " " + chat.participant.profile.lastName}
                     </span>
                     <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                      {message.time}
+                      {formatDistanceToNow(new Date(chat?.updatedAt), {
+                        addSuffix: true,
+                      })}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 truncate">
-                    {message.message}
+                    {chat.lastMessage?.content || "N/A"}
                   </div>
                 </div>
-
-                {message.unreadCount > 0 && (
-                  <div className="flex-shrink-0">
-                    <div className="bg-orange-500 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
-                      {message.unreadCount}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
 
         {/* Empty State */}
-        {filteredMessages.length === 0 && (
+        {filteredChats.length === 0 && (
           <div className="text-center py-8">
             <div className="text-gray-400 text-sm">No conversations found</div>
           </div>

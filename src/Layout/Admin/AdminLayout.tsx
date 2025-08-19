@@ -8,7 +8,7 @@ import { useState } from 'react';
 export default function AdminLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className=" bg-gray-50 flex flex-col">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div

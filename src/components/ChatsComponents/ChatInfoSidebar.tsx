@@ -1,5 +1,5 @@
 import personImg from "@/assets/chat-person.jpg";
-import { Chat } from "./ChatWindow";
+import { TChat } from "./ChatWindow";
 import mediaImgPlaceholder from "@/assets/media-img-placeholder.jpg";
 
 const ChatInfoSidebar = ({
@@ -8,7 +8,7 @@ const ChatInfoSidebar = ({
   setMobileView,
 }: {
   setShowChatInfo: (arg0: boolean) => void;
-  selectedChat: Chat;
+  selectedChat: TChat;
   setMobileView: React.Dispatch<React.SetStateAction<"list" | "chat" | "info">>;
 }) => {
   return (
