@@ -27,19 +27,6 @@ export function FilterControls({
   setSearchQuery,
   handleDateRangeSelect,
 }: FilterControlsProps) {
-  // Format date range for display
-  // const formatDateRange = (): string => {
-  //   if (dateRange.startDate && dateRange.endDate) {
-  //     const formatDate = (date: Date): string => {
-  //       const day: string = date.getDate().toString().padStart(2, "0");
-  //       const month: string = (date.getMonth() + 1).toString().padStart(2, "0");
-  //       const year: number = date.getFullYear();
-  //       return `${day}/${month}/${year}`;
-  //     };
-  //     return `${formatDate(dateRange.startDate)} to ${formatDate(dateRange.endDate)}`;
-  //   }
-  //   return `${new Date().toLocaleDateString()}`;
-  // };
   const formatDateRange = (): string => {
     if (dateRange.startDate && dateRange.endDate) {
       const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
