@@ -12,13 +12,14 @@ const announcementApi = baseApi.injectEndpoints({
       },
     }),
 
-    // fetchCategories: builder.query({
-    //   query: () => ({
-    //     url: "/admin/announcement/get-categories",
-    //     method: "GET",
-    //   }),
-    // }),
+    fetchAnnouncement: builder.query({
+      query: (filter) => ({
+        url: `/admin/announcement/get-announcements?page=${filter.page}&limit=${filter.limit}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateAnnouncementMutation } = announcementApi;
+export const { useCreateAnnouncementMutation, useFetchAnnouncementQuery } =
+  announcementApi;

@@ -4,8 +4,13 @@ import CategoryDropdown from "./CategoryDropdown";
 import DateTimePicker from "./dateTimeform";
 import { useGetAllTeamsQuery } from "@/store/api/admin/team/CreateTeamApi";
 import { useCreateAnnouncementMutation } from "@/store/api/admin/announcement/announcementApi";
+import { toast } from "sonner";
 
-const AnnouncementForm: React.FC = () => {
+const AnnouncementForm = ({
+  setShowForm,
+}: {
+  setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   // const [publishNow, setPublishNow] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
   const [fileName, setFileName] = useState("");
@@ -13,6 +18,7 @@ const AnnouncementForm: React.FC = () => {
   const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [audience, setAudience] = useState("");
+  console.log(audience);
   const [publishNow, setPublishNow] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [sendEmailNotification, setSendEmailNotification] = useState<
@@ -53,8 +59,12 @@ const AnnouncementForm: React.FC = () => {
       formData.append("files", file);
     });
 
-    const res = await createAnnouncement({ payload, formData });
-    console.log(res);
+    const { data } = await createAnnouncement({ payload, formData });
+
+    if (data.success) {
+      toast.success(data.message);
+      setShowForm(false);
+    }
   };
 
   return (
