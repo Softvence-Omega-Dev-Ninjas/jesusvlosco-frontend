@@ -45,7 +45,7 @@ const ChatConversation = ({
   const handleSendMessage = async () => {
     if (messageInput.trim() === "") return;
     const userId = me?.id || "";
-    const recipientId = selectedPrivateChatInfo.participant.id || "";
+  const recipientId = selectedPrivateChatInfo?.participant?.id || "";
 
     const formData = new FormData();
     formData.append("content", messageInput);
@@ -54,13 +54,13 @@ const ChatConversation = ({
 
     try {
 
-      const result = await sendPrivateMessage({
+      await sendPrivateMessage({
             recipientId: recipientId,
             messageInput: messageInput, // Initial greeting message
             userId: userId || '',
             file: undefined
           }).unwrap();
-          console.log(result)
+          // console.log(result)
 
       setMessageInput("");
     } catch (error) {
@@ -68,9 +68,9 @@ const ChatConversation = ({
     }
   };
 
-  console.log("Selected Chat", selectedChat);
-  console.log("Selected selectedPrivateChatInfo", selectedPrivateChatInfo);
-  console.log("Messages", messages);
+  // console.log("Selected Chat", selectedChat);
+  // console.log("Selected selectedPrivateChatInfo", selectedPrivateChatInfo);
+  // console.log("Messages", messages);
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}
@@ -78,15 +78,13 @@ const ChatConversation = ({
         <div className="flex items-center">
           <div className="relative">
             <img
-              src={
-                selectedChat ?  selectedPrivateChatInfo.participant.profile.profileUrl ||
-                "https://ui-avatars.com/api/?name=" +
-                        encodeURIComponent(
-                          selectedPrivateChatInfo.participant.profile.firstName +
-                            " " +
-                            selectedPrivateChatInfo.participant.profile.lastName
-                        ) : ''
-              }
+              src={(() => {
+                const profile = selectedPrivateChatInfo?.participant?.profile;
+                const name = `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+                if (profile?.profileUrl) return profile.profileUrl;
+                if (name) return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name);
+                return "";
+              })()}
               alt={selectedChat?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
@@ -94,9 +92,9 @@ const ChatConversation = ({
           </div>
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-900 capitalize">
-              {selectedPrivateChatInfo?.participant?.profile?.firstName +
+              {(selectedPrivateChatInfo?.participant?.profile?.firstName ?? "") +
                 " " +
-                selectedPrivateChatInfo?.participant?.profile?.lastName}
+                (selectedPrivateChatInfo?.participant?.profile?.lastName ?? "")}
             </h2>
   
           </div>

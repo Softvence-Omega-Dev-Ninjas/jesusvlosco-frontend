@@ -99,7 +99,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       openChatWithUser: async (userId: string) => {
         // First check if there's already a chat with this user
         const existingChat = privateChats.find(
-          (chat: TPrivateChat) => chat.participant.id === userId
+          (chat: TPrivateChat) => chat.participant?.id === userId
         );
         // console.log("Existing Chat:", existingChat);
         // console.log("User ID:", userId);
@@ -123,17 +123,15 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
               title: "Chat Initiated",
               text: "You are connected to this user",
             });
-            // After successfully sending the first message, find the new chat
-            // The API should return the chatId or we can refetch the chat list
+        
             if (result?.message?.conversationId) {
               setSelectedChatId(result.message.conversationId);
               setMobileView("chat");
             } else {
-              // If chatId is not returned, wait a bit and refetch chats to find the new one
               setTimeout(() => {
-                // The chat list will be automatically updated due to RTK Query cache invalidation
+              
                 const newChat = privateChats.find(
-                  (chat: TPrivateChat) => chat.participant.id === userId
+                  (chat: TPrivateChat) => chat.participant?.id === userId
                 );
                 if (newChat) {
                   setSelectedChatId(newChat.chatId);
@@ -277,13 +275,13 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       // console.log(`Sending message to ${recipientId}: ${messageInput}`);
 
       try {
-        const result = await sendPrivateMessage({
+         await sendPrivateMessage({
           recipientId: recipientId,
           messageInput: messageInput, // Initial greeting message
           userId: userId || "",
           file: undefined,
         }).unwrap();
-        console.log("Message sent successfully:", result);
+        // console.log("Message sent successfully:", result);
         setMessageInput("");
       } catch (error) {
         console.log(error);

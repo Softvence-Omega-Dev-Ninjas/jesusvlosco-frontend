@@ -25,7 +25,7 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
-  console.log(user)
+  // console.log(user)
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = ["All", "Unread"];

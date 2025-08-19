@@ -8,26 +8,16 @@ interface EmployeeDirectoryProps {
 }
 
 export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-   const users = useGetAllUserQuery({limit: 50});
-   console.log(users, "Users Data in Employee Directory");
+  const [searchTerm, setSearchTerm] = useState(``);
+  // console.log(searchTerm)
+   const users = useGetAllUserQuery({searchTerm: searchTerm});
+  //  console.log(users, "Users Data in Employee Directory");
       const employees = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
       // console.log(employees);
 
-  const lcSearch = searchTerm.toLowerCase();
-  const filteredEmployees = employees.filter((employee: TUser) => {
-    const first = (employee.profile?.firstName ?? "").toLowerCase();
-    const last = (employee.profile?.lastName ?? "").toLowerCase();
-    const dept = (employee.profile?.department ?? "").toLowerCase();
-
-    return (
-      first.includes(lcSearch) || last.includes(lcSearch) || dept.includes(lcSearch)
-    );
-  });
-
   const handleChat = (employee: TUser) => {
-    console.log(`Starting chat with ${employee.profile?.firstName || "Employee"}`);
-    console.log("Selected User:", employee.id);
+    // console.log(`Starting chat with ${employee.profile?.firstName || "Employee"}`);
+    // console.log("Selected User:", employee.id);
     
     // Call the parent's chat handler if provided
     if (onChatWithUser) {
@@ -44,7 +34,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
   };
     
   return (
-    <div className="max-w-4xl min-w-sm w-full mx-auto bg-gray-50 overflow-y-auto max-h-[700px] p-2 rounded-md">
+    <div className="max-w-4xl min-w-sm w-full mx-auto bg-gray-50 overflow-y-auto max-h-[700px] px-2 rounded-md py-3">
       {/* Header */}
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">
         Employee Directory
@@ -80,7 +70,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
 
       {/* Employee Grid */}
       <div className="grid grid-cols-1 gap-5">
-        {filteredEmployees.map((employee: TUser) => (
+        {employees.map((employee: TUser) => (
           <div
             key={employee.id}
             className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
@@ -158,7 +148,7 @@ export default function EmployeeDirectory({ onChatWithUser }: EmployeeDirectoryP
       </div>
 
       {/* No Results */}
-      {filteredEmployees.length === 0 && (
+      {employees.length === 0 && (
         <div className="text-center py-12">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
