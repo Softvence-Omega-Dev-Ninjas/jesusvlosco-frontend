@@ -1,7 +1,7 @@
 import { EyeIcon, Trash } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import RemotePolicyCard from "./RemotePolicyCard";
-import CategoryFilter from "./CategoryFilter";
+// import CategoryFilter from "./CategoryFilter";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { ResponsePanel } from "./ResponsePanel";
 import {
@@ -191,7 +191,7 @@ const AnnouncementList: React.FC = () => {
           </div>
 
           <div className="flex gap-2 relative">
-            <CategoryFilter />
+            {/* <CategoryFilter /> */}
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
               className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center gap-1"
