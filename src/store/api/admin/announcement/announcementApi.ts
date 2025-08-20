@@ -13,10 +13,21 @@ const announcementApi = baseApi.injectEndpoints({
     }),
 
     fetchAnnouncement: builder.query({
-      query: (filter) => ({
-        url: `/admin/announcement/get-announcements?page=${filter.page}&limit=${filter.limit}&title=${filter.searchValue}&publishedFrom=${filter.publishedFrom}&publishedTo=${filter.publishedTo}`,
-        method: "GET",
-      }),
+      query: (filter) => {
+        const params: Record<string, string | number | undefined> = {};
+
+        if (filter?.page) params.page = filter.page;
+        if (filter?.limit) params.limit = filter.limit;
+        if (filter?.searchValue) params.title = filter.searchValue;
+        if (filter?.publishedFrom) params.publishedFrom = filter.publishedFrom;
+        if (filter?.publishedTo) params.publishedTo = filter.publishedTo;
+
+        return {
+          url: `/admin/announcement/get-announcements`,
+          method: "GET",
+          params,
+        };
+      },
     }),
 
     deleteAnnouncement: builder.mutation({

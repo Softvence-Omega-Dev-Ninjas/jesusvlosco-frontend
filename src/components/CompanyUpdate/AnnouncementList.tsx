@@ -91,6 +91,7 @@ const AnnouncementList: React.FC = () => {
     searchValue,
     publishedFrom:
       publishedFrom.length > 0 && new Date(publishedFrom).toISOString(),
+    publishedTo: publishedTo.length > 0 && new Date(publishedTo).toISOString(),
   });
 
   useEffect(() => {
@@ -202,7 +203,7 @@ const AnnouncementList: React.FC = () => {
             {showFilterDropdown && (
               <div
                 ref={filterRef}
-                className="absolute bg-white top-full right-0 mt-2 w-80 border border-gray-200 shadow-lg p-4 z-10 rounded-xl"
+                className="absolute bg-white top-full right-0 mt-2 w-80 border border-gray-200 shadow-lg p-4 pb-6 z-10 rounded-xl"
               >
                 <h2 className="text-base font-semibold text-gray-800 mb-3">
                   Filter by Publish Date
@@ -240,11 +241,11 @@ const AnnouncementList: React.FC = () => {
                 </div>
 
                 {/* Apply Button */}
-                <div className="flex justify-end mt-4">
+                {/* <div className="flex justify-end mt-4">
                   <button className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
                     Apply Filter
                   </button>
-                </div>
+                </div> */}
               </div>
             )}
 
