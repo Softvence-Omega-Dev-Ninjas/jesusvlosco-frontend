@@ -18,8 +18,18 @@ const announcementApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    deleteAnnouncement: builder.mutation({
+      query: (announcementId) => ({
+        url: `/admin/announcement/delete-announcement/${announcementId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useCreateAnnouncementMutation, useFetchAnnouncementQuery } =
-  announcementApi;
+export const {
+  useCreateAnnouncementMutation,
+  useFetchAnnouncementQuery,
+  useDeleteAnnouncementMutation,
+} = announcementApi;
