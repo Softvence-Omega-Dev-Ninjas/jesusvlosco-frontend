@@ -21,6 +21,7 @@ import PendingRequestModal from "@/components/TimeSheets/PendingRequestModal";
 import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
+import { useGetAllTimeClockAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerRetina,
@@ -58,6 +59,12 @@ export default function TimeSheets() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTimePeriod, setSelectedTimePeriod] =
     useState<string>("19/06/2025");
+  const { data } = useGetAllTimeClockAdminQuery(null);
+
+  const pendingTimeClockRequest = data?.data?.filter(
+    (el: any) => el.shiftStatus === "DRAFT"
+  );
+  console.log({ pendingTimeClockRequest });
   const [selectedActivityDate, setSelectedActivityDate] =
     useState<string>("19/06");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
@@ -256,14 +263,14 @@ export default function TimeSheets() {
   // 3.4. RENDER METHOD (JSX Structure)
   return (
     <div
-      className={`py-4 bg-gray-50 min-h-screen ${
+      className={`py-4 bg-gray-50  min-h-screen ${
         isModalOpen ? "overflow-hidden" : ""
       }`}
     >
       {/* Main content with conditional opacity */}
       <div
         className={`${
-          isModalOpen ? "opacity-50 pointer-events-none" : ""
+          isModalOpen ? "opacity-50  pointer-events-none" : ""
         } transition-all duration-300`}
       >
         <h2 className="text-xl font-semibold mb-4 text-gray-800">Time Clock</h2>
@@ -292,14 +299,14 @@ export default function TimeSheets() {
           </div>
 
           {/* Search and Pending Requests */}
-          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col  sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
             {/* Pending Requests Button (Badge) */}
             <button
               onClick={handlePendingRequestsClick}
               className="relative cursor-pointer flex items-center justify-center px-4 py-2 rounded-full border border-yellow-500 text-yellow-700 font-semibold text-sm bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200 whitespace-nowrap"
             >
               <span className="absolute -top-2 -left-2 flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-orange-500 rounded-full">
-                1
+                {pendingTimeClockRequest?.length}
               </span>
               <span className="block leading-tight">Pending Requests</span>
             </button>
@@ -579,7 +586,7 @@ export default function TimeSheets() {
           <PendingRequestModal
             isOpen={isModalOpen}
             onClose={closeModal}
-            activityData={activityData}
+            activityData={pendingTimeClockRequest}
           />
         </div>
       )}
