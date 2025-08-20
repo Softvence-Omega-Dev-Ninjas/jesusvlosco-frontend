@@ -16,8 +16,35 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
         },
       }),
     }),
+    getUserTaskDetails: builder.query({
+      query: (id) => ({
+        url: `/employee/project/task/${id}`,
+        method: "GET",
+      }),
+    }),
+    getallTasksByUsers: builder.query({
+      query: ({ taskStatus, searchQuery, groupBy, start, end }) => ({
+        url: `/employee/project/task/all`,
+        method: "GET",
+        params: {
+          status: taskStatus || undefined,
+          search: searchQuery || undefined,
+          groupBy: groupBy || undefined,
+          startAfter: start,
+          endBefore: end,
+        },
+      }),
+    }),
+
+    createTask: builder.mutation({
+      query: (body) => ({
+        url: `/admin/task/add`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetTasksQuery } = taskAndProjectApi;
+export const { useGetTasksQuery, useCreateTaskMutation, useGetallTasksByUsersQuery, useGetUserTaskDetailsQuery } = taskAndProjectApi;

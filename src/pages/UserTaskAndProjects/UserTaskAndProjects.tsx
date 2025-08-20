@@ -1,24 +1,18 @@
 import { useState } from "react";
-import { TaskHeader } from "./TaskHeader";
-import { FilterControls } from "./FilterControls";
-import { TaskOverview } from "./TaskOverview";
-import { ProjectSection } from "./ProjectSection";
+
 import { DateRange } from "@/components/TimeOffRequest/EmployeeDetailModal";
-import { useGetTasksQuery } from "@/store/api/admin/task-and-projects";
 import { FaSpinner } from "react-icons/fa";
+import { FilterControls } from "../TasksAndProjects/FilterControls";
+import { UserProjectSection } from "./UserProjectSection";
+import { useGetallTasksByUsersQuery } from "@/store/api/admin/task-and-projects";
+import { UserTaskOverview } from "./UserTaskOverview";
 
-export function TasksAndProjects() {
-  // const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+export function UserTaskAndProjects() {
   const [groupBy, setGroupBy] = useState("title");
-  // const [dateRange, setDateRange] = useState("May 25 - May 30")
-
-  //Manage Calender State.
-  // State to manage calendar visibility
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
-  // State to store selected date range
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: null, // Default: 01/01/2025
-    endDate: null, // Default: 31/12/2025
+    startDate: null,
+    endDate: null,
   });
 
   // Handle date range selection from ShiftCalendar
@@ -34,7 +28,7 @@ export function TasksAndProjects() {
   const [taskStatus, setTaskStatus] = useState<"" | "OPEN" | "DONE">("");
   console.log({ start: dateRange.startDate?.toISOString(), end: dateRange.endDate?.toISOString() });
 
-  const { data: tasks, isLoading } = useGetTasksQuery({
+  const { data: tasks, isLoading } = useGetallTasksByUsersQuery({
     taskStatus,
     searchQuery,
     groupBy,
@@ -53,7 +47,7 @@ export function TasksAndProjects() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="mx-auto space-y-6">
-        <TaskHeader />
+        {/* <TaskHeader /> */}
 
         <FilterControls
           groupBy={groupBy}
@@ -66,17 +60,12 @@ export function TasksAndProjects() {
           dateRange={dateRange}
         />
 
-        <TaskOverview
-          setTaskStatus={setTaskStatus}
-          taskStatus={taskStatus}
-          analytics={tasks?.data?.analytics}
-          overDueTasks={tasks?.data?.overdueTasks}
-        />
+        <UserTaskOverview setTaskStatus={setTaskStatus} taskStatus={taskStatus} analytics={tasks?.data?.analytics} />
 
         <div className="space-y-6">
           {tasks?.data?.grouped && Object.keys(tasks.data.grouped).length > 0 ? (
             Object.entries(tasks.data.grouped).map(([groupName, taskList], idx) => (
-              <ProjectSection key={idx} groupName={groupName} tasks={taskList} groupBy={groupBy} />
+              <UserProjectSection key={idx} groupName={groupName} tasks={taskList} groupBy={groupBy} />
             ))
           ) : (
             <p className="text-center text-gray-500 py-10">No tasks available</p>

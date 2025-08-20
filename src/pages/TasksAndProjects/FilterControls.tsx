@@ -1,6 +1,5 @@
 import { DateRange } from "@/components/TimeOffRequest/EmployeeDetailModal";
 import ShiftCalendar from "@/components/TimeOffRequest/ShiftCalendar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon } from "lucide-react";
@@ -27,19 +26,6 @@ export function FilterControls({
   setSearchQuery,
   handleDateRangeSelect,
 }: FilterControlsProps) {
-  // Format date range for display
-  // const formatDateRange = (): string => {
-  //   if (dateRange.startDate && dateRange.endDate) {
-  //     const formatDate = (date: Date): string => {
-  //       const day: string = date.getDate().toString().padStart(2, "0");
-  //       const month: string = (date.getMonth() + 1).toString().padStart(2, "0");
-  //       const year: number = date.getFullYear();
-  //       return `${day}/${month}/${year}`;
-  //     };
-  //     return `${formatDate(dateRange.startDate)} to ${formatDate(dateRange.endDate)}`;
-  //   }
-  //   return `${new Date().toLocaleDateString()}`;
-  // };
   const formatDateRange = (): string => {
     if (dateRange.startDate && dateRange.endDate) {
       const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
@@ -96,9 +82,9 @@ export function FilterControls({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="bg-[#F5F6F7] border-1 border-slate-200 focus-within:ring-0 focus-within:outline-0 ring-slate-100 w-full  sm:max-w-72"
         />
-        <Button variant="outline" className="whitespace-nowrap bg-[#4E53B1] rounded-md text-white">
+        {/* <Button variant="outline" className="whitespace-nowrap bg-[#4E53B1] rounded-md text-white">
           Export
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
