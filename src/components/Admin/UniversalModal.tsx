@@ -602,7 +602,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               </p>
               <p className="mb-2">
                 <strong>Duration:</strong> {surveyData.startDate} -{" "}
-                {surveyData.endDate.replace("04/20/2025", "May 15,2025")}
+                {surveyData.endDate?.replace("04/20/2025", "May 15,2025")}
               </p>
               <p className="mb-2">
                 <strong>Top Departments by response rate:</strong>

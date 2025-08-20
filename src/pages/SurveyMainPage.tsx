@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
-import { BiSolidEditAlt } from "react-icons/bi";
 import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
 
 // Interface for Survey data structure (unchanged)
@@ -71,7 +70,7 @@ const SurveyMainPage: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [columnOptions, setColumnOptions] = useState<ColumnOption[]>([
-    { id: "checkbox", label: "", isVisible: true },
+    // { id: "checkbox", label: "", isVisible: true },
     { id: "title", label: "Survey title", isVisible: true },
     { id: "createdBy", label: "Created By", isVisible: true },
     { id: "startDate", label: "Start Date", isVisible: true },
@@ -106,10 +105,10 @@ const SurveyMainPage: React.FC = () => {
 
   // Sample data for surveys
   const { data: surveyData, isLoading, isError } = useGetAllSurveysQuery(null);
-    if (isLoading) return <p>Loading surveys...</p>;
+  if (isLoading) return <p>Loading surveys...</p>;
   if (isError) return <p>Failed to fetch surveys</p>;
   const surveys = surveyData?.data || [];
-  console.log(surveys[0])
+  console.log(surveys[0]);
   // NEW: Sample data for team members
   const teamsData: Record<string, TeamMember[]> = {
     "Team A": [
@@ -307,7 +306,7 @@ const SurveyMainPage: React.FC = () => {
   const filterOptions = ["All", "Active", "Completed"];
 
   // Filter surveys based on selected filters (unchanged, with searchTerm integration)
-  const filteredSurveys = surveys?.filter((survey:any) => {
+  const filteredSurveys = surveys?.filter((survey: any) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const matchesSearchTerm = Object.values(survey).some((value) =>
       String(value).toLowerCase().includes(lowerCaseSearchTerm)
@@ -449,7 +448,7 @@ const SurveyMainPage: React.FC = () => {
           {/* Survey Table */}
           <div className="w-full overflow-x-auto ">
             <table className="min-w-[900px] w-full">
-              <thead className="bg-gray-50   ">
+              <thead>
                 <tr>
                   {visibleColumns.map((column) => (
                     <th
@@ -480,28 +479,42 @@ const SurveyMainPage: React.FC = () => {
                   ))}
                 </tr>
               </thead>
-              <tbody className="">
-                {filteredSurveys?.map((survey:any) => (
+              <tbody>
+                {filteredSurveys?.map((survey: any) => (
                   <tr key={survey.id} className="hover:bg-gray-50">
                     {visibleColumns.map((column) => (
                       <td
                         key={`${survey.id}-${column.id}`}
                         className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                       >
-                        {column.id === "checkbox" && (
+                        {/* {column.id === "checkbox" && (
                           <input
                             type="checkbox"
                             className="rounded border-gray-300"
                           />
-                        )}
+                        )} */}
                         {column.id === "title" && (
-                          <span className=" text-[#484848]">
+                          <span className="font-normal  text-[#484848] text-base capitalize">
                             {survey.title}
                           </span>
                         )}
-                        {column.id === "createdBy" && survey.createdBy}
-                        {column.id === "startDate" && survey.createdAt}
-                        {column.id === "endDate" && survey.publishTime}
+                        {column.id === "createdBy" && survey.createdBY}
+                        {column.id === "startDate" && (
+                          <span className="text-gray-700">
+                            {new Date(survey.createdAt).toLocaleDateString(
+                              "en-US"
+                            )}{" "}
+                          </span>
+                        )}
+
+                        {column.id === "endDate" && (
+                          <span className="text-gray-700">
+                            {new Date(survey.publishTime).toLocaleDateString(
+                              "en-US"
+                            )}{" "}
+                          </span>
+                        )}
+
                         {column.id === "status" && (
                           <span className={getStatusBadge(survey.status)}>
                             {survey.status}
@@ -509,18 +522,16 @@ const SurveyMainPage: React.FC = () => {
                         )}
                         {column.id === "assignTo" && (
                           <div className="flex items-center">
-                            {/* Conditional rendering for assignTo based on content */}
-                            {survey.assignTo/* .startsWith("+") */ ? (
+                            {survey.assignTo ? (
                               <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
                                 {survey.assignedTo}
                               </span>
                             ) : (
-                              // If it's a team name, make it clickable and style it
                               <button
                                 className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:bg-indigo-200"
                                 onClick={() =>
                                   handleTeamAssignClick(survey.assignedTo)
-                                } // Call the new handler
+                                }
                               >
                                 {survey.assignedTo}
                               </button>
@@ -528,9 +539,9 @@ const SurveyMainPage: React.FC = () => {
                           </div>
                         )}
 
-                        <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
-                                {survey.assignTo}
-                              </span>
+                        <span className="text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
+                          {survey.assignTo}
+                        </span>
                         {column.id === "action" && (
                           <div className="flex items-center gap-3">
                             <button
@@ -541,9 +552,6 @@ const SurveyMainPage: React.FC = () => {
                               }}
                             >
                               <Eye size={24} />
-                            </button>
-                            <button className="text-gray-600 cursor-pointer">
-                              <BiSolidEditAlt size={24} />
                             </button>
                           </div>
                         )}
