@@ -28,6 +28,7 @@ export const baseApi = createApi({
     "PRIVATE_CHAT",
     "TEAM_CHAT",
     "survey",
+    "PROJECT",
     "SCHEDULING_USER",
     "TIME_CLOCK",
   ],

@@ -19,7 +19,6 @@ import BadgeLibrary from "@/pages/BadgeLibrary";
 import CreateBadge from "@/pages/CreateBadge";
 import CreateRecognition from "@/pages/CreateRecognition";
 import EditBadge from "@/pages/EditBadge";
-import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
 import PollPage from "@/pages/PollPage";
 import PollTemplate from "@/pages/PollTemplate";
@@ -67,6 +66,7 @@ import CreateTeam from "@/pages/Admin/CreateTeam";
 import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
 import { TasksAndProjects } from "@/pages/TasksAndProjects/TasksAndProjects";
 import AdminRoute from "./AdminRoutes";
+import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
@@ -194,7 +194,8 @@ const routes = createBrowserRouter([
         path: "schedule",
         element: <Schedule />,
         children: [
-          { path: "shiftschedule", element: <JobSchedulingLobby /> },
+          // { path: "shiftschedule", element: <JobSchedulingLobby /> },
+          { path: "shiftschedule", element: <ScheduleAssignPage /> },
           //dynamic routes
           { path: "overviewProjects/:id", element: <OverviewProject /> },
           // { path: "timeclock", element: <TimeClock /> },

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // NewTaskModal.tsx
 import type React from "react";
 import { useState } from "react";
@@ -209,7 +210,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                       </div>
                     )}
                     {!isProjectLoading &&
-                      projects?.data?.projects?.map((project: any) => {
+                      (projects as any)?.data?.projects?.map((project: any) => {
                         return <SelectItem key={project?.id} value={project?.id}>{`${project?.title}`}</SelectItem>;
                       })}
                   </SelectContent>

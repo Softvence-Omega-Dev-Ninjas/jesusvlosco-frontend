@@ -6,6 +6,15 @@ import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi"
 import { TChat, TPrivateChat } from "@/types/chatType";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
+// import { useAppSelector } from "@/hooks/useRedux";
+// import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
+// import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
+// team tab removed - no team API used here
+
+// Chat interface matching ChatWindow types
+
+
+
 // Props interface for the Chat component
 interface ChatProps {
   handleChatSelect?: (chatId: string) => void;
@@ -23,6 +32,8 @@ export const Chat = ({
   const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
   console.log(user);
+  // const user = useAppSelector(selectUser);
+  // console.log(user)
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = ["All", "Unread"];

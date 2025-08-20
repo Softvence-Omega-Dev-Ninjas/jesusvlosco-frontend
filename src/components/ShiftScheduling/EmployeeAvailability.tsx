@@ -6,12 +6,13 @@ import { Tab } from "@headlessui/react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import ShiftTemplateDropdown from "./ShiftTemplateDropdown";
 import EmployeeCardPopup from "./EmployeeCardPopup";
-import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+// import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 
 import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
-import { TUser } from "@/types/usertype";
+import { TProject, TProjectUser } from "@/types/projectType";
+
 
 interface ShiftFormData {
     currentUserId?: string;
@@ -103,8 +104,12 @@ const activityLog = [
     }
 ];
 
-const EmployeeAvailability = () => {
+const EmployeeAvailability = ({projectInformation}: {projectInformation: TProject}) => {
     const currentProjectId = useParams().id;
+      const projectUsers = projectInformation?.projectUsers || [];
+      const userList = projectUsers?.filter((user: TProjectUser) => user.user?.role != "ADMIN") || [];
+      console.log(projectUsers)
+      
     
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [checkedTasks, setCheckedTasks] = useState<string[]>(["e8b962e7-467f-46f2-a9e6-c927adadba32"]);
@@ -140,22 +145,19 @@ const EmployeeAvailability = () => {
         }
     });
 
-    const users = useGetAllUserQuery({});
-    const userList = users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
+
     
     // Filter users based on search term
-    const filteredUserList = userList.filter((user: TUser) => {
+    const filteredUserList = userList.filter((user) => {
         if (!searchTerm) return true; // If no search term, show all users
-        
-        const firstName = user.profile?.firstName?.toLowerCase() || "";
-        const jobTitle = user.profile?.jobTitle?.toLowerCase() || "";
+        const firstName = user.user.profile?.firstName?.toLowerCase() || "";
+        const jobTitle = user.user.profile?.jobTitle?.toLowerCase() || "";
         const searchLower = searchTerm.toLowerCase();
-        
         return firstName.includes(searchLower) || jobTitle.includes(searchLower);
     });
     
-    console.log("UserList data:", userList);
-    console.log("UserList length:", userList.length);
+    // console.log("UserList data:", userList);
+    // console.log("UserList length:", userList.length);
     console.log("Filtered UserList length:", filteredUserList.length);
 
     const toggleTask = (task: string) => {
@@ -277,53 +279,57 @@ const EmployeeAvailability = () => {
                 <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
             </div>
             <ul className="space-y-3 mt-10 h-full">
-                {filteredUserList.length === 0 && searchTerm ? (
+                {projectUsers.length === 0 && searchTerm ? (
                     <li className="text-center py-8 text-gray-500">
                         <p>No employees found matching "{searchTerm}"</p>
                         <p className="text-sm mt-1">Try searching by first name or job title</p>
                     </li>
                 ) : (
-                    filteredUserList?.map((emp: TUser, idx: number) => (
+                    filteredUserList?.map((emp, idx) => (
                     <li
-                        key={idx}
+                        key={emp.id || idx}
                         className="relative flex items-center mt-3 gap-3 border border-gray-300 rounded-lg min-h-[100px] px-3 py-3.5 hover:shadow-sm "
                     >
-                        <img
-                            src={emp.profile.profileUrl || 'https://i.pravatar.cc/100?img=1'}
-                            alt={emp.profile.firstName || "User"}
+                        <img src={emp.user?.profile?.profileUrl ||  "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(
+                          emp.user?.profile?.firstName +
+                            " " +
+                            emp.user?.profile?.lastName
+                        )}
+                            alt={emp.user?.profile?.firstName || "User"}
                             className="w-10 h-10  rounded-full object-cover"
                         />
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.profile?.firstName}</span>
+                                <span className="font-bold mb-1 text-sm text-gray-700 truncate">{emp.user.profile?.firstName} {emp.user.profile?.lastName}</span>
                                 <EmployeeCardPopup
-                                    name={emp.profile?.firstName ||  "Unknown"}
-                                    title={emp.profile?.jobTitle || "No title"}
-                                    department={emp.profile?.department ||  "No department"}
-                                    email={emp.email || "No email"}
-                                    phone={emp.phone || "No phone"}
-                                    avatar={emp.profile.profileUrl || `https://i.pravatar.cc/100?img=1`}
-                                    role={emp.role || "Employee"}
+                                    name={emp.user.profile?.firstName ||  "Unknown"}
+                                    title={emp.user.profile?.jobTitle || "No title"}
+                                    department={emp.user.profile?.department ||  "No department"}
+                                    email={emp.user.email || "No email"}
+                                    phone={emp.user.phone || "No phone"}
+                                    avatar={emp.user.profile?.profileUrl || `https://i.pravatar.cc/100?img=1`}
+                                    role={emp.user.role || "Employee"}
                                 />
                             </div>
                             
                             <p
-                                className={`text-xs mb-1 ${emp.shift.length === 0 ? 'text-green-600' : 'text-red-600'
+                                className={`text-xs mb-1 ${emp.user.shift?.length === 0 ? 'text-green-600' : 'text-red-600'
                                     }`}
                             >
-                                {emp.shift.length === 0 ? 'Available' : 'Busy'} 
+                                {emp.user?.shift?.length === 0 ? 'Available' : 'Busy'} 
                             </p>
 
 
                             <div className="flex items-center gap-2 mb-1 text-sm text-gray-600 mt-1">
-                                <button onClick={() => handleAssignUser(emp.id as string, idx)} className="text-lg">
+                                <button onClick={() => handleAssignUser(emp.user.id as string, idx)} className="text-lg">
                                     <BsStopwatch />
                                 </button>
                                 {/* <TiEqualsOutline className="text-lg" /> */}
-                                <ShiftTemplateDropdown shiftTemplates={emp.shift} />
-                                <span className="text-lg font-medium">{emp.shift.length}</span>
+                                <ShiftTemplateDropdown shiftTemplates={emp.user?.shift ?? []} />
+                                <span className="text-lg font-medium">{emp.user?.shift?.length ?? 0}</span>
                             </div>
-                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {emp.payroll?.offDay.map((day: string) => day).join(", ") || "Update Info"}</p>
+                            <p className="text-sm text-[rgba(78,83,177,1)]">Off Day: {(emp.user.payroll?.offDay ?? []).join(", ") || "Update Info"}</p>
                         </div>
 
                         {openIndex === idx && (

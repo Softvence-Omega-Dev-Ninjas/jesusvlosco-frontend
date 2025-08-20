@@ -174,7 +174,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
     // Handle back navigation on mobile
     const handleBackToList = () => {
       setMobileView("list");
-      setShowChatInfo(false);
+      // setShowChatInfo(false);
     };
 
     const modalRef = useRef<HTMLDivElement>(null);
@@ -347,7 +347,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
                 >
                   <button
                     onClick={() => {
-                      setShowChatInfo(true);
+                      // setShowChatInfo(true);
                       setMobileView("info");
                       setShowDropdown(false);
                     }}
@@ -364,7 +364,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
                     Add Member
                   </button>
                   <button
-                    onClick={() => setShowDeleteModal(true)}
+                    // onClick={() => setShowDeleteModal(true)}
                     className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200 text-red-600"
                   >
                     Delete Chat
