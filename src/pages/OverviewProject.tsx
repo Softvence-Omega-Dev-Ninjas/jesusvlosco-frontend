@@ -29,14 +29,13 @@ import {
   useGetAllTimeOffRequestsQuery,
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
-import { TProjectUser } from "@/types/usertype";
 import { formatTimeFromISO, parseISODate } from "@/utils/formatDateToMDY";
 
 const OverviewProject = () => {
   const projectId = useParams().id;
   console.log(projectId, "Project ID from URL");
-  const projectInformation = useGetSingleProjectQuery(projectId);
-  const projectUsers = projectInformation.data?.data.projectUsers || [];
+  const projectInformation = useGetSingleProjectQuery(projectId as string) as any;
+  const projectUsers = projectInformation?.data?.data?.projectUsers || [];
   console.log(projectInformation, "Project Information");
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
 
@@ -197,49 +196,6 @@ const OverviewProject = () => {
     );
   };
 
-  // Helper function to format date
-  // const formatDate = (dateString: string) => {
-  //   try {
-  //     const date = new Date(dateString);
-  //     const day = String(date.getDate()).padStart(2, "0");
-  //     const month = String(date.getMonth() + 1).padStart(2, "0");
-  //     const year = date.getFullYear();
-  //     return `${day}/${month}/${year}`;
-  //   } catch {
-  //     return "N/A";
-  //   }
-  // };
-
-  // Process the employees data from API
-  // const processedEmployees = data?.data
-  //   ? data.data.map((user: any, index: number) => {
-  //       const profile = user.profile;
-  //       const primaryProject = user.projects?.[0];
-  //       const additionalProjectsCount =
-  //         user.projects?.length > 1 ? user.projects.length - 1 : 0;
-
-  //       return {
-  //         id: user.id,
-  //         name: profile
-  //           ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim()
-  //           : "Unknown User",
-  //         jobTitle: getJobTitleDisplay(profile?.jobTitle),
-  //         profileUrl:
-  //           profile?.profileUrl ||
-  //           defaultAvatars[index % defaultAvatars.length],
-  //         project: primaryProject
-  //           ? primaryProject.title
-  //           : "No Project Assigned",
-  //         additionalProjects: additionalProjectsCount,
-  //         shift: "Morning", // Default since shift data structure seems to be empty in the API
-  //         time: "9:00am-5:00pm", // Default time
-  //         date: formatDate(user.updatedAt),
-  //         location: primaryProject?.projectLocation || "Not specified",
-  //       };
-  //     })
-  //   : [];
-
-  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -336,7 +292,7 @@ const OverviewProject = () => {
               <div>
                 {projectUsers && projectUsers.length > 0 ? (
                   projectUsers.map(
-                    (employee: TProjectUser, index: number) => (
+                    (employee: any, index: number) => (
                       <div
                         key={employee.user.id}
                         className={`px-5 py-4 border-b-2 border-gray-200 ${
@@ -392,7 +348,7 @@ const OverviewProject = () => {
                             <div className="space-y-1">
                               <div className="text-sm font-medium text-gray-500 space-y-2">
                                {
-                                employee.user.shift.length === 0 ? "No Shift" : employee.user.shift.map((shift) => (
+                                employee.user.shift.length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
                                   <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
                                     <div className="text-xs text-gray-500">
                                       {shift.shiftTitle}
@@ -411,7 +367,7 @@ const OverviewProject = () => {
                           <div>
                             <div className="text-sm text-gray-700 space-y-3">
                               {
-                                employee.user.shift.length === 0? "No Shift" : employee.user.shift.map((shift) => (
+                                employee.user.shift.length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
                                   <div key={shift.id} className="space-y-1">
                                     {parseISODate(shift.date)?.toLocaleDateString()}
                                   </div>

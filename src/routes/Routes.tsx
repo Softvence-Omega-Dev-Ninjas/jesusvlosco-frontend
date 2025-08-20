@@ -19,7 +19,6 @@ import BadgeLibrary from "@/pages/BadgeLibrary";
 import CreateBadge from "@/pages/CreateBadge";
 import CreateRecognition from "@/pages/CreateRecognition";
 import EditBadge from "@/pages/EditBadge";
-import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
 import PollPage from "@/pages/PollPage";
 import PollTemplate from "@/pages/PollTemplate";

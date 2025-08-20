@@ -196,7 +196,7 @@ const ScheduleAssignPage: React.FC = () => {
                 >
                   <option value="">Select a manager</option>
                  {
-                   managers.map((manager) => (
+                   managers.map((manager: any) => (
                      <option key={manager.id} value={manager.id}>
                        {manager.profile?.firstName} {manager.profile?.lastName}
                      </option>
