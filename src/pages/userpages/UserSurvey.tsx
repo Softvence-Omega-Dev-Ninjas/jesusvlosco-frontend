@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Pagination from "@/components/UserSurvey/Pagination";
-import { useGetPollAndSurveyQuery } from "@/store/api/employe/getPollAndSurvey";
+import {
+  useGetSurveyQuery,
+  useGetPollQuery,
+} from "@/store/api/employe/getPollAndSurvey";
 import { FaSpinner } from "react-icons/fa";
 
-interface Survey {
+interface Item {
   id: string;
   title: string;
   createdBy: string;
-  createdAt: string; // ISO string
+  createdAt: string;
   reminderTime: string;
   user: any;
   status: "Active" | "Completed";
@@ -19,28 +22,81 @@ const ITEMS_PER_PAGE = 8;
 
 const UserSurvey: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"survey" | "pool">("survey");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, isLoading, error, refetch } = useGetPollAndSurveyQuery({
-    page: currentPage,
-    limit: ITEMS_PER_PAGE,
-  });
-
-  // Refetch automatically on mount
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  const surveys: Survey[] = data?.data ?? [];
-
-  const filteredSurveys = surveys.filter((survey) =>
-    survey.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // Survey API with polling for auto-refetch
+  const {
+    data: surveyData,
+    isLoading: surveyLoading,
+    error: surveyError,
+    refetch: refetchSurveys,
+  } = useGetSurveyQuery(
+    { page: currentPage, limit: ITEMS_PER_PAGE },
+    {
+      pollingInterval: 30000, // Auto-refetch every 30 seconds
+      skip: activeTab !== "survey", // Skip if not active tab
+    }
   );
 
-  const totalPages = Math.ceil(filteredSurveys.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentSurveys = filteredSurveys.slice(startIndex, endIndex);
+  // Poll API with polling for auto-refetch
+  const {
+    data: poolData,
+    isLoading: poolLoading,
+    error: poolError,
+    refetch: refetchPolls,
+  } = useGetPollQuery(
+    { page: currentPage, limit: ITEMS_PER_PAGE },
+    {
+      pollingInterval: 30000, // Auto-refetch every 30 seconds
+      skip: activeTab !== "pool", // Skip if not active tab
+    }
+  );
+
+  // Refetch data when tab changes
+  useEffect(() => {
+    if (activeTab === "survey") {
+      refetchSurveys();
+    } else {
+      refetchPolls();
+    }
+  }, [activeTab, refetchSurveys, refetchPolls]);
+
+  // Refetch data when page changes
+  useEffect(() => {
+    if (activeTab === "survey") {
+      refetchSurveys();
+    } else {
+      refetchPolls();
+    }
+  }, [currentPage, activeTab, refetchSurveys, refetchPolls]);
+
+  // Surveys and polls data
+  const surveys: Item[] = surveyData?.data ?? [];
+  const pools: Item[] = poolData?.data ?? [];
+
+  const activeData = activeTab === "survey" ? surveys : pools;
+  const isLoading = activeTab === "survey" ? surveyLoading : poolLoading;
+  const error = activeTab === "survey" ? surveyError : poolError;
+
+  // Filter data based on search term
+  const filteredData = activeData.filter((item) =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // For pagination, we need to handle both client-side and server-side pagination
+  // Since the API returns paginated data, we'll use that for the main display
+  // but client-side filtering for search
+  const totalItems = activeData.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  // If we're searching, we need to paginate the filtered results client-side
+  const displayData = searchTerm
+    ? filteredData.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+      )
+    : activeData;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -59,16 +115,16 @@ const UserSurvey: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-primary mb-4">
-              Available Surveys
+              Available Surveys & Polls
             </h1>
             <p className="text-sm text-gray-500">
-              View and take all surveys & poll.
+              View and take all surveys & polls
             </p>
           </div>
           <div className="relative w-full md:w-96 mt-4 md:mt-0">
             <input
               type="text"
-              placeholder="Search Survey"
+              placeholder="Search..."
               className="w-full pl-10 pr-4 py-2 border border-[#D9D9D9] rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
               value={searchTerm}
               onChange={(e) => {
@@ -79,13 +135,43 @@ const UserSurvey: React.FC = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex space-x-4 mb-6 border-b border-gray-300">
+          <button
+            className={`px-4 py-2 font-medium cursor-pointer ${
+              activeTab === "survey"
+                ? "border-b-2 border-primary text-primary"
+                : "text-gray-600"
+            }`}
+            onClick={() => {
+              setActiveTab("survey");
+              setCurrentPage(1);
+            }}
+          >
+            Surveys
+          </button>
+          <button
+            className={`px-4 py-2 font-medium cursor-pointer ${
+              activeTab === "pool"
+                ? "border-b-2 border-primary text-primary"
+                : "text-gray-600"
+            }`}
+            onClick={() => {
+              setActiveTab("pool");
+              setCurrentPage(1);
+            }}
+          >
+            Polls
+          </button>
+        </div>
+
         {/* Table */}
         <div className="overflow-x-auto border border-[#C8CAE7] rounded-md px-6">
           <table className="min-w-full divide-y divide-primary text-sm">
             <thead>
               <tr>
                 {[
-                  "Survey title",
+                  "Title",
                   "Created By",
                   "Created At",
                   "End Time",
@@ -107,58 +193,52 @@ const UserSurvey: React.FC = () => {
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-gray-500">
                     <FaSpinner className="mx-auto animate-spin text-2xl text-primary" />
-                    <p className="mt-2">Loading surveys...</p>
+                    <p className="mt-2">Loading {activeTab}...</p>
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-red-600">
-                    Failed to load surveys.{" "}
-                    <button
-                      onClick={() => refetch()}
-                      className="underline text-blue-600"
-                    >
-                      Retry
-                    </button>
+                    Failed to load {activeTab}.
                   </td>
                 </tr>
-              ) : currentSurveys.length > 0 ? (
-                currentSurveys.map((survey: Survey) => (
-                  <tr key={survey.id}>
+              ) : displayData.length > 0 ? (
+                displayData.map((item: Item) => (
+                  <tr key={item.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-[#484848] font-medium">
-                      {survey.title || "-"}
+                      {item.title || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-[#484848]">
-                      {survey?.user?.profile?.firstName || "-"}
+                      {item?.user?.profile?.firstName || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-[#484848]">
-                      {formatDate(survey.createdAt)}
+                      {formatDate(item.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-[#484848]">
-                      {formatDate(survey.reminderTime)}
+                      {formatDate(item.reminderTime)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-3 py-1 inline-flex text-xs font-medium rounded-full ${
-                          survey.status === "Active"
+                          item.status === "Active"
                             ? "bg-[#D2F8E7] text-[#2EBD85]"
                             : "bg-[#FFE9C1] text-[#F4A300]"
                         }`}
                       >
-                        {survey.status}
+                        {item.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link to={`/user/take-survey/${survey.id}`}>
+                      <Link to={`/user/take-${activeTab}/${item.id}/assigned`}>
                         <button
                           className={`px-4 py-2 rounded-full transition cursor-pointer ${
-                            survey.isResponded
+                            item.isResponded
                               ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                               : "bg-primary text-white hover:bg-primary-dark"
                           }`}
-                          disabled={survey.isResponded}
+                          disabled={item.isResponded}
                         >
-                          Take Survey
+                          Take
                         </button>
                       </Link>
                     </td>
@@ -167,7 +247,7 @@ const UserSurvey: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={6} className="text-center py-4 text-gray-500">
-                    No surveys found.
+                    No {activeTab}s found.
                   </td>
                 </tr>
               )}
@@ -176,7 +256,7 @@ const UserSurvey: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        {filteredSurveys.length > ITEMS_PER_PAGE && (
+        {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
