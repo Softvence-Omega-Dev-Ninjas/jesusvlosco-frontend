@@ -362,7 +362,7 @@ const SurveyMainPage: React.FC = () => {
             />
 
             {/* Quick View Modal */}
-            <div className="w-[700px] ">
+            <div className="">
               <UniversalModal
                 isOpen={openModalType === "quickView"}
                 onClose={() => setOpenModalType(null)}
