@@ -12,18 +12,17 @@ const UserDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector(selectUser);
+  console.log("Access Token:", user?.accessToken);
   const { data } = useGetProfileQuery({ id: user?.id });
   // console.log({data})
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  console.log({ user });
+  // console.log(user)
+  // console.log(user?.accessToken);
   // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -40,22 +39,16 @@ const UserDropdown: React.FC = () => {
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger */}
-      <div
-        className="flex items-center space-x-3 cursor-pointer group"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
+      <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setIsOpen((prev) => !prev)}>
         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
           <span className="text-white text-sm font-medium">
-            {
-              data?.data?.profile?.firstName[0] + data?.data?.profile?.lastName[0]
-            }
+            {data?.data?.profile?.firstName[0] +
+              data?.data?.profile?.lastName[0]}
           </span>
         </div>
         <div className="hidden sm:block">
           <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
-            {data?.data?.profile?.firstName +
-              " " +
-              data?.data?.profile?.lastName}{" "}
+            {data?.data?.profile?.firstName + " " + data?.data?.profile?.lastName}{" "}
           </p>
         </div>
         <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-blue-600" />
@@ -69,10 +62,7 @@ const UserDropdown: React.FC = () => {
               <UpdateProfileModal />
             </li>
             <li>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-              >
+              <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                 Logout
               </button>
             </li>

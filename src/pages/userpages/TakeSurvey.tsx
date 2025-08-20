@@ -1,190 +1,295 @@
 import React, { useState, useEffect } from "react";
-import profile from "../../assets/person.png";
-import calendar from "../../assets/calendar_month.png";
-import icon from "../../assets/Icons.png";
-
-const totalQuestions = 5;
+import { useParams, useNavigate } from "react-router-dom";
+import { FaSpinner } from "react-icons/fa";
+import {
+  useGetSurveyByIdForEmployeeQuery,
+  useSubmitSurveyResponseMutation,
+} from "@/store/api/employe/getPollAndSurvey";
+import { toast } from "sonner";
 
 const TakeSurvey: React.FC = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<number, string | null>>({});
-  const [progress, setProgress] = useState((1 / totalQuestions) * 100);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { data, isLoading, error, isError } = useGetSurveyByIdForEmployeeQuery(
+    id!,
+    {
+      skip: !id,
+    }
+  );
+
+  // ✅ Submit mutation hook
+  const [submitSurveyResponse, { isLoading: isSubmitting }] =
+    useSubmitSurveyResponseMutation();
+
+  const survey = data?.data;
+  const questions = survey?.questions || [];
+  const totalSteps = questions.length;
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [progress, setProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setSelectedOption(answers[currentQuestion] || null);
-    setProgress((currentQuestion / totalQuestions) * 100);
-  }, [currentQuestion, answers]);
+    if (totalSteps > 0) {
+      setProgress((currentStep / totalSteps) * 100);
+    }
+  }, [currentStep, totalSteps]);
 
-  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.value;
-    setSelectedOption(selected);
-    setAnswers((prev) => ({ ...prev, [currentQuestion]: selected }));
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const isStepValid = () => {
+    const question = questions[currentStep - 1];
+    if (!question) return false;
+    return answers[question.id] && answers[question.id].trim() !== "";
   };
 
   const handleNextClick = () => {
-    if (!selectedOption) {
-      alert("Please select an option before continuing.");
+    if (!isStepValid()) {
+      toast.error("Please answer this question");
       return;
     }
-    if (currentQuestion < totalQuestions) {
-      setCurrentQuestion((prev) => prev + 1);
-    }
+    if (currentStep < totalSteps) setCurrentStep((prev) => prev + 1);
   };
 
   const handlePreviousClick = () => {
-    if (currentQuestion > 1) {
-      setCurrentQuestion((prev) => prev - 1);
-    }
+    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
   };
 
-  const handleSubmitClick = () => {
-    if (!selectedOption) {
-      alert("Please select an option before submitting.");
+  // ✅ Submit with RTK mutation
+  const handleSubmitClick = async () => {
+    if (!isStepValid()) {
+      toast.error("Please complete the last question before submitting.");
       return;
     }
-    const updatedAnswers = { ...answers, [currentQuestion]: selectedOption };
-    setAnswers(updatedAnswers);
-    setShowModal(true);
-    console.log("Submitted answers:", updatedAnswers); // <-- Use latest values
+
+    const payload = {
+      surveyId: id!,
+      answers: questions.map((q: any) => {
+        const answerValue = answers[q.id];
+        switch (q.type) {
+          case "SELECT": {
+            const selectedOption = q.options?.find(
+              (opt: any) => opt.text === answerValue
+            );
+            return selectedOption
+              ? { questionId: q.id, options: [{ optionId: selectedOption.id }] }
+              : { questionId: q.id, options: [] };
+          }
+          case "OPEN_ENDED":
+            return { questionId: q.id, answerText: answerValue };
+          case "RANGE":
+            return { questionId: q.id, rate: Number(answerValue) };
+          default:
+            return { questionId: q.id, answerText: answerValue };
+        }
+      }),
+    };
+
+    try {
+      const res = await submitSurveyResponse(payload).unwrap();
+
+      if (res?.success === true) {
+        toast.success(res.message || "Survey submitted successfully");
+        setShowModal(true);
+        setTimeout(() => navigate("/user/survey"), 2000);
+      } else {
+        toast.error(res?.message || "Something went wrong.");
+      }
+    } catch (err: any) {
+      console.error("Survey submit failed:", err);
+      toast.error(
+        err?.data?.message || "Failed to submit survey. Please try again."
+      );
+    }
   };
 
-  const getQuestionData = (id: number) => ({
-    id,
-    text: "How satisfied are you with the current safety protocols on-site?",
-    options: [
-      "Very Satisfied",
-      "Satisfied",
-      "Neutral",
-      "Unsatisfied",
-      "Very Unsatisfied",
-    ],
-  });
+  // ✅ Step rendering
+  const renderStepContent = () => {
+    const question = questions[currentStep - 1];
+    if (!question) return null;
 
-  const question = getQuestionData(currentQuestion);
-  const isProgressBarFull = progress === 100;
-
-  return (
-    <div className="my-6 container mx-auto relative">
-      <div>
-        {/* Header */}
-        <div className="flex flex-wrap gap-2 items-center mb-6 text-sm text-gray-600">
-          <h1 className="text-2xl font-semibold text-primary w-full mb-2">
-            Employee Satisfaction Survey
-          </h1>
-          <div className="flex gap-4 items-center flex-wrap">
-            <span className="flex gap-1 items-center">
-              <img src={profile} alt="Owner" className="w-5 h-5" />
-              Owner: Admin
-            </span>
-            <span className="flex gap-1 items-center">
-              <img src={calendar} alt="Calendar" className="w-5 h-5" />
-              Duration: May 1 - May 15, 2025
-            </span>
-            <span className="">
-              Status: <span className="text-green-600">Active</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-700 mb-6">
-          This survey gathers feedback on employee satisfaction with current workplace practices.
-          Your responses will help us improve our work environment and <br /> address any concerns.
-        </p>
-
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
-            <span>Progress</span>
-            <span>
-              {currentQuestion} of {totalQuestions} questions ({Math.round(progress)}%)
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Question */}
-        <div className="flex items-center my-4">
-          <button className="font-bold text-white mr-3 border px-4 rounded-md py-2 bg-primary">
-            {currentQuestion}
-          </button>
+    return (
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="flex items-center mb-4">
+          <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold mr-3">
+            {currentStep}
+          </span>
           <div>
-            <p className="text-gray-900 font-semibold mb-2">{question.text}</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-900 font-semibold">{question.question}</p>
+            <p className="text-sm text-gray-500">
               Please select one option that best represents your opinion
             </p>
           </div>
         </div>
 
         {/* Options */}
-        <div className="space-y-4 mb-8">
-          {question.options.map((option, index) => (
-            <label
-              key={index}
-              className={`flex items-center p-3 rounded-lg border cursor-pointer ${
-                selectedOption === option
-                  ? "border-primary bg-purple-50"
-                  : "border-gray-300"
-              }`}
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value={option}
-                checked={selectedOption === option}
-                onChange={handleOptionChange}
-                className="form-radio h-5 w-5 text-primary "
-              />
-              <span className="ml-4 text-gray-800">{option}</span>
-            </label>
-          ))}
-        </div>
+        {question.type === "SELECT" && (
+          <div className="space-y-3">
+            {question.options?.map((opt: any) => (
+              <label
+                key={opt.id}
+                className={`flex items-center p-3 border rounded-lg cursor-pointer transition
+                  ${
+                    answers[question.id] === opt.text
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-300 hover:border-blue-400"
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name={question.id}
+                  value={opt.text}
+                  checked={answers[question.id] === opt.text}
+                  onChange={(e) =>
+                    handleAnswerChange(question.id, e.target.value)
+                  }
+                  className="hidden"
+                />
+                <span className="ml-2">{opt.text}</span>
+              </label>
+            ))}
+          </div>
+        )}
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
+        {question.type === "OPEN_ENDED" && (
+          <textarea
+            value={answers[question.id] || ""}
+            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            placeholder="Type your answer..."
+            className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-600 focus:ring focus:ring-blue-200 transition mt-3"
+          />
+        )}
+
+        {question.type === "RANGE" && (
+          <div className="space-y-3 mt-3">
+            {Array.from(
+              { length: question.rangeEnd - question.rangeStart + 1 },
+              (_, i) => {
+                const value = String(question.rangeStart + i);
+                return (
+                  <label
+                    key={value}
+                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition
+                      ${
+                        answers[question.id] === value
+                          ? "border-blue-600 bg-blue-50"
+                          : "border-gray-300 hover:border-blue-400"
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name={question.id}
+                      value={value}
+                      checked={answers[question.id] === value}
+                      onChange={(e) =>
+                        handleAnswerChange(question.id, e.target.value)
+                      }
+                      className="hidden"
+                    />
+                    <span className="ml-2">{value}</span>
+                  </label>
+                );
+              }
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ✅ Loading state
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <FaSpinner className="animate-spin text-4xl text-blue-600" />
+      </div>
+    );
+
+  // ✅ Error state
+  if (isError) {
+    console.error("Survey fetch error:", error);
+    return (
+      <div className="text-center mt-10">
+        <p className="text-red-600 mb-4">Survey not found or already responded</p>
+        <button 
+          onClick={() => navigate("/user/survey")}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+        >
+          Back to Surveys
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-6 container mx-auto relative">
+      <h1 className="text-2xl font-semibold text-blue-600 mb-4">
+        {survey?.title || "Employee Survey"}
+      </h1>
+
+      {/* Progress */}
+      <div className="mb-6">
+        <div className="flex justify-between text-sm text-gray-600 mb-2">
+          <span>Progress</span>
+          <span>
+            Step {currentStep} of {totalSteps} ({Math.round(progress)}%)
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div
+            className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Step Content */}
+      {renderStepContent()}
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between my-6">
+        <button
+          className={`font-bold text-white border px-6 py-2 rounded-md cursore-pointer ${
+            currentStep === 1
+              ? "bg-gray-400 cursor-not-allowed border-gray-400"
+              : "bg-primary border-primary hover:bg-primary/90"
+          }`}
+          onClick={handlePreviousClick}
+          disabled={currentStep === 1}
+        >
+          Previous
+        </button>
+
+        {currentStep === totalSteps ? (
           <button
-            className="px-6 py-2 border border-gray-300 rounded-md cursor-pointer text-white bg-primary"
-            onClick={handlePreviousClick}
-            disabled={currentQuestion === 1}
+            className="font-bold text-white border px-6 py-2 rounded-md bg-green-600 border-green-600 hover:bg-green-700 cursore-pointer"
+            onClick={handleSubmitClick}
+            disabled={isSubmitting}
           >
-            Previous
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
-
-          {isProgressBarFull ? (
-            <button
-              className="px-6 py-2 rounded-md text-white cursor-pointer bg-green-600"
-              onClick={handleSubmitClick}
-            >
-              Submit
-            </button>
-          ) : (
-            <button
-              className="px-6 py-2 rounded-md text-white cursor-pointer bg-primary"
-              onClick={handleNextClick}
-            >
-              Next
-            </button>
-          )}
-        </div>
+        ) : (
+          <button
+            className="font-bold text-white border px-6 py-2 rounded-md bg-primary border-primary hover:bg-primary/90 cursore-pointer"
+            onClick={handleNextClick}
+          >
+            Next
+          </button>
+        )}
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/45 bg-opacity-60 flex justify-center items-center">
-          <div className="bg-white rounded-lg shadow-xl py-16 w-[450px] text-center">
-            
-            <img className="mx-auto mb-4" src={icon} alt="" />
-            <h2 className="text-2xl font-semibold text-primary">Survey</h2>
-            <p className="text-2xl font-semibold text-primary">Submission Complete</p>
+        <div className="fixed inset-0 z-50 bg-black/45 flex justify-center items-center">
+          <div className="bg-white rounded-lg shadow-xl py-10 px-6 w-[450px] text-center">
+            <h2 className="text-2xl font-semibold text-blue-600">
+              Survey Submission Complete ✅
+            </h2>
             <button
-              className="mt-6 bg-primary text-white px-6 py-2 cursor-pointer rounded-md"
+              className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md cursore-pointer"
               onClick={() => setShowModal(false)}
             >
               Close

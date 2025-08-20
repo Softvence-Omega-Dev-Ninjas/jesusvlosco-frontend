@@ -1,10 +1,10 @@
 import { EllipsisVertical } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Chat } from "./ChatWindow";
+import { useEffect, useRef, useState } from "react";
+import { TChat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-import axios from "axios";
 import { initPrivateMessageListener } from "@/utils/socket";
+import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
 
 const ChatConversation = ({
   selectedChat,
@@ -13,15 +13,17 @@ const ChatConversation = ({
   setShowDeleteModal,
   setShowMemberModal,
 }: {
-  selectedChat: Chat;
-  selectedPrivateChatInfo: Chat;
+  selectedChat: TChat;
+  selectedPrivateChatInfo: TChat;
   setShowChatInfo: (arg0: boolean) => void;
   setShowDeleteModal: (arg0: boolean) => void;
   setShowMemberModal: (arg0: boolean) => void;
 }) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
   const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState(selectedChat?.messages || []);
+    const [sendPrivateMessage] = useSendPrivateMessageMutation();
 
   useEffect(() => {
     if (selectedChat?.messages) {
@@ -29,46 +31,46 @@ const ChatConversation = ({
     }
   }, [selectedChat?.messages]);
 
+  useEffect(() => {
+    initPrivateMessageListener((newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Scrolls to the bottom when messages change or on mount
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const handleSendMessage = async () => {
     if (messageInput.trim() === "") return;
     const userId = me?.id || "";
-    const recipientId = selectedPrivateChatInfo.participant.id || "";
+  const recipientId = selectedPrivateChatInfo?.participant?.id || "";
 
     const formData = new FormData();
     formData.append("content", messageInput);
     formData.append("userId", userId);
 
-    // if (file) {
-    //   formData.append("file", file);
-    // }
 
     try {
-      await axios.post(
-        `https://api.lgcglobalcontractingltd.com/js/private-chat/send-message/${recipientId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${me?.accessToken}`,
-          },
-        }
-      );
+
+      await sendPrivateMessage({
+            recipientId: recipientId,
+            messageInput: messageInput, // Initial greeting message
+            userId: userId || '',
+            file: undefined
+          }).unwrap();
+          // console.log(result)
 
       setMessageInput("");
     } catch (error) {
       console.log(error);
     }
   };
-  useEffect(() => {
-    initPrivateMessageListener((newMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
-      // setMessageInput("");
-    });
-  }, []);
 
-  // if (messages.length === 0 || !messages) {
-  //   return "No messages";
-  // }
-
+  // console.log("Selected Chat", selectedChat);
+  // console.log("Selected selectedPrivateChatInfo", selectedPrivateChatInfo);
+  // console.log("Messages", messages);
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}
@@ -76,26 +78,25 @@ const ChatConversation = ({
         <div className="flex items-center">
           <div className="relative">
             <img
-              src={
-                selectedChat?.avatar ||
-                "https://avatar.iran.liara.run/public/boy?username=Ash"
-              }
+              src={(() => {
+                const profile = selectedPrivateChatInfo?.participant?.profile;
+                const name = `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+                if (profile?.profileUrl) return profile.profileUrl;
+                if (name) return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name);
+                return "";
+              })()}
               alt={selectedChat?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
-            {/* {selectedChat.online && (
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )} */}
+        
           </div>
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-900 capitalize">
-              {selectedPrivateChatInfo?.participant?.profile?.firstName +
+              {(selectedPrivateChatInfo?.participant?.profile?.firstName ?? "") +
                 " " +
-                selectedPrivateChatInfo?.participant?.profile?.lastName}
+                (selectedPrivateChatInfo?.participant?.profile?.lastName ?? "")}
             </h2>
-            {/* <p className="text-sm text-green-600">
-              {selectedChat.online ? "Online" : "Offline"}
-            </p> */}
+  
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -144,17 +145,24 @@ const ChatConversation = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-170px)]">
-        {messages?.map((message) => {
-          const isMe = message.senderId === me?.id; // currentUserId from auth
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(70vh-170px)]">
+        {messages?.map((message, idx) => {
+          const isMe = message.senderId === me?.id; 
           // console.log(isMe, "isMe");
           const avatar =
             message.sender?.profile?.profileUrl ||
-            "https://avatar.iran.liara.run/public/boy?username=Ash";
+            "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(
+                          message.sender.profile?.firstName +
+                            " " +
+                            message.sender.profile?.lastName
+                        )
+
+          const messageKey = message.id ?? `${message.senderId ?? 'msg'}-${idx}`;
 
           return (
             <div
-              key={message.id}
+              key={messageKey}
               className={`flex items-start space-x-3 ${
                 isMe ? "flex-row-reverse space-x-reverse" : ""
               }`}
@@ -163,7 +171,9 @@ const ChatConversation = ({
               <img
                 src={avatar}
                 alt={`${message.sender?.profile?.firstName} avatar`}
-                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                className={`w-8 h-8 rounded-full object-cover flex-shrink-0 ${
+                  isMe && "hidden"
+                }`}
               />
 
               {/* Message bubble */}
@@ -174,6 +184,7 @@ const ChatConversation = ({
               >
                 <p className="text-sm">{message.content}</p>
               </div>
+              <div ref={bottomRef} />
             </div>
           );
         })}
