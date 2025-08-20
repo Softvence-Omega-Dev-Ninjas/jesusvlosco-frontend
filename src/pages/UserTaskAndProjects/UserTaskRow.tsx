@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 interface TaskRowProps {
   task: any;
-  //test
 }
 
 export const formatCustomDate = (dateString: string) => {
