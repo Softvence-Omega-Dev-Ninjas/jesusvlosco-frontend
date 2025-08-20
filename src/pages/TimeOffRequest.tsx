@@ -11,7 +11,7 @@ const TimeOffRequest: React.FC = () => {
     isError,
   } = useGetAllTimeOffRequestsAnalysisQuery({
     page: 1,
-    limit: 30,
+    limit: 100,
     status: "DRAFT",
     orderBy: "asc",
   });
@@ -20,7 +20,7 @@ const TimeOffRequest: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
-  console.log(timeOffRequestsAnalysis);
+  // console.log(timeOffRequestsAnalysis);
 
   useEffect(() => {
     if (timeOffRequestsAnalysis?.data) {
