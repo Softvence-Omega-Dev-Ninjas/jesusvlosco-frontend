@@ -1,12 +1,6 @@
 // SurveyMainPage.tsx
 import React, { useState } from "react";
-import {
-  Plus,
-  Search,
-  Eye,
-  Columns3,
-  ChevronDown,
-} from "lucide-react";
+import { Plus, Search, Eye, Columns3, ChevronDown } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
 import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
@@ -109,12 +103,11 @@ const SurveyMainPage: React.FC = () => {
 
   // Sample data for surveys
   const { data: surveyData, isLoading, isError } = useGetAllSurveysQuery(null);
-  if (isLoading) return <TableLoadingSpinner/>;
+  if (isLoading) return <TableLoadingSpinner />;
   if (isError) return <p>Failed to fetch surveys</p>;
   const surveys = surveyData?.data || [];
-  console.log(surveys[0])
+  console.log(surveys[0]);
 
-  
   // NEW: Sample data for team members
   const teamsData: Record<string, TeamMember[]> = {
     "Team A": [
@@ -369,13 +362,15 @@ const SurveyMainPage: React.FC = () => {
             />
 
             {/* Quick View Modal */}
-            <UniversalModal
-              isOpen={openModalType === "quickView"}
-              onClose={() => setOpenModalType(null)}
-              modalType="quickView"
-              surveyData={selectedSurveyForQuickView}
-              // initialPosition={{ x: 1450, y: 430 }}
-            />
+            <div className="w-[700px] ">
+              <UniversalModal
+                isOpen={openModalType === "quickView"}
+                onClose={() => setOpenModalType(null)}
+                modalType="quickView"
+                surveyData={selectedSurveyForQuickView}
+                // initialPosition={{ x: 1450, y: 430 }}
+              />
+            </div>
 
             {/* NEW: Team Members Modal */}
             <UniversalModal
@@ -522,7 +517,9 @@ const SurveyMainPage: React.FC = () => {
                         )}
 
                         {column.id === "status" && (
-                          <span className={`${getStatusBadge(survey.status)} p-1`} >
+                          <span
+                            className={`${getStatusBadge(survey.status)} p-1`}
+                          >
                             {survey.status}
                           </span>
                         )}

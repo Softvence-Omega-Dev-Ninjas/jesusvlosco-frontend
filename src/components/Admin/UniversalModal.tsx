@@ -296,7 +296,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
       case "columns":
         return "w-64";
       case "quickView":
-        return "w-[24rem]";
+        return "w-[36rem]";
       case "teamMembers": // NEW: Width for team members modal
         return "w-[24rem]"; // Adjust width as per design
       default:
