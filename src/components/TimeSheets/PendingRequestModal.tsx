@@ -9,16 +9,7 @@ import { toast } from "sonner";
 interface PendingRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activityData: ActivityItem[];
-}
-
-interface ActivityItem {
-  id: number;
-  time: string;
-  startTime: string;
-  endTime: string;
-  avatars: string[];
-  description: string;
+  activityData: any;
 }
 
 const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
@@ -297,13 +288,11 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
                 </div>
               )}
               {/* Chat Conversation Modal */}
-              {/* {selectedId === el?.id && (
-                <ChatConversationModal
-                  isOpen={showChatConversationModal}
-                  onClose={() => setShowChatConversationModal(false)}
-                  selectedChat={dummySelectedChat}
-                />
-              )} */}
+              <ChatConversationModal
+                isOpen={showChatConversationModal}
+                onClose={() => setShowChatConversationModal(false)}
+                selectedChat={dummySelectedChat}
+              />
             </div>
           </div>
         ))}
