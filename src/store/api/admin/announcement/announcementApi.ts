@@ -14,7 +14,7 @@ const announcementApi = baseApi.injectEndpoints({
 
     fetchAnnouncement: builder.query({
       query: (filter) => ({
-        url: `/admin/announcement/get-announcements?page=${filter.page}&limit=${filter.limit}&title=${filter.searchValue}`,
+        url: `/admin/announcement/get-announcements?page=${filter.page}&limit=${filter.limit}&title=${filter.searchValue}&publishedFrom=${filter.publishedFrom}&publishedTo=${filter.publishedTo}`,
         method: "GET",
       }),
     }),

@@ -1,5 +1,5 @@
 import { EyeIcon, Trash } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RemotePolicyCard from "./RemotePolicyCard";
 import CategoryFilter from "./CategoryFilter";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
@@ -71,6 +71,12 @@ const AnnouncementList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [showResponseId, setShowResponseId] = useState<string | null>(null);
   const [deleteAnnouncement] = useDeleteAnnouncementMutation();
+  const [publishedFrom, setPublishFrom] = useState<string>("");
+  const [publishedTo, setPublishTo] = useState<string>("");
+  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // console.log(new Date(publishedFrom).toISOString());
 
   const itemsPerPage = 5;
   const totalPages = Math.ceil(announcementList.length / itemsPerPage);
@@ -83,17 +89,30 @@ const AnnouncementList: React.FC = () => {
     page: currentPage,
     limit: 10,
     searchValue,
+    publishedFrom:
+      publishedFrom.length > 0 && new Date(publishedFrom).toISOString(),
   });
 
   useEffect(() => {
     if (announcementData) {
       setAnnouncementList(announcementData.data);
     }
-  }, [announcementData, currentPage, searchValue]);
+  }, [announcementData, currentPage, searchValue, publishedTo, publishedFrom]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setShowFilterDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleDeleteSelected = async (announcementId: string) => {
-    console.log(announcementId);
-
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -170,12 +189,65 @@ const AnnouncementList: React.FC = () => {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative">
             <CategoryFilter />
-            <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center gap-1">
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center gap-1"
+            >
               <img src="/filter_list.png" alt="Filter" className="w-4 h-4" />
               Filter
             </button>
+
+            {showFilterDropdown && (
+              <div
+                ref={filterRef}
+                className="absolute bg-white top-full right-0 mt-2 w-80 border border-gray-200 shadow-lg p-4 z-10 rounded-xl"
+              >
+                <h2 className="text-base font-semibold text-gray-800 mb-3">
+                  Filter by Publish Date
+                </h2>
+
+                <div className="flex flex-col gap-4">
+                  {/* Published From */}
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">
+                      Published from
+                    </label>
+                    <input
+                      type="date"
+                      value={publishedFrom}
+                      onChange={(e) => setPublishFrom(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    />
+                  </div>
+
+                  {/* Published To */}
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">
+                      Published to
+                    </label>
+                    <input
+                      type="date"
+                      value={publishedTo}
+                      onChange={(e) =>
+                        // setPublishTo(new Date(e.target.value).toISOString())
+                        setPublishTo(e.target.value)
+                      }
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Apply Button */}
+                <div className="flex justify-end mt-4">
+                  <button className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Apply Filter
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* <CalendarDropdown /> */}
 
             {/* 3-dot button */}
