@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "../TasksAndProjects/StatusBadge";
-import { UserAvatar } from "../TasksAndProjects/UserAvatar";
 import { Link } from "react-router-dom";
 
 interface TaskRowProps {
   task: any;
+  //test
 }
 
 export const formatCustomDate = (dateString: string) => {

@@ -31,7 +31,7 @@ interface NewTaskModalProps {
 export function NewTaskModal({ trigger }: NewTaskModalProps) {
   const { data: users, isLoading: isUserLoading } = useGetAllUserQuery(undefined);
   const { data: projects, isLoading: isProjectLoading } = useGetAllProjectsQuery(undefined);
-  const [createTask, { isLoading: isCreatingTask }] = useCreateTaskMutation();
+  const [createTask] = useCreateTaskMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,

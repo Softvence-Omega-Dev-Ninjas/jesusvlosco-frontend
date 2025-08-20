@@ -1,68 +1,13 @@
-import type React from "react";
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { X, MessageCircle } from "lucide-react";
-import { UserAvatar } from "./UserAvatar";
 import { formatCustomDate } from "./TaskRow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// interface OverdueTask {
-//   id: string;
-//   projectName: string;
-//   dueDate: string;
-//   dueTime: string;
-//   label: string;
-//   assignedTo: {
-//     name: string;
-//     avatar: string;
-//   };
-//   comments: number;
-// }
 
 interface OverdueTasksModalProps {
   overDueTasks: any;
 }
 
 export function OverdueTasksModal({ overDueTasks }: OverdueTasksModalProps) {
-  // Mock overdue tasks data
-  // const overdueTasks: OverdueTask[] = [
-  //   {
-  //     id: "1",
-  //     projectName: "Metro Shopping Center",
-  //     dueDate: "Due Jun 22",
-  //     dueTime: "at 11:00 am",
-  //     label: "General",
-  //     assignedTo: {
-  //       name: "Jane Cooper",
-  //       avatar: "/diverse-group.png",
-  //     },
-  //     comments: 0,
-  //   },
-  //   {
-  //     id: "2",
-  //     projectName: "Riverside Apartments",
-  //     dueDate: "Due Jun 30",
-  //     dueTime: "at 10:00 am",
-  //     label: "General",
-  //     assignedTo: {
-  //       name: "Wade Warren",
-  //       avatar: "/diverse-group.png",
-  //     },
-  //     comments: 0,
-  //   },
-  //   {
-  //     id: "3",
-  //     projectName: "Tech Campus Phase 2",
-  //     dueDate: "Due Jun 26",
-  //     dueTime: "at 09:45 am",
-  //     label: "General",
-  //     assignedTo: {
-  //       name: "Jane Cooper",
-  //       avatar: "/diverse-group.png",
-  //     },
-  //     comments: 0,
-  //   },
-  // ];
 
   return (
     <Dialog>
