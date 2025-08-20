@@ -27,7 +27,8 @@ export const baseApi = createApi({
     "COMMENT",
     "PRIVATE_CHAT",
     "TEAM_CHAT",
-    "survey"
+    "survey",
+    "PROJECT"
   ],
   endpoints: () => ({}),
 });

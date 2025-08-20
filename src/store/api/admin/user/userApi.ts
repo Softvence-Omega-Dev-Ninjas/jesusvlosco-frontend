@@ -2,14 +2,10 @@ import { baseApi } from "../../baseApi";
 
 const userApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    // Get Api
 
     getAllUser: build.query({
-      // query: () => `/admin/user`,
       query: (params = {}) => {
-        // console.log("params", params);
         const queryParams = new URLSearchParams(params).toString();
-        // console.log("queryParams===========>", queryParams);
         return `/admin/user${queryParams ? `?${queryParams}` : ""}`;
       },
       providesTags: ["ADMIN_USER"],

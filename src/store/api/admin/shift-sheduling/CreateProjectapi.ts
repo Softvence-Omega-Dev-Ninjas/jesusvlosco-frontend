@@ -3,17 +3,18 @@ import { baseApi } from "../../baseApi";
 export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // POST - Create project
-    createProject: builder.mutation({
-      query: (body: Record<string, any>) => ({
+    createProject: builder.mutation<Record<string, unknown>, Record<string, unknown>>({
+      query: (body) => ({
         url: "/admin/project",
         method: "POST",
         body,
       }),
+      invalidatesTags: ["PROJECT"],
     }),
 
-    // GET - All projects with filters
-    getAllProjects: builder.query({
-      query: (params?: Record<string, any>) => {
+    // GET - All projects with optional filters
+    getAllProjects: builder.query<unknown, Record<string, unknown> | undefined>({
+      query: (params) => {
         const queryParams = new URLSearchParams();
         if (params) {
           Object.entries(params).forEach(([key, value]) => {
@@ -27,6 +28,7 @@ export const projectApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["PROJECT"],
     }),
 
     // DELETE - Delete a project
@@ -35,25 +37,28 @@ export const projectApi = baseApi.injectEndpoints({
         url: `/admin/project/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags:  ["PROJECT"],
     }),
 
     // PATCH - Update project title
-    updateProjectTitle: builder.mutation< void,{ projectId: number | string; title: string }>({
+    updateProjectTitle: builder.mutation<void, { projectId: number | string; title: string }>({
       query: ({ projectId, title }) => ({
         url: `/admin/project/${projectId}/update-title`,
         method: "PATCH",
         body: { title },
       }),
+      invalidatesTags: ["PROJECT"],
     }),
 
-    getSingleProject: builder.query({
+    // GET - Single project
+    getSingleProject: builder.query<unknown, number | string>({
       query: (id) => ({
         url: `/admin/project/${id}`,
         method: "GET",
       }),
+      providesTags: ["PROJECT"],
     }),
   }),
-  
 });
 
 export const {
@@ -61,5 +66,5 @@ export const {
   useGetAllProjectsQuery,
   useDeleteProjectMutation,
   useUpdateProjectTitleMutation,
-  useGetSingleProjectQuery
+  useGetSingleProjectQuery,
 } = projectApi;

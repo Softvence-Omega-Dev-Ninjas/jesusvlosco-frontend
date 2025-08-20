@@ -2,6 +2,7 @@
 // Base types
 type UUID = string;
 type ISODateString = string;
+import { TProfile, TPayroll, TShift } from './shared';
 
 // Enums for better type safety
 export enum Gender {
@@ -76,68 +77,7 @@ export interface TExperience {
   startDate: ISODateString;
 }
 
-// Payroll related types
-export interface TPayroll {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
-  breakTimePerDay: BreakTimeType;
-  casualLeave: number;
-  numberOfDay: number;
-  offDay: DayOfWeek[];
-  overTimePayRate: number;
-  overTimePayRateType: PayRateType;
-  regularPayRate: number;
-  regularPayRateType: PayRateType;
-  sickLeave: number;
-}
-
-// Profile related types
-export interface TProfile {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
-  address: string | null;
-  city: string | null;
-  country: string | null;
-  department: string;
-  dob: ISODateString;
-  firstName: string;
-  gender: Gender;
-  jobTitle: string;
-  lastName: string;
-  nationality: string | null;
-  profileUrl: string | null;
-  state: string | null;
-  offDay?: string | null;
-}
-
-
-export interface TShift {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
-  allDay: boolean;
-  date: ISODateString;
-  endTime: ISODateString;
-  location: string;
-  note: string | null;
-  shiftStatus: ShiftStatus;
-  shiftTitle: string;
-  startTime: ISODateString;
-}
-
-export interface TProjectUser {
-  id: string;
-  projectId: string;
-  userId: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  user: TUser;
-}
+// Use shared types for profile, payroll, shift and project user
 type TShiftStatus = 'PUBLISHED' | 'DRAFT' | 'CANCELLED' | 'COMPLETED';
 export interface TShiftDTO {
   id: string;

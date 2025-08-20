@@ -1,4 +1,5 @@
-import { TShift } from "@/types/usertype";
+
+import { TShift } from "@/types/shared";
 import { formatTimeFromISO } from "@/utils/formatDateToMDY";
 import {  useState, useRef, useEffect } from "react";
 import { TiEqualsOutline } from "react-icons/ti";
@@ -38,7 +39,7 @@ const ShiftTemplateDropdown= ({shiftTemplates}: {shiftTemplates: TShift[]}) => {
                                           className="bg-indigo-600 text-white rounded-md px-3 py-2 text-sm cursor-pointer hover:bg-indigo-700"
                                     >
                                           <p className="font-semibold">{shift.shiftTitle}</p>
-                                          <p className="text-sm">{formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)}</p>
+                                          <p className="text-sm">{formatTimeFromISO(shift.startTime ?? "")} - {formatTimeFromISO(shift.endTime ?? "")}</p>
                                     </div>
                               ))}
 

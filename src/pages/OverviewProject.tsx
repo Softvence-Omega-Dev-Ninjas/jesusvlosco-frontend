@@ -30,18 +30,7 @@ import {
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { TProjectUser } from "@/types/usertype";
-
-interface Employee {
-  id: string;
-  profileUrl?: string;
-  name: string;
-  jobTitle: string;
-  project?: string;
-  shift?: string;
-  time?: string;
-  date?: string;
-  additionalProjects?: number;
-}
+import { formatTimeFromISO, parseISODate } from "@/utils/formatDateToMDY";
 
 const OverviewProject = () => {
   const projectId = useParams().id;
@@ -209,46 +198,46 @@ const OverviewProject = () => {
   };
 
   // Helper function to format date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch {
-      return "N/A";
-    }
-  };
+  // const formatDate = (dateString: string) => {
+  //   try {
+  //     const date = new Date(dateString);
+  //     const day = String(date.getDate()).padStart(2, "0");
+  //     const month = String(date.getMonth() + 1).padStart(2, "0");
+  //     const year = date.getFullYear();
+  //     return `${day}/${month}/${year}`;
+  //   } catch {
+  //     return "N/A";
+  //   }
+  // };
 
   // Process the employees data from API
-  const processedEmployees = data?.data
-    ? data.data.map((user: any, index: number) => {
-        const profile = user.profile;
-        const primaryProject = user.projects?.[0];
-        const additionalProjectsCount =
-          user.projects?.length > 1 ? user.projects.length - 1 : 0;
+  // const processedEmployees = data?.data
+  //   ? data.data.map((user: any, index: number) => {
+  //       const profile = user.profile;
+  //       const primaryProject = user.projects?.[0];
+  //       const additionalProjectsCount =
+  //         user.projects?.length > 1 ? user.projects.length - 1 : 0;
 
-        return {
-          id: user.id,
-          name: profile
-            ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim()
-            : "Unknown User",
-          jobTitle: getJobTitleDisplay(profile?.jobTitle),
-          profileUrl:
-            profile?.profileUrl ||
-            defaultAvatars[index % defaultAvatars.length],
-          project: primaryProject
-            ? primaryProject.title
-            : "No Project Assigned",
-          additionalProjects: additionalProjectsCount,
-          shift: "Morning", // Default since shift data structure seems to be empty in the API
-          time: "9:00am-5:00pm", // Default time
-          date: formatDate(user.updatedAt),
-          location: primaryProject?.projectLocation || "Not specified",
-        };
-      })
-    : [];
+  //       return {
+  //         id: user.id,
+  //         name: profile
+  //           ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim()
+  //           : "Unknown User",
+  //         jobTitle: getJobTitleDisplay(profile?.jobTitle),
+  //         profileUrl:
+  //           profile?.profileUrl ||
+  //           defaultAvatars[index % defaultAvatars.length],
+  //         project: primaryProject
+  //           ? primaryProject.title
+  //           : "No Project Assigned",
+  //         additionalProjects: additionalProjectsCount,
+  //         shift: "Morning", // Default since shift data structure seems to be empty in the API
+  //         time: "9:00am-5:00pm", // Default time
+  //         date: formatDate(user.updatedAt),
+  //         location: primaryProject?.projectLocation || "Not specified",
+  //       };
+  //     })
+  //   : [];
 
   // Show loading state
   if (isLoading) {
@@ -385,7 +374,7 @@ const OverviewProject = () => {
                                   {employee.user.profile.firstName}{" "}{employee.user.profile.lastName}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {employee.user.profile.jobTitle}
+                                  {getJobTitleDisplay(employee.user.profile.jobTitle)}
                                 </div>
                               </div>
                             </div>
@@ -401,27 +390,33 @@ const OverviewProject = () => {
                           {/* Shift */}
                           <div>
                             <div className="space-y-1">
-                              <div className="text-sm font-medium text-gray-500">
-                                {employee.user.shift.map((shift) => (
-                                  <div key={shift.id} className="space-y-1">
+                              <div className="text-sm font-medium text-gray-500 space-y-2">
+                               {
+                                employee.user.shift.length === 0 ? "No Shift" : employee.user.shift.map((shift) => (
+                                  <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
                                     <div className="text-xs text-gray-500">
                                       {shift.shiftTitle}
                                     </div>
                                     <div>
-                                      ({shift.startTime} - {shift.endTime})
+                                      ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
                                     </div>
-                                    
                                   </div>
-                                ))}
+                                ))
+                               }
                               </div>
-                              
                             </div>
                           </div>
 
                           {/* Date */}
                           <div>
-                            <div className="text-sm text-gray-700">
-                              {employee.date}
+                            <div className="text-sm text-gray-700 space-y-3">
+                              {
+                                employee.user.shift.length === 0? "No Shift" : employee.user.shift.map((shift) => (
+                                  <div key={shift.id} className="space-y-1">
+                                    {parseISODate(shift.date)?.toLocaleDateString()}
+                                  </div>
+                                ))
+                              }
                             </div>
                           </div>
                         </div>
