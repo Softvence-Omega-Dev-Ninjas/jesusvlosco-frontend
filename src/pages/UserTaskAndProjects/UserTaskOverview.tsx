@@ -1,15 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { NewTaskModal } from "./NewTaskModal";
-import { OverdueTasksModal } from "./OverdueTasksModal";
+
 
 interface TaskOverviewProps {
   setTaskStatus: React.Dispatch<React.SetStateAction<"" | "OPEN" | "DONE">>;
   taskStatus: "" | "OPEN" | "DONE";
   analytics: { total: number; done: number; open: number };
-  overDueTasks: any;
 }
 
-export function TaskOverview({ taskStatus, setTaskStatus, analytics, overDueTasks }: TaskOverviewProps) {
+export function UserTaskOverview({ taskStatus, setTaskStatus, analytics,}: TaskOverviewProps) {
   const handleTabClick = (tab: "" | "OPEN" | "DONE") => {
     setTaskStatus(tab);
   };
@@ -51,12 +48,6 @@ export function TaskOverview({ taskStatus, setTaskStatus, analytics, overDueTask
         >
           {analytics?.done} done tasks
         </button>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <OverdueTasksModal overDueTasks={overDueTasks} />
-
-        <NewTaskModal trigger={<Button className="bg-[#4E53B1] text-white w-fit cursor-pointer">+ Add Task</Button>} />
       </div>
     </div>
   );

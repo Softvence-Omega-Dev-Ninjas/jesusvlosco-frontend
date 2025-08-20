@@ -9,6 +9,10 @@ interface IUser {
   role: "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE"; // adjust roles as needed
   isLogin: boolean;
   isVerified: boolean;
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
   lastLoginAt: string; // ISO date string
   createdAt: string;
   updatedAt: string;

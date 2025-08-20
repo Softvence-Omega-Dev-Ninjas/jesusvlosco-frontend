@@ -15,7 +15,7 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  
+
   tagTypes: [
     "BLOG",
     "EditedContent",
@@ -28,7 +28,9 @@ export const baseApi = createApi({
     "PRIVATE_CHAT",
     "TEAM_CHAT",
     "survey",
-    "PROJECT"
+    "PROJECT",
+    "SCHEDULING_USER",
+    "TIME_CLOCK",
   ],
   endpoints: () => ({}),
 });

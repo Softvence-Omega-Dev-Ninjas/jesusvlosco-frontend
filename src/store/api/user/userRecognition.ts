@@ -4,11 +4,11 @@ const userRecognitionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCommentLike: builder.query({
       //TODO: API WILL CHANGE/UPDATE
-      query: ({type = "all",status = "DRAFT", orderBy = "asc" }) => ({
+      query: ({ type = "all", status = "DRAFT", orderBy = "asc" }) => ({
         url: "/employee/recognition/feed",
         method: "GET",
         params: {
-            type,
+          type,
           status,
           orderBy,
         },
