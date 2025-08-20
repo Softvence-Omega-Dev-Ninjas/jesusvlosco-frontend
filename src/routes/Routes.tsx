@@ -57,7 +57,7 @@ import UserRecognition from "@/pages/userpages/UserRecognition";
 import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
 import UserSurvey from "@/pages/userpages/UserSurvey";
 import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
-import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
+import UserTaskMainPage from "@/pages/UserTaskAndProjects/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import EmailLogin from "@/pages/email-login/EmailLogin";
@@ -150,6 +150,11 @@ const routes = createBrowserRouter([
         path: "user-task",
         element: <UserTaskMainPage></UserTaskMainPage>,
       },
+      {
+        path: "user-task/:id",
+        element: <UserTaskDetails></UserTaskDetails>,
+        // element: <TaskDeta,
+      },
 
       // dynamic routes
       {
@@ -161,7 +166,11 @@ const routes = createBrowserRouter([
 
   {
     path: "/admin",
-    element: <AdminRoute><AdminLayout /></AdminRoute>, // Admin shell with sidebar/header
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ), // Admin shell with sidebar/header
     children: [
       {
         index: true,
@@ -225,15 +234,15 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
+        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
       },
       { path: "publish-poll", element: <PublishSurvey /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => { }} />,
+        element: <PollTemplate onBackToPollCreation={() => {}} />,
       },
 
-      { path: "tasks-projects", element: <TasksAndProjects/> },
+      { path: "tasks-projects", element: <TasksAndProjects /> },
       { path: "user", element: <TaskAndProject /> },
 
       {

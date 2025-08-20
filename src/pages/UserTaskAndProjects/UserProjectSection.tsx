@@ -1,12 +1,7 @@
-import { TaskRow } from "./TaskRow";
+import { ProjectSectionProps } from "../TasksAndProjects/ProjectSection";
+import { UserTaskRow } from "./UserTaskRow";
 
-export interface ProjectSectionProps {
-  groupName: string;
-  tasks: any;
-  groupBy: string;
-}
-
-export function ProjectSection({ groupName, groupBy, tasks }: ProjectSectionProps) {
+export function UserProjectSection({ groupName, groupBy, tasks }: ProjectSectionProps) {
   return (
     <div className="overflow-hidden">
       {/* Project Header */}
@@ -44,7 +39,7 @@ export function ProjectSection({ groupName, groupBy, tasks }: ProjectSectionProp
           </thead>
           <tbody className="divide-y divide-gray-200">
             {tasks.map((task: any) => (
-              <TaskRow key={task?.id} task={task} />
+              <UserTaskRow key={task?.id} task={task} />
             ))}
           </tbody>
         </table>

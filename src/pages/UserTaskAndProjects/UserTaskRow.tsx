@@ -1,23 +1,9 @@
-import { StatusBadge } from "./StatusBadge";
-import { UserAvatar } from "./UserAvatar";
-
-// interface Task {
-//   id: string;
-//   name: string;
-//   status: "open" | "draft" | "done";
-//   label: string;
-//   startTime: string;
-//   dueDate: string;
-//   assignedTo: {
-//     name: string;
-//     avatar: string;
-//   };
-// }
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "../TasksAndProjects/StatusBadge";
+import { Link } from "react-router-dom";
 
 interface TaskRowProps {
   task: any;
-  // isSelected: boolean;
-  // onSelect: () => void;
 }
 
 export const formatCustomDate = (dateString: string) => {
@@ -37,7 +23,7 @@ export const formatCustomDate = (dateString: string) => {
   return `${day}/${month}/${year} at ${hours}:${minutes} ${ampm}`;
 };
 
-export function TaskRow({ task }: TaskRowProps) {
+export function UserTaskRow({ task }: TaskRowProps) {
   //Formate Custom date
 
   return (
@@ -69,9 +55,9 @@ export function TaskRow({ task }: TaskRowProps) {
       </td>
 
       {/* Assigned To */}
-      <td className="px-4 py-3">
-        <UserAvatar user={task?.assignTo} />
-      </td>
+      <Link to={`/user/user-task/${task?.id}`}>
+        <Button className="bg-[#4E53B1] text-white w-fit cursor-pointer mt-4">View Task</Button>
+      </Link>
     </tr>
   );
 }
