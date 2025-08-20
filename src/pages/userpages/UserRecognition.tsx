@@ -1,35 +1,69 @@
-// export default function UserRecognition() {
-//     return (
-//         <div>UserRecognition</div>
-//     )
-// }
-
 import down from "@/assets/arrow_drop_down.svg";
 import comment from "@/assets/comment.png";
-import Creative from "@/assets/creative.png";
-import GreatLea from "@/assets/Great Lea.png";
-import TeamPlayer from "@/assets/Team Player.png";
-import WellDone from "@/assets/Well Done!.png";
+import {
+  useGetAllCommentLikeQuery,
+  usePostCommentMutation,
+  usePostLikeMutation,
+  usePostReplyMutation,
+} from "@/store/api/user/userRecognition";
 import { Eye, Send, ThumbsUp } from "lucide-react";
-import { useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-interface Comment {
+// Fallback avatar image
+const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
+
+// Types (updated to ensure profileUrl is used)
+interface ApiUser {
+  id: string;
+  name?: string;
+  profileUrl?: string;
+  initial?: string;
+  firstName?: string;
+  lastName?: string;
+  jobTitle?: string;
+}
+
+interface ApiComment {
+  id: string;
+  comment: string;
+  user: ApiUser;
+  replies: ApiComment[];
+  reactions?: { id: string; reaction: string; user: ApiUser }[];
+  createdAt?: string;
+}
+
+interface ApiPost {
+  id: string;
+  badgeId: string;
+  message: string;
+  visibility: string;
+  shouldNotify: boolean;
+  isAllowedToLike: boolean;
+  createdAt: string;
+  updatedAt: string;
+  recognitionUsers: ApiUser[];
+  badge: { id: string; title: string; category: string; iconImage: string };
+  comments: ApiComment[];
+  reactions: { id: string; reaction: string; user: ApiUser }[];
+}
+
+interface TransformedComment {
   id: string;
   author: string;
-  authorInitials: string;
+  authorProfileUrl: string; // Changed from authorInitials
   authorColor: string;
   content: string;
   timestamp: string;
   likes: number;
   liked: boolean;
-  replies: Reply[];
+  replies: TransformedReply[];
   showReplyInput?: boolean;
 }
 
-interface Reply {
+interface TransformedReply {
   id: string;
   author: string;
-  authorInitials: string;
+  authorProfileUrl: string; // Changed from authorInitials
   authorColor: string;
   content: string;
   timestamp: string;
@@ -37,356 +71,298 @@ interface Reply {
   liked: boolean;
 }
 
-interface RecognitionPost {
+interface TransformedPost {
   id: string;
   recognizer: string;
-  recognizerInitials: string;
-  recipient: string;
+  recognizerProfileUrl: string; // Changed from recognizerInitials
   emoji: string;
-  recipientInitials: string;
+  recipients: { name: string; profileUrl: string }[]; // Changed from initials
   recognitionType: string;
+  message: string;
   timestamp: string;
+  visibility: string;
   liked: boolean;
   likeCount: number;
-  comments: Comment[];
+  comments: TransformedComment[];
 }
 
-const recognitionTypes = [
-  {
-    id: "creative",
-    title: "Creative",
-    emoji: Creative,
-    bgColor: "bg-yellow-100",
-  },
-  {
-    id: "well-done",
-    title: "Well Done!",
-    emoji: WellDone,
-    bgColor: "bg-pink-100",
-  },
-  {
-    id: "great-leadership",
-    title: "Great Leadership",
-    emoji: GreatLea,
-    bgColor: "bg-blue-100",
-  },
-  {
-    id: "team-player",
-    title: "Team Player",
-    emoji: TeamPlayer,
-    bgColor: "bg-orange-100",
-  },
-];
+interface RecognitionType {
+  id: string;
+  title: string;
+  emoji: string;
+  bgColor: string;
+}
 
-const samplePosts: RecognitionPost[] = [
-  {
-    id: "1",
-    recognizer: "Sarah Johnson",
-    recognizerInitials: "SJ",
-    emoji: Creative,
-    recipient: "Alex Chen",
-    recipientInitials: "AC",
-    recognitionType: "Creative",
-    timestamp: "22/06/2025 at 09:30",
-    liked: false,
-    likeCount: 0,
-    comments: [],
-  },
-  {
-    id: "2",
-    recognizer: "Michael Davis",
-    recognizerInitials: "MD",
-    emoji: WellDone,
-    recipient: "Emma Wilson",
-    recipientInitials: "EW",
-    recognitionType: "Well Done!",
-    timestamp: "21/06/2025 at 16:45",
-    liked: true,
-    likeCount: 0,
-    comments: [],
-  },
-  {
-    id: "3",
-    recognizer: "Sharmin Rahman",
-    recognizerInitials: "SR",
-    recipient: "Sahida Akter",
-    emoji: GreatLea,
-    recipientInitials: "SA",
-    recognitionType: "Great Leadership",
-    timestamp: "21/06/2025 at 15:25",
-    liked: false,
-    likeCount: 0,
-    comments: [],
-  },
-  {
-    id: "4",
-    recognizer: "David Kim",
-    recognizerInitials: "DK",
-    recipient: "Lisa Rodriguez",
-    emoji: TeamPlayer,
-    recipientInitials: "LR",
-    recognitionType: "Team Player",
-    timestamp: "20/06/2025 at 11:20",
-    liked: true,
-    likeCount: 0,
-    comments: [],
-  },
-  {
-    id: "5",
-    recognizer: "Jennifer Lee",
-    recognizerInitials: "JL",
-    recipient: "Mark Thompson",
-    recipientInitials: "MT",
-    emoji: Creative,
-    recognitionType: "Creative",
-    timestamp: "19/06/2025 at 14:15",
-    liked: false,
-    likeCount: 9,
-    comments: [],
-  },
-  {
-    id: "6",
-    recognizer: "Robert Brown",
-    recognizerInitials: "RB",
-    recipient: "Anna Garcia",
-    recipientInitials: "AG",
-    emoji: Creative,
-    recognitionType: "Well Done!",
-    timestamp: "18/06/2025 at 10:30",
-    liked: true,
-    likeCount: 18,
-    comments: [],
-  },
-];
+// Context to provide API functions globally
+export const ApiContext = createContext<{
+  postComment: (postId: string, commentContent: string) => Promise<void>;
+  postReply: (
+    postId: string,
+    commentId: string,
+    replyContent: string
+  ) => Promise<void>;
+  postLike: (postId: string) => Promise<void>;
+} | null>(null);
 
-export default function UserRecognition() {
-  const [posts, setPosts] = useState<RecognitionPost[]>(samplePosts);
-  const [selectedFilter, setSelectedFilter] = useState("All recognitions");
+export default function App() {
+  const [posts, setPosts] = useState<TransformedPost[]>([]);
+  const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>(
+    []
+  );
+  const [selectedFilter, setSelectedFilter] = useState("All Recognitions");
 
-  const handlePostLike = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((post) => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            liked: !post.liked,
-            likeCount: post.liked ? post.likeCount - 1 : post.likeCount + 1,
-          };
-        }
-        return post;
-      })
-    );
+  // Map UI filter values to API-compatible values
+  const filterMap: { [key: string]: string } = {
+    "All Recognitions": "all",
+    "My Recognitions": "my",
+    "Shared with me": "sharedWithMe",
   };
 
-  const handlePostComment = (postId: string, commentContent: string) => {
-    if (commentContent.trim()) {
-      const newComment: Comment = {
-        id: Date.now().toString(),
-        author: "You",
-        authorInitials: "YU",
-        authorColor: "bg-blue-500",
-        content: commentContent,
-        timestamp: "now",
-        likes: 0,
-        liked: false,
-        replies: [],
-      };
+  // RTK Query Hooks (pass selectedFilter to API)
+  const {
+    data: apiData,
+    error,
+    isLoading,
+    refetch,
+  } = useGetAllCommentLikeQuery({ filter: filterMap[selectedFilter] });
+  const [postCommentMutation] = usePostCommentMutation();
+  const [postReplyMutation] = usePostReplyMutation();
+  const [postLikeMutation] = usePostLikeMutation();
 
-      setPosts((prev) =>
-        prev.map((post) => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              comments: [...post.comments, newComment],
-            };
-          }
-          return post;
-        })
-      );
+  // Transform API data to component format (filter out MANAGERS visibility)
+  const transformApiData = (apiPosts: ApiPost[]): TransformedPost[] => {
+    return apiPosts
+      .filter((post) => post.visibility.toLowerCase() !== "managers") // Hide posts with MANAGERS visibility
+      .map((post) => ({
+        id: post.id,
+        recognizer: post.recognitionUsers[0]?.name || "Unknown",
+        recognizerProfileUrl:
+          post.recognitionUsers[0]?.profileUrl || FALLBACK_AVATAR,
+        emoji: post.badge.iconImage,
+        recipients: post.recognitionUsers.map((user) => ({
+          name: user.name ?? "Unknown",
+          profileUrl: user.profileUrl ?? FALLBACK_AVATAR,
+        })),
+        recognitionType: post.badge.title,
+        message: post.message,
+        timestamp: new Date(post.createdAt).toLocaleString(),
+        visibility: post.visibility,
+        liked: false, // No user ID, rely on localLiked state
+        likeCount: post.reactions.length,
+        comments: post.comments.map((comment) => ({
+          id: comment.id,
+          author: `${comment.user.firstName} ${comment.user.lastName}`,
+          authorProfileUrl: comment.user.profileUrl ?? FALLBACK_AVATAR,
+          authorColor: "bg-blue-500",
+          content: comment.comment,
+          timestamp: comment.createdAt
+            ? new Date(comment.createdAt).toLocaleString()
+            : new Date().toLocaleString(),
+          likes: comment.reactions?.length ?? 0,
+          liked: false, // No user ID, assume false
+          replies: comment.replies.map((reply) => ({
+            id: reply.id,
+            author: `${reply.user.firstName} ${reply.user.lastName}`,
+            authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
+            authorColor: "bg-orange-500",
+            content: reply.comment,
+            timestamp: reply.createdAt
+              ? new Date(reply.createdAt).toLocaleString()
+              : new Date().toLocaleString(),
+            likes: 0,
+            liked: false,
+          })),
+        })),
+      }));
+  };
+
+  // Update posts & recognition types when API data or filter changes
+  useEffect(() => {
+    if (apiData?.data) {
+      const transformed = transformApiData(apiData.data);
+      setPosts(transformed);
+
+      interface Badge {
+        id: string;
+        title: string;
+        category: string;
+        iconImage: string;
+      }
+
+      interface PostWithBadge {
+        badge: Badge;
+      }
+
+      const data = apiData?.data as PostWithBadge[];
+      const types: RecognitionType[] = data?.reduce((acc: RecognitionType[], post: PostWithBadge) => {
+        if (!acc.some((type) => type.id === post.badge.id)) {
+          acc.push({
+            id: post.badge.id,
+            title: post.badge.title,
+            emoji: post.badge.iconImage,
+            bgColor: `bg-${post.badge.category.toLowerCase()}-100`,
+          });
+        }
+        return acc;
+      }, [] as RecognitionType[]) || [];
+      setRecognitionTypes(types);
+    }
+  }, [apiData, selectedFilter]);
+
+  // API action functions
+  const postComment = async (postId: string, commentContent: string) => {
+    try {
+      await postCommentMutation({
+        recognitionId: postId,
+        comment: commentContent,
+      }).unwrap();
+      refetch();
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+    }
+  };
+
+  const postReply = async (
+    postId: string,
+    commentId: string,
+    replyContent: string
+  ) => {
+    try {
+      await postReplyMutation({
+        recognitionId: postId,
+        parentCommentId: commentId,
+        comment: replyContent,
+      }).unwrap();
+      refetch();
+    } catch (err) {
+      console.error("Failed to post reply:", err);
+    }
+  };
+
+  const postLike = async (postId: string) => {
+    try {
+      await postLikeMutation({ recognitionId: postId }).unwrap();
+      refetch();
+    } catch (err) {
+      console.error("Failed to post like:", err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-[#FFFFFF] max-w-lg mx-auto ">
-        <div className="max-w-2xl mx-auto px-6 py-6 ">
-          <h1 className="text-2xl font-bold text-[#484848] mb-6">
-            My Recognitions
-          </h1>
-
-          {/* Recognition Type Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
-            {recognitionTypes.map((type) => (
-              <div
-                key={type.id}
-                className="flex   flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
-                    <img src={type.emoji} alt="" />
+    <ApiContext.Provider value={{ postComment, postReply, postLike }}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Section */}
+        <div className="bg-[#FFFFFF] max-w-lg mx-auto">
+          <div className="max-w-2xl mx-auto px-6 py-6">
+            <h1 className="text-2xl font-bold text-[#484848] mb-6">
+              My Recognitions
+            </h1>
+            {/* Recognition Type Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {recognitionTypes.map((type) => (
+                <div
+                  key={type.id}
+                  className="flex flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
+                      <img
+                        src={type.emoji}
+                        alt={type.title}
+                        className="object-contain h-20"
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-gray-700">
+                      {type.title}
+                    </span>
                   </div>
-                  <span className="text-xs font-medium text-gray-700">
-                    {type.title}
-                  </span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-lg mx-auto  py-10 ">
-        {/* Feed Header */}
-        <div className="flex flex-col gap-4 md:flex-row items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-[#484848]">
-            Recognitions Feed
-          </h2>
-          <div className="relative w-fit">
-            <select
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="text-sm text-[#4E53B1] appearance-none border border-[#4E53B1] bg-white px-6 py-3 pr-10 rounded-full cursor-pointer outline-none"
-            >
-              <option>All Recognitions</option>
-              <option>My Recognitions</option>
-              <option>Shared with me</option>
-            </select>
-
-            {/* Custom down arrow icon */}
-            <img
-              src={down}
-              alt="Dropdown icon"
-              className="w-2 h-2 absolute right-6 top-1/2 transform -translate-y-1/2 pointer-events-none"
-            />
+        {/* Main Content */}
+        <div className="max-w-lg mx-auto py-10">
+          {/* Feed Header */}
+          <div className="flex flex-col gap-4 md:flex-row items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-[#484848]">
+              Recognitions Feed
+            </h2>
+            <div className="relative w-fit">
+              <select
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                className="text-sm text-[#4E53B1] appearance-none border border-[#4E53B1] bg-white px-6 py-3 pr-10 rounded-full cursor-pointer outline-none"
+              >
+                <option>All Recognitions</option>
+                <option>My Recognitions</option>
+                <option>Shared with me</option>
+              </select>
+              <img
+                src={down}
+                alt="Dropdown icon"
+                className="w-2 h-2 absolute right-6 top-1/2 transform -translate-y-1/2 pointer-events-none"
+              />
+            </div>
           </div>
-        </div>
-
-        {/* Recognition Posts Feed */}
-        <div className="space-y-6  ">
-          {posts.map((post) => (
-            <RecognitionPostCard
-              key={post.id}
-              post={post}
-              onLike={() => handlePostLike(post.id)}
-              onComment={(content) => handlePostComment(post.id, content)}
-            />
-          ))}
+          {/* Loading and Error states */}
+          {isLoading && <p className="text-center">Loading recognitions...</p>}
+          {error && (
+            <p className="text-center text-red-500">
+              Error loading recognitions. Please try again.
+            </p>
+          )}
+          {/* Recognition Posts Feed */}
+          {!isLoading && !error && (
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <RecognitionPostCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </ApiContext.Provider>
   );
 }
 
-// Individual Recognition Post Component
-function RecognitionPostCard({
-  post,
-  onLike,
-  onComment,
-}: {
-  post: RecognitionPost;
-  onLike: () => void;
-  onComment: (content: string) => void;
-}) {
+// Sub-component for a single recognition post
+function RecognitionPostCard({ post }: { post: TransformedPost }) {
+  const context = useContext(ApiContext);
+  const postComment = context?.postComment ?? (() => Promise.resolve());
+  const postLike = context?.postLike ?? (() => Promise.resolve());
   const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState<Comment[]>(post.comments);
+  const [comments, setComments] = useState(post.comments);
+  const [isCommenting, setIsCommenting] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [localLiked, setLocalLiked] = useState(post.liked);
+  const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
 
-  const handleCommentLike = (commentId: string) => {
-    setComments((prev) =>
-      prev.map((comment) => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            liked: !comment.liked,
-            likes: comment.liked ? comment.likes - 1 : comment.likes + 1,
-          };
-        }
-        return comment;
-      })
-    );
+  // Update comments state when post prop changes
+  useEffect(() => {
+    setComments(post.comments);
+    setLocalLikeCount(post.likeCount);
+  }, [post]);
+
+  const handlePostLike = async () => {
+    setIsLiking(true);
+    setLocalLiked(true);
+    setLocalLikeCount((prev) => prev + 1);
+    await postLike(post.id);
+    setIsLiking(false);
   };
 
-  const handleReplyLike = (commentId: string, replyId: string) => {
-    setComments((prev) =>
-      prev.map((comment) => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            replies: comment.replies.map((reply) => {
-              if (reply.id === replyId) {
-                return {
-                  ...reply,
-                  liked: !reply.liked,
-                  likes: reply.liked ? reply.likes - 1 : reply.likes + 1,
-                };
-              }
-              return reply;
-            }),
-          };
-        }
-        return comment;
-      })
-    );
-  };
-
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (newComment.trim()) {
-      onComment(newComment);
-      const comment: Comment = {
-        id: Date.now().toString(),
-        author: "You",
-        authorInitials: "YU",
-        authorColor: "bg-blue-500",
-        content: newComment,
-        timestamp: "now",
-        likes: 0,
-        liked: false,
-        replies: [],
-      };
-      setComments((prev) => [...prev, comment]);
+      setIsCommenting(true);
+      await postComment(post.id, newComment);
       setNewComment("");
       setShowCommentInput(false);
+      setShowComments(true);
+      setIsCommenting(false);
     }
-  };
-
-  const handleAddReply = (commentId: string, replyContent: string) => {
-    if (replyContent.trim()) {
-      const reply: Reply = {
-        id: Date.now().toString(),
-        author: "Sahida Akter",
-        authorInitials: "SA",
-        authorColor: "bg-orange-500",
-        content: replyContent,
-        timestamp: "now",
-        likes: 0,
-        liked: false,
-      };
-
-      setComments((prev) =>
-        prev.map((comment) => {
-          if (comment.id === commentId) {
-            return {
-              ...comment,
-              replies: [...comment.replies, reply],
-              showReplyInput: false,
-            };
-          }
-          return comment;
-        })
-      );
-    }
-  };
-
-  const toggleReplyInput = (commentId: string) => {
-    setComments((prev) =>
-      prev.map((comment) => ({
-        ...comment,
-        showReplyInput:
-          comment.id === commentId ? !comment.showReplyInput : false,
-      }))
-    );
   };
 
   const totalComments = comments.reduce(
@@ -395,46 +371,47 @@ function RecognitionPostCard({
   );
 
   return (
-    <div className="max-w-lg mx-auto rounded-xl  bg-white p-4 border-gray-200">
+    <div className="max-w-lg mx-auto rounded-xl bg-white p-4 border-gray-200">
       {/* Main Post Content */}
-      <div className="relative rounded-2xl bg-[#FFF6DC] p-8  overflow-hidden">
+      <div className="relative rounded-2xl bg-[#FFF6DC] p-8 overflow-hidden">
         {/* Header */}
         <div className="text-center mb-6">
           <h2 className="text-lg font-semibold text-[#484848]">
-            {post.recognizer} Recognized {post.recipient}
+            {post.recognizer} is Recognized{" "}
+            {/* {post.recipients.map((r) => r.name).join(", ")} */}
           </h2>
+          <p className="text-gray-600 mt-2">{post.message}</p>
         </div>
-
-        {/* ✅ Responsive Profile Section */}
-        <div className="flex  sm:flex-row items-center justify-center gap-2 md:gap-8 mb-6">
-          {/* Recognizer */}
+        {/* Responsive Profile Section */}
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-8 mb-6">
           <div className="flex flex-col items-center">
-            <div
-              className={`w-14 h-14 text-white font-bold text-lg rounded-full flex items-center justify-center bg-[#FDD835]`}
-            >
-              {post.recognizerInitials}
-            </div>
+            <img
+              src={post.recognizerProfileUrl}
+              alt={post.recognizer}
+              className="w-14 h-14 rounded-full object-cover"
+              onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
+            />
           </div>
-
-          {/* Icon */}
           <div className="flex flex-col items-center">
             <div className="w-26 h-26 p-4 bg-[#FFFBEFB8] rounded-full flex items-center justify-center">
-              <div>
-                <img src={post.emoji} alt="emoji" className="" />
-              </div>
+              <img
+                src={post.emoji}
+                alt="badge"
+                className="object-contain h-16"
+              />
             </div>
           </div>
-
-          {/* Recipient */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-14 h-14 text-white font-bold text-lg rounded-full flex items-center justify-center bg-[#FFA000]`}
-            >
-              {post.recipientInitials}
+          {post.recipients.slice(0, 1).map((recipient, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <img
+                src={recipient.profileUrl}
+                alt={recipient.name}
+                className="w-14 h-14 rounded-full object-cover"
+                onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
+              />
             </div>
-          </div>
+          ))}
         </div>
-
         {/* Recognition Text */}
         <div className="text-center">
           <h3 className="text-2xl font-bold text-[#484848]">
@@ -442,65 +419,79 @@ function RecognitionPostCard({
           </h3>
         </div>
       </div>
-
       {/* Post Metadata */}
-      <div className="px-4 py-3  ">
+      <div className="px-4 py-3">
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span>{post.timestamp}</span>
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
-            <span>Everyone can see this</span>
+            <span>{post.visibility.replace(/_/g, " ")}</span>
           </div>
         </div>
       </div>
-
       {/* Action Buttons */}
-      <div className=" py-3 ">
+      <div className="py-3">
         <div className="flex gap-4">
           <button
-            onClick={onLike}
-            className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4  transition-colors cursor-pointer hover:bg-gray-50 ${
-              post.liked ? "text-[#FFA000]" : "text-gray-600"
+            onClick={handlePostLike}
+            disabled={isLiking || localLiked}
+            className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4 transition-colors cursor-pointer hover:bg-gray-50 ${
+              localLiked ? "text-[#FFA000]" : "text-gray-600"
             }`}
           >
             <ThumbsUp
-              className={`w-4 h-4 ${post.liked ? "fill-current" : ""}`}
+              className={`w-4 h-4 ${localLiked ? "fill-current" : ""}`}
             />
-            Like
+            {isLiking ? "Liking..." : "Like"}
           </button>
           <button
-            className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full  transition-colors cursor-pointer hover:bg-gray-50"
-            onClick={() => setShowCommentInput(!showCommentInput)}
+            className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
+            onClick={() => {
+              setShowCommentInput(!showCommentInput);
+              setShowComments(true);
+            }}
           >
-            {/* <MessageCircle className="w-4 h-4" /> */}
             <img src={comment} alt="" className="w-4 h-4" />
             Comment
           </button>
         </div>
       </div>
-
       {/* Engagement Stats */}
-      {post.likeCount > 0 && (
+      {(localLikeCount > 0 || totalComments > 0) && (
         <div className="px-6 py-2 border-b border-t border-gray-100">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center gap-1">
-              <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
-              <span>{post.likeCount}</span>
+              {localLikeCount > 0 && (
+                <>
+                  <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                  <span>{localLikeCount}</span>
+                </>
+              )}
             </div>
-            <span>
-              {totalComments} {totalComments === 1 ? "Comment" : "Comments"}
-            </span>
+            {totalComments > 0 && (
+              <button
+                className="hover:underline cursor-pointer"
+                onClick={() => setShowComments(!showComments)}
+              >
+                {showComments
+                  ? "Hide Comments"
+                  : `${totalComments} ${
+                      totalComments === 1 ? "Comment" : "Comments"
+                    }`}
+              </button>
+            )}
           </div>
         </div>
       )}
-
       {/* Comment Input */}
       {showCommentInput && (
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex gap-3">
-            <div className="w-8 h-8 bg-blue-500 text-white font-semibold text-sm rounded-full flex items-center justify-center">
-              YU
-            </div>
+            <img
+              src={FALLBACK_AVATAR}
+              alt="Current User"
+              className="w-8 h-8 rounded-full object-cover"
+            />
             <div className="flex-1">
               <textarea
                 placeholder="Write a comment..."
@@ -521,99 +512,26 @@ function RecognitionPostCard({
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   onClick={handleAddComment}
-                  disabled={!newComment.trim()}
+                  disabled={!newComment.trim() || isCommenting}
                 >
                   <Send className="w-4 h-4" />
-                  Post
+                  {isCommenting ? "Posting..." : "Post"}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-
       {/* Comments Section */}
-      {comments.length > 0 && (
+      {showComments && comments.length > 0 && (
         <div className="px-6 py-4">
           <div className="space-y-4">
             {comments.map((comment) => (
-              <div key={comment.id} className="space-y-3">
-                {/* Main Comment */}
-                <div className="flex gap-3">
-                  <div
-                    className={`w-8 h-8 ${comment.authorColor} text-white font-semibold text-sm rounded-full flex items-center justify-center`}
-                  >
-                    {comment.authorInitials}
-                  </div>
-                  <div className="flex-1">
-                    <div className="bg-gray-100 rounded-2xl px-4 py-2">
-                      <div className="font-semibold text-sm text-gray-800 mb-1">
-                        {comment.author}
-                      </div>
-                      <div className="text-gray-700">{comment.content}</div>
-                    </div>
-                    <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                      <span>{comment.timestamp}</span>
-                      <button
-                        className={`hover:underline cursor-pointer ${
-                          comment.liked ? "text-blue-600 font-semibold" : ""
-                        }`}
-                        onClick={() => handleCommentLike(comment.id)}
-                      >
-                        Like {comment.likes > 0 && `(${comment.likes})`}
-                      </button>
-                      <button
-                        className="hover:underline cursor-pointer"
-                        onClick={() => toggleReplyInput(comment.id)}
-                      >
-                        Reply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Reply Input */}
-                {comment.showReplyInput && (
-                  <div className="ml-11">
-                    <ReplyInput
-                      onSubmit={(content) =>
-                        handleAddReply(comment.id, content)
-                      }
-                      onCancel={() => toggleReplyInput(comment.id)}
-                    />
-                  </div>
-                )}
-
-                {/* Replies */}
-                {comment.replies.map((reply) => (
-                  <div key={reply.id} className="flex gap-3 ml-11">
-                    <div
-                      className={`w-8 h-8 ${reply.authorColor} text-white font-semibold text-sm rounded-full flex items-center justify-center`}
-                    >
-                      {reply.authorInitials}
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-gray-100 rounded-2xl px-4 py-2">
-                        <div className="font-semibold text-sm text-gray-800 mb-1">
-                          {reply.author}
-                        </div>
-                        <div className="text-gray-700">{reply.content}</div>
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                        <span>{reply.timestamp}</span>
-                        <button
-                          className={`hover:underline cursor-pointer ${
-                            reply.liked ? "text-blue-600 font-semibold" : ""
-                          }`}
-                          onClick={() => handleReplyLike(comment.id, reply.id)}
-                        >
-                          Like {reply.likes > 0 && `(${reply.likes})`}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CommentCard
+                key={comment.id}
+                comment={comment}
+                postId={post.id}
+              />
             ))}
           </div>
         </div>
@@ -622,50 +540,119 @@ function RecognitionPostCard({
   );
 }
 
-// Reply Input Component
-function ReplyInput({
-  onSubmit,
-  onCancel,
+// Sub-component for a single comment and its replies
+function CommentCard({
+  comment,
+  postId,
 }: {
-  onSubmit: (content: string) => void;
-  onCancel: () => void;
+  comment: TransformedComment;
+  postId: string;
 }) {
-  const [replyContent, setReplyContent] = useState("");
+  const context = useContext(ApiContext);
+  const postReply = context?.postReply ?? (() => Promise.resolve());
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [newReply, setNewReply] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
 
-  const handleSubmit = () => {
-    onSubmit(replyContent);
-    setReplyContent("");
+  const handleAddReply = async () => {
+    if (newReply.trim()) {
+      setIsReplying(true);
+      await postReply(postId, comment.id, newReply);
+      setNewReply("");
+      setShowReplyInput(false);
+      setIsReplying(false);
+    }
   };
 
   return (
-    <div className="flex gap-3">
-      <div className="w-8 h-8 bg-orange-500 text-white font-semibold text-sm rounded-full flex items-center justify-center">
-        SA
-      </div>
-      <div className="flex-1">
-        <textarea
-          placeholder="Write a reply..."
-          value={replyContent}
-          onChange={(e) => setReplyContent(e.target.value)}
-          className="w-full min-h-[60px] p-3 border border-gray-200 rounded-md resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+    <div className="space-y-3">
+      {/* Main Comment */}
+      <div className="flex gap-3">
+        <img
+          src={comment.authorProfileUrl}
+          alt={comment.author}
+          className="w-8 h-8 rounded-full object-cover"
+          onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
         />
-        <div className="flex justify-end gap-2 mt-2">
-          <button
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-            onClick={handleSubmit}
-            disabled={!replyContent.trim()}
-          >
-            <Send className="w-4 h-4" />
-            Reply
-          </button>
+        <div className="flex-1">
+          <div className="bg-gray-100 rounded-2xl px-4 py-2">
+            <div className="font-semibold text-sm text-gray-800 mb-1">
+              {comment.author}
+            </div>
+            <div className="text-gray-700">{comment.content}</div>
+          </div>
+          <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+            <span>{comment.timestamp}</span>
+            <button
+              className="hover:underline cursor-pointer"
+              onClick={() => setShowReplyInput(!showReplyInput)}
+            >
+              Reply
+            </button>
+          </div>
         </div>
       </div>
+      {/* Reply Input */}
+      {showReplyInput && (
+        <div className="ml-11">
+          <div className="flex gap-3">
+            <img
+              src={FALLBACK_AVATAR}
+              alt="Current User"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <div className="flex-1">
+              <textarea
+                placeholder="Write a reply..."
+                value={newReply}
+                onChange={(e) => setNewReply(e.target.value)}
+                className="w-full min-h-[60px] p-3 border border-gray-200 rounded-md resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                  onClick={() => {
+                    setShowReplyInput(false);
+                    setNewReply("");
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  onClick={handleAddReply}
+                  disabled={!newReply.trim() || isReplying}
+                >
+                  <Send className="w-4 h-4" />
+                  {isReplying ? "Replying..." : "Reply"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Replies */}
+      {comment.replies.map((reply) => (
+        <div key={reply.id} className="flex gap-3 ml-11">
+          <img
+            src={reply.authorProfileUrl}
+            alt={reply.author}
+            className="w-8 h-8 rounded-full object-cover"
+            onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
+          />
+          <div className="flex-1">
+            <div className="bg-gray-100 rounded-2xl px-4 py-2">
+              <div className="font-semibold text-sm text-gray-800 mb-1">
+                {reply.author}
+              </div>
+              <div className="text-gray-700">{reply.content}</div>
+            </div>
+            <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+              <span>{reply.timestamp}</span>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
