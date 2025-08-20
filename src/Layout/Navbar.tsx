@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   return (
-    <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2">
+    <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2 br">
       <div className="flex items-center justify-between">
         {/* Mobile menu button */}
         <button

@@ -123,13 +123,12 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
               title: "Chat Initiated",
               text: "You are connected to this user",
             });
-        
+
             if (result?.message?.conversationId) {
               setSelectedChatId(result.message.conversationId);
               setMobileView("chat");
             } else {
               setTimeout(() => {
-              
                 const newChat = privateChats.find(
                   (chat: TPrivateChat) => chat.participant?.id === userId
                 );
@@ -275,7 +274,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       // console.log(`Sending message to ${recipientId}: ${messageInput}`);
 
       try {
-         await sendPrivateMessage({
+        await sendPrivateMessage({
           recipientId: recipientId,
           messageInput: messageInput, // Initial greeting message
           userId: userId || "",
