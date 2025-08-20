@@ -1,11 +1,19 @@
-import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const DateTimePicker: React.FC = () => {
-  const [publishNow, setPublishNow] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+interface TDateTimePicker {
+  publishNow: boolean;
+  setPublishNow: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedDate: Date | null;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
+}
 
+const DateTimePicker = ({
+  publishNow,
+  setPublishNow,
+  selectedDate,
+  setSelectedDate,
+}: TDateTimePicker) => {
   return (
     <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:gap-6 w-full">
       {/* Radio Buttons */}

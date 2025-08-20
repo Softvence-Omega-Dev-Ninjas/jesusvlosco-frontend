@@ -6,43 +6,48 @@ import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi"
 import { TChat, TPrivateChat } from "@/types/chatType";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-// import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
-// team tab removed - no team API used here
-
-// Chat interface matching ChatWindow types
-
-
-
 // Props interface for the Chat component
 interface ChatProps {
   handleChatSelect?: (chatId: string) => void;
   selectedChatId?: string;
-  className?: string;
+  className?: string; 
 }
 
-export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatProps) => {
+export const Chat = ({
+  handleChatSelect,
+  selectedChatId,
+  className = "",
+}: ChatProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
-  console.log(user)
+  console.log(user);
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = ["All", "Unread"];
 
   // Fetch private chats using Redux
   const { data: conversationsData } = useGetPrivateChatQuery([]);
-  const privateChats = conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
+  const privateChats =
+    conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
   // console.log(privateChats, "Private Chats Data in Chat");
 
   // Filter chats based on search term and active tab
   const filteredChats = privateChats.filter((chat: TPrivateChat) => {
     const matchesSearch =
-      chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      chat.participant.profile.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (chat.lastMessage?.content || "").toLowerCase().includes(searchTerm.toLowerCase());
+      chat.participant.profile.firstName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      chat.participant.profile.lastName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (chat.lastMessage?.content || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-    const matchesTab = activeTab === "All" || (activeTab === "Unread" && chat.unread);
+    const matchesTab =
+      activeTab === "All" || (activeTab === "Unread" && chat.unread);
 
     return matchesSearch && matchesTab;
   });
@@ -102,7 +107,9 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
   }, []);
 
   return (
-    <div className={`min-w-sm rounded-2xl p-3 border border-gray-200 ${className}`}>
+    <div
+      className={`min-w-sm rounded-2xl p-3 border border-gray-200 ${className}`}
+    >
       <div className="max-h-140 h-140 overflow-hidden flex flex-col w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -151,8 +158,9 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
           ref={chatListRef}
           className="flex-1 overflow-y-auto"
           style={{
-            overscrollBehavior: 'contain' as React.CSSProperties['overscrollBehavior'],
-            touchAction: 'pan-y'
+            overscrollBehavior:
+              "contain" as React.CSSProperties["overscrollBehavior"],
+            touchAction: "pan-y",
           }}
         >
           <div className="space-y-1">
@@ -162,7 +170,9 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
                 className={`flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer group ${
                   chat.unread ? "bg-[#EDEEF7]" : ""
                 } ${
-                  selectedChatId === chat.chatId ? "bg-indigo-50 hover:bg-indigo-50" : ""
+                  selectedChatId === chat.chatId
+                    ? "bg-indigo-50 hover:bg-indigo-50"
+                    : ""
                 }`}
                 onClick={() => {
                   handleChatSelect?.(chat.chatId);
@@ -195,7 +205,9 @@ export const Chat = ({ handleChatSelect, selectedChatId, className = "" }: ChatP
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-semibold text-gray-900 truncate capitalize">
-                      {chat.participant.profile.firstName + " " + chat.participant.profile.lastName}
+                      {chat.participant.profile.firstName +
+                        " " +
+                        chat.participant.profile.lastName}
                     </span>
                     <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                       {formatDistanceToNow(new Date(chat?.updatedAt), {

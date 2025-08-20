@@ -1,17 +1,10 @@
 // SurveyMainPage.tsx
 import React, { useState } from "react";
-import {
-  Plus,
-  Search,
-  Calendar,
-  Eye,
-  Columns3,
-  ChevronDown,
-  ListFilter,
-} from "lucide-react";
+import { Plus, Search, Eye, Columns3, ChevronDown } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
-import { BiSolidEditAlt } from "react-icons/bi";
+import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
+import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 
 // Interface for Survey data structure (unchanged)
 interface Survey {
@@ -22,6 +15,11 @@ interface Survey {
   endDate: string;
   status: "Active" | "Completed" | "Pending";
   assignTo: string;
+  createdBY: string;
+  description: string;
+  surveyType: string;
+  publishTime: string;
+  createdAt: string; // Added to match the new data structure
 }
 
 // Interface for Survey statistics data structure (unchanged)
@@ -70,7 +68,7 @@ const SurveyMainPage: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [columnOptions, setColumnOptions] = useState<ColumnOption[]>([
-    { id: "checkbox", label: "", isVisible: true },
+    // { id: "checkbox", label: "", isVisible: true },
     { id: "title", label: "Survey title", isVisible: true },
     { id: "createdBy", label: "Created By", isVisible: true },
     { id: "startDate", label: "Start Date", isVisible: true },
@@ -104,80 +102,11 @@ const SurveyMainPage: React.FC = () => {
   );
 
   // Sample data for surveys
-  const surveys: Survey[] = [
-    {
-      id: "1",
-      title: "Employee Satisfaction Survey",
-      createdBy: "HR Manager",
-      startDate: "05/01/2024",
-      endDate: "05/15/2025",
-      status: "Active",
-      assignTo: "+3",
-    },
-    {
-      id: "2",
-      title: "Workplace Safety",
-      createdBy: "Safety Lead",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Completed",
-      assignTo: "Team A", // This will be clickable
-    },
-    {
-      id: "3",
-      title: "Remote Work Feedback",
-      createdBy: "Team Lead",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+5",
-    },
-    {
-      id: "4",
-      title: "Employee Wellness Check",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "Team B", // This will be clickable
-    },
-    {
-      id: "5",
-      title: "Diversity & Inclusion Feedback",
-      createdBy: "HR Manager",
-      startDate: "05/01/2024",
-      endDate: "05/01/2024",
-      status: "Completed",
-      assignTo: "Team C", // This will be clickable
-    },
-    {
-      id: "6",
-      title: "Team Collaboration Survey",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+3",
-    },
-    {
-      id: "7",
-      title: "New Policy Awareness",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Completed",
-      assignTo: "+3",
-    },
-    {
-      id: "8",
-      title: "Employee Engagement Pulse",
-      createdBy: "HR Manager",
-      startDate: "04/20/2025",
-      endDate: "04/20/2025",
-      status: "Active",
-      assignTo: "+5",
-    },
-  ];
+  const { data: surveyData, isLoading, isError } = useGetAllSurveysQuery(null);
+  if (isLoading) return <TableLoadingSpinner />;
+  if (isError) return <p>Failed to fetch surveys</p>;
+  const surveys = surveyData?.data || [];
+  console.log(surveys[0]);
 
   // NEW: Sample data for team members
   const teamsData: Record<string, TeamMember[]> = {
@@ -331,11 +260,11 @@ const SurveyMainPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case "Active":
+      case "ACTIVE":
         return `${baseClasses} bg-green-100 text-green-800`;
-      case "Completed":
+      case "COMPLETED":
         return `${baseClasses} bg-orange-100 text-orange-800`;
-      case "Pending":
+      case "PENDING":
         return `${baseClasses} bg-gray-100 text-gray-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -373,10 +302,10 @@ const SurveyMainPage: React.FC = () => {
   };
 
   // Available filter options for the Filter Modal (unchanged)
-  const filterOptions = ["All", "Active", "Completed"];
+  const filterOptions = ["All", "ACTIVE", "COMPLETED"];
 
   // Filter surveys based on selected filters (unchanged, with searchTerm integration)
-  const filteredSurveys = surveys.filter((survey) => {
+  const filteredSurveys = surveys?.filter((survey: any) => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     const matchesSearchTerm = Object.values(survey).some((value) =>
       String(value).toLowerCase().includes(lowerCaseSearchTerm)
@@ -433,13 +362,15 @@ const SurveyMainPage: React.FC = () => {
             />
 
             {/* Quick View Modal */}
-            <UniversalModal
-              isOpen={openModalType === "quickView"}
-              onClose={() => setOpenModalType(null)}
-              modalType="quickView"
-              surveyData={selectedSurveyForQuickView}
-              // initialPosition={{ x: 1450, y: 430 }}
-            />
+            <div className="">
+              <UniversalModal
+                isOpen={openModalType === "quickView"}
+                onClose={() => setOpenModalType(null)}
+                modalType="quickView"
+                surveyData={selectedSurveyForQuickView}
+                // initialPosition={{ x: 1450, y: 430 }}
+              />
+            </div>
 
             {/* NEW: Team Members Modal */}
             <UniversalModal
@@ -488,7 +419,7 @@ const SurveyMainPage: React.FC = () => {
             />
           </div>
           {/* Date button */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               className="flex items-center gap-2 px-4 py-2 text-[#5B5B5B] border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
               onClick={() => setOpenModalType("calendar")}
@@ -496,11 +427,11 @@ const SurveyMainPage: React.FC = () => {
               <Calendar size={16} />
               Date
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="px-3 py-4  flex items-center justify-between">
+          {/* <div className="px-3 py-4  flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[#484848]">
               Survey Table
             </h2>
@@ -513,12 +444,12 @@ const SurveyMainPage: React.FC = () => {
                 Filter
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Survey Table */}
           <div className="w-full overflow-x-auto ">
             <table className="min-w-[900px] w-full">
-              <thead className="bg-gray-50   ">
+              <thead>
                 <tr>
                   {visibleColumns.map((column) => (
                     <th
@@ -549,53 +480,71 @@ const SurveyMainPage: React.FC = () => {
                   ))}
                 </tr>
               </thead>
-              <tbody className="">
-                {filteredSurveys.map((survey) => (
+              <tbody>
+                {filteredSurveys?.map((survey: any) => (
                   <tr key={survey.id} className="hover:bg-gray-50">
                     {visibleColumns.map((column) => (
                       <td
                         key={`${survey.id}-${column.id}`}
                         className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                       >
-                        {column.id === "checkbox" && (
+                        {/* {column.id === "checkbox" && (
                           <input
                             type="checkbox"
                             className="rounded border-gray-300"
                           />
-                        )}
+                        )} */}
                         {column.id === "title" && (
-                          <span className=" text-[#484848]">
+                          <span className="font-normal  text-[#484848] text-base capitalize">
                             {survey.title}
                           </span>
                         )}
-                        {column.id === "createdBy" && survey.createdBy}
-                        {column.id === "startDate" && survey.startDate}
-                        {column.id === "endDate" && survey.endDate}
+                        {column.id === "createdBy" && survey.createdBY}
+                        {column.id === "startDate" && (
+                          <span className="text-gray-700">
+                            {new Date(survey.createdAt).toLocaleDateString(
+                              "en-US"
+                            )}{" "}
+                          </span>
+                        )}
+
+                        {column.id === "endDate" && (
+                          <span className="text-gray-700">
+                            {new Date(survey.publishTime).toLocaleDateString(
+                              "en-US"
+                            )}{" "}
+                          </span>
+                        )}
+
                         {column.id === "status" && (
-                          <span className={getStatusBadge(survey.status)}>
+                          <span
+                            className={`${getStatusBadge(survey.status)} p-1`}
+                          >
                             {survey.status}
                           </span>
                         )}
                         {column.id === "assignTo" && (
                           <div className="flex items-center">
-                            {/* Conditional rendering for assignTo based on content */}
-                            {survey.assignTo.startsWith("+") ? (
+                            {survey.assignTo ? (
                               <span className="bg-gray-100 text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
-                                {survey.assignTo}
+                                {survey.assignedTo}
                               </span>
                             ) : (
-                              // If it's a team name, make it clickable and style it
                               <button
                                 className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:bg-indigo-200"
                                 onClick={() =>
-                                  handleTeamAssignClick(survey.assignTo)
-                                } // Call the new handler
+                                  handleTeamAssignClick(survey.assignedTo)
+                                }
                               >
-                                {survey.assignTo}
+                                {survey.assignedTo}
                               </button>
                             )}
                           </div>
                         )}
+
+                        <span className="text-[#484848] px-2 py-1 rounded-full text-xs font-medium">
+                          {survey.assignTo}
+                        </span>
                         {column.id === "action" && (
                           <div className="flex items-center gap-3">
                             <button
@@ -606,9 +555,6 @@ const SurveyMainPage: React.FC = () => {
                               }}
                             >
                               <Eye size={24} />
-                            </button>
-                            <button className="text-gray-600 cursor-pointer">
-                              <BiSolidEditAlt size={24} />
                             </button>
                           </div>
                         )}
@@ -645,9 +591,7 @@ const SurveyMainPage: React.FC = () => {
                 >
                   <div className="flex flex-col items-center">
                     <div className="text-center  mt-4">
-                      <h4 className="text-xl text-primary">
-                        {stat.title}
-                      </h4>
+                      <h4 className="text-xl text-primary">{stat.title}</h4>
                       <p className="text-xl  my-2 text-primary">
                         {stat.subtitle}
                       </p>
@@ -660,10 +604,12 @@ const SurveyMainPage: React.FC = () => {
                       <p className="  mt-2">{stat.responseRate}</p>
                       <p className=" ">{stat.responseCount}</p>
 
-                      <Link to={"/admin/survey-response"}> <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
-                        View
-                      </button></Link>
-                     
+                      <Link to={"/admin/survey-response"}>
+                        {" "}
+                        <button className="mt-2 text-primary text-sm font-medium border-b cursor-pointer">
+                          View
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -713,11 +659,12 @@ const SurveyMainPage: React.FC = () => {
                         },
                         optionIndex: number
                       ) => (
-                        <div key={optionIndex} className=" border-b-2 border-gray-300 pb-2 mb-2 ">
+                        <div
+                          key={optionIndex}
+                          className=" border-b-2 border-gray-300 pb-2 mb-2 "
+                        >
                           <div className="flex items-center justify-between mb-1 ">
-                            <span className="text-sm ">
-                              {option.label}
-                            </span>
+                            <span className="text-sm ">{option.label}</span>
                             <span className="text-sm font-medium ">
                               {option.percentage}%
                             </span>
