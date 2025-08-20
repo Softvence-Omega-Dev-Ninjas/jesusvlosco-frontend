@@ -3,15 +3,14 @@ import React, { useState } from "react";
 import {
   Plus,
   Search,
-  Calendar,
   Eye,
   Columns3,
   ChevronDown,
-  ListFilter,
 } from "lucide-react";
 import UniversalModal from "@/components/Admin/UniversalModal";
 import { Link } from "react-router-dom";
 import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
+import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 
 // Interface for Survey data structure (unchanged)
 interface Survey {
@@ -22,6 +21,11 @@ interface Survey {
   endDate: string;
   status: "Active" | "Completed" | "Pending";
   assignTo: string;
+  createdBY: string;
+  description: string;
+  surveyType: string;
+  publishTime: string;
+  createdAt: string; // Added to match the new data structure
 }
 
 // Interface for Survey statistics data structure (unchanged)
@@ -105,10 +109,12 @@ const SurveyMainPage: React.FC = () => {
 
   // Sample data for surveys
   const { data: surveyData, isLoading, isError } = useGetAllSurveysQuery(null);
-  if (isLoading) return <p>Loading surveys...</p>;
+  if (isLoading) return <TableLoadingSpinner/>;
   if (isError) return <p>Failed to fetch surveys</p>;
   const surveys = surveyData?.data || [];
-  console.log(surveys[0]);
+  console.log(surveys[0])
+
+  
   // NEW: Sample data for team members
   const teamsData: Record<string, TeamMember[]> = {
     "Team A": [
@@ -261,11 +267,11 @@ const SurveyMainPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case "Active":
+      case "ACTIVE":
         return `${baseClasses} bg-green-100 text-green-800`;
-      case "Completed":
+      case "COMPLETED":
         return `${baseClasses} bg-orange-100 text-orange-800`;
-      case "Pending":
+      case "PENDING":
         return `${baseClasses} bg-gray-100 text-gray-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -303,7 +309,7 @@ const SurveyMainPage: React.FC = () => {
   };
 
   // Available filter options for the Filter Modal (unchanged)
-  const filterOptions = ["All", "Active", "Completed"];
+  const filterOptions = ["All", "ACTIVE", "COMPLETED"];
 
   // Filter surveys based on selected filters (unchanged, with searchTerm integration)
   const filteredSurveys = surveys?.filter((survey: any) => {
@@ -418,7 +424,7 @@ const SurveyMainPage: React.FC = () => {
             />
           </div>
           {/* Date button */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               className="flex items-center gap-2 px-4 py-2 text-[#5B5B5B] border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
               onClick={() => setOpenModalType("calendar")}
@@ -426,11 +432,11 @@ const SurveyMainPage: React.FC = () => {
               <Calendar size={16} />
               Date
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="px-3 py-4  flex items-center justify-between">
+          {/* <div className="px-3 py-4  flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[#484848]">
               Survey Table
             </h2>
@@ -443,7 +449,7 @@ const SurveyMainPage: React.FC = () => {
                 Filter
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Survey Table */}
           <div className="w-full overflow-x-auto ">
@@ -516,7 +522,7 @@ const SurveyMainPage: React.FC = () => {
                         )}
 
                         {column.id === "status" && (
-                          <span className={getStatusBadge(survey.status)}>
+                          <span className={`${getStatusBadge(survey.status)} p-1`} >
                             {survey.status}
                           </span>
                         )}

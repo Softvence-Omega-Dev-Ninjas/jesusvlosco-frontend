@@ -1,17 +1,20 @@
 // UniversalModal.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Search } from "lucide-react";
-import { Link } from "react-router-dom";
 
 // Assuming these interfaces are defined either here or imported from a shared types file
 interface Survey {
   id: string;
   title: string;
-  createdBy: string;
+  createdBY: string;
   startDate: string;
   endDate: string;
   status: "Active" | "Completed" | "Pending";
   assignTo: string;
+  description: string;
+  surveyType: string;
+  publishTime: string;
+  createdAt: string;
 }
 
 interface ColumnOption {
@@ -36,7 +39,6 @@ interface TeamMember {
   name: string;
   email: string;
 }
-
 
 // NEW: Interface for Team Data
 interface TeamData {
@@ -92,13 +94,23 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
   // Calendar related states (unchanged)
   const monthNames = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const parseDateStringToCalendarDate = (dateString?: string): CalendarDate => {
     if (dateString) {
-      const parts = dateString.split('-');
+      const parts = dateString.split("-");
       if (parts.length === 3) {
         const year = parts[0];
         const monthNum = parseInt(parts[1], 10) - 1; // Month is 0-indexed
@@ -106,20 +118,28 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
         return {
           day: day,
           month: monthNames[monthNum],
-          year: year
+          year: year,
         };
       }
     }
     const today = new Date();
     return {
-      day: String(today.getDate()).padStart(2, '0'),
+      day: String(today.getDate()).padStart(2, "0"),
       month: monthNames[today.getMonth()],
       year: String(today.getFullYear()),
     };
   };
 
-  const initialFrom = fromInitialDate || (selectedDate ? parseDateStringToCalendarDate(selectedDate.split(' to ')[0]) : undefined);
-  const initialTo = toInitialDate || (selectedDate ? parseDateStringToCalendarDate(selectedDate.split(' to ')[1]) : undefined);
+  const initialFrom =
+    fromInitialDate ||
+    (selectedDate
+      ? parseDateStringToCalendarDate(selectedDate.split(" to ")[0])
+      : undefined);
+  const initialTo =
+    toInitialDate ||
+    (selectedDate
+      ? parseDateStringToCalendarDate(selectedDate.split(" to ")[1])
+      : undefined);
 
   const [fromDate, setFromDate] = useState<CalendarDate>(
     initialFrom || parseDateStringToCalendarDate()
@@ -128,13 +148,15 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
     initialTo || parseDateStringToCalendarDate()
   );
 
-  const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(null);
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(
+    null
+  );
   // End Calendar related states
 
   // API data for filters (unchanged)
   const [apiFilterOptions, setApiFilterOptions] = useState<string[]>([]);
-  const [loadingFilters, ] = useState(false);
-  const [filterError, ] = useState<string | null>(null);
+  const [loadingFilters] = useState(false);
+  const [filterError] = useState<string | null>(null);
 
   const centerModal = () => {
     if (modalRef.current) {
@@ -158,14 +180,14 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
       if (toInitialDate) setToDate(toInitialDate);
       // If selectedDate is passed, attempt to parse and set from/to
       if (selectedDate) {
-        const parts = selectedDate.split(' to ');
+        const parts = selectedDate.split(" to ");
         if (parts.length === 2) {
           setFromDate(parseDateStringToCalendarDate(parts[0]));
           setToDate(parseDateStringToCalendarDate(parts[1]));
         } else {
-            // Handle single date or invalid format, default to current date
-            setFromDate(parseDateStringToCalendarDate(selectedDate));
-            setToDate(parseDateStringToCalendarDate(selectedDate));
+          // Handle single date or invalid format, default to current date
+          setFromDate(parseDateStringToCalendarDate(selectedDate));
+          setToDate(parseDateStringToCalendarDate(selectedDate));
         }
       }
 
@@ -194,12 +216,25 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
         setApiFilterOptions(["All", "Active", "Completed"]); //
       }
     }
-  }, [isOpen, initialPosition, fromInitialDate, toInitialDate, selectedDate, modalType]); //
+  }, [
+    isOpen,
+    initialPosition,
+    fromInitialDate,
+    toInitialDate,
+    selectedDate,
+    modalType,
+  ]); //
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     // Add 'SELECT' to prevent dragging when clicking on dropdowns
-    if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'SELECT' || target.closest('.no-drag')) {
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "BUTTON" ||
+      target.closest("button") ||
+      target.tagName === "SELECT" ||
+      target.closest(".no-drag")
+    ) {
       return;
     }
     setIsDragging(true);
@@ -241,7 +276,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case "Active":
+      case "ACTIVE":
         return `${baseClasses} bg-green-100 text-green-800`;
       case "Completed":
         return `${baseClasses} bg-orange-100 text-orange-800`;
@@ -296,25 +331,56 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
   };
 
   const onCalendarDayClick = (day: number) => {
-    const newDay = String(day).padStart(2, '0');
-    const clickedDate = new Date(parseInt(fromDate.year), monthNameToNumber(fromDate.month), day);
+    const newDay = String(day).padStart(2, "0");
+    const clickedDate = new Date(
+      parseInt(fromDate.year),
+      monthNameToNumber(fromDate.month),
+      day
+    );
 
     const currentFromDateObj = calendarDateToDate(fromDate);
     const currentToDateObj = calendarDateToDate(toDate);
 
-    if (selectedCalendarDay === null || currentFromDateObj.getTime() === currentToDateObj.getTime()) {
+    if (
+      selectedCalendarDay === null ||
+      currentFromDateObj.getTime() === currentToDateObj.getTime()
+    ) {
       setFromDate({ day: newDay, month: fromDate.month, year: fromDate.year });
       setToDate({ day: newDay, month: fromDate.month, year: fromDate.year });
       setSelectedCalendarDay(day);
     } else {
       if (clickedDate < currentFromDateObj) {
-        setFromDate({ day: newDay, month: fromDate.month, year: fromDate.year });
+        setFromDate({
+          day: newDay,
+          month: fromDate.month,
+          year: fromDate.year,
+        });
       } else {
         setToDate({ day: newDay, month: fromDate.month, year: fromDate.year });
         setSelectedCalendarDay(null);
       }
     }
   };
+
+  const timeRemaining = useMemo(() => {
+    if (!surveyData?.publishTime) return null;
+
+    const now = new Date();
+    const end = new Date(surveyData.publishTime);
+
+    if (isNaN(end.getTime())) return null;
+
+    const diffMs = end.getTime() - now.getTime();
+    if (diffMs <= 0) return "Expired";
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+    const diffMinutes = Math.floor((diffMs / (1000 * 60)) % 60);
+
+    if (diffDays > 0) return `${diffDays} day(s) ${diffHours} hr`;
+    if (diffHours > 0) return `${diffHours} hr ${diffMinutes} min`;
+    return `${diffMinutes} min`;
+  }, [surveyData]);
   // End Calendar Helper Functions
 
   const renderContent = () => {
@@ -324,24 +390,32 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
       return new Date(parseInt(year), monthNum + 1, 0).getDate();
     };
 
-    const firstDayOfMonth = new Date(parseInt(fromDate.year), monthNames.indexOf(fromDate.month), 1).getDay();
+    const firstDayOfMonth = new Date(
+      parseInt(fromDate.year),
+      monthNames.indexOf(fromDate.month),
+      1
+    ).getDay();
 
-    const prevMonthDate = new Date(parseInt(fromDate.year), monthNames.indexOf(fromDate.month), 0);
+    const prevMonthDate = new Date(
+      parseInt(fromDate.year),
+      monthNames.indexOf(fromDate.month),
+      0
+    );
     const daysInPrevMonth = prevMonthDate.getDate();
 
     const calendarDays: (number | null)[] = [];
 
     for (let i = 0; i < firstDayOfMonth; i++) {
-        calendarDays.unshift(daysInPrevMonth - i);
+      calendarDays.unshift(daysInPrevMonth - i);
     }
 
     for (let i = 1; i <= daysInMonth(fromDate.month, fromDate.year); i++) {
-        calendarDays.push(i);
+      calendarDays.push(i);
     }
 
     const remainingCells = 42 - calendarDays.length;
     for (let i = 1; i <= remainingCells; i++) {
-        calendarDays.push(i);
+      calendarDays.push(i);
     }
 
     switch (modalType) {
@@ -368,7 +442,10 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 31 }, (_, i) => (
-                      <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
+                      <option
+                        key={i + 1}
+                        value={String(i + 1).padStart(2, "0")}
+                      >
                         {String(i + 1).padStart(2, "0")}
                       </option>
                     ))}
@@ -414,7 +491,10 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 31 }, (_, i) => (
-                      <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
+                      <option
+                        key={i + 1}
+                        value={String(i + 1).padStart(2, "0")}
+                      >
                         {String(i + 1).padStart(2, "0")}
                       </option>
                     ))}
@@ -460,7 +540,10 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 <div className="grid grid-cols-7 gap-y-2 text-center">
                   {calendarDays.map((day, index) => {
                     const isPreviousMonthDay = index < firstDayOfMonth;
-                    const isNextMonthDay = index >= (firstDayOfMonth + daysInMonth(fromDate.month, fromDate.year));
+                    const isNextMonthDay =
+                      index >=
+                      firstDayOfMonth +
+                        daysInMonth(fromDate.month, fromDate.year);
 
                     const isSelected = day !== null && isDateInRange(day);
 
@@ -475,7 +558,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                         } ${
                           isSelected
                             ? "bg-[#FFBA5C] text-black font-medium"
-                            : (isPreviousMonthDay || isNextMonthDay)
+                            : isPreviousMonthDay || isNextMonthDay
                             ? "text-gray-400"
                             : "hover:bg-gray-100"
                         }`}
@@ -487,7 +570,6 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 </div>
               </div>
             </div>
-           
           </>
         );
       case "filter":
@@ -501,12 +583,18 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               <span>Filter Options</span>
             </div>
             <div className="p-4">
-              {loadingFilters && <div className="text-gray-500">Loading filters...</div>}
-              {filterError && <div className="text-red-500">{filterError}</div>}
-              {!loadingFilters && !filterError && apiFilterOptions.length === 0 && (
-                <div className="text-gray-500">No filters available.</div>
+              {loadingFilters && (
+                <div className="text-gray-500">Loading filters...</div>
               )}
-              {!loadingFilters && !filterError && apiFilterOptions.length > 0 && (
+              {filterError && <div className="text-red-500">{filterError}</div>}
+              {!loadingFilters &&
+                !filterError &&
+                apiFilterOptions.length === 0 && (
+                  <div className="text-gray-500">No filters available.</div>
+                )}
+              {!loadingFilters &&
+                !filterError &&
+                apiFilterOptions.length > 0 &&
                 apiFilterOptions.map((filter: string) => (
                   <label
                     key={filter}
@@ -520,8 +608,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                     />
                     <span className="ml-2 text-gray-700">{filter}</span>
                   </label>
-                ))
-              )}
+                ))}
             </div>
           </>
         );
@@ -582,7 +669,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
             <div className="p-4 text-red-500">No survey data available.</div>
           );
         return (
-          <>
+          <div>
             <div
               className="py-2 px-3 font-semibold text-gray-700  flex items-center justify-center"
               onMouseDown={handleMouseDown}
@@ -601,39 +688,58 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 </span>
               </p>
               <p className="mb-2">
+                <strong>Duration:</strong>{" "}
+                {new Date(surveyData.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}{" "}
+                -{" "}
+                {new Date(surveyData.publishTime).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+
+              {/* <p className="mb-2">
                 <strong>Duration:</strong> {surveyData.startDate} -{" "}
                 {surveyData.endDate?.replace("04/20/2025", "May 15,2025")}
-              </p>
-              <p className="mb-2">
+              </p> */}
+              {/* <p className="mb-2">
                 <strong>Top Departments by response rate:</strong>
               </p>
               <ul className="list-disc list-inside ml-4">
                 <li>Sales (40%)</li>
                 <li>HR (30%)</li>
                 <li>IT (20%)</li>
-              </ul>
+              </ul> */}
+
               <p className="mt-2 mb-2">
-                <strong>Creator:</strong>{" "}
-                {surveyData.createdBy.replace("HR Manager", "HR Department")}
+                <strong>Creator:</strong> {surveyData.createdBY}
               </p>
               <p className="mb-2">
-                <strong>Category:</strong> Employee Engagement
+                <strong>Category:</strong> {surveyData.surveyType}
               </p>
-              <p className="mb-2">
-                <strong>Time remaining:</strong> 2 days
-              </p>
+              <div>
+                <p className="mb-2">
+                  <strong>Time remaining:</strong> {timeRemaining ?? "N/A"}
+                </p>
+              </div>
               <p className="mt-4">
-                <strong>Description:</strong> This survey gathers feedback on
-                employee satisfaction and workplace environment.
+                <strong>Description:</strong>{" "}
+                {/* This survey gathers feedback on
+                employee satisfaction and workplace environment. */}
+                {surveyData.description}
               </p>
             </div>
             <div className="p-3 border-t border-gray-200 flex justify-center gap-2">
-              <Link to={"/admin/survey-details"}>
+              {/* <Link to={"/admin/survey-details"}>
                <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium cursor-pointer">
                 View detail
               </button>
-              </Link>
-             
+              </Link> */}
+
               <button
                 className="border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 cursor-pointer "
                 onClick={onClose}
@@ -641,7 +747,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 Close
               </button>
             </div>
-          </>
+          </div>
         );
       case "teamMembers": // NEW: Case for "teamMembers" modal
         if (!teamData)
@@ -665,7 +771,9 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
             </div>
             <div className="p-4">
               {teamData.members.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2"> {/* Use grid for the team members as per screenshot */}
+                <div className="grid grid-cols-2 gap-2">
+                  {" "}
+                  {/* Use grid for the team members as per screenshot */}
                   {teamData.members.map((member) => (
                     <div
                       key={member.id}
