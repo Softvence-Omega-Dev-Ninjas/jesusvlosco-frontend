@@ -83,9 +83,9 @@ export function FilterControls({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="bg-[#F5F6F7] border-1 border-slate-200 focus-within:ring-0 focus-within:outline-0 ring-slate-100 w-full  sm:max-w-72"
         />
-        <Button variant="outline" className="whitespace-nowrap bg-[#4E53B1] rounded-md text-white">
+        {/* <Button variant="outline" className="whitespace-nowrap bg-[#4E53B1] rounded-md text-white">
           Export
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
