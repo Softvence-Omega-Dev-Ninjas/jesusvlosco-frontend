@@ -304,7 +304,7 @@ const PayrollForm = ({
             </label>
             <div className="relative">
               <div
-                className="flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer font-medium"
+                className="flex items-center  justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer font-medium"
                 onClick={() => setOffDayOpen(!offDayOpen)}
               >
                 <span>{payrollData.selectOffDay}</span>

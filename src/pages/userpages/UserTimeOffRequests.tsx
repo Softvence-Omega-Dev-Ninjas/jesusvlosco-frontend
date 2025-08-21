@@ -1,8 +1,9 @@
+import { useGetUserQuery } from "@/store/api/admin/user/getUser/getUserApi";
 import { useUserTimeRequestMutation } from "@/store/api/admin/user/timeRequest/createUserTimeRequestApi";
 import { useGetUserTimeRequestQuery } from "@/store/api/admin/user/timeRequest/getUserTimeRequestApi";
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 // TypeScript interfaces
 interface CalendarDay {
@@ -30,9 +31,6 @@ interface TimeOffRequestData {
   totalDaysOff: number;
   status: string;
 }
-
-
-
 
 // Updated interface for TimeOffPolicy to include remainingDays
 interface TimeOffPolicy {
@@ -314,36 +312,69 @@ export default function TimeOffComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5); // You can make this configurable
 
-  const initialTimeOffPolicies: TimeOffPolicy[] = useMemo(() => [
-    { type: "Time off", days: 22 },
-    { type: "Sick leave", days: 10 },
-    { type: "Casual leave", days: 12 },
-    { type: "Unpaid leave", days: 8 },
-  ], []);
-
-  // --- API Calls ---
+   const {data:userData,refetch: refetchUserData}=useGetUserQuery(undefined)
+  console.log(userData)
+const initialTimeOffPolicies: TimeOffPolicy[] = useMemo(() => {
+  if (userData && userData.data && userData.data.payroll) {
+    const payroll = userData.data.payroll;
+    return [
+      { type: "Time off", days: payroll.timeOff || 0 },
+      { type: "Sick leave", days: payroll.sickLeave || 0 },
+      { type: "Casual leave", days: payroll.casualLeave || 0 },
+      { type: "Unpaid leave", days: payroll.unpaidLeave || 0 },
+    ];
+  }
+  // Fallback to default values if user data or payroll is not available yet
+  return [
+    { type: "Time off", days: 0 },
+    { type: "Sick leave", days: 0 },
+    { type: "Casual leave", days: 0 },
+    { type: "Unpaid leave", days: 0 },
+  ];
+}, [userData]); // Re-memoize if userData changes
 
   // 1. Fetch paginated time-off requests for the table display
   const {
     data: paginatedTimeData,
     isLoading: isPaginatedTimeDataLoading,
-    isError: isPaginatedTimeDataError
+    isError: isPaginatedTimeDataError,
+    refetch: refetchPaginatedTimeData
   } = useGetUserTimeRequestQuery(
     { page: currentPage, limit: itemsPerPage }
   );
 
-  // 2. Fetch ALL time-off requests for accurate remaining days calculation
-  // We use a very large limit to try and get all records.
-  // Ideally, your API would have a dedicated endpoint for this summary or return total approved days per policy.
+  console.log("all data get :",paginatedTimeData)
+
+
+ 
+  
   const {
     data: allTimeData,
+    refetch: refetchAllTimeData
     
   } = useGetUserTimeRequestQuery(
     { limit: 999999999 } // Fetch a very large number of records to get "all"
   );
 
-  const [createTimeOffRequest, { isLoading, isSuccess, isError }] =
+  console.log(allTimeData)
+
+ const [createTimeOffRequest, { isLoading, isSuccess, isError, reset }] =
     useUserTimeRequestMutation();
+
+
+    useEffect(() => {
+  if (isSuccess) {
+    refetchUserData();           // Update policies section
+    refetchPaginatedTimeData();  // Update table history
+    refetchAllTimeData();        // Update remaining days calculation
+    setIsPopupOpen(false);       // Close modal
+    setNote("");                 // Clear form
+    setDateRange({ startDate: null, endDate: null });
+    setAllDayOff(true);
+    setTimeOffType("sick-leave");
+    reset();                     // Reset mutation state
+  }
+}, [isSuccess, refetchUserData, refetchPaginatedTimeData, refetchAllTimeData, reset]);
 
   // Calculate remaining days for policies using ALL fetched data
   const timeOffPolicies: TimeOffPolicy[] = useMemo(() => {
@@ -473,6 +504,16 @@ export default function TimeOffComponent() {
     }
   };
 
+
+  // New states for the note modal
+const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+const [currentNote, setCurrentNote] = useState<string | null>(null);
+// Handler for opening the note modal
+const handleViewNote = (noteContent: string | null) => {
+  setCurrentNote(noteContent);
+  setIsNoteModalOpen(true);
+};
+
   return (
     <div className="mt-5">
       {/* Header */}
@@ -581,13 +622,17 @@ export default function TimeOffComponent() {
                         className={`inline-flex min-w-max justify-center px-2 py-1 text-xs font-medium rounded-full w-[60%] ${getStatusColorClass(request.status)}`}
                       >
                         {request.status}
+                        
                       </span>
                     </td>
-                    <td className="py-3">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm underline">
-                        View
-                      </button>
-                    </td>
+                   <td className="py-3">
+                     <button
+                       onClick={() => handleViewNote(request.adminNote)} // This line changed
+                       className="text-blue-600 hover:text-blue-800 text-sm underline"
+                     >
+                       View
+                     </button>
+                   </td>
                   </tr>
                 ))
               )}
@@ -786,8 +831,36 @@ export default function TimeOffComponent() {
           />
         </div>
       )}
+      {/* Note Display Modal */}
+      {isNoteModalOpen && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Request Note</h3>
+              <button
+                onClick={() => setIsNoteModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold w-6 h-6 flex items-center justify-center cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+              <p className="text-gray-800 break-words whitespace-pre-wrap">
+                {currentNote || "No note provided for this request."}
+              </p>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setIsNoteModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// lkdsfglds
