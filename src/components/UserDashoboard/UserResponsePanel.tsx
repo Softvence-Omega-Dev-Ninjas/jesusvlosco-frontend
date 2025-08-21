@@ -1,20 +1,7 @@
 
-import { FC } from "react";
 import { HiX } from "react-icons/hi";
 import { UserResponseCard } from "./UserResponseCard";
 
-
-interface Announcement {
-  id: number;
-  title: string;
-  time: string;
-  tags: string[];
-}
-
-interface ResponsePanelProps {
-  announcement: Announcement;
-  onClose: () => void;
-}
 
 const totalUsers = 250;
 const viewedUsers = 210;
@@ -30,7 +17,7 @@ const dummyUsers = Array.from({ length: 12 }).map((_, i) => ({
   profile: `https://i.pravatar.cc/40?img=${i + 1}`
 }));
 
-export const UserResponsePanel: FC<ResponsePanelProps> = ({ announcement, onClose }) => {
+export const UserResponsePanel = ({ announcement, onClose }:{announcement:any,onClose:any}) => {
   const users = dummyUsers; // swap in live data
 
   return (
