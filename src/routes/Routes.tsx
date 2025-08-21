@@ -55,7 +55,7 @@ import UserPoll from "@/pages/userpages/UserPoll";
 import UserRecognition from "@/pages/userpages/UserRecognition";
 import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
 import UserSurvey from "@/pages/userpages/UserSurvey";
-import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
+// import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
 import UserTaskMainPage from "@/pages/UserTaskAndProjects/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
@@ -63,11 +63,12 @@ import EmailLogin from "@/pages/email-login/EmailLogin";
 
 import CreateTeam from "@/pages/Admin/CreateTeam";
 
-import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
-import { TasksAndProjects } from "@/pages/TasksAndProjects/TasksAndProjects";
+// import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
+import TasksAndProjects from "@/pages/TasksAndProjects/TasksAndProjects";
 import AdminRoute from "./AdminRoutes";
 import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
-// import EmailLogin from "@/pages/EmailLogin";
+import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
+// import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
   {
@@ -137,12 +138,12 @@ const routes = createBrowserRouter([
         element: <UserSurvey></UserSurvey>,
       },
       {
-        path: "take-survey/:id",
+        path: "take-survey/:id/assigned",
         element: <TakeSurvey></TakeSurvey>,
       },
 
       {
-        path: "poll",
+        path: "take-pool/:id/assigned",
         element: <UserPoll></UserPoll>,
       },
 
@@ -152,15 +153,14 @@ const routes = createBrowserRouter([
       },
       {
         path: "user-task/:id",
-        element: <UserTaskDetails></UserTaskDetails>,
-        // element: <TaskDeta,
+        element: <UserTaskDetails />,
       },
 
       // dynamic routes
-      {
-        path: "user-task-details",
-        element: <UserTaskDetails></UserTaskDetails>,
-      },
+      // {
+      //   path: "user-task-details",
+      //   element: <UserTaskDetails></UserTaskDetails>,
+      // },
     ],
   },
 
@@ -244,7 +244,7 @@ const routes = createBrowserRouter([
       },
 
       { path: "tasks-projects", element: <TasksAndProjects /> },
-      { path: "user", element: <TaskAndProject /> },
+      // { path: "user", element: <TaskAndProject /> },
 
       {
         path: "user",

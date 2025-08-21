@@ -1,27 +1,31 @@
 // store/api/getPollAndSurvey.ts
 import { baseApi } from "@/store/api/baseApi";
 
-export const getPollAndSurvey = baseApi.injectEndpoints({
+export const pollAndSurveyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPollAndSurvey: builder.query({
-      // Accept optional params for pagination
+    // Get Survey
+    getSurvey: builder.query({
       query: ({ page = 1, limit = 10 }) => ({
         url: `/employee/survey/assigned?page=${page}&limit=${limit}`,
         method: "GET",
-    
+      }),
+    }),
+
+    // Get Poll
+    getPoll: builder.query({
+      query: ({ page = 1, limit = 10 }) => ({
+        url: `/employee/pool/assigned?page=${page}&limit=${limit}`,
+        method: "GET",
       }),
     }),
   }),
 });
 
-export const { useGetPollAndSurveyQuery } = getPollAndSurvey;
+export const { useGetSurveyQuery, useGetPollQuery } = pollAndSurveyApi;
 
-
-
-export const getSingleSurveyByIdApi = baseApi.injectEndpoints({
+export const getSingleSurveyByIdForEmployeeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSurveyById: builder.query({
-      // surveyId is dynamic
+    getSurveyByIdForEmployee: builder.query({
       query: (surveyId: string) => ({
         url: `/employee/survey/${surveyId}/assigned`,
         method: "GET",
@@ -30,12 +34,26 @@ export const getSingleSurveyByIdApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetSurveyByIdQuery } = getSingleSurveyByIdApi;
+export const { useGetSurveyByIdForEmployeeQuery } =
+  getSingleSurveyByIdForEmployeeApi;
 
+export const getSinglePollByIdApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getPollById: builder.query({
+      // pollId is dynamic
+      query: (pollId: string) => ({
+        url: `/employee/pool/${pollId}/assigned`,
+        method: "GET",
+      }),
+    }),
+  }),
+});
 
+export const { useGetPollByIdQuery } = getSinglePollByIdApi;
 
 export const surveyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // ✅ Survey response submit
     submitSurveyResponse: builder.mutation({
       query: (payload: {
         surveyId: string;
@@ -50,7 +68,22 @@ export const surveyApi = baseApi.injectEndpoints({
         body: { answers: payload.answers },
       }),
     }),
+
+    // ✅ Poll response submit
+    submitPollResponse: builder.mutation({
+      query: (payload: { pollId: string; optionId: string }) => {
+        console.log(payload);
+        return {
+          url: `/employee/pool/${payload.pollId}/response`,
+          method: "POST",
+          body: { optionId: payload.optionId },
+        };
+      },
+    }),
   }),
 });
 
-export const { useSubmitSurveyResponseMutation} = surveyApi;
+export const {
+  useSubmitSurveyResponseMutation,
+  useSubmitPollResponseMutation,
+} = surveyApi;
