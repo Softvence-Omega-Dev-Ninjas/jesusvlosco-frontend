@@ -7,6 +7,7 @@ export const hitLikeApi = baseApi.injectEndpoints({
         url: `/employee/announcement/like/${announcementId}`,
         method: "POST",
       }),
+      invalidatesTags:["Like"]
     }),
   }),
   overrideExisting: false,

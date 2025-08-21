@@ -7,6 +7,7 @@ export const singleCompanyAnnounceApi = baseApi.injectEndpoints({
         url: `/employee/announcement/${announcementId}`,
         method: "GET",
       }),
+      providesTags:["Like"]
     }),
   }),
   overrideExisting: false,
