@@ -15,7 +15,6 @@ import {
 import {
   useCreateOffdayPayRollMutation,
   useCreateUserEducationMultipleMutation,
-  
   useCreateUserExperienceMutation,
   useCreateUserMutation,
   useCreateUserPayRollMutation,
@@ -178,8 +177,8 @@ const AddUserProfile = () => {
     casualLeave: "10 days",
     sickLeave: "10 days",
     numberOfDays: "Select number here",
-    selectOffDay: "Sunday",
-    breakTime: "30 min",
+    selectOffDay: "SUNDAY",
+    breakTime: "HALF_HOUR",
   });
 
   const yearOptions = Array.from({ length: 50 }, (_, i) =>
@@ -359,8 +358,8 @@ const AddUserProfile = () => {
         casualLeave: "10 days",
         sickLeave: "10 days",
         numberOfDays: "Select number here",
-        selectOffDay: "Sunday",
-        breakTime: "30 min",
+        selectOffDay: "SUNDAY",
+        breakTime: "HALF_HOUR",
       });
     }
   };
