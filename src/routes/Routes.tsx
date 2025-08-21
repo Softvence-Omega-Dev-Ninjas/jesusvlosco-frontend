@@ -19,7 +19,6 @@ import BadgeLibrary from "@/pages/BadgeLibrary";
 import CreateBadge from "@/pages/CreateBadge";
 import CreateRecognition from "@/pages/CreateRecognition";
 import EditBadge from "@/pages/EditBadge";
-import JobSchedulingLobby from "@/pages/JobSchedulingLobby";
 import OverviewProject from "@/pages/OverviewProject";
 import PollPage from "@/pages/PollPage";
 import PollTemplate from "@/pages/PollTemplate";
@@ -57,7 +56,7 @@ import UserRecognition from "@/pages/userpages/UserRecognition";
 import UserShiftScheduling from "@/pages/userpages/UserShiftScheduling";
 import UserSurvey from "@/pages/userpages/UserSurvey";
 import UserTaskDetails from "@/pages/userpages/UserTaskDetails";
-import UserTaskMainPage from "@/pages/userpages/UserTaskMainPage";
+import UserTaskMainPage from "@/pages/UserTaskAndProjects/UserTaskMainPage";
 import UserTimeClock from "@/pages/userpages/UserTimeClock";
 import UserTimeOffRequests from "@/pages/userpages/UserTimeOffRequests";
 import EmailLogin from "@/pages/email-login/EmailLogin";
@@ -67,6 +66,7 @@ import CreateTeam from "@/pages/Admin/CreateTeam";
 import TaskAndProject from "../pages/TaskAndProject/TaskAndProject";
 import { TasksAndProjects } from "@/pages/TasksAndProjects/TasksAndProjects";
 import AdminRoute from "./AdminRoutes";
+import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
 // import EmailLogin from "@/pages/EmailLogin";
 
 const routes = createBrowserRouter([
@@ -137,18 +137,23 @@ const routes = createBrowserRouter([
         element: <UserSurvey></UserSurvey>,
       },
       {
-        path: "take-survey/:id",
+        path: "take-survey/:id/assigned",
         element: <TakeSurvey></TakeSurvey>,
       },
 
       {
-        path: "poll",
+        path: "take-pool/:id/assigned",
         element: <UserPoll></UserPoll>,
       },
 
       {
         path: "user-task",
         element: <UserTaskMainPage></UserTaskMainPage>,
+      },
+      {
+        path: "user-task/:id",
+        element: <UserTaskDetails></UserTaskDetails>,
+        // element: <TaskDeta,
       },
 
       // dynamic routes
@@ -161,7 +166,11 @@ const routes = createBrowserRouter([
 
   {
     path: "/admin",
-    element: <AdminRoute><AdminLayout /></AdminRoute>, // Admin shell with sidebar/header
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ), // Admin shell with sidebar/header
     children: [
       {
         index: true,
@@ -185,7 +194,8 @@ const routes = createBrowserRouter([
         path: "schedule",
         element: <Schedule />,
         children: [
-          { path: "shiftschedule", element: <JobSchedulingLobby /> },
+          // { path: "shiftschedule", element: <JobSchedulingLobby /> },
+          { path: "shiftschedule", element: <ScheduleAssignPage /> },
           //dynamic routes
           { path: "overviewProjects/:id", element: <OverviewProject /> },
           // { path: "timeclock", element: <TimeClock /> },
@@ -225,15 +235,15 @@ const routes = createBrowserRouter([
       { path: "publish-survey", element: <PublishSurvey /> },
       {
         path: "survey-template",
-        element: <SurveyTemplate onBackToPollCreation={() => { }} />,
+        element: <SurveyTemplate onBackToPollCreation={() => {}} />,
       },
       { path: "publish-poll", element: <PublishSurvey /> },
       {
         path: "poll-template",
-        element: <PollTemplate onBackToPollCreation={() => { }} />,
+        element: <PollTemplate onBackToPollCreation={() => {}} />,
       },
 
-      { path: "tasks-projects", element: <TasksAndProjects/> },
+      { path: "tasks-projects", element: <TasksAndProjects /> },
       { path: "user", element: <TaskAndProject /> },
 
       {

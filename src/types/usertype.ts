@@ -2,6 +2,7 @@
 // Base types
 type UUID = string;
 type ISODateString = string;
+import { TProfile, TPayroll, TShift } from './shared';
 
 // Enums for better type safety
 export enum Gender {
@@ -76,58 +77,21 @@ export interface TExperience {
   startDate: ISODateString;
 }
 
-// Payroll related types
-export interface TPayroll {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
-  breakTimePerDay: BreakTimeType;
-  casualLeave: number;
-  numberOfDay: number;
-  offDay: DayOfWeek[];
-  overTimePayRate: number;
-  overTimePayRateType: PayRateType;
-  regularPayRate: number;
-  regularPayRateType: PayRateType;
-  sickLeave: number;
-}
-
-// Profile related types
-export interface TProfile {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
-  address: string | null;
-  city: string | null;
-  country: string | null;
-  department: string;
-  dob: ISODateString;
-  firstName: string;
-  gender: Gender;
-  jobTitle: string;
-  lastName: string;
-  nationality: string | null;
-  profileUrl: string | null;
-  state: string | null;
-  offDay?: string | null;
-}
-
-
-export interface TShift {
-  id: UUID;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  userId: UUID;
+// Use shared types for profile, payroll, shift and project user
+type TShiftStatus = 'PUBLISHED' | 'DRAFT' | 'CANCELLED' | 'COMPLETED';
+export interface TShiftDTO {
+  id: string;
+  date: string; // ISO date string
+  startTime: string; // ISO date string
+  endTime: string; // ISO date string
+  shiftTitle: string;
   allDay: boolean;
-  date: ISODateString;
-  endTime: ISODateString;
+  job: string;
+  shiftStatus: TShiftStatus;
   location: string;
   note: string | null;
-  shiftStatus: ShiftStatus;
-  shiftTitle: string;
-  startTime: ISODateString;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
 // Main User/Employee type
 export interface TUser {
@@ -146,7 +110,7 @@ export interface TUser {
   payroll: TPayroll;
   profile: TProfile;
   projects: any[]; // You can define Project type if needed
-  shift: any[]; // You can define Shift type if needed
+  shift: TShift[]; // You can define Shift type if needed
   defaultShifts: any[]; // You can define DefaultShift type if needed
 }
 

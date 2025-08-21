@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { Clock, CheckCircle, XCircle, Plus } from "lucide-react";
 import AddShiftModal from "./AddShiftModal";
 import { TimeOffRequestModal } from "./AddTimeModal";
+import {
+  useDeleteSchedulingRequestMutation,
+  useGetAllUserTimeClockQuery,
+} from "@/store/api/user/scheduling/schedulingApi";
+import { formatDateRange } from "@/utils/formatDateRange";
+import { toast } from "sonner";
 
 interface TimeEntry {
   clockIn: string;
@@ -12,6 +18,10 @@ interface TimeEntry {
 
 const TimeTrackingDashboard: React.FC = () => {
   const currentDate = "Wednesday, June 25, 2024";
+  const { data } = useGetAllUserTimeClockQuery(null);
+  const timeClockRequest = data?.data?.data;
+  console.log({ timeClockRequest });
+  const [deleteTimeCLock] = useDeleteSchedulingRequestMutation();
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -21,24 +31,6 @@ const TimeTrackingDashboard: React.FC = () => {
     hoursWorked: "0:36",
     totalHours: "8:00",
   };
-
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      dateRange: "Jul 15 - Jul 19, 2024 (5 days)",
-      type: "Annual vacation",
-      status: "Pending",
-      canCancel: true,
-    },
-    {
-      id: 2,
-      dateRange: "Jun 22, 2024",
-      type: "Forgot to clock out - actual end time was 5:30 PM",
-      status: "Approved",
-      canCancel: false,
-    },
-  ]);
-
   const [activities] = useState([
     {
       id: 1,
@@ -70,15 +62,23 @@ const TimeTrackingDashboard: React.FC = () => {
     },
   ]);
 
-  const handleCancelRequest = (id: number) => {
-    setRequests(requests.filter((request) => request.id !== id));
+  const handleCancelRequest = async (id: number) => {
+    const toastId = toast.loading("loading.....");
+    try {
+      const result = await deleteTimeCLock(id).unwrap();
+      if (result?.success) {
+        toast.error("Time clock cencelled", { id: toastId });
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message, { id: toastId });
+    }
   };
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-3 py-1 rounded-full text-sm font-medium";
-    if (status === "Pending") {
+    if (status === "pending") {
       return `${baseClasses} bg-yellow-100 text-yellow-800`;
-    } else if (status === "Approved") {
+    } else if (status === "approved") {
       return `${baseClasses} bg-green-100 text-green-800`;
     }
     return baseClasses;
@@ -99,7 +99,7 @@ const TimeTrackingDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-8xl mx-auto bg-gray-50 mt-6">
+    <div className="max-w-8xl  mx-auto bg-gray-50 mt-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Current Status and Requests */}
         <div className="lg:col-span-2 space-y-6">
@@ -151,7 +151,7 @@ const TimeTrackingDashboard: React.FC = () => {
                 </div>
 
                 <div className="p-6 space-y-4 ">
-                  {requests.map((request) => (
+                  {timeClockRequest?.map((request: any) => (
                     <div
                       key={request.id}
                       className="border  border-gray-200 rounded-lg p-4 py-11 bg-gray-50"
@@ -159,31 +159,42 @@ const TimeTrackingDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 mb-1">
-                            {request.dateRange}
+                            {formatDateRange(
+                              request?.startTime,
+                              request?.endTime
+                            )}
                           </p>
-                          <p className="text-gray-600 text-sm">
+                          {/* <p className="text-gray-600 text-sm">
                             {request.type}
-                          </p>
+                          </p> */}
                         </div>
-                        <span className={getStatusBadge(request.status)}>
-                          {request.status}
+                        <span
+                          className={getStatusBadge(
+                            request.status === "DRAFT" ? "pending" : "approved"
+                          )}
+                        >
+                          {request?.status}
                         </span>
                       </div>
 
-                      {request.canCancel && (
+                      {request.status === "DRAFT" ? (
                         <button
                           onClick={() => handleCancelRequest(request.id)}
-                          className="px-4 py-2 bg-red-100 text-red-600 rounded-full text-sm font-medium hover:bg-red-100 transition-colors"
+                          className="px-4 py-2 cursor-pointer bg-red-100 text-red-600 rounded-full text-sm font-medium hover:bg-red-100 transition-colors"
                         >
                           Cancel request
                         </button>
-                      )}
-
-                      {request.status === "Approved" && (
+                      ) : (
                         <div className="px-4 py-2 bg-green-700 text-white rounded-full text-sm font-medium inline-block">
                           Approved
                         </div>
                       )}
+                      {/* 
+                      {request.status === "Approved" && (
+                        <div className="px-4 py-2 bg-green-700 text-white rounded-full text-sm font-medium inline-block">
+                          Approved
+                        </div>
+                      )} */}
                     </div>
                   ))}
                 </div>
@@ -243,7 +254,7 @@ const TimeTrackingDashboard: React.FC = () => {
                 <AddShiftModal onClose={() => setIsShiftModalOpen(false)} />
               )}
 
-              <button
+              {/* <button
                 onClick={() => setIsModalOpen(true)}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
@@ -251,7 +262,7 @@ const TimeTrackingDashboard: React.FC = () => {
                 <span className="text-sm font-medium text-gray-700">
                   Add a time off request
                 </span>
-              </button>
+              </button> */}
               <TimeOffRequestModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

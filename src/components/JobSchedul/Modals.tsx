@@ -200,8 +200,13 @@ const Modals: React.FC<ModalsProps> = ({
       {openMoreModalId !== null && moreModalPosition && (
         <div
           ref={moreModalRef}
-          className="fixed bg-white rounded-lg shadow-lg border w-32 py-1 z-30"
-          style={{ top: moreModalPosition.top, left: moreModalPosition.left }}
+          className="fixed bg-white rounded-lg shadow-lg border py-1 z-30"
+          style={{
+            top: moreModalPosition.top,
+            left: moreModalPosition.left,
+            width: 160,
+            boxSizing: 'border-box',
+          }}
         >
           <button
             className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-sm cursor-pointer"
