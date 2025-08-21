@@ -27,10 +27,10 @@ export const userRecognitionApi = baseApi.injectEndpoints({
     }),
 
     postLike: builder.mutation({
-      query: ({ recognitionId }) => ({
+      query: ({ recognitionId, reaction }) => ({
         url: `/employee/recognition/${recognitionId}`,
         method: "POST",
-        body: { reaction: "LIKE" },
+        body: { reaction },
       }),
     }),
   }),

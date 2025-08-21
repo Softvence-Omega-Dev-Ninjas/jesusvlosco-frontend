@@ -1,19 +1,40 @@
 /* eslint-disable react-refresh/only-export-components */
+import React from 'react';
 import down from "@/assets/arrow_drop_down.svg";
 import comment from "@/assets/comment.png";
+import { useGetUserProfileQuery } from "@/store/api/auth/authApi";
 import {
   useGetAllCommentLikeQuery,
   usePostCommentMutation,
   usePostLikeMutation,
   usePostReplyMutation,
 } from "@/store/api/user/userRecognition";
-import { Eye, Send, ThumbsUp } from "lucide-react";
+import {
+  Eye,
+  Frown,
+  Heart,
+  PartyPopper,
+  Send,
+  Smile,
+  Sparkles,
+  ThumbsUp,
+} from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 // Fallback avatar image
 const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
 
-// Types (updated to ensure profileUrl is used)
+// Reaction icon mapping
+const REACTION_ICONS: { [key: string]: React.ReactNode } = {
+  LIKE: <ThumbsUp className="w-4 h-4 fill-current" />,
+  LOVE_FACE: <Heart className="w-4 h-4 fill-current text-red-500" />,
+  SMILE_FACE: <Smile className="w-4 h-4 fill-current text-yellow-500" />,
+  WOW_FACE: <Sparkles className="w-4 h-4 fill-current text-blue-500" />,
+  SAD_FACE: <Frown className="w-4 h-4 fill-current text-gray-500" />,
+  CELEBRATION: <PartyPopper className="w-4 h-4 fill-current text-purple-500" />,
+};
+
+// Types (updated to include userReaction)
 interface ApiUser {
   id: string;
   name?: string;
@@ -29,7 +50,12 @@ interface ApiComment {
   comment: string;
   user: ApiUser;
   replies: ApiComment[];
-  reactions?: { id: string; reaction: string; user: ApiUser }[];
+  reactions?: {
+    id: string;
+    reaction: string;
+    user: ApiUser;
+    recognitionUserId: string;
+  }[];
   createdAt?: string;
 }
 
@@ -45,18 +71,24 @@ interface ApiPost {
   recognitionUsers: ApiUser[];
   badge: { id: string; title: string; category: string; iconImage: string };
   comments: ApiComment[];
-  reactions: { id: string; reaction: string; user: ApiUser }[];
+  reactions: {
+    id: string;
+    reaction: string;
+    user: ApiUser;
+    recognitionUserId: string;
+  }[];
 }
 
 interface TransformedComment {
   id: string;
   author: string;
-  authorProfileUrl: string; // Changed from authorInitials
+  authorProfileUrl: string;
   authorColor: string;
   content: string;
   timestamp: string;
   likes: number;
   liked: boolean;
+  userReaction?: string;
   replies: TransformedReply[];
   showReplyInput?: boolean;
 }
@@ -64,25 +96,27 @@ interface TransformedComment {
 interface TransformedReply {
   id: string;
   author: string;
-  authorProfileUrl: string; // Changed from authorInitials
+  authorProfileUrl: string;
   authorColor: string;
   content: string;
   timestamp: string;
   likes: number;
   liked: boolean;
+  userReaction?: string;
 }
 
 interface TransformedPost {
   id: string;
   recognizer: string;
-  recognizerProfileUrl: string; // Changed from recognizerInitials
+  recognizerProfileUrl: string;
   emoji: string;
-  recipients: { name: string; profileUrl: string }[]; // Changed from initials
+  recipients: { name: string; profileUrl: string }[];
   recognitionType: string;
   message: string;
   timestamp: string;
   visibility: string;
   liked: boolean;
+  userReaction?: string;
   likeCount: number;
   comments: TransformedComment[];
 }
@@ -115,66 +149,95 @@ export default function App() {
   // Map UI filter values to API-compatible values
   const filterMap: { [key: string]: string } = {
     "All Recognitions": "all",
-    "My Recognitions": "my",
     "Shared with me": "sharedWithMe",
   };
 
-  // RTK Query Hooks (pass selectedFilter to API)
+  // RTK Query Hooks
   const {
     data: apiData,
     error,
     isLoading,
     refetch,
-  } = useGetAllCommentLikeQuery({ filter: filterMap[selectedFilter] });
+  } = useGetAllCommentLikeQuery({
+    type: filterMap[selectedFilter],
+    status: "DRAFT",
+    orderBy: "asc",
+  });
   const [postCommentMutation] = usePostCommentMutation();
   const [postReplyMutation] = usePostReplyMutation();
   const [postLikeMutation] = usePostLikeMutation();
+  const { data: userInfo } = useGetUserProfileQuery({});
 
-  // Transform API data to component format (filter out MANAGERS visibility)
+  // Current user ID from userInfo
+
+  const CURRENT_USER_ID =
+    userInfo?.data?.id || "94eeeb50-6982-4d47-b33c-2049d2df2cf6";
+  console.log(CURRENT_USER_ID);
+  console.log(userInfo?.data?.profile?.profileUrl);
+
+  // Transform API data to component format
   const transformApiData = (apiPosts: ApiPost[]): TransformedPost[] => {
     return apiPosts
-      .filter((post) => post.visibility.toLowerCase() !== "managers") // Hide posts with MANAGERS visibility
-      .map((post) => ({
-        id: post.id,
-        recognizer: post.recognitionUsers[0]?.name || "Unknown",
-        recognizerProfileUrl:
-          post.recognitionUsers[0]?.profileUrl || FALLBACK_AVATAR,
-        emoji: post.badge.iconImage,
-        recipients: post.recognitionUsers.map((user) => ({
-          name: user.name ?? "Unknown",
-          profileUrl: user.profileUrl ?? FALLBACK_AVATAR,
-        })),
-        recognitionType: post.badge.title,
-        message: post.message,
-        timestamp: new Date(post.createdAt).toLocaleString(),
-        visibility: post.visibility,
-        liked: false, // No user ID, rely on localLiked state
-        likeCount: post.reactions.length,
-        comments: post.comments.map((comment) => ({
-          id: comment.id,
-          author: `${comment.user.firstName} ${comment.user.lastName}`,
-          authorProfileUrl: comment.user.profileUrl ?? FALLBACK_AVATAR,
-          authorColor: "bg-blue-500",
-          content: comment.comment,
-          timestamp: comment.createdAt
-            ? new Date(comment.createdAt).toLocaleString()
-            : new Date().toLocaleString(),
-          likes: comment.reactions?.length ?? 0,
-          liked: false, // No user ID, assume false
-          replies: comment.replies.map((reply) => ({
-            id: reply.id,
-            author: `${reply.user.firstName} ${reply.user.lastName}`,
-            authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
-            authorColor: "bg-orange-500",
-            content: reply.comment,
-            timestamp: reply.createdAt
-              ? new Date(reply.createdAt).toLocaleString()
-              : new Date().toLocaleString(),
-            likes: 0,
-            liked: false,
+      .filter((post) => post.visibility.toLowerCase() !== "managers")
+      .map((post) => {
+        const userReaction = post.reactions.find(
+          (r) => r.recognitionUserId === CURRENT_USER_ID
+        )?.reaction;
+        return {
+          id: post.id,
+          recognizer: post.recognitionUsers[0]?.name || "Unknown",
+          recognizerProfileUrl:
+            post.recognitionUsers[0]?.profileUrl || FALLBACK_AVATAR,
+          emoji: post.badge.iconImage,
+          recipients: post.recognitionUsers.map((user) => ({
+            name: user.name ?? "Unknown",
+            profileUrl: user.profileUrl ?? FALLBACK_AVATAR,
           })),
-        })),
-      }));
+          recognitionType: post.badge.title,
+          message: post.message,
+          timestamp: new Date(post.createdAt).toLocaleString(),
+          visibility: post.visibility,
+          liked: !!userReaction,
+          userReaction: userReaction,
+          likeCount: post.reactions.length,
+          comments: post.comments.map((comment) => {
+            const commentUserReaction = comment.reactions?.find(
+              (r) => r.recognitionUserId === CURRENT_USER_ID
+            )?.reaction;
+            return {
+              id: comment.id,
+              author: `${comment.user.firstName} ${comment.user.lastName}`,
+              authorProfileUrl: comment.user.profileUrl ?? FALLBACK_AVATAR,
+              authorColor: "bg-blue-500",
+              content: comment.comment,
+              timestamp: comment.createdAt
+                ? new Date(comment.createdAt).toLocaleString()
+                : new Date().toLocaleString(),
+              likes: comment.reactions?.length ?? 0,
+              liked: !!commentUserReaction,
+              userReaction: commentUserReaction,
+              replies: comment.replies.map((reply) => {
+                const replyUserReaction = reply.reactions?.find(
+                  (r) => r.recognitionUserId === CURRENT_USER_ID
+                )?.reaction;
+                return {
+                  id: reply.id,
+                  author: `${reply.user.firstName} ${reply.user.lastName}`,
+                  authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
+                  authorColor: "bg-orange-500",
+                  content: reply.comment,
+                  timestamp: reply.createdAt
+                    ? new Date(reply.createdAt).toLocaleString()
+                    : new Date().toLocaleString(),
+                  likes: reply.reactions?.length ?? 0,
+                  liked: !!replyUserReaction,
+                  userReaction: replyUserReaction,
+                };
+              }),
+            };
+          }),
+        };
+      });
   };
 
   // Update posts & recognition types when API data or filter changes
@@ -195,17 +258,18 @@ export default function App() {
       }
 
       const data = apiData?.data as PostWithBadge[];
-      const types: RecognitionType[] = data?.reduce((acc: RecognitionType[], post: PostWithBadge) => {
-        if (!acc.some((type) => type.id === post.badge.id)) {
-          acc.push({
-            id: post.badge.id,
-            title: post.badge.title,
-            emoji: post.badge.iconImage,
-            bgColor: `bg-${post.badge.category.toLowerCase()}-100`,
-          });
-        }
-        return acc;
-      }, [] as RecognitionType[]) || [];
+      const types: RecognitionType[] =
+        data?.reduce((acc: RecognitionType[], post: PostWithBadge) => {
+          if (!acc.some((type) => type.id === post.badge.id)) {
+            acc.push({
+              id: post.badge.id,
+              title: post.badge.title,
+              emoji: post.badge.iconImage,
+              bgColor: `bg-${post.badge.category.toLowerCase()}-100`,
+            });
+          }
+          return acc;
+        }, [] as RecognitionType[]) || [];
       setRecognitionTypes(types);
     }
   }, [apiData, selectedFilter]);
@@ -296,7 +360,6 @@ export default function App() {
                 className="text-sm text-[#4E53B1] appearance-none border border-[#4E53B1] bg-white px-6 py-3 pr-10 rounded-full cursor-pointer outline-none"
               >
                 <option>All Recognitions</option>
-                <option>My Recognitions</option>
                 <option>Shared with me</option>
               </select>
               <img
@@ -332,6 +395,7 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
   const context = useContext(ApiContext);
   const postComment = context?.postComment ?? (() => Promise.resolve());
   const postLike = context?.postLike ?? (() => Promise.resolve());
+  const { data: userInfo } = useGetUserProfileQuery({});
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -340,16 +404,20 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
   const [isLiking, setIsLiking] = useState(false);
   const [localLiked, setLocalLiked] = useState(post.liked);
   const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
+  const [localUserReaction, setLocalUserReaction] = useState(post.userReaction);
 
-  // Update comments state when post prop changes
+  // Update state when post prop changes
   useEffect(() => {
     setComments(post.comments);
     setLocalLikeCount(post.likeCount);
+    setLocalLiked(post.liked);
+    setLocalUserReaction(post.userReaction);
   }, [post]);
 
   const handlePostLike = async () => {
     setIsLiking(true);
     setLocalLiked(true);
+    setLocalUserReaction("LIKE");
     setLocalLikeCount((prev) => prev + 1);
     await postLike(post.id);
     setIsLiking(false);
@@ -378,8 +446,7 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
         {/* Header */}
         <div className="text-center mb-6">
           <h2 className="text-lg font-semibold text-[#484848]">
-            {post.recognizer} is Recognized{" "}
-            {/* {post.recipients.map((r) => r.name).join(", ")} */}
+            {post.recognizer} is Recognized
           </h2>
           <p className="text-gray-600 mt-2">{post.message}</p>
         </div>
@@ -440,10 +507,14 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
               localLiked ? "text-[#FFA000]" : "text-gray-600"
             }`}
           >
-            <ThumbsUp
-              className={`w-4 h-4 ${localLiked ? "fill-current" : ""}`}
-            />
-            {isLiking ? "Liking..." : "Like"}
+            {localLiked && localUserReaction ? (
+              REACTION_ICONS[localUserReaction] || (
+                <ThumbsUp className="w-4 h-4 fill-current" />
+              )
+            ) : (
+              <ThumbsUp className="w-4 h-4" />
+            )}
+            {isLiking ? "Liking..." : localLiked ? "" : "Like"}
           </button>
           <button
             className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
@@ -464,7 +535,13 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
             <div className="flex items-center gap-1">
               {localLikeCount > 0 && (
                 <>
-                  <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                  {localUserReaction ? (
+                    REACTION_ICONS[localUserReaction] || (
+                      <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                    )
+                  ) : (
+                    <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                  )}
                   <span>{localLikeCount}</span>
                 </>
               )}
@@ -489,9 +566,10 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex gap-3">
             <img
-              src={FALLBACK_AVATAR}
+              src={userInfo?.data?.profile?.profileUrl || FALLBACK_AVATAR}
               alt="Current User"
               className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
             />
             <div className="flex-1">
               <textarea
@@ -554,6 +632,7 @@ function CommentCard({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+  const { data: userInfo } = useGetUserProfileQuery({});
 
   const handleAddReply = async () => {
     if (newReply.trim()) {
@@ -590,6 +669,18 @@ function CommentCard({
             >
               Reply
             </button>
+            {comment.likes > 0 && (
+              <div className="flex items-center gap-1">
+                {comment.userReaction ? (
+                  REACTION_ICONS[comment.userReaction] || (
+                    <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                  )
+                ) : (
+                  <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                )}
+                <span>{comment.likes}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -598,9 +689,10 @@ function CommentCard({
         <div className="ml-11">
           <div className="flex gap-3">
             <img
-              src={FALLBACK_AVATAR}
+              src={userInfo?.data?.profile?.profileUrl || FALLBACK_AVATAR}
               alt="Current User"
               className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
             />
             <div className="flex-1">
               <textarea
@@ -650,6 +742,18 @@ function CommentCard({
             </div>
             <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
               <span>{reply.timestamp}</span>
+              {reply.likes > 0 && (
+                <div className="flex items-center gap-1">
+                  {reply.userReaction ? (
+                    REACTION_ICONS[reply.userReaction] || (
+                      <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                    )
+                  ) : (
+                    <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
+                  )}
+                  <span>{reply.likes}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
