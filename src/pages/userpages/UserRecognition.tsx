@@ -1,11 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
 import down from "@/assets/arrow_drop_down.svg";
 import comment from "@/assets/comment.png";
+import { useGetUserProfileQuery } from "@/store/api/auth/authApi";
 import {
   useGetAllCommentLikeQuery,
   usePostCommentMutation,
-  usePostLikeMutation,
   usePostReplyMutation,
+  usePostReactionMutation,
+  useDeleteReactionMutation,
 } from "@/store/api/user/userRecognition";
 import { Eye, Send, ThumbsUp } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -16,6 +18,15 @@ const safeAvatar = (url?: string) => (url && url.trim() ? url : FALLBACK_AVATAR)
 const formatDate = (date?: string) => (date ? new Date(date).toLocaleString() : new Date().toLocaleString());
 
 // ==================== TYPES ====================
+enum Reaction {
+  LIKE = "LIKE",
+  LOVE_FACE = "LOVE_FACE",
+  SMILE_FACE = "SMILE_FACE",
+  WOW_FACE = "WOW_FACE",
+  SAD_FACE = "SAD_FACE",
+  CELEBRATION = "CELEBRATION",
+}
+
 interface ApiUser {
   id: string;
   name?: string;
@@ -30,7 +41,7 @@ interface ApiComment {
   comment: string;
   user: ApiUser;
   replies: ApiComment[];
-  reactions?: { id: string; reaction: string; user: ApiUser }[];
+  reactions: { id: string; reaction: Reaction; user: ApiUser }[];
   createdAt?: string;
 }
 
@@ -46,7 +57,7 @@ interface ApiPost {
   recognitionUsers: ApiUser[];
   badge: { id: string; title: string; category: string; iconImage: string };
   comments: ApiComment[];
-  reactions: { id: string; reaction: string; user: ApiUser }[];
+  reactions: { id: string; reaction: Reaction; user: ApiUser }[];
 }
 
 interface TransformedReply {
@@ -56,8 +67,9 @@ interface TransformedReply {
   authorColor: string;
   content: string;
   timestamp: string;
-  likes: number;
-  liked: boolean;
+  reactions: { [key in Reaction]?: number };
+  userReaction: Reaction | null;
+  userReactionId: string | null;
 }
 
 interface TransformedComment extends TransformedReply {
@@ -75,8 +87,10 @@ interface TransformedPost {
   message: string;
   timestamp: string;
   visibility: string;
-  liked: boolean;
-  likeCount: number;
+  isAllowedToLike: boolean;
+  reactions: { [key in Reaction]?: number };
+  userReaction: Reaction | null;
+  userReactionId: string | null;
   comments: TransformedComment[];
 }
 
@@ -91,11 +105,13 @@ interface RecognitionType {
 export const ApiContext = createContext<{
   postComment: (postId: string, commentContent: string) => Promise<void>;
   postReply: (postId: string, commentId: string, replyContent: string) => Promise<void>;
-  postLike: (postId: string) => Promise<void>;
+  postReaction: (postId: string, commentId: string | null, reaction: Reaction) => Promise<void>;
+  deleteReaction: (postId: string, commentId: string | null, reactionId: string) => Promise<void>;
 }>({
   postComment: async () => {},
   postReply: async () => {},
-  postLike: async () => {},
+  postReaction: async () => {},
+  deleteReaction: async () => {},
 });
 
 // ==================== INPUT COMPONENT ====================
@@ -147,43 +163,105 @@ function InputBox({
   );
 }
 
-// ==================== DATA TRANSFORM HELPERS ====================
-const transformComment = (c: ApiComment, isReply = false): TransformedComment | TransformedReply => ({
-  id: c.id,
-  author: `${c.user.firstName ?? ""} ${c.user.lastName ?? ""}`.trim() || "Unknown",
-  authorProfileUrl: safeAvatar(c.user.profileUrl),
-  authorColor: isReply ? "bg-orange-500" : "bg-blue-500",
-  content: c.comment,
-  timestamp: formatDate(c.createdAt),
-  likes: c.reactions?.length ?? 0,
-  liked: false,
-  ...(isReply ? {} : { replies: c.replies.map((r) => transformComment(r, true) as TransformedReply) }),
-});
+// ==================== REACTION MENU ====================
+function ReactionMenu({
+  onSelect,
+  disabled,
+}: {
+  onSelect: (reaction: Reaction) => void;
+  disabled: boolean;
+}) {
+  const reactions = Object.values(Reaction);
+  const reactionIcons: { [key in Reaction]: string } = {
+    [Reaction.LIKE]: "👍",
+    [Reaction.LOVE_FACE]: "❤️",
+    [Reaction.SMILE_FACE]: "😊",
+    [Reaction.WOW_FACE]: "😮",
+    [Reaction.SAD_FACE]: "😢",
+    [Reaction.CELEBRATION]: "🎉",
+  };
 
-const transformApiData = (apiPosts: ApiPost[]): TransformedPost[] => {
+  return (
+    <div className="absolute bottom-full mb-2 flex gap-2 bg-white border border-gray-200 rounded-full p-2 shadow-lg z-10">
+      {reactions.map((reaction) => (
+        <button
+          key={reaction}
+          onClick={() => onSelect(reaction)}
+          disabled={disabled}
+          className="text-lg hover:bg-gray-100 rounded-full p-1 transition-colors"
+          title={reaction}
+        >
+          {reactionIcons[reaction]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ==================== DATA TRANSFORM HELPERS ====================
+const transformComment = (c: ApiComment, isReply = false, currentUserId: string): TransformedComment | TransformedReply => {
+  const reactionCounts = c.reactions.reduce(
+    (acc, r) => ({
+      ...acc,
+      [r.reaction]: (acc[r.reaction as Reaction] || 0) + 1,
+    }),
+    {} as { [key in Reaction]?: number },
+  );
+
+  const userReactionData = c.reactions.find((r) => r.user.id === currentUserId);
+
+  return {
+    id: c.id,
+    author: `${c.user.firstName ?? ""} ${c.user.lastName ?? ""}`.trim() || "Unknown",
+    authorProfileUrl: safeAvatar(c.user.profileUrl),
+    authorColor: isReply ? "bg-orange-500" : "bg-blue-500",
+    content: c.comment,
+    timestamp: formatDate(c.createdAt),
+    reactions: reactionCounts,
+    userReaction: userReactionData?.reaction || null,
+    userReactionId: userReactionData?.id || null,
+    ...(isReply ? {} : { replies: c.replies.map((r) => transformComment(r, true, currentUserId) as TransformedReply) }),
+  };
+};
+
+const transformApiData = (apiPosts: ApiPost[], currentUserId: string): TransformedPost[] => {
   return apiPosts
     .filter((post) => post.visibility.toLowerCase() !== "managers")
-    .map((post) => ({
-      id: post.id,
-      recognizer: post.recognitionUsers[0]?.name || "Unknown",
-      recognizerProfileUrl: safeAvatar(post.recognitionUsers[0]?.profileUrl),
-      emoji: post.badge.iconImage,
-      recipients: post.recognitionUsers.map((user) => ({
-        name: user.name ?? "Unknown",
-        profileUrl: safeAvatar(user.profileUrl),
-      })),
-      recognitionType: post.badge.title,
-      message: post.message,
-      timestamp: formatDate(post.createdAt),
-      visibility: post.visibility,
-      liked: false,
-      likeCount: post.reactions.length,
-      comments: post.comments.map((c) => transformComment(c) as TransformedComment),
-    }));
+    .map((post) => {
+      const reactionCounts = post.reactions.reduce(
+        (acc, r) => ({
+          ...acc,
+          [r.reaction]: (acc[r.reaction as Reaction] || 0) + 1,
+        }),
+        {} as { [key in Reaction]?: number },
+      );
+
+      const userReactionData = post.reactions.find((r) => r.user.id === currentUserId);
+
+      return {
+        id: post.id,
+        recognizer: post.recognitionUsers[0]?.name || "Unknown",
+        recognizerProfileUrl: safeAvatar(post.recognitionUsers[0]?.profileUrl),
+        emoji: post.badge.iconImage,
+        recipients: post.recognitionUsers.map((user) => ({
+          name: user.name ?? "Unknown",
+          profileUrl: safeAvatar(user.profileUrl),
+        })),
+        recognitionType: post.badge.title,
+        message: post.message,
+        timestamp: formatDate(post.createdAt),
+        visibility: post.visibility,
+        isAllowedToLike: post.isAllowedToLike,
+        reactions: reactionCounts,
+        userReaction: userReactionData?.reaction || null,
+        userReactionId: userReactionData?.id || null,
+        comments: post.comments.map((c) => transformComment(c, false, currentUserId) as TransformedComment),
+      };
+    });
 };
 
 // ==================== MAIN COMPONENT ====================
-export default function App() {
+export default function App({ currentUserId }: { currentUserId: string }) {
   const [posts, setPosts] = useState<TransformedPost[]>([]);
   const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>([]);
   const [selectedFilter, setSelectedFilter] = useState("All Recognitions");
@@ -196,11 +274,12 @@ export default function App() {
   const { data: apiData, error, isLoading, refetch } = useGetAllCommentLikeQuery({
     filter: filterMap[selectedFilter],
   });
-  console.log(apiData);
-  
+  const userInfo = useGetUserProfileQuery({});
+
   const [postCommentMutation] = usePostCommentMutation();
   const [postReplyMutation] = usePostReplyMutation();
-  const [postLikeMutation] = usePostLikeMutation();
+  const [postReactionMutation] = usePostReactionMutation();
+  const [deleteReactionMutation] = useDeleteReactionMutation();
 
   // ==================== API ACTIONS ====================
   const postComment = async (postId: string, commentContent: string) => {
@@ -221,19 +300,28 @@ export default function App() {
     }
   };
 
-  const postLike = async (postId: string) => {
+  const postReaction = async (postId: string, commentId: string | null, reaction: Reaction) => {
     try {
-      await postLikeMutation({ recognitionId: postId }).unwrap();
+      await postReactionMutation({ recognitionId: postId, commentId, reaction }).unwrap();
       refetch();
     } catch (err) {
-      console.error("Failed to post like:", err);
+      console.error("Failed to post reaction:", err);
+    }
+  };
+
+  const deleteReaction = async (postId: string, commentId: string | null, reactionId: string) => {
+    try {
+      await deleteReactionMutation({ recognitionId: postId, commentId, reactionId }).unwrap();
+      refetch();
+    } catch (err) {
+      console.error("Failed to delete reaction:", err);
     }
   };
 
   // ==================== DATA TRANSFORM EFFECT ====================
   useEffect(() => {
     if (apiData?.data) {
-      const transformed = transformApiData(apiData.data);
+      const transformed = transformApiData(apiData.data, currentUserId);
       setPosts(transformed);
 
       const types: RecognitionType[] = apiData.data.reduce((acc: RecognitionType[], post) => {
@@ -249,10 +337,10 @@ export default function App() {
       }, []);
       setRecognitionTypes(types);
     }
-  }, [apiData, selectedFilter]);
+  }, [apiData, selectedFilter, currentUserId]);
 
   return (
-    <ApiContext.Provider value={{ postComment, postReply, postLike }}>
+    <ApiContext.Provider value={{ postComment, postReply, postReaction, deleteReaction }}>
       <div className="min-h-screen bg-gray-50">
         {/* HEADER */}
         <div className="bg-[#FFFFFF] max-w-lg mx-auto px-6 py-6">
@@ -306,41 +394,68 @@ export default function App() {
 
 // ==================== POST CARD ====================
 function RecognitionPostCard({ post }: { post: TransformedPost }) {
-  const { postComment, postLike } = useContext(ApiContext);
+  const { postComment, postReaction, deleteReaction } = useContext(ApiContext);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(post.comments);
-  const [isCommenting, setIsCommenting] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-  const [localLiked, setLocalLiked] = useState(post.liked);
-  const [localLikeCount, setLocalLikeCount] = useState(post.likeCount);
+  const [showReactionMenu, setShowReactionMenu] = useState(false);
+  const [localReactions, setLocalReactions] = useState(post.reactions);
+  const [localUserReaction, setLocalUserReaction] = useState(post.userReaction);
+  const [localUserReactionId, setLocalUserReactionId] = useState(post.userReactionId);
+
+  const reactionIcons: { [key in Reaction]: string } = {
+    [Reaction.LIKE]: "👍",
+    [Reaction.LOVE_FACE]: "❤️",
+    [Reaction.SMILE_FACE]: "😊",
+    [Reaction.WOW_FACE]: "😮",
+    [Reaction.SAD_FACE]: "😢",
+    [Reaction.CELEBRATION]: "🎉",
+  };
 
   useEffect(() => {
     setComments(post.comments);
-    setLocalLikeCount(post.likeCount);
+    setLocalReactions(post.reactions);
+    setLocalUserReaction(post.userReaction);
+    setLocalUserReactionId(post.userReactionId);
   }, [post]);
 
-  const handlePostLike = async () => {
-    if (localLiked) return;
-    setIsLiking(true);
-    setLocalLiked(true);
-    setLocalLikeCount((prev) => prev + 1);
-    await postLike(post.id);
-    setIsLiking(false);
+  const handlePostReaction = async (reaction: Reaction) => {
+    if (!post.isAllowedToLike) return;
+
+    if (localUserReaction === reaction && localUserReactionId) {
+      // Remove reaction
+      setLocalUserReaction(null);
+      setLocalUserReactionId(null);
+      setLocalReactions((prev) => ({
+        ...prev,
+        [reaction]: (prev[reaction] || 1) - 1,
+      }));
+      await deleteReaction(post.id, null, localUserReactionId);
+    } else {
+      // Add or change reaction
+      setLocalUserReaction(reaction);
+      setLocalUserReactionId("temp-id"); // Will be updated after refetch
+      setLocalReactions((prev) => ({
+        ...prev,
+        [reaction]: (prev[reaction] || 0) + 1,
+        ...(localUserReaction ? { [localUserReaction]: (prev[localUserReaction] || 1) - 1 } : {}),
+      }));
+      await postReaction(post.id, null, reaction);
+    }
+    setShowReactionMenu(false);
   };
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
-    setIsCommenting(true);
+    setShowCommentInput(false);
     await postComment(post.id, newComment);
     setNewComment("");
-    setShowCommentInput(false);
     setShowComments(true);
-    setIsCommenting(false);
   };
 
   const totalComments = comments.reduce((total, c) => total + 1 + c.replies.length, 0);
+  const totalReactions = Object.values(localReactions).reduce((sum, count) => sum + (count || 0), 0);
 
   return (
     <div className="max-w-lg mx-auto rounded-xl bg-white p-4 border-gray-200">
@@ -371,16 +486,25 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
 
       {/* ACTION BUTTONS */}
       <div className="py-3 flex gap-4">
-        <button
-          onClick={handlePostLike}
-          disabled={isLiking || localLiked}
-          className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4 transition-colors cursor-pointer hover:bg-gray-50 ${
-            localLiked ? "text-[#FFA000]" : "text-gray-600"
-          }`}
-        >
-          <ThumbsUp className={`w-4 h-4 ${localLiked ? "fill-current" : ""}`} />
-          {isLiking ? "Liking..." : "Like"}
-        </button>
+        <div className="relative flex-1">
+          <button
+            onClick={() => setShowReactionMenu(!showReactionMenu)}
+            disabled={!post.isAllowedToLike}
+            className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4 transition-colors cursor-pointer hover:bg-gray-50 ${
+              localUserReaction ? "text-[#FFA000] font-semibold" : "text-gray-600"
+            } ${!post.isAllowedToLike ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {localUserReaction ? (
+              <span className="text-lg">{reactionIcons[localUserReaction]}</span>
+            ) : (
+              <ThumbsUp className="w-4 h-4" />
+            )}
+            {localUserReaction || "React"}
+          </button>
+          {showReactionMenu && (
+            <ReactionMenu onSelect={handlePostReaction} disabled={!post.isAllowedToLike} />
+          )}
+        </div>
         <button
           onClick={() => {
             setShowCommentInput(!showCommentInput);
@@ -394,12 +518,23 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
       </div>
 
       {/* ENGAGEMENT STATS */}
-      {(localLikeCount > 0 || totalComments > 0) && (
+      {(totalReactions > 0 || totalComments > 0) && (
         <div className="px-6 py-2 border-b border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
-          {localLikeCount > 0 && (
+          {totalReactions > 0 && (
             <div className="flex items-center gap-1">
-              <ThumbsUp className="w-4 h-4 text-[#FFA000] fill-current" />
-              <span>{localLikeCount}</span>
+              {Object.entries(localReactions)
+                .filter(([_, count]) => count && count > 0)
+                .map(([reaction], i) => (
+                  <span key={i} className="text-lg">
+                    {reaction === Reaction.LIKE && "👍"}
+                    {reaction === Reaction.LOVE_FACE && "❤️"}
+                    {reaction === Reaction.SMILE_FACE && "😊"}
+                    {reaction === Reaction.WOW_FACE && "😮"}
+                    {reaction === Reaction.SAD_FACE && "😢"}
+                    {reaction === Reaction.CELEBRATION && "🎉"}
+                  </span>
+                ))}
+              <span>{totalReactions}</span>
             </div>
           )}
           {totalComments > 0 && (
@@ -422,7 +557,7 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
               setShowCommentInput(false);
               setNewComment("");
             }}
-            submitting={isCommenting}
+            submitting={false}
             submitLabel="Post"
           />
         </div>
@@ -442,19 +577,46 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
 
 // ==================== COMMENT CARD ====================
 function CommentCard({ comment, postId }: { comment: TransformedComment; postId: string }) {
-  const { postReply } = useContext(ApiContext);
+  const { postReply, postReaction, deleteReaction } = useContext(ApiContext);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [newReply, setNewReply] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
+  const [reactionMenuState, setReactionMenuState] = useState<{ [key: string]: boolean }>({});
+
+  const reactionIcons: { [key in Reaction]: string } = {
+    [Reaction.LIKE]: "👍",
+    [Reaction.LOVE_FACE]: "❤️",
+    [Reaction.SMILE_FACE]: "😊",
+    [Reaction.WOW_FACE]: "😮",
+    [Reaction.SAD_FACE]: "😢",
+    [Reaction.CELEBRATION]: "🎉",
+  };
 
   const handleAddReply = async () => {
     if (!newReply.trim()) return;
-    setIsReplying(true);
+    setShowReplyInput(false);
     await postReply(postId, comment.id, newReply);
     setNewReply("");
-    setShowReplyInput(false);
-    setIsReplying(false);
   };
+
+  const handleCommentReaction = async (reaction: Reaction, commentId: string, userReactionId: string | null) => {
+    setReactionMenuState((prev) => ({ ...prev, [commentId]: false }));
+    if (userReactionId && comment.userReaction === reaction) {
+      // Remove reaction
+      await deleteReaction(postId, commentId, userReactionId);
+    } else {
+      // Add or change reaction
+      await postReaction(postId, commentId, reaction);
+    }
+  };
+
+  const toggleReactionMenu = (commentId: string) => {
+    setReactionMenuState((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
+  const totalReactions = Object.values(comment.reactions).reduce((sum, count) => sum + (count || 0), 0);
 
   return (
     <div className="space-y-2">
@@ -469,7 +631,36 @@ function CommentCard({ comment, postId }: { comment: TransformedComment; postId:
             <button className="hover:underline" onClick={() => setShowReplyInput(!showReplyInput)}>
               Reply
             </button>
+            <div className="relative">
+              <button
+                className={`hover:underline ${comment.userReaction ? "text-[#FFA000] font-semibold" : ""}`}
+                onClick={() => toggleReactionMenu(comment.id)}
+              >
+                {comment.userReaction ? reactionIcons[comment.userReaction] : "React"}
+              </button>
+              {reactionMenuState[comment.id] && (
+                <ReactionMenu onSelect={(reaction) => handleCommentReaction(reaction, comment.id, comment.userReactionId)} disabled={false} />
+              )}
+            </div>
           </div>
+
+          {totalReactions > 0 && (
+            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+              {Object.entries(comment.reactions)
+                .filter(([_, count]) => count && count > 0)
+                .map(([reaction], i) => (
+                  <span key={i} className="text-sm">
+                    {reaction === Reaction.LIKE && "👍"}
+                    {reaction === Reaction.LOVE_FACE && "❤️"}
+                    {reaction === Reaction.SMILE_FACE && "😊"}
+                    {reaction === Reaction.WOW_FACE && "😮"}
+                    {reaction === Reaction.SAD_FACE && "😢"}
+                    {reaction === Reaction.CELEBRATION && "🎉"}
+                  </span>
+                ))}
+              <span>{totalReactions}</span>
+            </div>
+          )}
 
           {showReplyInput && (
             <div className="mt-2">
@@ -482,7 +673,7 @@ function CommentCard({ comment, postId }: { comment: TransformedComment; postId:
                   setShowReplyInput(false);
                   setNewReply("");
                 }}
-                submitting={isReplying}
+                submitting={false}
                 submitLabel="Reply"
               />
             </div>
@@ -493,8 +684,41 @@ function CommentCard({ comment, postId }: { comment: TransformedComment; postId:
               {comment.replies.map((r) => (
                 <div key={r.id} className="flex gap-3">
                   <img src={r.authorProfileUrl} alt={r.author} className="w-7 h-7 rounded-full object-cover" />
-                  <div className="bg-gray-50 rounded-xl p-2 text-sm text-gray-700">
-                    <span className="font-semibold">{r.author}:</span> {r.content}
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-xl p-2 text-sm text-gray-700">
+                      <span className="font-semibold">{r.author}:</span> {r.content}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                      <span>{r.timestamp}</span>
+                      <div className="relative">
+                        <button
+                          className={`hover:underline ${r.userReaction ? "text-[#FFA000] font-semibold" : ""}`}
+                          onClick={() => toggleReactionMenu(r.id)}
+                        >
+                          {r.userReaction ? reactionIcons[r.userReaction] : "React"}
+                        </button>
+                        {reactionMenuState[r.id] && (
+                          <ReactionMenu onSelect={(reaction) => handleCommentReaction(reaction, r.id, r.userReactionId)} disabled={false} />
+                        )}
+                      </div>
+                    </div>
+                    {Object.values(r.reactions).some((count) => count && count > 0) && (
+                      <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                        {Object.entries(r.reactions)
+                          .filter(([_, count]) => count && count > 0)
+                          .map(([reaction], i) => (
+                            <span key={i} className="text-sm">
+                              {reaction === Reaction.LIKE && "👍"}
+                              {reaction === Reaction.LOVE_FACE && "❤️"}
+                              {reaction === Reaction.SMILE_FACE && "😊"}
+                              {reaction === Reaction.WOW_FACE && "😮"}
+                              {reaction === Reaction.SAD_FACE && "😢"}
+                              {reaction === Reaction.CELEBRATION && "🎉"}
+                            </span>
+                          ))}
+                        <span>{Object.values(r.reactions).reduce((sum, count) => sum + (count || 0), 0)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

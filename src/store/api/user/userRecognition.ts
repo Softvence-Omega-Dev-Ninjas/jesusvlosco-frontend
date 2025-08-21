@@ -1,5 +1,14 @@
 import { baseApi } from "../baseApi";
 
+enum Reaction {
+  LIKE = "LIKE",
+  LOVE_FACE = "LOVE_FACE",
+  SMILE_FACE = "SMILE_FACE",
+  WOW_FACE = "WOW_FACE",
+  SAD_FACE = "SAD_FACE",
+  CELEBRATION = "CELEBRATION",
+}
+
 export const userRecognitionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCommentLike: builder.query({
@@ -14,7 +23,7 @@ export const userRecognitionApi = baseApi.injectEndpoints({
       query: ({ recognitionId, comment }) => ({
         url: `/employee/recognition/${recognitionId}`,
         method: "POST",
-        body: { comment },
+        body: { comment, reaction: null, commentId: null, parentCommentId: null },
       }),
     }),
 
@@ -22,15 +31,31 @@ export const userRecognitionApi = baseApi.injectEndpoints({
       query: ({ recognitionId, parentCommentId, comment }) => ({
         url: `/employee/recognition/${recognitionId}`,
         method: "POST",
-        body: { parentCommentId, comment },
+        body: { comment, reaction: null, commentId: null, parentCommentId },
       }),
     }),
 
-    postLike: builder.mutation({
-      query: ({ recognitionId }) => ({
+    postReaction: builder.mutation({
+      query: ({ recognitionId, commentId, reaction }) => ({
         url: `/employee/recognition/${recognitionId}`,
         method: "POST",
-        body: { reaction: "LIKE" },
+        body: {
+          comment: null,
+          reaction,
+          commentId: commentId || null,
+          parentCommentId: commentId ? commentId : null,
+        },
+      }),
+    }),
+
+    deleteReaction: builder.mutation({
+      query: ({ recognitionId, commentId, reactionId }) => ({
+        url: `/employee/recognition/${recognitionId}/reaction/${reactionId}`,
+        method: "DELETE",
+        body: {
+          commentId: commentId || null,
+          parentCommentId: commentId ? commentId : null,
+        },
       }),
     }),
   }),
@@ -40,5 +65,6 @@ export const {
   useGetAllCommentLikeQuery,
   usePostCommentMutation,
   usePostReplyMutation,
-  usePostLikeMutation,
+  usePostReactionMutation,
+  useDeleteReactionMutation,
 } = userRecognitionApi;
