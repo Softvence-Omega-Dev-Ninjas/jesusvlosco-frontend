@@ -4,16 +4,30 @@ import { FiDownload, FiHeart } from "react-icons/fi";
 import { toast } from "sonner";
 import { jsPDF } from 'jspdf';
 
-  const handleDownload = () => {
-    const doc = new jsPDF();
+const handleDownload = async (file: string) => {
+  const doc = new jsPDF();
+  const img = new Image();
+  img.crossOrigin = "anonymous";
 
-    doc.text("Hello, this is a sample PDF document.", 10, 10);
-    doc.save("sample.pdf");
+  img.onload = () => {
+    const imgWidth = 180;
+    const imgHeight = (img.height * imgWidth) / img.width;
+
+    doc.addImage(img, 'PNG', 10, 10, imgWidth, imgHeight);
+    doc.save("download.pdf");
   };
 
-const UserRemotePolicyCard = ({ onClose, singleAnnouce }:{onClose:any,singleAnnouce:any}) => {
-  const [hitLike] = useHitLikeMutation();
+  img.onerror = () => {
+    alert("Failed to load image for PDF");
+  };
 
+  img.src = file;
+};
+
+
+const UserRemotePolicyCard = ({ onClose, singleAnnouce }:{onClose:any,singleAnnouce:any}) => {
+console.log(singleAnnouce)
+  const [hitLike] = useHitLikeMutation();
   const handleLike = async () => {
   try {
     const response:any = await hitLike(singleAnnouce?.data?.id)
@@ -86,7 +100,7 @@ const UserRemotePolicyCard = ({ onClose, singleAnnouce }:{onClose:any,singleAnno
             <a href="#" className="text-indigo-600 hover:underline flex items-center gap-1"
               onClick={(e) => {
                 e.preventDefault();
-                handleDownload();
+                handleDownload(singleAnnouce?.data?.attachments[0].file);
               }}
             >
               <FiDownload className="w-4 h-4" />
