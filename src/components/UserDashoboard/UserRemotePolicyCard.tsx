@@ -1,15 +1,34 @@
 
+import { useHitLikeMutation } from "@/store/api/user/hitLike";
 import React from "react";
 import { FiDownload, FiHeart } from "react-icons/fi";
+import { toast } from "sonner";
 
 interface RemotePolicyCardProps {
   onClose: () => void;
 }
 
-const UserRemotePolicyCard: React.FC<RemotePolicyCardProps> = ({ onClose }) => {
+const UserRemotePolicyCard: React.FC<RemotePolicyCardProps> = ({ onClose, singleAnnouce }) => {
+  console.log(singleAnnouce)
+  const [hitLike] = useHitLikeMutation();
+
+  const handleLike = async() =>{
+    try {
+      const response = await hitLike(singleAnnouce?.data?.id)
+
+      if(response?.success){
+        toast.success(response?.data?.message)
+      }
+    if(response?.error){
+      toast.warning(response?.error?.data?.message)
+    }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <div className="bg-white rounded-xl shadow-md p-6 max-w-8xl mx-auto relative">
-      
+
       <button
         onClick={onClose}
         className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl"
@@ -19,21 +38,25 @@ const UserRemotePolicyCard: React.FC<RemotePolicyCardProps> = ({ onClose }) => {
       </button>
 
       <h2 className="text-xl font-semibold text-indigo-800 mb-2">
-        New Remote Work Policy Implementation
+        {singleAnnouce?.data?.title}
       </h2>
 
       <div className="flex items-center text-sm text-gray-500 mb-4 gap-4">
-        <span>Posted by HR Department</span>
+        <span>{singleAnnouce?.data?.author?.profile?.firstName}</span>
         <span>•</span>
-        <span>142 reads</span>
+        <span>{singleAnnouce?.data?.viewCount}</span>
       </div>
 
       <p className="text-gray-700 text-sm mb-4">
-        We are excited to announce our new flexible remote work policy that will take effect starting February 1st, 2024. This policy aims to provide better work-life balance...
+        <div
+          dangerouslySetInnerHTML={{
+            __html: singleAnnouce?.data?.description,
+          }}
+        ></div>
+
       </p>
 
       <p className="text-gray-700 text-sm mb-6">
-        We are excited to announce our new flexible remote work policy that will take effect starting February 1st, 2024. This policy aims to provide better work-life balance while maintaining our high standards of productivity and collaboration.
         <br />
         <br />
         <strong>Key highlights of the new policy:</strong>
@@ -55,14 +78,9 @@ const UserRemotePolicyCard: React.FC<RemotePolicyCardProps> = ({ onClose }) => {
         <h4 className="text-sm font-semibold text-gray-700 mb-2">Attachments</h4>
         <ul className="space-y-2">
           <li className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md text-sm">
-            <span>Remote_Work_Policy_2024.pdf</span>
-            <a href="#" className="text-indigo-600 hover:underline flex items-center gap-1">
-              <FiDownload className="w-4 h-4" />
-              Download
-            </a>
-          </li>
-          <li className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md text-sm">
-            <span>Remote_Work_Policy_2024.pdf</span>
+            <span>{singleAnnouce?.data?.attachments.map((file:any)=>(
+              file?.file
+            ))}</span>
             <a href="#" className="text-indigo-600 hover:underline flex items-center gap-1">
               <FiDownload className="w-4 h-4" />
               Download
@@ -72,8 +90,8 @@ const UserRemotePolicyCard: React.FC<RemotePolicyCardProps> = ({ onClose }) => {
       </div>
 
       <div className="flex items-center text-sm text-gray-600 gap-1">
-        <FiHeart className="w-4 h-4 text-pink-500" />
-        <span>89 Likes</span>
+        <FiHeart className="w-4 h-4 text-pink-500 cursor-pointer" onClick={handleLike}/>
+        <span>{singleAnnouce?.data?.likeCount} Likes</span>
       </div>
     </div>
   );
