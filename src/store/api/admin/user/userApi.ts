@@ -2,7 +2,6 @@ import { baseApi } from "../../baseApi";
 
 const userApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-
     getAllUser: build.query({
       query: (params = {}) => {
         const queryParams = new URLSearchParams(params).toString();
@@ -30,6 +29,13 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+    }),
+    deleteUser: build.mutation({
+      query: (userId) => ({
+        url: `/admin/user/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ADMIN_USER"],
     }),
 
     // Education
@@ -109,8 +115,6 @@ const userApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["ADMIN_USER"],
     }),
-
-    
   }),
 });
 
@@ -122,6 +126,9 @@ export const {
   useGetUserByEmployeeIdQuery,
 
   useUpdateUserMutation,
+
+  // delete user
+  useDeleteUserMutation,
 
   // User Creation
   useCreateUserMutation,

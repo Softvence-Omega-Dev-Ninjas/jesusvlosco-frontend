@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// NewTaskModal.tsx
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -63,60 +61,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
     setIsSubmitting(false);
   };
 
-  // const handlePublishTask = async (data: TaskFormData) => {
-  //   setIsSubmitting(true);
-  //   const formData = new FormData();
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (key === "labels") {
-  //       (value as string[]).forEach((label) => formData.append("labels", label));
-  //     } else if (key === "startTime" || key === "endTime") {
-  //       const isoString = (value as Date).toISOString();
-  //       formData.append(key, isoString);
-  //     } else if (key === "attachment" && value?.[0]) {
-  //       formData.append(key, value[0]);
-  //     } else {
-  //       formData.append(key, value as string);
-  //     }
-  //   });
-
-  //   // Add the status field for publishing
-  //   formData.append("status", "OPEN");
-
-  //   try {
-  //     // Simulate API call
-  //     console.log("startDateTime ISO format:", formData.get("startTime"));
-  //     console.log("Publishing task with data:", Object.fromEntries(formData.entries()));
-  //     await new Promise((resolve) => setTimeout(resolve, 1000));
-  //     resetForm();
-  //   } catch (error) {
-  //     console.error("Error publishing task:", error);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // const handleDraftTask = (data: TaskFormData) => {
-  //   // This will only run if validation passes
-  //   const formData = new FormData();
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (key === "labels") {
-  //       (value as string[]).forEach((label) => formData.append("labels", label));
-  //     } else if (key === "startTime" || key === "endTime") {
-  //       formData.append(key, (value as Date).toISOString());
-  //     } else if (key === "attachment" && value?.[0]) {
-  //       formData.append(key, value[0]);
-  //     } else {
-  //       formData.append(key, value as string);
-  //     }
-  //   });
-
-  //   // Add the status field for drafting
-  //   formData.append("status", "DRAFT");
-
-  //   console.log("Saving task as draft:", Object.fromEntries(formData.entries()));
-  //   resetForm();
-  // };
-
+  //Handle publish task
   const handlePublishTask = async (data: TaskFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -147,6 +92,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
     }
   };
 
+  //Handle draft task
   const handleDraftTask = async (data: TaskFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {

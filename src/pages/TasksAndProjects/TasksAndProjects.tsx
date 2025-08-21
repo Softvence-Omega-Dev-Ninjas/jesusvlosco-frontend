@@ -7,7 +7,7 @@ import { DateRange } from "@/components/TimeOffRequest/EmployeeDetailModal";
 import { useGetTasksQuery } from "@/store/api/admin/task-and-projects";
 import { FaSpinner } from "react-icons/fa";
 
-export function TasksAndProjects() {
+export default function TasksAndProjects() {
   // const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [groupBy, setGroupBy] = useState("title");
   // const [dateRange, setDateRange] = useState("May 25 - May 30")
