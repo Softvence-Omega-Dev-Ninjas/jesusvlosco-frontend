@@ -22,6 +22,7 @@ interface UpdateRoleModalProps {
   selectedRole: string;
   setSelectedRole: (role: string) => void;
   onConfirm: () => void;
+  name: string;
 }
 
 export default function UpdateRoleModal({
@@ -30,14 +31,15 @@ export default function UpdateRoleModal({
   selectedRole,
   setSelectedRole,
   onConfirm,
+  name,
 }: UpdateRoleModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white border-0">
         <DialogHeader>
           <DialogTitle>Update User Role</DialogTitle>
           <DialogDescription>
-            Change the role for John Doe. This will affect their permissions and
+            Change the role for {name}. This will affect their permissions and
             access level.
           </DialogDescription>
         </DialogHeader>
@@ -48,11 +50,9 @@ export default function UpdateRoleModal({
               <SelectTrigger>
                 <SelectValue placeholder="Choose a role" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="employee">Employee</SelectItem>
-                <SelectItem value="viewer">Viewer</SelectItem>
-                <SelectItem value="guest">Guest</SelectItem>
+              <SelectContent className="bg-white">
+                <SelectItem value="ADMIN">Admin</SelectItem>
+                <SelectItem value="EMPLOYEE">Employee</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -61,7 +61,11 @@ export default function UpdateRoleModal({
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={!selectedRole}>
+          <Button
+            className="text-white"
+            onClick={onConfirm}
+            disabled={!selectedRole}
+          >
             Update Role
           </Button>
         </DialogFooter>

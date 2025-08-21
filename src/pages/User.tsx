@@ -15,7 +15,7 @@ import { PiUserCircleLight } from "react-icons/pi";
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 import Pagination from "@/utils/Pagination";
-import UserRoleDropdown from "@/components/RecognitionTable/UserRoleDropdown";
+import UserActionDropdown from "@/Layout/User/UserActionDropdown";
 
 // Define the type for a User
 interface User {
@@ -169,7 +169,6 @@ const initialUsers: User[] = [
 const User: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
   const [currentPage, setCurrentPage] = useState(1);
-  const [role, setRole] = useState("Emoloyee");
   const limit = 10;
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { data, isLoading, isFetching } = useGetAllUserQuery({
@@ -180,20 +179,7 @@ const User: React.FC = () => {
   });
   const allUsers = data?.data;
   console.log({ data, isLoading });
-  const [updateRoleOpen, setUpdateRoleOpen] = useState(false);
-  const [deleteUserOpen, setDeleteUserOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("");
 
-  const handleUpdateRole = () => {
-    console.log("Updating role to:", selectedRole);
-    setUpdateRoleOpen(false);
-    setSelectedRole("");
-  };
-
-  const handleDeleteUser = () => {
-    console.log("Deleting user");
-    setDeleteUserOpen(false);
-  };
   // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
   const [showViewByOptionsModal, setShowViewByOptionsModal] =
@@ -522,7 +508,7 @@ const User: React.FC = () => {
   return (
     <div
       ref={mainContainerRef}
-      className="min-h-screen border-2  px-2 font-sans antialiased relative"
+      className="min-h-screen   px-2 font-sans antialiased relative"
     >
       {/* Header Section */}
       <header className="flex items-center justify-between p-4  mb-3">
@@ -952,10 +938,12 @@ const User: React.FC = () => {
                         {formatDateToMDY(user?.lastLoginAt)}
                       </td>
                       <td className="px-6 py-4  whitespace-nowrap text-sm text-gray-500">
-                        <UserRoleDropdown
+                        <UserActionDropdown
                           id={user?.id}
-                          role={role}
-                          setRole={setRole}
+                          firstName={user?.profile?.firstName}
+                          lastName={user?.profile?.lastName}
+                          email={user?.email}
+                          role={user?.role}
                         />
                       </td>
                     </tr>
