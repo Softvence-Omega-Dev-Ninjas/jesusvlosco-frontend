@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// NewTaskModal.tsx
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { FaSpinner } from "react-icons/fa";
-import { Paperclip, Trash2, X } from "lucide-react";
+import { Check, ChevronsUpDown, Paperclip, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -22,6 +20,8 @@ import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { useCreateTaskMutation } from "@/store/api/admin/task-and-projects";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
@@ -30,10 +30,18 @@ interface NewTaskModalProps {
 }
 
 export function NewTaskModal({ trigger }: NewTaskModalProps) {
-  const { data: users, isLoading: isUserLoading } = useGetAllUserQuery(undefined);
+  const { data: users, isLoading: isUserLoading } = useGetAllUserQuery({ limit: 100 });
   const { data: projects, isLoading: isProjectLoading } = useGetAllProjectsQuery(undefined);
+
+  console.log(users);
   const [createTask] = useCreateTaskMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
+
+  // Add a state variable to control the dialog's open state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -61,63 +69,14 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       attachment: undefined,
     });
     setIsSubmitting(false);
+    setIsDrafting(false);
+    // Increment the key to force re-render and reset the file input
+    setFormKey((prevKey) => prevKey + 1);
   };
 
-  // const handlePublishTask = async (data: TaskFormData) => {
-  //   setIsSubmitting(true);
-  //   const formData = new FormData();
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (key === "labels") {
-  //       (value as string[]).forEach((label) => formData.append("labels", label));
-  //     } else if (key === "startTime" || key === "endTime") {
-  //       const isoString = (value as Date).toISOString();
-  //       formData.append(key, isoString);
-  //     } else if (key === "attachment" && value?.[0]) {
-  //       formData.append(key, value[0]);
-  //     } else {
-  //       formData.append(key, value as string);
-  //     }
-  //   });
-
-  //   // Add the status field for publishing
-  //   formData.append("status", "OPEN");
-
-  //   try {
-  //     // Simulate API call
-  //     console.log("startDateTime ISO format:", formData.get("startTime"));
-  //     console.log("Publishing task with data:", Object.fromEntries(formData.entries()));
-  //     await new Promise((resolve) => setTimeout(resolve, 1000));
-  //     resetForm();
-  //   } catch (error) {
-  //     console.error("Error publishing task:", error);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-  // const handleDraftTask = (data: TaskFormData) => {
-  //   // This will only run if validation passes
-  //   const formData = new FormData();
-  //   Object.entries(data).forEach(([key, value]) => {
-  //     if (key === "labels") {
-  //       (value as string[]).forEach((label) => formData.append("labels", label));
-  //     } else if (key === "startTime" || key === "endTime") {
-  //       formData.append(key, (value as Date).toISOString());
-  //     } else if (key === "attachment" && value?.[0]) {
-  //       formData.append(key, value[0]);
-  //     } else {
-  //       formData.append(key, value as string);
-  //     }
-  //   });
-
-  //   // Add the status field for drafting
-  //   formData.append("status", "DRAFT");
-
-  //   console.log("Saving task as draft:", Object.fromEntries(formData.entries()));
-  //   resetForm();
-  // };
-
+  //Handle publish task
   const handlePublishTask = async (data: TaskFormData) => {
+    setIsSubmitting(true);
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "labels") {
@@ -139,15 +98,20 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       console.log(result);
       if (result?.success) {
         toast.success("Task assigned successfully.");
+        resetForm();
+        setIsModalOpen(false); // Close the dialog on success
       }
-
-      resetForm();
     } catch (error) {
       console.error("Error publishing task:", error);
+      toast.error("Failed to publish task."); // Add a toast for failure
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  //Handle draft task
   const handleDraftTask = async (data: TaskFormData) => {
+    setIsDrafting(true);
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "labels") {
@@ -167,17 +131,29 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       const result = await createTask(formData).unwrap();
       if (result?.success) {
         toast.success("Task draft saved successfully.");
+        resetForm();
+        setIsModalOpen(false); // Close the dialog on success
       }
-      resetForm();
     } catch (error) {
       console.error("Error saving draft task:", error);
+      toast.error("Failed to save draft task."); // Add a toast for failure
+    } finally {
+      setIsDrafting(false);
     }
   };
 
   const showDetails = true; // Hardcoded to true for demonstration of delete button
 
   return (
-    <Dialog onOpenChange={(open) => !open && resetForm()}>
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={(open) => {
+        setIsModalOpen(open);
+        if (!open) {
+          resetForm(); // Reset the form when the dialog is closed
+        }
+      }}
+    >
       <DialogTrigger asChild>{trigger || <Button className="">New Task</Button>}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[600px] overflow-y-scroll border-none p-0 bg-white">
         <DialogHeader className="px-6 pt-6 pb-4">
@@ -187,7 +163,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={(e) => e.preventDefault()} className="px-6 pb-6 space-y-4">
+        <form key={formKey} onSubmit={(e) => e.preventDefault()} className="px-6 pb-6 space-y-4">
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Task Details</h3>
           </div>
@@ -227,22 +203,49 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
               name="assignUserId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className={cn("w-full border border-slate-300", errors.assignUserId && "border-red-500")}>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-none max-h-60 overflow-y-scroll">
-                    {isUserLoading && (
-                      <div className="w-full h-14 flex items-center justify-center">
-                        <FaSpinner className="animate-spin" />
-                      </div>
-                    )}
-                    {!isUserLoading &&
-                      users?.data?.map((user: any) => {
-                        return <SelectItem key={user?.id} value={user?.id}>{`${user?.profile?.firstName} ${user?.profile?.lastName}`}</SelectItem>;
-                      })}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn("w-full justify-between border border-slate-300 font-normal", errors.assignUserId && "border-red-500")}
+                    >
+                      {field.value
+                        ? users?.data?.find((user: any) => user?.id === field.value)?.profile?.firstName +
+                          " " +
+                          users?.data?.find((user: any) => user?.id === field.value)?.profile?.lastName
+                        : "Select user"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 bg-white max-h-[200px] overflow-y-scroll border border-slate-100 mb-2">
+                    <Command>
+                      <CommandInput placeholder="Search user..." className="h-9 border-none" />
+                      <CommandGroup>
+                        {isUserLoading && (
+                          <div className="w-full h-14 flex items-center justify-center">
+                            <FaSpinner className="animate-spin" />
+                          </div>
+                        )}
+                        {!isUserLoading &&
+                          users?.data?.map((user: any) => (
+                            <CommandItem
+                              className="cursor-pointer hover:bg-slate-50"
+                              key={user?.id}
+                              value={`${user?.profile?.firstName} ${user?.profile?.lastName}`}
+                              onSelect={() => {
+                                field.onChange(user?.id);
+                              }}
+                            >
+                              {`${user?.profile?.firstName} ${user?.profile?.lastName}`}
+                              <Check className={cn("ml-auto h-4 w-4", user?.id === field.value ? "opacity-100" : "opacity-0")} />
+                            </CommandItem>
+                          ))}
+                        {!isUserLoading && users?.data?.length === 0 && <CommandEmpty>No users found.</CommandEmpty>}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               )}
             />
             {errors.assignUserId && <p className="text-sm text-red-500 mt-1">{errors.assignUserId.message}</p>}
@@ -386,9 +389,9 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 variant="outline"
                 className="border-gray-300 bg-transparent cursor-pointer"
                 onClick={handleSubmit(handleDraftTask)}
-                disabled={isSubmitting}
+                disabled={isDrafting}
               >
-                Draft Task
+                {isDrafting ? "Saving..." : "Save Draft"}
               </Button>
             </div>
 
@@ -398,8 +401,11 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 variant="ghost"
                 size="sm"
                 className="text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                onClick={resetForm}
-                disabled={isSubmitting}
+                onClick={() => {
+                  // setIsModalOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting || isDrafting}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  useCreateCategoryMutation,
-  useFetchCategoriesQuery,
-} from "@/store/api/admin/announcement/categoryApi";
+import { useCreateCategoryMutation, useFetchCategoriesQuery } from "@/store/api/admin/announcement/categoryApi";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -20,6 +17,7 @@ const CategoryDropdown = ({
   const [categoryDescription, setCategoryDescription] = useState("");
   const [createCategory] = useCreateCategoryMutation();
   const { data: categoriesData } = useFetchCategoriesQuery([]);
+  console.log("categoryData========>", categoriesData);
   const categories = categoriesData?.data;
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const handleSelect = (category: any) => {
@@ -42,10 +40,7 @@ const CategoryDropdown = ({
   return (
     <div className="relative w-full max-w-md">
       {/* Dropdown Button */}
-      <button
-        onClick={toggleDropdown}
-        className="w-full p-2 border border-gray-300 rounded-md text-sm bg-white text-left"
-      >
+      <button onClick={toggleDropdown} className="w-full p-2 border border-gray-300 rounded-md text-sm bg-white text-left">
         {selectedCategory?.name || "Select category"}
       </button>
 
@@ -65,10 +60,7 @@ const CategoryDropdown = ({
           ))}
 
           {/* Create New Category */}
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 text-indigo-600 font-medium hover:underline pt-2  w-full"
-          >
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 text-indigo-600 font-medium hover:underline pt-2  w-full">
             <span>➕</span> Create new category
           </button>
         </div>
@@ -77,9 +69,7 @@ const CategoryDropdown = ({
       {/* Create New Category Form */}
       {showForm && (
         <div className="absolute top-full mt-2 w-full sm:w-96 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-20">
-          <label className="block mb-2 text-sm font-medium">
-            Category name
-          </label>
+          <label className="block mb-2 text-sm font-medium">Category name</label>
           <input
             type="text"
             placeholder="Enter category title here"
