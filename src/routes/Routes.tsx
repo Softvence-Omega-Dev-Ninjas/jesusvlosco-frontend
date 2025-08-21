@@ -137,12 +137,12 @@ const routes = createBrowserRouter([
         element: <UserSurvey></UserSurvey>,
       },
       {
-        path: "take-survey/:id",
+        path: "take-survey/:id/assigned",
         element: <TakeSurvey></TakeSurvey>,
       },
 
       {
-        path: "poll",
+        path: "take-pool/:id/assigned",
         element: <UserPoll></UserPoll>,
       },
 
