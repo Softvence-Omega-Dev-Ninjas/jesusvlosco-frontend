@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import React from 'react';
 import down from "@/assets/arrow_drop_down.svg";
 import comment from "@/assets/comment.png";
 import { useGetUserProfileQuery } from "@/store/api/auth/authApi";
@@ -24,7 +25,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
 
 // Reaction icon mapping
-const REACTION_ICONS: { [key: string]: JSX.Element } = {
+const REACTION_ICONS: { [key: string]: React.ReactNode } = {
   LIKE: <ThumbsUp className="w-4 h-4 fill-current" />,
   LOVE_FACE: <Heart className="w-4 h-4 fill-current text-red-500" />,
   SMILE_FACE: <Smile className="w-4 h-4 fill-current text-yellow-500" />,
