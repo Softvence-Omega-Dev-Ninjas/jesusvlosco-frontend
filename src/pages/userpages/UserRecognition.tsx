@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 import React from 'react';
 import down from "@/assets/arrow_drop_down.svg";
