@@ -63,7 +63,7 @@ const navigation: NavigationItem[] = [
         icon: Calendar,
         hasSubmenu: true,
         submenu: [
-            // { name: 'Shift Scheduling', icon: Calendar, path: '/user/user-schedule/user-shiftschedule' },
+            { name: 'Shift Scheduling', icon: Calendar, path: '/user/user-schedule/user-shiftschedule' },
             { name: 'Time Clock', icon: Calendar, path: '/user/user-schedule/user-timeclock' },
 
             { name: 'TimeOff Request', icon: Calendar, path: '/user/user-schedule/user-timeoffrequest' },

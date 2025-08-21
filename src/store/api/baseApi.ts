@@ -32,6 +32,7 @@ export const baseApi = createApi({
     "SCHEDULING_USER",
     "TIME_CLOCK",
     "Like",
+    "TASK",
   ],
   endpoints: () => ({}),
 });

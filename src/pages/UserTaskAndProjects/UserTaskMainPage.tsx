@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { UserTaskAndProjects } from "./UserTaskAndProjects";
+import UserSubmittedTask from "./UserSubmittedTask";
 
 function TaskAndProject() {
   const [activeTabMain, setActiveTabMain] = useState<"all" | "submitted">("all");
@@ -44,7 +45,7 @@ function TaskAndProject() {
         )}
         {activeTabMain === "submitted" && (
           <div>
-            <h1>submitted</h1>
+            <UserSubmittedTask />
           </div>
         )}
       </div>
