@@ -2,13 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { formatCustomDate } from "./TaskRow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-
 interface OverdueTasksModalProps {
   overDueTasks: any;
 }
 
 export function OverdueTasksModal({ overDueTasks }: OverdueTasksModalProps) {
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -19,7 +17,7 @@ export function OverdueTasksModal({ overDueTasks }: OverdueTasksModalProps) {
           <span className="text-sm font-medium">Overdue tasks</span>
         </p>
       </DialogTrigger>
-      <DialogContent className="max-w-md p-0 bg-white">
+      <DialogContent className="max-w-md p-0 bg-white max-h-[500px] overflow-scroll border-none">
         <DialogHeader className="p-4 pb-2">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold text-[#4E53B1] flex items-center gap-2">Overdue Tasks</DialogTitle>
