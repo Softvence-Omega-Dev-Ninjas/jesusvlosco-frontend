@@ -6,11 +6,7 @@ import { useGetAllTeamsQuery } from "@/store/api/admin/team/CreateTeamApi";
 import { useCreateAnnouncementMutation } from "@/store/api/admin/announcement/announcementApi";
 import { toast } from "sonner";
 
-const AnnouncementForm = ({
-  setShowForm,
-}: {
-  setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+const AnnouncementForm = ({ setShowForm }: { setShowForm: React.Dispatch<React.SetStateAction<boolean>> }) => {
   // const [publishNow, setPublishNow] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
   const [fileName, setFileName] = useState("");
@@ -21,12 +17,8 @@ const AnnouncementForm = ({
   console.log(audience);
   const [publishNow, setPublishNow] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [sendEmailNotification, setSendEmailNotification] = useState<
-    boolean | null
-  >();
-  const [enabledReadReceipt, setEnabledReadReceipt] = useState<
-    boolean | null
-  >();
+  const [sendEmailNotification, setSendEmailNotification] = useState<boolean | null>();
+  const [enabledReadReceipt, setEnabledReadReceipt] = useState<boolean | null>();
 
   const [createAnnouncement] = useCreateAnnouncementMutation();
 
@@ -45,7 +37,7 @@ const AnnouncementForm = ({
       title,
       description,
       categoryId: selectedCategory.id,
-      teams: [...audience],
+      teams: audience,
       publishedNow: publishNow,
       publishedAt: selectedDate?.toISOString(),
       enabledReadReceipt,
@@ -59,27 +51,22 @@ const AnnouncementForm = ({
       formData.append("files", file);
     });
 
-    const { data } = await createAnnouncement({ payload, formData });
+    const result = await createAnnouncement({ payload, formData });
 
-    if (data.success) {
-      toast.success(data.message);
+    console.log("================>", result);
+    if (result?.data?.success) {
+      toast.success(result?.data.message);
       setShowForm(false);
     }
   };
 
   return (
     <div className="w-full max-w-8xl mx-auto p-4 sm:p-6 md:p-10 bg-white rounded-md shadow">
-      <h2 className="text-xl sm:text-2xl font-semibold text-indigo-600 mb-2">
-        Create New announcement
-      </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Fill out the form below to create a new company announcement.
-      </p>
+      <h2 className="text-xl sm:text-2xl font-semibold text-indigo-600 mb-2">Create New announcement</h2>
+      <p className="text-sm text-gray-500 mb-6">Fill out the form below to create a new company announcement.</p>
 
       {/* Title */}
-      <label className="block mb-2 text-sm font-medium text-gray-700">
-        Announcement Title*
-      </label>
+      <label className="block mb-2 text-sm font-medium text-gray-700">Announcement Title*</label>
       <input
         type="text"
         placeholder="Enter announcement title here"
@@ -89,9 +76,7 @@ const AnnouncementForm = ({
       />
 
       {/* Description */}
-      <label className="block mb-2 text-sm font-medium text-gray-700">
-        Description*
-      </label>
+      <label className="block mb-2 text-sm font-medium text-gray-700">Description*</label>
       <div className="border border-gray-300  rounded-md mb-4">
         <div className="flex gap-2 p-2 border-b border-gray-300  bg-gray-50">
           <button className="text-sm font-medium">B</button>
@@ -117,17 +102,11 @@ const AnnouncementForm = ({
           {/* <select className="w-full p-2 border border-gray-300  rounded-md text-sm">
             <option>Select category</option>
           </select> */}
-          <CategoryDropdown
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-          />
+          <CategoryDropdown selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
         </div>
         <div className="flex-1">
           <label className="block mb-1 text-sm font-medium">Audience*</label>
-          <select
-            onChange={(e) => setAudience(e.target.value)}
-            className="w-full p-2 border border-gray-300  rounded-md text-sm"
-          >
+          <select onChange={(e) => setAudience(e.target.value)} className="w-full p-2 border border-gray-300  rounded-md text-sm">
             <option>Select category</option>
             {teams?.map((team: { id: string; title: string }) => (
               <option key={team.id} value={team?.id}>
@@ -163,34 +142,19 @@ const AnnouncementForm = ({
         )}
       </div> */}
 
-      <DateTimePicker
-        publishNow={publishNow}
-        setPublishNow={setPublishNow}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
+      <DateTimePicker publishNow={publishNow} setPublishNow={setPublishNow} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
       {/* Attachment */}
       <div className="mb-4 p-4 border border-gray-300  rounded-md text-center text-sm text-gray-500 bg-gray-50">
-        <input
-          type="file"
-          id="file"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        <label
-          htmlFor="file"
-          className="cursor-pointer flex flex-col items-center justify-center"
-        >
+        <input type="file" id="file" className="hidden" onChange={handleFileChange} />
+        <label htmlFor="file" className="cursor-pointer flex flex-col items-center justify-center">
           <div className="text-2xl mb-2">📁</div>
           {fileName ? (
             <p>{fileName}</p>
           ) : (
             <>
               <p>Click to upload files or drag and drop</p>
-              <p className="text-xs mt-1">
-                PDF, DOC, DOCX, JPG, PNG up to 10MB
-              </p>
+              <p className="text-xs mt-1">PDF, DOC, DOCX, JPG, PNG up to 10MB</p>
             </>
           )}
         </label>
@@ -199,17 +163,11 @@ const AnnouncementForm = ({
       {/* Notification Settings */}
       <div className="mb-4 space-y-2 text-sm">
         <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            onChange={(e) => setSendEmailNotification(e.target.checked)}
-          />
+          <input type="checkbox" onChange={(e) => setSendEmailNotification(e.target.checked)} />
           Send email notifications to recipients
         </label>
         <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            onChange={(e) => setEnabledReadReceipt(e.target.checked)}
-          />
+          <input type="checkbox" onChange={(e) => setEnabledReadReceipt(e.target.checked)} />
           Enable read receipt tracking
         </label>
       </div>
@@ -225,9 +183,7 @@ const AnnouncementForm = ({
         >
           Publish
         </button>
-        <button className="px-4 py-2 text-sm border border-gray-300  rounded-md text-gray-700 hover:bg-gray-100">
-          Cancel
-        </button>
+        <button className="px-4 py-2 text-sm border border-gray-300  rounded-md text-gray-700 hover:bg-gray-100">Cancel</button>
       </div>
     </div>
   );
