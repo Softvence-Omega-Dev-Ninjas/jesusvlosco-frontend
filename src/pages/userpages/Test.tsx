@@ -9,7 +9,16 @@ import {
   usePostReactionMutation,
   usePostReplyMutation,
 } from "@/store/api/user/userRecognition";
-import { Eye, Send, ThumbsUp } from "lucide-react";
+import {
+  Eye,
+  Frown,
+  Heart,
+  PartyPopper,
+  Send,
+  Smile,
+  Sparkles,
+  ThumbsUp,
+} from "lucide-react";
 import React, {
   createContext,
   useContext,
@@ -21,38 +30,14 @@ import React, {
 // Fallback avatar image
 const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
 
-// Reaction icon mapping without unwanted fill
+// Reaction icon mapping
 const REACTION_ICONS: { [key: string]: React.ReactNode } = {
-  LIKE: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      👍
-    </span>
-  ),
-  LOVE_FACE: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      ❤️
-    </span>
-  ),
-  SMILE_FACE: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      😄
-    </span>
-  ),
-  WOW_FACE: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      😮
-    </span>
-  ),
-  SAD_FACE: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      😢
-    </span>
-  ),
-  CELEBRATION: (
-    <span className="text-xl hover:scale-110 transition-transform duration-200">
-      🎉
-    </span>
-  ),
+  LIKE: <ThumbsUp className="w-4 h-4 fill-current" />,
+  LOVE_FACE: <Heart className="w-4 h-4 fill-current text-red-500" />,
+  SMILE_FACE: <Smile className="w-4 h-4 fill-current text-yellow-500" />,
+  WOW_FACE: <Sparkles className="w-4 h-4 fill-current text-blue-500" />,
+  SAD_FACE: <Frown className="w-4 h-4 fill-current text-gray-500" />,
+  CELEBRATION: <PartyPopper className="w-4 h-4 fill-current text-purple-500" />,
 };
 
 const REACTION_TYPES = [
@@ -63,17 +48,8 @@ const REACTION_TYPES = [
   "SAD_FACE",
   "CELEBRATION",
 ];
-// Reaction Text Mapping
-const REACTION_TEXT: { [key: string]: string } = {
-  LIKE: "Like",
-  LOVE_FACE: "Love",
-  SMILE_FACE: "Smile",
-  WOW_FACE: "Wow",
-  SAD_FACE: "Sad",
-  CELEBRATION: "Celebrate",
-};
 
-// Types (unchanged, included for reference)
+// Types
 interface ApiUser {
   id: string;
   name?: string;
@@ -142,8 +118,6 @@ interface TransformedReply {
   likes: number;
   liked: boolean;
   userReaction?: string;
-  replies: TransformedReply[];
-  showReplyInput?: boolean;
 }
 
 interface TransformedPost {
@@ -169,7 +143,7 @@ interface RecognitionType {
   bgColor: string;
 }
 
-// Reaction Picker Component (unchanged)
+// Reaction Picker Component
 function ReactionPicker({
   onSelect,
   isOpen,
@@ -217,7 +191,7 @@ function ReactionPicker({
   );
 }
 
-// Context to provide API functions globally (unchanged)
+// Context to provide API functions globally
 export const ApiContext = createContext<{
   postComment: (postId: string, commentContent: string) => Promise<void>;
   postReply: (
@@ -247,55 +221,25 @@ export default function App() {
 
   // RTK Query Hooks
   const {
-    data: userInfo,
-    isLoading: isUserLoading,
-    error: userError,
-  } = useGetUserProfileQuery({});
-  const {
     data: apiData,
     error,
     isLoading,
     refetch,
-  } = useGetAllCommentLikeQuery(
-    {
-      type: filterMap[selectedFilter],
-      status: "DRAFT",
-      orderBy: "asc",
-    },
-    {
-      skip: !userInfo?.data?.id, // Wait for userInfo to be available
-    }
-  );
+  } = useGetAllCommentLikeQuery({
+    type: filterMap[selectedFilter],
+    status: "DRAFT",
+    orderBy: "asc",
+  });
   const [postCommentMutation] = usePostCommentMutation();
   const [postReplyMutation] = usePostReplyMutation();
   const [postReactionMutation] = usePostReactionMutation();
+  const { data: userInfo } = useGetUserProfileQuery({});
 
   // Current user ID from userInfo
   const CURRENT_USER_ID = userInfo?.data?.id;
 
   // Transform API data to component format
   const transformApiData = (apiPosts: ApiPost[]): TransformedPost[] => {
-    const transformReply = (reply: ApiComment): TransformedReply => {
-      const replyUserReaction = reply.reactions?.find(
-        (r) => r.recognitionUserId === CURRENT_USER_ID
-      )?.reaction;
-      return {
-        id: reply.id,
-        author: `${reply.user.firstName} ${reply.user.lastName}`,
-        authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
-        authorColor: "bg-orange-500",
-        content: reply.comment,
-        timestamp: reply.createdAt
-          ? new Date(reply.createdAt).toLocaleString()
-          : new Date().toLocaleString(),
-        likes: reply.reactions?.length ?? 0,
-        liked: !!replyUserReaction,
-        userReaction: replyUserReaction,
-        replies: reply.replies.map(transformReply),
-        showReplyInput: false,
-      };
-    };
-
     return apiPosts
       .filter((post) => post.visibility.toLowerCase() !== "managers")
       .map((post) => {
@@ -335,8 +279,24 @@ export default function App() {
               likes: comment.reactions?.length ?? 0,
               liked: !!commentUserReaction,
               userReaction: commentUserReaction,
-              replies: comment.replies.map(transformReply),
-              showReplyInput: false,
+              replies: comment.replies.map((reply) => {
+                const replyUserReaction = reply.reactions?.find(
+                  (r) => r.recognitionUserId === CURRENT_USER_ID
+                )?.reaction;
+                return {
+                  id: reply.id,
+                  author: `${reply.user.firstName} ${reply.user.lastName}`,
+                  authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
+                  authorColor: "bg-orange-500",
+                  content: reply.comment,
+                  timestamp: reply.createdAt
+                    ? new Date(reply.createdAt).toLocaleString()
+                    : new Date().toLocaleString(),
+                  likes: reply.reactions?.length ?? 0,
+                  liked: !!replyUserReaction,
+                  userReaction: replyUserReaction,
+                };
+              }),
             };
           }),
         };
@@ -434,37 +394,27 @@ export default function App() {
               My Recognitions
             </h1>
             {/* Recognition Type Cards */}
-            {isUserLoading ? (
-              <p className="text-center text-gray-500">
-                Loading user profile...
-              </p>
-            ) : userError ? (
-              <p className="text-center text-red-500">
-                Error loading user profile. Please try again.
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {recognitionTypes.map((type) => (
-                  <div
-                    key={type.id}
-                    className="flex flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
-                        <img
-                          src={type.emoji}
-                          alt={type.title}
-                          className="object-contain h-20"
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-gray-700">
-                        {type.title}
-                      </span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {recognitionTypes.map((type) => (
+                <div
+                  key={type.id}
+                  className="flex flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
+                      <img
+                        src={type.emoji}
+                        alt={type.title}
+                        className="object-contain h-20"
+                      />
                     </div>
+                    <span className="text-xs font-medium text-gray-700">
+                      {type.title}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         {/* Main Content */}
@@ -491,19 +441,14 @@ export default function App() {
             </div>
           </div>
           {/* Loading and Error states */}
-          {isUserLoading ? (
-            <p className="text-center text-gray-500">Loading user profile...</p>
-          ) : userError ? (
-            <p className="text-center text-red-500">
-              Error loading user profile. Please try again.
-            </p>
-          ) : isLoading ? (
-            <p className="text-center">Loading recognitions...</p>
-          ) : error ? (
+          {isLoading && <p className="text-center">Loading recognitions...</p>}
+          {error && (
             <p className="text-center text-red-500">
               Error loading recognitions. Please try again.
             </p>
-          ) : (
+          )}
+          {/* Recognition Posts Feed */}
+          {!isLoading && !error && (
             <div className="space-y-6">
               {posts.map((post) => (
                 <RecognitionPostCard key={post.id} post={post} />
@@ -515,9 +460,6 @@ export default function App() {
     </ApiContext.Provider>
   );
 }
-
-// RecognitionPostCard, CommentCard, ReplyCard components remain unchanged
-// (Omitted for brevity, as they are identical to your original code)
 
 // Sub-component for a single recognition post
 function RecognitionPostCard({ post }: { post: TransformedPost }) {
@@ -639,22 +581,18 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
               onClick={() => setShowReactionPicker(true)}
               onMouseEnter={() => setShowReactionPicker(true)}
               disabled={isReacting}
-              className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-3 transition-colors cursor-pointer hover:bg-gray-50 ${
+              className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4 transition-colors cursor-pointer hover:bg-gray-50 ${
                 localLiked ? "text-[#FFA000]" : "text-gray-600"
               }`}
             >
-              {/* Show the icon with human-readable text */}
               {localLiked && localUserReaction ? (
                 REACTION_ICONS[localUserReaction] || (
-                  <ThumbsUp className="w-6 h-6 fill-current" />
+                  <ThumbsUp className="w-4 h-4 fill-current" />
                 )
               ) : (
-                <ThumbsUp className="w-6 h-6" />
+                <ThumbsUp className="w-4 h-4" />
               )}
-              {/* Show human-readable reaction text */}
-              {isReacting
-                ? "Reacting..."
-                : localUserReaction && REACTION_TEXT[localUserReaction] || "React"}
+              {isReacting ? "Reacting..." : localUserReaction || "Like"}
             </button>
             <ReactionPicker
               onSelect={handleReactionSelect}
@@ -663,7 +601,7 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
             />
           </div>
           <button
-            className="flex items-center gap-2 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
+            className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
             onClick={() => {
               setShowCommentInput(!showCommentInput);
               setShowComments(true);
@@ -776,9 +714,7 @@ function CommentCard({
   const context = useContext(ApiContext);
   const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(
-    comment.showReplyInput || false
-  );
+  const [showReplyInput, setShowReplyInput] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
@@ -922,20 +858,14 @@ function CommentCard({
 function ReplyCard({
   reply,
   postId,
-  
+  parentCommentId,
 }: {
   reply: TransformedReply;
   postId: string;
   parentCommentId: string;
 }) {
   const context = useContext(ApiContext);
-  const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(
-    reply.showReplyInput || false
-  );
-  const [newReply, setNewReply] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
   const [localLiked, setLocalLiked] = useState(reply.liked);
   const [localLikeCount, setLocalLikeCount] = useState(reply.likes);
@@ -943,7 +873,6 @@ function ReplyCard({
     reply.userReaction
   );
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const { data: userInfo } = useGetUserProfileQuery({});
 
   const handleReactionSelect = async (reaction: string) => {
     if (isReacting) return;
@@ -954,121 +883,53 @@ function ReplyCard({
     setLocalLikeCount((prev) =>
       isNewReaction ? prev + (localLiked ? 0 : 1) : prev
     );
-    await postReaction(postId, reaction, reply.id); // Fixed: Use reply.id for reactions
+    await postReaction(postId, reaction, parentCommentId);
     setIsReacting(false);
   };
 
-  const handleAddReply = async () => {
-    if (newReply.trim()) {
-      setIsReplying(true);
-      await postReply(postId, reply.id, newReply); // Use reply.id for nested replies
-      setNewReply("");
-      setShowReplyInput(false);
-      setIsReplying(false);
-    }
-  };
-
   return (
-    <div className="space-y-3 ml-11">
-      {/* Main Reply */}
-      <div className="flex gap-3">
-        <img
-          src={reply.authorProfileUrl}
-          alt={reply.author}
-          className="w-8 h-8 rounded-full object-cover"
-          onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
-        />
-        <div className="flex-1">
-          <div className="bg-gray-100 rounded-2xl px-4 py-2">
-            <div className="font-semibold text-sm text-gray-800 mb-1">
-              {reply.author}
-            </div>
-            <div className="text-gray-700">{reply.content}</div>
+    <div className="flex gap-3 ml-11">
+      <img
+        src={reply.authorProfileUrl}
+        alt={reply.author}
+        className="w-8 h-8 rounded-full object-cover"
+        onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
+      />
+      <div className="flex-1">
+        <div className="bg-gray-100 rounded-2xl px-4 py-2">
+          <div className="font-semibold text-sm text-gray-800 mb-1">
+            {reply.author}
           </div>
-          <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-            <span>{reply.timestamp}</span>
+          <div className="text-gray-700">{reply.content}</div>
+        </div>
+        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+          <span>{reply.timestamp}</span>
+          <div className="relative">
             <button
-              className="hover:underline cursor-pointer"
-              onClick={() => setShowReplyInput(!showReplyInput)}
+              onClick={() => setShowReactionPicker(true)}
+              onMouseEnter={() => setShowReactionPicker(true)}
+              disabled={isReacting}
+              className={`flex items-center gap-1 ${
+                localLiked ? "text-[#FFA000]" : "text-gray-500"
+              }`}
             >
-              Reply
+              {localLiked && localUserReaction ? (
+                REACTION_ICONS[localUserReaction] || (
+                  <ThumbsUp className="w-4 h-4 fill-current" />
+                )
+              ) : (
+                <ThumbsUp className="w-4 h-4" />
+              )}
+              <span>{localLikeCount || ""}</span>
             </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowReactionPicker(true)}
-                onMouseEnter={() => setShowReactionPicker(true)}
-                disabled={isReacting}
-                className={`flex items-center gap-1 ${
-                  localLiked ? "text-[#FFA000]" : "text-gray-500"
-                }`}
-              >
-                {localLiked && localUserReaction ? (
-                  REACTION_ICONS[localUserReaction] || (
-                    <ThumbsUp className="w-4 h-4 fill-current" />
-                  )
-                ) : (
-                  <ThumbsUp className="w-4 h-4" />
-                )}
-                <span>{localLikeCount || ""}</span>
-              </button>
-              <ReactionPicker
-                onSelect={handleReactionSelect}
-                isOpen={showReactionPicker}
-                setIsOpen={setShowReactionPicker}
-              />
-            </div>
+            <ReactionPicker
+              onSelect={handleReactionSelect}
+              isOpen={showReactionPicker}
+              setIsOpen={setShowReactionPicker}
+            />
           </div>
         </div>
       </div>
-      {/* Reply Input */}
-      {showReplyInput && (
-        <div className="ml-11">
-          <div className="flex gap-3">
-            <img
-              src={userInfo?.data?.profile?.profileUrl || FALLBACK_AVATAR}
-              alt="Current User"
-              className="w-8 h-8 rounded-full object-cover"
-              onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
-            />
-            <div className="flex-1">
-              <textarea
-                placeholder="Write a reply..."
-                value={newReply}
-                onChange={(e) => setNewReply(e.target.value)}
-                className="w-full min-h-[60px] p-3 border border-gray-200 rounded-md resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                  onClick={() => {
-                    setShowReplyInput(false);
-                    setNewReply("");
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  onClick={handleAddReply}
-                  disabled={!newReply.trim() || isReplying}
-                >
-                  <Send className="w-4 h-4" />
-                  {isReplying ? "Replying..." : "Reply"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Nested Replies */}
-      {reply.replies.map((nestedReply) => (
-        <ReplyCard
-          key={nestedReply.id}
-          reply={nestedReply}
-          postId={postId}
-          parentCommentId={reply.id}
-        />
-      ))}
     </div>
   );
 }

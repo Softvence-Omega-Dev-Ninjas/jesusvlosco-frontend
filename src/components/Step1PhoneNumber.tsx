@@ -1,24 +1,40 @@
-// src/components/Step1PhoneNumber.tsx
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { customList } from "country-codes-list";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
-// Define the interface for the component's props
 interface Step1PhoneNumberProps {
   onSubmit: (phoneNumber: string) => void;
   isLoading: boolean;
 }
 
+// Generate array of all country codes
+const countryCodes = Object.values(
+  customList(
+    "countryCode",
+    "{countryCode} | {countryNameEn} | +{countryCallingCode}"
+  )
+).map((item: string) => {
+  const [code, name, dialCode] = item.split(" | ");
+  return { code, name, dialCode };
+});
+
 const Step1PhoneNumber: React.FC<Step1PhoneNumberProps> = ({
   onSubmit,
   isLoading,
 }) => {
-  const [countryCode, setCountryCode] = useState<string>("BD"); // Explicitly type as string
-  const [number, setNumber] = useState<string>(""); // Explicitly type as string
+  const [countryCode, setCountryCode] = useState<string>("US");
+  const [number, setNumber] = useState<string>("");
+  const [dialCode, setDialCode] = useState<string>("+1");
+
+  useEffect(() => {
+    const selectedCountry = countryCodes.find((c) => c.code === countryCode);
+    if (selectedCountry) {
+      setDialCode(selectedCountry.dialCode);
+    }
+  }, [countryCode]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    // Type event object as FormEvent
     e.preventDefault();
-    // In a real app, you'd send this number to your backend to send a verification code
-    onSubmit(`${number}`);
+    onSubmit(`${dialCode}${number}`);
   };
 
   return (
@@ -28,36 +44,45 @@ const Step1PhoneNumber: React.FC<Step1PhoneNumberProps> = ({
       <form onSubmit={handleSubmit}>
         <div className="flex items-center border border-gray-300 rounded-md p-2 mb-4">
           <select
-            className="bg-white outline-none mr-2"
+            className="bg-white outline-none mr-2 min-w-fit"
             value={countryCode}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setCountryCode(e.target.value)
-            } // Type event object as ChangeEvent<HTMLSelectElement>
+            }
           >
-            <option value="BD">BD</option>
-            {/* Add more country codes as needed */}
+            {countryCodes.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.code}
+              </option>
+            ))}
           </select>
-          <span className="text-gray-500">+880</span>
+
+          <span className="text-gray-500 mr-2 whitespace-nowrap">
+            {dialCode}
+          </span>
+
           <input
             type="text"
-            className="flex-grow ml-2 outline-none"
+            className="flex-1 min-w-0 outline-none"
             placeholder="e.g., 1234567890"
             value={number}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setNumber(e.target.value)
-            } // Type event object as ChangeEvent<HTMLInputElement>
+            }
             required
           />
         </div>
+
         <p className="text-sm text-gray-500 mb-6">
           We'll send you a code to verify your number
         </p>
+
         <button
           type="submit"
           disabled={isLoading}
           className="w-full disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
         >
-          {isLoading ? " Verifying..." : " Verify"}
+          {isLoading ? "Verifying..." : "Verify"}
         </button>
       </form>
     </div>
