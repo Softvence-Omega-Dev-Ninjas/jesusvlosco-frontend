@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { X, ChevronDown, MapPin } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
