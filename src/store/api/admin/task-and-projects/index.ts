@@ -56,9 +56,23 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["TASK"],
     }),
+
+    getProjectDetails: builder.query({
+      query: ({ projectId }) => ({
+        url: `/admin/project/${projectId}`,
+        method: "GET",
+      }),
+      providesTags: ["TASK", "PROJECT"],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetTasksQuery, useCreateTaskMutation, useGetallTasksByUsersQuery, useGetUserTaskDetailsQuery, useSubmitTaskMutation } =
-  taskAndProjectApi;
+export const {
+  useGetTasksQuery,
+  useCreateTaskMutation,
+  useGetallTasksByUsersQuery,
+  useGetUserTaskDetailsQuery,
+  useSubmitTaskMutation,
+  useGetProjectDetailsQuery,
+} = taskAndProjectApi;
