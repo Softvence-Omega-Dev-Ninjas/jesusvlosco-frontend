@@ -19,7 +19,13 @@ import {
   Sparkles,
   ThumbsUp,
 } from "lucide-react";
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 // Fallback avatar image
 const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
@@ -112,8 +118,6 @@ interface TransformedReply {
   likes: number;
   liked: boolean;
   userReaction?: string;
-  replies: TransformedReply[]; // Added to support nested replies
-  showReplyInput?: boolean; // Added to manage reply input visibility
 }
 
 interface TransformedPost {
@@ -204,7 +208,9 @@ export const ApiContext = createContext<{
 
 export default function App() {
   const [posts, setPosts] = useState<TransformedPost[]>([]);
-  const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>([]);
+  const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>(
+    []
+  );
   const [selectedFilter, setSelectedFilter] = useState("All Recognitions");
 
   // Map UI filter values to API-compatible values
@@ -234,27 +240,6 @@ export default function App() {
 
   // Transform API data to component format
   const transformApiData = (apiPosts: ApiPost[]): TransformedPost[] => {
-    const transformReply = (reply: ApiComment): TransformedReply => {
-      const replyUserReaction = reply.reactions?.find(
-        (r) => r.recognitionUserId === CURRENT_USER_ID
-      )?.reaction;
-      return {
-        id: reply.id,
-        author: `${reply.user.firstName} ${reply.user.lastName}`,
-        authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
-        authorColor: "bg-orange-500",
-        content: reply.comment,
-        timestamp: reply.createdAt
-          ? new Date(reply.createdAt).toLocaleString()
-          : new Date().toLocaleString(),
-        likes: reply.reactions?.length ?? 0,
-        liked: !!replyUserReaction,
-        userReaction: replyUserReaction,
-        replies: reply.replies.map(transformReply), // Recursively transform nested replies
-        showReplyInput: false,
-      };
-    };
-
     return apiPosts
       .filter((post) => post.visibility.toLowerCase() !== "managers")
       .map((post) => {
@@ -294,8 +279,24 @@ export default function App() {
               likes: comment.reactions?.length ?? 0,
               liked: !!commentUserReaction,
               userReaction: commentUserReaction,
-              replies: comment.replies.map(transformReply),
-              showReplyInput: false,
+              replies: comment.replies.map((reply) => {
+                const replyUserReaction = reply.reactions?.find(
+                  (r) => r.recognitionUserId === CURRENT_USER_ID
+                )?.reaction;
+                return {
+                  id: reply.id,
+                  author: `${reply.user.firstName} ${reply.user.lastName}`,
+                  authorProfileUrl: reply.user.profileUrl ?? FALLBACK_AVATAR,
+                  authorColor: "bg-orange-500",
+                  content: reply.comment,
+                  timestamp: reply.createdAt
+                    ? new Date(reply.createdAt).toLocaleString()
+                    : new Date().toLocaleString(),
+                  likes: reply.reactions?.length ?? 0,
+                  liked: !!replyUserReaction,
+                  userReaction: replyUserReaction,
+                };
+              }),
             };
           }),
         };
@@ -713,7 +714,7 @@ function CommentCard({
   const context = useContext(ApiContext);
   const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(comment.showReplyInput || false);
+  const [showReplyInput, setShowReplyInput] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
@@ -864,17 +865,14 @@ function ReplyCard({
   parentCommentId: string;
 }) {
   const context = useContext(ApiContext);
-  const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(reply.showReplyInput || false);
-  const [newReply, setNewReply] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
   const [localLiked, setLocalLiked] = useState(reply.liked);
   const [localLikeCount, setLocalLikeCount] = useState(reply.likes);
-  const [localUserReaction, setLocalUserReaction] = useState(reply.userReaction);
+  const [localUserReaction, setLocalUserReaction] = useState(
+    reply.userReaction
+  );
   const [showReactionPicker, setShowReactionPicker] = useState(false);
-  const { data: userInfo } = useGetUserProfileQuery({});
 
   const handleReactionSelect = async (reaction: string) => {
     if (isReacting) return;
@@ -885,121 +883,53 @@ function ReplyCard({
     setLocalLikeCount((prev) =>
       isNewReaction ? prev + (localLiked ? 0 : 1) : prev
     );
-    await postReaction(postId, reaction, reply.id); // Fixed: Use reply.id for reactions
+    await postReaction(postId, reaction, parentCommentId);
     setIsReacting(false);
   };
 
-  const handleAddReply = async () => {
-    if (newReply.trim()) {
-      setIsReplying(true);
-      await postReply(postId, reply.id, newReply); // Use reply.id for nested replies
-      setNewReply("");
-      setShowReplyInput(false);
-      setIsReplying(false);
-    }
-  };
-
   return (
-    <div className="space-y-3 ml-11">
-      {/* Main Reply */}
-      <div className="flex gap-3">
-        <img
-          src={reply.authorProfileUrl}
-          alt={reply.author}
-          className="w-8 h-8 rounded-full object-cover"
-          onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
-        />
-        <div className="flex-1">
-          <div className="bg-gray-100 rounded-2xl px-4 py-2">
-            <div className="font-semibold text-sm text-gray-800 mb-1">
-              {reply.author}
-            </div>
-            <div className="text-gray-700">{reply.content}</div>
+    <div className="flex gap-3 ml-11">
+      <img
+        src={reply.authorProfileUrl}
+        alt={reply.author}
+        className="w-8 h-8 rounded-full object-cover"
+        onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
+      />
+      <div className="flex-1">
+        <div className="bg-gray-100 rounded-2xl px-4 py-2">
+          <div className="font-semibold text-sm text-gray-800 mb-1">
+            {reply.author}
           </div>
-          <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-            <span>{reply.timestamp}</span>
+          <div className="text-gray-700">{reply.content}</div>
+        </div>
+        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+          <span>{reply.timestamp}</span>
+          <div className="relative">
             <button
-              className="hover:underline cursor-pointer"
-              onClick={() => setShowReplyInput(!showReplyInput)}
+              onClick={() => setShowReactionPicker(true)}
+              onMouseEnter={() => setShowReactionPicker(true)}
+              disabled={isReacting}
+              className={`flex items-center gap-1 ${
+                localLiked ? "text-[#FFA000]" : "text-gray-500"
+              }`}
             >
-              Reply
+              {localLiked && localUserReaction ? (
+                REACTION_ICONS[localUserReaction] || (
+                  <ThumbsUp className="w-4 h-4 fill-current" />
+                )
+              ) : (
+                <ThumbsUp className="w-4 h-4" />
+              )}
+              <span>{localLikeCount || ""}</span>
             </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowReactionPicker(true)}
-                onMouseEnter={() => setShowReactionPicker(true)}
-                disabled={isReacting}
-                className={`flex items-center gap-1 ${
-                  localLiked ? "text-[#FFA000]" : "text-gray-500"
-                }`}
-              >
-                {localLiked && localUserReaction ? (
-                  REACTION_ICONS[localUserReaction] || (
-                    <ThumbsUp className="w-4 h-4 fill-current" />
-                  )
-                ) : (
-                  <ThumbsUp className="w-4 h-4" />
-                )}
-                <span>{localLikeCount || ""}</span>
-              </button>
-              <ReactionPicker
-                onSelect={handleReactionSelect}
-                isOpen={showReactionPicker}
-                setIsOpen={setShowReactionPicker}
-              />
-            </div>
+            <ReactionPicker
+              onSelect={handleReactionSelect}
+              isOpen={showReactionPicker}
+              setIsOpen={setShowReactionPicker}
+            />
           </div>
         </div>
       </div>
-      {/* Reply Input */}
-      {showReplyInput && (
-        <div className="ml-11">
-          <div className="flex gap-3">
-            <img
-              src={userInfo?.data?.profile?.profileUrl || FALLBACK_AVATAR}
-              alt="Current User"
-              className="w-8 h-8 rounded-full object-cover"
-              onError={(e) => (e.currentTarget.src = FALLBACK_AVATAR)}
-            />
-            <div className="flex-1">
-              <textarea
-                placeholder="Write a reply..."
-                value={newReply}
-                onChange={(e) => setNewReply(e.target.value)}
-                className="w-full min-h-[60px] p-3 border border-gray-200 rounded-md resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                  onClick={() => {
-                    setShowReplyInput(false);
-                    setNewReply("");
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  onClick={handleAddReply}
-                  disabled={!newReply.trim() || isReplying}
-                >
-                  <Send className="w-4 h-4" />
-                  {isReplying ? "Replying..." : "Reply"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Nested Replies */}
-      {reply.replies.map((nestedReply) => (
-        <ReplyCard
-          key={nestedReply.id}
-          reply={nestedReply}
-          postId={postId}
-          parentCommentId={reply.id}
-        />
-      ))}
     </div>
   );
 }
