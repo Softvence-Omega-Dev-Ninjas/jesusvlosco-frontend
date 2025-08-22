@@ -18,11 +18,12 @@ import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
 import { ShiftNotifications } from "../components/Dashboard/ShiftNotifications";
 import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
+import { formatTimeRange } from "@/utils/timeUtils";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
-
+  
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
 
   //assigned employee data call
@@ -64,22 +65,7 @@ const Dashboard: React.FC = () => {
         user.shift && user.shift.length > 0 && user.shift[0].startTime;
       const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
 
-      const startFormatted = new Date(start)
-        .toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .toLowerCase();
-      const endFormatted = new Date(end)
-        .toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .toLowerCase();
-
-      const time = `${startFormatted}-${endFormatted}`;
+      const time = formatTimeRange(start, end, { hour12: true }).toLowerCase();
       return {
         id: user.id,
         name,

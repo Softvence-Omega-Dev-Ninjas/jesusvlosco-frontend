@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -18,6 +19,7 @@ import { DateTimePicker } from "./DateTimePicker";
 import { taskSchema } from "./schemas/createTask.scheme";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import { toLocal24HourString } from "@/utils/timeUtils";
 import { useCreateTaskMutation } from "@/store/api/admin/task-and-projects";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -308,7 +310,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 label="Start Date & Time"
                 date={field.value}
                 setDate={field.onChange}
-                time={field.value ? field.value.toLocaleTimeString("en-US", { hour12: false }) : ""}
+                time={field.value ? toLocal24HourString(field.value.toISOString()) : ""}
                 setTime={(time) => {
                   const [hours, minutes, seconds] = time.split(":").map(Number);
                   const newDate = field.value || new Date();
@@ -328,7 +330,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 label="End Date & Time"
                 date={field.value}
                 setDate={field.onChange}
-                time={field.value ? field.value.toLocaleTimeString("en-US", { hour12: false }) : ""}
+                time={field.value ? toLocal24HourString(field.value.toISOString()) : ""}
                 setTime={(time) => {
                   const [hours, minutes, seconds] = time.split(":").map(Number);
                   const newDate = field.value || new Date();

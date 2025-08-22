@@ -38,7 +38,7 @@ const ChatConversation = ({
   }, [selectedChat?.messages]);
 
   useEffect(() => {
-    initPrivateMessageListener((newMessage) => {
+    initPrivateMessageListener((newMessage: any) => {
       setMessages((prev) => [...prev, newMessage]);
     });
   }, []);

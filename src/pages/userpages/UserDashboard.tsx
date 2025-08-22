@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AlertBanner from "@/components/UserDashoboard/AlertBanner";
-
 import CompanyUpdateItem from "@/components/UserDashoboard/CompanyUpdateItem";
 import CurrentShiftCard from "@/components/UserDashoboard/CurrentShiftCard";
 import {
@@ -13,6 +13,29 @@ import TaskList from "@/components/UserDashoboard/TaskList";
 import { CompanyUpdate, Shift, Task } from "@/components/UserDashoboard/types";
 
 import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
+// import { useGetUserInformationQuery } from "@/store/api/user/userinformation/userInfoApi";
+import { toLocalTimeString } from "@/utils/timeUtils";
+import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
+
+// API Shift Data Interface based on your actual response
+interface ApiShiftData {
+  id: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  locationLat: number;
+  locationLng: number;
+  date: string;
+  allDay: boolean;
+  shiftTitle: string;
+  job: string;
+  note: string;
+  shiftType: "MORNING" | "AFTERNOON" | "EVENING" | "NIGHT";
+  shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
+  createdAt: string;
+  updatedAt: string;
+  
+}
 
 interface Achievement {
   id: string;
@@ -21,12 +44,68 @@ interface Achievement {
   recipient: string;
 }
 const UserDashboard: React.FC = () => {
-  const currentShift: Shift = {
-    startTime: "09:00 AM",
-    endTime: "05:00 PM",
-    date: "Friday, June 20",
-    location: "Downtown Flagship Store",
-    team: ["L", "M", "C"],
+  // Get shift data from API
+  const data = useGetClockInOutQuery({});
+  const shiftData = data?.data?.data?.shift as ApiShiftData | undefined;
+  const teamMembers = data?.data?.data?.teamMembers as any | undefined;
+  console.log(teamMembers, "Team members")
+  console.log("Current Shift Data Check:", shiftData);
+  
+  // const userData = useGetUserInformationQuery({})
+  // const shifts = userData?.data?.data?.shift as ApiShiftData[] | undefined;
+  // console.log("User Data:", shifts);
+  
+  // find today's date (YYYY-MM-DD)
+  // const todayDate = new Date().toISOString().slice(0, 10);
+
+  // const todayShifts = Array.isArray(shifts)
+  //   ? shifts.filter((s: ApiShiftData) => {
+  //       if (!s?.date) return false;
+  //       try {
+  //         return new Date(s.date).toISOString().slice(0, 10) === todayDate;
+  //       } catch {
+  //         return false;
+  //       }
+  //     })
+  //   : [];
+
+  // const latestTodayShift = todayShifts.length
+  //   ? todayShifts.reduce((prev: ApiShiftData, curr: ApiShiftData) =>
+  //       new Date(curr.createdAt).getTime() > new Date(prev.createdAt).getTime() ? curr : prev
+  //     )
+  //   : undefined;
+
+  // Use the latest shift from today, or fallback to shiftData from clock API
+  const currentApiShift = shiftData || shiftData;
+
+  // Convert API shift data to UI Shift format
+  const currentShiftFromApi: Shift | undefined = currentApiShift
+    ? {
+        startTime: toLocalTimeString(currentApiShift.startTime),
+        endTime: toLocalTimeString(currentApiShift.endTime),
+        date: new Date(currentApiShift.date).toLocaleDateString(undefined, { 
+          weekday: "long", 
+          month: "long", 
+          day: "numeric" 
+        }),
+        location: currentApiShift.location || "",
+        team: [], // Team data might need to be fetched separately or processed differently
+      }
+    : undefined;
+
+    console.log(currentShiftFromApi, " Current Shift Formatted");
+    console.log("Raw API Shift Data:", currentApiShift);
+    console.log("Shift Title:", currentApiShift?.shiftTitle);
+    console.log("Job:", currentApiShift?.job);
+    console.log("Shift Type:", currentApiShift?.shiftType);
+
+  // Fallback shift data when no API data is available
+  const fallbackShift: Shift = {
+    startTime: "No shift",
+    endTime: "scheduled",
+    date: "today",
+    location: "No location assigned",
+    team: [],
   };
 
   const upcomingTasks: Task[] = [
@@ -115,7 +194,7 @@ const UserDashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            <CurrentShiftCard shift={currentShift} />
+            <CurrentShiftCard shift={currentShiftFromApi || fallbackShift} team={teamMembers} />
           </div>
 
           <div>

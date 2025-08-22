@@ -149,9 +149,9 @@ const EmployeeAvailability = ({
         endTime: "16:00", // Time input format
         shiftTitle: "",
         job: "",
-        location: "",
-        locationLat: 0,
-        locationLng: 0,
+        // location: "",
+        // locationLat: 0,
+        // locationLng: 0,
         note: "",
         allDay: false,
         userIds: [], // Use the same initial value

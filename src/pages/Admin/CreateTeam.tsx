@@ -12,11 +12,15 @@ import Swal from "sweetalert2";
 const CreateTeam: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [createTeam] = useCreateTeamMutation();
-  const getUsers = useGetAllUserQuery({});
+  const getUsers = useGetAllUserQuery({limit: 1000});
   const navigate = useNavigate();
   
-  const userList =
-    getUsers?.data?.data?.filter((user: TUser) => user.role != "ADMIN") || [];
+  const userList = (Array.isArray(getUsers?.data?.data) ? getUsers!.data!.data : []).filter(
+    (user: TUser) =>
+      user.role !== "ADMIN" &&
+      (user.projects?.length ?? 0) === 0 &&
+      (user.shift?.length ?? 0) === 0
+  );
   console.log(userList);
   const handleUserSelection = (userId: string, isSelected: boolean) => {
     if (isSelected) {
