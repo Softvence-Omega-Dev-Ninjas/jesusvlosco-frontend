@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { EllipsisVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TChat } from "./ChatWindow";
