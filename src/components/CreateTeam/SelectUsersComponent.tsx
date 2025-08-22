@@ -14,9 +14,21 @@ const SelectUsersComponent: React.FC<SelectUsersProps> = ({
 }) => {
   return (
     <div className="border-l border-gray-200 px-5 min-w-sm w-full">
-      <h2 className="text-2xl font-bold text-indigo-700">
-        Select Team Members
-      </h2>
+      <>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-indigo-700">Select Team Members</h2>
+          <p className="text-sm text-gray-500">Pick users to add to the team — scroll the list if needed.</p>
+        </div>
+
+        <style>{`
+          /* make the users list have a minimum height and be scrollable with a sensible max height */
+          .border-l > .max-h-max {
+            min-height: 220px;
+            max-height: 48vh;
+            overflow-y: auto;
+          }
+        `}</style>
+      </>
       <div className="max-h-max overflow-y-auto pt-5">
         <div className="flex flex-wrap gap-3">
           {userList.map((user: TUser) => (

@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
+let locationSocket: Socket | null = null;
 
 export const connectPrivateChat = (token: string) => {
   if (socket) return socket;
@@ -27,7 +28,63 @@ export const connectPrivateChat = (token: string) => {
   return socket;
 };
 
-export const initPrivateMessageListener = (onMessage: (msg: any) => void) => {
+// Location tracking socket connection
+export const connectLocationTracking = (token: string) => {
+  if (locationSocket) return locationSocket;
+
+  locationSocket = io("https://api.lgcglobalcontractingltd.com/js/clock", {
+    auth: {
+      token: `Bearer ${token}`,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  locationSocket.on("connect", () => {
+    console.log("✅ Connected to location tracking:", locationSocket?.id);
+  });
+  // Debug: log any incoming events and their data
+  // locationSocket.onAny((event: string, ...args: any[]) => {
+  //   console.log(`📨 Location socket event: ${event}`, ...args);
+  // });
+
+  // Specific listener for the location update event (matches sendLocationUpdate)
+  locationSocket.on("clock-status", (payload: any) => {
+    console.log("📍 Received location-update from server:", payload);
+  });
+  locationSocket.on("disconnect", () => {
+    console.log("❌ Disconnected from location tracking");
+  });
+
+  // locationSocket.on("connect_error", (err) => {
+  //   console.error("❌ Location tracking connection error:", err.message);
+  // });
+
+  return locationSocket;
+};
+
+// Send location update via socket
+export const sendLocationUpdate = (lat: number, lng: number) => {
+  if (!locationSocket) {
+    console.error("⚠️ Location socket not connected");
+    return;
+  }
+
+  const locationData = { lat, lng };
+  console.log("📍 Sending location update:", locationData);
+  
+  locationSocket.emit("location-update", locationData);
+};
+
+// Disconnect location tracking socket
+export const disconnectLocationTracking = () => {
+  if (locationSocket) {
+    console.log("🔌 Disconnecting location tracking socket");
+    locationSocket.disconnect();
+    locationSocket = null;
+  }
+};
+
+export const initPrivateMessageListener = (onMessage: (msg: unknown) => void) => {
   if (!socket) {
     console.error("⚠️ Socket not connected");
     return;
@@ -56,7 +113,7 @@ export const sendPrivateMessage = (
   });
 };
 
-export const onNewPrivateMessage = (callback: (message: any) => void) => {
+export const onNewPrivateMessage = (callback: (message: unknown) => void) => {
   if (!socket) return;
   socket.on("private:new_message", callback);
 };

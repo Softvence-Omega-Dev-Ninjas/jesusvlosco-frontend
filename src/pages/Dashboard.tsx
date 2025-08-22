@@ -22,7 +22,7 @@ import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
-
+  
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
 
   //assigned employee data call
@@ -52,29 +52,38 @@ const employees = React.useMemo(() => {
       dateObj.getMonth() + 1
     ).padStart(2, "0")}/${dateObj.getFullYear()}`;
 
-    // Format time as hh:mm am/pm
-    const startFormatted = new Date(user.shift?.startTime || user.date)
-      .toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-      .toLowerCase();
+      const start =
+        user.shift && user.shift.length > 0 && user.shift[0].startTime;
+      const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
 
-    const endFormatted = new Date(user.shift?.endTime || user.date)
-      .toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-      .toLowerCase();
+      const startFormatted = new Date(start)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
+      const endFormatted = new Date(end)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
 
-    const time = `${startFormatted}-${endFormatted}`;
-
-    return {
-      id: user.profile?.id || user.id,
-      name,
-      role,
-      avatar,
-      project,
-      shift,
-      date,
-      time,
-    };
-  });
-}, [assignedUsersdata]);
+      const time = `${startFormatted}-${endFormatted}`;
+      return {
+        id: user.id,
+        name,
+        role,
+        avatar,
+        project,
+        shift,
+        date,
+        time,
+      };
+    });
+  }, [assignedUsersdata]);
 
   //time off data call
   const { data: timeOffRequestsData, refetch } = useGetAllTimeOffRequestsQuery({

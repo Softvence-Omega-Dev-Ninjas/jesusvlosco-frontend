@@ -125,7 +125,9 @@ const routes = createBrowserRouter([
           },
           {
             path: "user-overviewProjects/:id",
-            element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>,
+            element: (
+              <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>
+            ),
           },
           { path: "user-timeclock", element: <UserTimeClock /> },
 

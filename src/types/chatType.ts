@@ -15,11 +15,10 @@ interface TMessage {
   content: string;
   createdAt: string;
   sender: TUser;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: any | null;
+  file: File | null;
 }
 
-interface TBaseChat {
+export interface TBaseChat {
   chatId: string;
   lastMessage: TMessage;
   updatedAt: string;
