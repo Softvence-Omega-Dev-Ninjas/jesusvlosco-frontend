@@ -1,64 +1,15 @@
-import { EyeIcon } from "lucide-react";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import React, { useEffect, useState } from "react";
+import { EyeIcon, Trash } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import RemotePolicyCard from "./RemotePolicyCard";
 import CategoryFilter from "./CategoryFilter";
-import CalendarDropdown from "./CalendarDropdown";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { ResponsePanel } from "./ResponsePanel";
-import { useFetchAnnouncementQuery } from "@/store/api/admin/announcement/announcementApi";
-
-// const announcementsData = [
-//   {
-//     id: 1,
-//     time: "02:0",
-
-//     title: "New Leave Policy Effective July 2025",
-//     description:
-//       "We’ve updated our leave policy to provide more flexible options for parental leave and personal days. Please review the detailed policy...",
-//     tags: ["All", "New leave policy update"],
-//   },
-//   {
-//     id: 2,
-//     time: "02:00",
-//     title: "Upcoming Company Retreat",
-//     description:
-//       "Our annual company retreat will be held from August 15–17 at Lakeview Resort. Registration opens next week...",
-//     tags: ["Team B", "Construction equipment updates"],
-//   },
-//   {
-//     id: 3,
-//     time: "03:00",
-//     title: "Emergency Evacuation Drill",
-//     description:
-//       "An emergency evacuation drill will take place at 3:00 to ensure all workers are familiar with the emergency procedures...",
-//     tags: ["Team C", "Emergency Alert Update"],
-//   },
-//   {
-//     id: 4,
-//     time: "05:00",
-//     title: "Team Meeting Scheduled for Next Week: Project 2 Overview",
-//     description:
-//       "A team meeting will be held to discuss the progress, upcoming tasks, and resource requirements for Project 2. The meeting will also cover ...",
-//     tags: ["Team D", "Internal Communication Update"],
-//   },
-//   {
-//     id: 5,
-//     time: "02:00",
-//     title: "Mandatory Safety Training on Scaffold Safety",
-//     description:
-//       "All employees are required to attend a safety training session on scaffold safety. This is a mandatory training as part of our ongoing commitments to ...",
-//     tags: ["All", "Safety & Compliance Updates"],
-//   },
-//   {
-//     id: 6,
-//     time: "02:00",
-//     title: "Weather Delay: Heavy Rain Forecasted for March 22–23",
-//     description:
-//       "Due to the heavy rain forecasted for March 22–23, construction work on Site A will be delayed by 2 days. This may affect our progress on ...",
-//     tags: ["All", "Weather & Site Conditions"],
-//   },
-// ];
+import {
+  useDeleteAnnouncementMutation,
+  useFetchAnnouncementQuery,
+} from "@/store/api/admin/announcement/announcementApi";
+import Swal from "sweetalert2";
+import { toast } from "sonner";
 
 export interface Author {
   id: string;
@@ -116,12 +67,16 @@ const AnnouncementList: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState("");
   const [announcementList, setAnnouncementList] = useState<Announcement[]>([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [showDeleteMode, setShowDeleteMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [showResponseId, setShowResponseId] = useState<string | null>(null);
+  const [deleteAnnouncement] = useDeleteAnnouncementMutation();
+  const [publishedFrom, setPublishFrom] = useState<string>("");
+  const [publishedTo, setPublishTo] = useState<string>("");
+  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // console.log(new Date(publishedFrom).toISOString());
 
   const itemsPerPage = 5;
   const totalPages = Math.ceil(announcementList.length / itemsPerPage);
@@ -130,31 +85,61 @@ const AnnouncementList: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const { data: announcementData } = useFetchAnnouncementQuery({
+  const { data: announcementData, refetch } = useFetchAnnouncementQuery({
     page: currentPage,
     limit: 10,
     searchValue,
+    publishedFrom:
+      publishedFrom.length > 0 && new Date(publishedFrom).toISOString(),
+    publishedTo: publishedTo.length > 0 && new Date(publishedTo).toISOString(),
   });
 
   useEffect(() => {
     if (announcementData) {
       setAnnouncementList(announcementData.data);
     }
-  }, [announcementData, currentPage, searchValue]);
+  }, [announcementData, currentPage, searchValue, publishedTo, publishedFrom]);
 
-  const handleCheckboxChange = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setShowFilterDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleDeleteSelected = async (announcementId: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      const { data } = await deleteAnnouncement(announcementId);
+      // console.log(data);
+
+      if (data?.success) {
+        refetch();
+        await Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
   };
-
-  //   const handleDeleteSelected = () => {
-  //     setAnnouncementList((prev) =>
-  //       prev.filter((a) => !selectedIds.includes(a.id))
-  //     );
-  //     setSelectedIds([]);
-  //     setShowDeleteMode(false);
-  //   };
 
   const handleCloseResponse = () => {
     setShowResponseId(null);
@@ -163,7 +148,7 @@ const AnnouncementList: React.FC = () => {
   return (
     <div className="max-w-8xl mx-auto px-4 py-8">
       {/* Delete Mode Bar */}
-      {showDeleteMode && (
+      {/* {showDeleteMode && (
         <div className="flex justify-between items-center  bg-red-50 p-3 rounded-lg border border-red-300 mb-4">
           <p className="text-sm text-red-600 font-medium">
             {selectedIds.length} selected
@@ -176,7 +161,7 @@ const AnnouncementList: React.FC = () => {
             Delete
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Search and Filters */}
       {!showResponseId && (
@@ -205,16 +190,69 @@ const AnnouncementList: React.FC = () => {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative">
             <CategoryFilter />
-            <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center gap-1">
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center gap-1"
+            >
               <img src="/filter_list.png" alt="Filter" className="w-4 h-4" />
               Filter
             </button>
-            <CalendarDropdown />
+
+            {showFilterDropdown && (
+              <div
+                ref={filterRef}
+                className="absolute bg-white top-full right-0 mt-2 w-80 border border-gray-200 shadow-lg p-4 pb-6 z-10 rounded-xl"
+              >
+                <h2 className="text-base font-semibold text-gray-800 mb-3">
+                  Filter by Publish Date
+                </h2>
+
+                <div className="flex flex-col gap-4">
+                  {/* Published From */}
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">
+                      Published from
+                    </label>
+                    <input
+                      type="date"
+                      value={publishedFrom}
+                      onChange={(e) => setPublishFrom(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    />
+                  </div>
+
+                  {/* Published To */}
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">
+                      Published to
+                    </label>
+                    <input
+                      type="date"
+                      value={publishedTo}
+                      onChange={(e) =>
+                        // setPublishTo(new Date(e.target.value).toISOString())
+                        setPublishTo(e.target.value)
+                      }
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Apply Button */}
+                {/* <div className="flex justify-end mt-4">
+                  <button className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Apply Filter
+                  </button>
+                </div> */}
+              </div>
+            )}
+
+            {/* <CalendarDropdown /> */}
 
             {/* 3-dot button */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
                 className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm flex items-center justify-center"
@@ -239,7 +277,7 @@ const AnnouncementList: React.FC = () => {
                   </button>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       )}
@@ -255,7 +293,7 @@ const AnnouncementList: React.FC = () => {
               <ResponsePanel announcement={a} onClose={handleCloseResponse} />
             ) : (
               <>
-                {showDeleteMode && (
+                {/* {showDeleteMode && (
                   <div className="absolute left-4 top-10">
                     <input
                       type="checkbox"
@@ -267,7 +305,7 @@ const AnnouncementList: React.FC = () => {
                     />
                     <RiDeleteBin6Line className="mt-0.5" />
                   </div>
-                )}
+                )} */}
 
                 {selectedId === a.id ? (
                   <RemotePolicyCard
@@ -276,9 +314,7 @@ const AnnouncementList: React.FC = () => {
                   />
                 ) : (
                   <>
-                    <div
-                      className={`flex gap-4 ${showDeleteMode ? "pl-10" : ""}`}
-                    >
+                    <div className={`flex gap-4`}>
                       <div className="mt-2 border-r border-gray-300 px-2">
                         <p className="text-sm text-gray-400">
                           {new Date(a.publishedAt).getTime() > Date.now()
@@ -310,23 +346,31 @@ const AnnouncementList: React.FC = () => {
                       </div>
                     </div>
 
-                    {!showDeleteMode && (
-                      <div className="lg:grid flex lg:-mt-14 lg:mb-10 mt-4 justify-end gap-3">
-                        <button
-                          onClick={() => setShowResponseId(a.id)}
-                          className="px-4 py-1 text-sm border border-indigo-400 rounded text-indigo-400 hover:bg-gray-100 flex items-center"
-                        >
-                          <EyeIcon className="h-4 w-4 mr-1.5" />
-                          Response
-                        </button>
-                        <button
-                          onClick={() => setSelectedId(a.id)}
-                          className="px-4 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                        >
-                          Read receipt
-                        </button>
-                      </div>
-                    )}
+                    {/* {!showDeleteMode && ( */}
+                    <div className="lg:grid flex lg:-mt-14  mt-4 justify-end gap-3">
+                      <button
+                        onClick={() => setShowResponseId(a.id)}
+                        className="px-4 py-1 text-sm border border-indigo-400 rounded text-indigo-400 hover:bg-gray-100 flex items-center cursor-pointer"
+                      >
+                        <EyeIcon className="h-4 w-4 mr-1.5" />
+                        Response
+                      </button>
+                      <button
+                        onClick={() => setSelectedId(a.id)}
+                        className="px-4 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 cursor-pointer"
+                      >
+                        Read receipt
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteSelected(a.id)}
+                        className="bg-white border-red-400 border text-red-400 duration-200 py-1 rounded hover:text-white text-sm flex items-center justify-center gap-1 cursor-pointer hover:bg-red-400"
+                      >
+                        <Trash size={15} />
+                        Delete
+                      </button>
+                    </div>
+                    {/* )} */}
                   </>
                 )}
               </>

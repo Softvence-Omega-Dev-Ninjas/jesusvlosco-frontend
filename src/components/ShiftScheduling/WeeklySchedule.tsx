@@ -8,19 +8,8 @@ import {
 } from "react-icons/hi";
 import { CiCirclePlus } from "react-icons/ci";
 import { useGetAllShiftsQuery } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
-import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
-import { TUser } from "@/types/usertype";
 import { formatTimeFromISO } from "@/utils/formatDateToMDY";
-
-interface User {
-  id: string;
-  email: string;
-  role?: string;
-  profile?: {
-    firstName?: string;
-    lastName?: string;
-  };
-}
+import { TProject, TProjectUser } from "@/types/projectType";
 
 interface ShiftData {
   id?: string;
@@ -70,25 +59,22 @@ interface ShiftData {
   }>;
 }
 
-const WeeklyScheduleGrid = () => {
+const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProject }) => {
+  console.log("Project Information:", projectInformation);
   // Note: We're fetching shift data directly from API instead of using props
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
   const getShifts = useGetAllShiftsQuery({});
-  const users = useGetAllUserQuery({});
-  const userList =
-    users?.data?.data.filter((user: TUser) => user.role != "ADMIN") || [];
-  // console.log("UserList", userList);
-  // console.log('=== DEBUGGING SHIFTS ===');
-  // console.log('getShifts:', getShifts);
-  console.log("getShifts.data:", getShifts.data);
-  // console.log('getShifts.data?.data:', getShifts.data?.data);
-  // console.log('Is Array?:', Array.isArray(getShifts.data?.data));
-  // console.log('Length:', getShifts.data?.data?.length);
+  const users = projectInformation?.projectUsers || [];
+  const userList = users?.filter((user: TProjectUser) => user.user?.role != "ADMIN") || [];
+  
+  console.log("Users Data:", userList);
+  console.log("Shifts Data:", getShifts.data);
+  console.log("Shifts loading:", getShifts.isLoading);
+  console.log("Shifts error:", getShifts.error);
 
-  // if (getShifts.data?.data && getShifts.data.data.length > 0) {
-  //     console.log('First shift:', getShifts.data.data[0]);
-  // }
+  const userIds = userList.map((user: TProjectUser) => user.user?.id).filter(Boolean);
+  console.log("User IDs:", userIds);
 
   // Utility functions for handling ISO date formats
   const parseISODate = (isoString: string): Date | null => {
@@ -101,11 +87,17 @@ const WeeklyScheduleGrid = () => {
   };
 
   const isSameDay = (date1: Date, date2: Date): boolean => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
+    // Normalize both dates to local timezone for comparison
+    const normalizeDate = (date: Date) => {
+      const normalized = new Date(date);
+      normalized.setHours(0, 0, 0, 0);
+      return normalized;
+    };
+
+    const norm1 = normalizeDate(date1);
+    const norm2 = normalizeDate(date2);
+    
+    return norm1.getTime() === norm2.getTime();
   };
 
   // Format ISO datetime to time string in hh:mm AM/PM format, always padded
@@ -165,11 +157,11 @@ const WeeklyScheduleGrid = () => {
     dayDate: Date,
     userId: string
   ): ShiftData[] => {
-    // console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
+    console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
 
     // Safety check: ensure data exists and is an array
     if (!getShifts.data || !Array.isArray(getShifts.data)) {
-      // console.log('❌ No data available or not an array');
+      console.log('❌ No data available or not an array');
       return [];
     }
 
@@ -184,29 +176,57 @@ const WeeklyScheduleGrid = () => {
 
       // Check if the date matches AND if the shift belongs to this user
       const isDateMatch = isSameDay(shiftDate, dayDate);
-      const isUserMatch = shift.users.some((user) => user.id === userId);
+      const isUserMatch = shift.users && shift.users.some && shift.users.some((user) => user.id === userId);
 
-      // if (isDateMatch && isUserMatch) {
-      //     console.log('✅ USER SHIFT MATCH FOUND!', {
-      //         userId,
-      //         shiftDate: shift.date,
-      //         shiftStatus: shift.shiftStatus,
-      //         employee: shift.users?.[0]?.profile?.firstName || 'No name'
-      //     });
-      // }
+      if (isDateMatch && isUserMatch) {
+          console.log('✅ USER SHIFT MATCH FOUND!', {
+              userId,
+              shiftDate: shift.date,
+              shiftStatus: shift.shiftStatus,
+              employee: shift.users?.[0]?.profile?.firstName || 'No name'
+          });
+      }
 
       return isDateMatch && isUserMatch;
     });
 
-    // console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
+    console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
     return matchingShifts;
   };
   const days = getDaysForWeek();
 
-  // console.log('=== WEEK DAYS ===');
-  // days.forEach((day, index) => {
-  //     console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
-  // });
+  // Show loading state
+  if (getShifts.isLoading) {
+    return (
+      <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center justify-center h-32">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+            <p className="text-gray-600">Loading shifts...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show error state
+  if (getShifts.error) {
+    return (
+      <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center justify-center h-32">
+          <div className="text-center">
+            <p className="text-red-600 mb-2">Error loading shifts</p>
+            <p className="text-gray-600 text-sm">Please try refreshing the page</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  console.log('=== WEEK DAYS ===');
+  days.forEach((day, index) => {
+      console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
+  });
 
   return (
     <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm overflow-x-auto">
@@ -313,7 +333,11 @@ const WeeklyScheduleGrid = () => {
 
       <div className="min-w-max mt-6">
         {/* Header row with day names */}
-        <div className="grid grid-cols-7 gap-2 text-sm font-medium text-[rgba(78,83,177,1)] mb-2">
+        <div className="grid grid-cols-8 gap-2 text-sm font-medium text-[rgba(78,83,177,1)] mb-2">
+          {/* User column header */}
+          <div className="text-center whitespace-nowrap font-semibold">
+            Employee
+          </div>
           {/* Day columns */}
           {days.map((day, i) => (
             <div key={i} className="text-center whitespace-nowrap">
@@ -324,54 +348,77 @@ const WeeklyScheduleGrid = () => {
 
         {/* Multiple rows - one for each user */}
         <div className="space-y-2">
-          {userList.map((user: User, rowIdx: number) => (
-            <div key={user.id || rowIdx} className="grid grid-cols-7 gap-2">
-              {/* 7 day columns for this user */}
-              {days.map((day, colIdx) => {
-                const shiftsForUserAndDay = getShiftsForUserAndDay(
-                  day.fullDate,
-                  user.id
-                );
-                // Get only the last shift if multiple shifts exist for this user on this day
-                const lastShift =
-                  shiftsForUserAndDay.length > 0
-                    ? shiftsForUserAndDay[shiftsForUserAndDay.length - 1]
-                    : null;
-                return (
-                  <div key={`${rowIdx}-${colIdx}`} className="space-y-2">
-                    {lastShift ? (
-                      <div
-                        className={`min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative flex flex-col justify-center items-center gap-2 ${
-                          lastShift.shiftStatus === "PUBLISHED"
-                            ? "bg-indigo-200 border border-[rgba(78,83,177,1)]"
-                            : "bg-white border-2 border-indigo-400"
-                        }`}
-                      >
-                        <p className="text-sm text-center font-medium">
-                          {user.profile?.firstName ||
-                            user.email?.split("@")[0] ||
-                            "Unknown"}
-                        </p>
-                        <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
-                          {formatTimeFromISO(lastShift.startTime)} -{" "}
-                          {formatTimeFromISO(lastShift.endTime)}
-                        </p>
-
-                        <p className="text-sm text-center font-semibold text-purple-800">
-                          {lastShift.shiftTitle}
-                        </p>
-                      </div>
-                    ) : (
-                      /* Empty cell with consistent styling */
-                      <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
-                        <CiCirclePlus className="text-2xl text-gray-400 hover:text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+          {userList.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">No employees found in this project</p>
+              <p className="text-gray-400 text-sm mt-2">Add employees to the project to see their shifts</p>
             </div>
-          ))}
+          ) : (
+            userList.map((projectUser: TProjectUser, rowIdx: number) => {
+              const user = projectUser.user;
+              if (!user) return null;
+              
+              return (
+              <div key={user.id || rowIdx} className="grid grid-cols-8 gap-2">
+                {/* User name column */}
+                <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 bg-gray-100 border border-gray-300 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-800">
+                      {user.profile?.firstName} {user.profile?.lastName}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {user.profile?.jobTitle?.replace(/_/g, " ") || user.email?.split("@")[0]}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* 7 day columns for this user */}
+                {days.map((day, colIdx) => {
+                  const shiftsForUserAndDay = getShiftsForUserAndDay(
+                    day.fullDate,
+                    user.id
+                  );
+                  // Get only the last shift if multiple shifts exist for this user on this day
+                  const lastShift =
+                    shiftsForUserAndDay.length > 0
+                      ? shiftsForUserAndDay[shiftsForUserAndDay.length - 1]
+                      : null;
+                  return (
+                    <div key={`${rowIdx}-${colIdx}`} className="space-y-2">
+                      {lastShift ? (
+                        <div
+                          className={`min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative flex flex-col justify-center items-center gap-2 ${
+                            lastShift.shiftStatus === "PUBLISHED"
+                              ? "bg-indigo-200 border border-[rgba(78,83,177,1)]"
+                              : "bg-white border-2 border-indigo-400"
+                          }`}
+                        >
+                          <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
+                            {formatTimeFromISO(lastShift.startTime)} -{" "}
+                            {formatTimeFromISO(lastShift.endTime)}
+                          </p>
+
+                          <p className="text-sm text-center font-semibold text-purple-800">
+                            {lastShift.shiftTitle}
+                          </p>
+
+                          <p className="text-xs text-center text-gray-600">
+                            {lastShift.location}
+                          </p>
+                        </div>
+                      ) : (
+                        /* Empty cell with consistent styling */
+                        <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
+                          <CiCirclePlus className="text-2xl text-gray-400 hover:text-gray-600" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              );
+            })
+          )}
         </div>
       </div>
     </section>

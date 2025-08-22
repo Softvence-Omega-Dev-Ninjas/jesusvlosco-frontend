@@ -1,20 +1,44 @@
 import { baseApi } from "../baseApi";
 
-const userRecognitionApi = baseApi.injectEndpoints({
+export const userRecognitionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCommentLike: builder.query({
-      //TODO: API WILL CHANGE/UPDATE
-      query: ({type = "all",status = "DRAFT", orderBy = "asc" }) => ({
+      query: ({ type = "all", status = "DRAFT", orderBy = "asc" }) => ({
         url: "/employee/recognition/feed",
         method: "GET",
-        params: {
-            type,
-          status,
-          orderBy,
-        },
+        params: { type, status, orderBy },
+      }),
+    }),
+
+    postComment: builder.mutation({
+      query: ({ recognitionId, comment }) => ({
+        url: `/employee/recognition/${recognitionId}`,
+        method: "POST",
+        body: { comment },
+      }),
+    }),
+
+    postReply: builder.mutation({
+      query: ({ recognitionId, parentCommentId, comment }) => ({
+        url: `/employee/recognition/${recognitionId}`,
+        method: "POST",
+        body: { parentCommentId, comment },
+      }),
+    }),
+
+    postLike: builder.mutation({
+      query: ({ recognitionId, reaction }) => ({
+        url: `/employee/recognition/${recognitionId}`,
+        method: "POST",
+        body: { reaction },
       }),
     }),
   }),
 });
 
-export const { useGetAllCommentLikeQuery } = userRecognitionApi;
+export const {
+  useGetAllCommentLikeQuery,
+  usePostCommentMutation,
+  usePostReplyMutation,
+  usePostLikeMutation,
+} = userRecognitionApi;

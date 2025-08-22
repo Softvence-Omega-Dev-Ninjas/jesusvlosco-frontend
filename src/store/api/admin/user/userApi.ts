@@ -2,14 +2,9 @@ import { baseApi } from "../../baseApi";
 
 const userApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    // Get Api
-
     getAllUser: build.query({
-      // query: () => `/admin/user`,
       query: (params = {}) => {
-        // console.log("params", params);
         const queryParams = new URLSearchParams(params).toString();
-        // console.log("queryParams===========>", queryParams);
         return `/admin/user${queryParams ? `?${queryParams}` : ""}`;
       },
       providesTags: ["ADMIN_USER"],
@@ -34,6 +29,13 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+    }),
+    deleteUser: build.mutation({
+      query: (userId) => ({
+        url: `/admin/user/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ADMIN_USER"],
     }),
 
     // Education
@@ -113,8 +115,6 @@ const userApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["ADMIN_USER"],
     }),
-
-    
   }),
 });
 
@@ -126,6 +126,9 @@ export const {
   useGetUserByEmployeeIdQuery,
 
   useUpdateUserMutation,
+
+  // delete user
+  useDeleteUserMutation,
 
   // User Creation
   useCreateUserMutation,

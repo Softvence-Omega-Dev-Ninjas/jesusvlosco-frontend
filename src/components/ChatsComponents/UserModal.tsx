@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import user1 from "@/assets/user1.png";
 import { X } from "lucide-react";
@@ -33,7 +34,7 @@ export default function UserModal({
     };
 
     const filteredEmployees = employees.filter(
-    (employee: TUser) =>
+    (employee: any) =>
       employee.profile?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.profile?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.profile?.department.toLowerCase().includes(searchTerm.toLowerCase())
