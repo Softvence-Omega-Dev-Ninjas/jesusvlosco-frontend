@@ -9,29 +9,50 @@ import {
   usePostReactionMutation,
   usePostReplyMutation,
 } from "@/store/api/user/userRecognition";
-import {
-  Eye,
-  Frown,
-  Heart,
-  PartyPopper,
-  Send,
-  Smile,
-  Sparkles,
-  ThumbsUp,
-} from "lucide-react";
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Eye, Send, ThumbsUp } from "lucide-react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 // Fallback avatar image
 const FALLBACK_AVATAR = "https://avatar.iran.liara.run/public";
 
-// Reaction icon mapping
+// Reaction icon mapping without unwanted fill
 const REACTION_ICONS: { [key: string]: React.ReactNode } = {
-  LIKE: <ThumbsUp className="w-4 h-4 fill-current" />,
-  LOVE_FACE: <Heart className="w-4 h-4 fill-current text-red-500" />,
-  SMILE_FACE: <Smile className="w-4 h-4 fill-current text-yellow-500" />,
-  WOW_FACE: <Sparkles className="w-4 h-4 fill-current text-blue-500" />,
-  SAD_FACE: <Frown className="w-4 h-4 fill-current text-gray-500" />,
-  CELEBRATION: <PartyPopper className="w-4 h-4 fill-current text-purple-500" />,
+  LIKE: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      👍
+    </span>
+  ),
+  LOVE_FACE: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      ❤️
+    </span>
+  ),
+  SMILE_FACE: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      😄
+    </span>
+  ),
+  WOW_FACE: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      😮
+    </span>
+  ),
+  SAD_FACE: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      😢
+    </span>
+  ),
+  CELEBRATION: (
+    <span className="text-xl hover:scale-110 transition-transform duration-200">
+      🎉
+    </span>
+  ),
 };
 
 const REACTION_TYPES = [
@@ -42,8 +63,17 @@ const REACTION_TYPES = [
   "SAD_FACE",
   "CELEBRATION",
 ];
+// Reaction Text Mapping
+const REACTION_TEXT: { [key: string]: string } = {
+  LIKE: "Like",
+  LOVE_FACE: "Love",
+  SMILE_FACE: "Smile",
+  WOW_FACE: "Wow",
+  SAD_FACE: "Sad",
+  CELEBRATION: "Celebrate",
+};
 
-// Types
+// Types (unchanged, included for reference)
 interface ApiUser {
   id: string;
   name?: string;
@@ -112,8 +142,8 @@ interface TransformedReply {
   likes: number;
   liked: boolean;
   userReaction?: string;
-  replies: TransformedReply[]; // Added to support nested replies
-  showReplyInput?: boolean; // Added to manage reply input visibility
+  replies: TransformedReply[];
+  showReplyInput?: boolean;
 }
 
 interface TransformedPost {
@@ -139,7 +169,7 @@ interface RecognitionType {
   bgColor: string;
 }
 
-// Reaction Picker Component
+// Reaction Picker Component (unchanged)
 function ReactionPicker({
   onSelect,
   isOpen,
@@ -187,7 +217,7 @@ function ReactionPicker({
   );
 }
 
-// Context to provide API functions globally
+// Context to provide API functions globally (unchanged)
 export const ApiContext = createContext<{
   postComment: (postId: string, commentContent: string) => Promise<void>;
   postReply: (
@@ -204,7 +234,9 @@ export const ApiContext = createContext<{
 
 export default function App() {
   const [posts, setPosts] = useState<TransformedPost[]>([]);
-  const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>([]);
+  const [recognitionTypes, setRecognitionTypes] = useState<RecognitionType[]>(
+    []
+  );
   const [selectedFilter, setSelectedFilter] = useState("All Recognitions");
 
   // Map UI filter values to API-compatible values
@@ -215,19 +247,28 @@ export default function App() {
 
   // RTK Query Hooks
   const {
+    data: userInfo,
+    isLoading: isUserLoading,
+    error: userError,
+  } = useGetUserProfileQuery({});
+  const {
     data: apiData,
     error,
     isLoading,
     refetch,
-  } = useGetAllCommentLikeQuery({
-    type: filterMap[selectedFilter],
-    status: "DRAFT",
-    orderBy: "asc",
-  });
+  } = useGetAllCommentLikeQuery(
+    {
+      type: filterMap[selectedFilter],
+      status: "DRAFT",
+      orderBy: "asc",
+    },
+    {
+      skip: !userInfo?.data?.id, // Wait for userInfo to be available
+    }
+  );
   const [postCommentMutation] = usePostCommentMutation();
   const [postReplyMutation] = usePostReplyMutation();
   const [postReactionMutation] = usePostReactionMutation();
-  const { data: userInfo } = useGetUserProfileQuery({});
 
   // Current user ID from userInfo
   const CURRENT_USER_ID = userInfo?.data?.id;
@@ -250,7 +291,7 @@ export default function App() {
         likes: reply.reactions?.length ?? 0,
         liked: !!replyUserReaction,
         userReaction: replyUserReaction,
-        replies: reply.replies.map(transformReply), // Recursively transform nested replies
+        replies: reply.replies.map(transformReply),
         showReplyInput: false,
       };
     };
@@ -393,27 +434,37 @@ export default function App() {
               My Recognitions
             </h1>
             {/* Recognition Type Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {recognitionTypes.map((type) => (
-                <div
-                  key={type.id}
-                  className="flex flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
-                      <img
-                        src={type.emoji}
-                        alt={type.title}
-                        className="object-contain h-20"
-                      />
+            {isUserLoading ? (
+              <p className="text-center text-gray-500">
+                Loading user profile...
+              </p>
+            ) : userError ? (
+              <p className="text-center text-red-500">
+                Error loading user profile. Please try again.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {recognitionTypes.map((type) => (
+                  <div
+                    key={type.id}
+                    className="flex flex-col items-start cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="w-24 h-24 rounded-full flex items-center justify-center mb-2">
+                        <img
+                          src={type.emoji}
+                          alt={type.title}
+                          className="object-contain h-20"
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-gray-700">
+                        {type.title}
+                      </span>
                     </div>
-                    <span className="text-xs font-medium text-gray-700">
-                      {type.title}
-                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {/* Main Content */}
@@ -440,14 +491,19 @@ export default function App() {
             </div>
           </div>
           {/* Loading and Error states */}
-          {isLoading && <p className="text-center">Loading recognitions...</p>}
-          {error && (
+          {isUserLoading ? (
+            <p className="text-center text-gray-500">Loading user profile...</p>
+          ) : userError ? (
+            <p className="text-center text-red-500">
+              Error loading user profile. Please try again.
+            </p>
+          ) : isLoading ? (
+            <p className="text-center">Loading recognitions...</p>
+          ) : error ? (
             <p className="text-center text-red-500">
               Error loading recognitions. Please try again.
             </p>
-          )}
-          {/* Recognition Posts Feed */}
-          {!isLoading && !error && (
+          ) : (
             <div className="space-y-6">
               {posts.map((post) => (
                 <RecognitionPostCard key={post.id} post={post} />
@@ -459,6 +515,9 @@ export default function App() {
     </ApiContext.Provider>
   );
 }
+
+// RecognitionPostCard, CommentCard, ReplyCard components remain unchanged
+// (Omitted for brevity, as they are identical to your original code)
 
 // Sub-component for a single recognition post
 function RecognitionPostCard({ post }: { post: TransformedPost }) {
@@ -580,18 +639,22 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
               onClick={() => setShowReactionPicker(true)}
               onMouseEnter={() => setShowReactionPicker(true)}
               disabled={isReacting}
-              className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-4 transition-colors cursor-pointer hover:bg-gray-50 ${
+              className={`flex items-center border rounded-full gap-2 flex-1 justify-center py-2 px-3 transition-colors cursor-pointer hover:bg-gray-50 ${
                 localLiked ? "text-[#FFA000]" : "text-gray-600"
               }`}
             >
+              {/* Show the icon with human-readable text */}
               {localLiked && localUserReaction ? (
                 REACTION_ICONS[localUserReaction] || (
-                  <ThumbsUp className="w-4 h-4 fill-current" />
+                  <ThumbsUp className="w-6 h-6 fill-current" />
                 )
               ) : (
-                <ThumbsUp className="w-4 h-4" />
+                <ThumbsUp className="w-6 h-6" />
               )}
-              {isReacting ? "Reacting..." : localUserReaction || "Like"}
+              {/* Show human-readable reaction text */}
+              {isReacting
+                ? "Reacting..."
+                : localUserReaction && REACTION_TEXT[localUserReaction] || "React"}
             </button>
             <ReactionPicker
               onSelect={handleReactionSelect}
@@ -600,7 +663,7 @@ function RecognitionPostCard({ post }: { post: TransformedPost }) {
             />
           </div>
           <button
-            className="flex items-center gap-2 flex-1 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
+            className="flex items-center gap-2 justify-center text-gray-600 py-2 px-4 border rounded-full transition-colors cursor-pointer hover:bg-gray-50"
             onClick={() => {
               setShowCommentInput(!showCommentInput);
               setShowComments(true);
@@ -713,7 +776,9 @@ function CommentCard({
   const context = useContext(ApiContext);
   const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(comment.showReplyInput || false);
+  const [showReplyInput, setShowReplyInput] = useState(
+    comment.showReplyInput || false
+  );
   const [newReply, setNewReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
@@ -857,7 +922,7 @@ function CommentCard({
 function ReplyCard({
   reply,
   postId,
-  parentCommentId,
+  
 }: {
   reply: TransformedReply;
   postId: string;
@@ -866,13 +931,17 @@ function ReplyCard({
   const context = useContext(ApiContext);
   const postReply = context?.postReply ?? (() => Promise.resolve());
   const postReaction = context?.postReaction ?? (() => Promise.resolve());
-  const [showReplyInput, setShowReplyInput] = useState(reply.showReplyInput || false);
+  const [showReplyInput, setShowReplyInput] = useState(
+    reply.showReplyInput || false
+  );
   const [newReply, setNewReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
   const [localLiked, setLocalLiked] = useState(reply.liked);
   const [localLikeCount, setLocalLikeCount] = useState(reply.likes);
-  const [localUserReaction, setLocalUserReaction] = useState(reply.userReaction);
+  const [localUserReaction, setLocalUserReaction] = useState(
+    reply.userReaction
+  );
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const { data: userInfo } = useGetUserProfileQuery({});
 
