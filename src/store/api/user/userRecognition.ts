@@ -2,6 +2,7 @@ import { baseApi } from "../baseApi";
 
 export const userRecognitionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Feed / All posts with comments & reactions
     getAllCommentLike: builder.query({
       query: ({ type = "all", status = "DRAFT", orderBy = "asc" }) => ({
         url: "/employee/recognition/feed",
@@ -10,6 +11,7 @@ export const userRecognitionApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // Create a new comment on a post
     postComment: builder.mutation({
       query: ({ recognitionId, comment }) => ({
         url: `/employee/recognition/${recognitionId}`,
@@ -18,6 +20,7 @@ export const userRecognitionApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // Reply to a comment
     postReply: builder.mutation({
       query: ({ recognitionId, parentCommentId, comment }) => ({
         url: `/employee/recognition/${recognitionId}`,
@@ -26,11 +29,12 @@ export const userRecognitionApi = baseApi.injectEndpoints({
       }),
     }),
 
-    postLike: builder.mutation({
-      query: ({ recognitionId }) => ({
+    // ✅ Generic Reaction (Post or Comment)
+    postReaction: builder.mutation({
+      query: ({ recognitionId, reaction, parentCommentId = null }) => ({
         url: `/employee/recognition/${recognitionId}`,
         method: "POST",
-        body: { reaction: "LIKE" },
+        body: parentCommentId ? { reaction, parentCommentId } : { reaction },
       }),
     }),
   }),
@@ -40,5 +44,5 @@ export const {
   useGetAllCommentLikeQuery,
   usePostCommentMutation,
   usePostReplyMutation,
-  usePostLikeMutation,
+  usePostReactionMutation,
 } = userRecognitionApi;
