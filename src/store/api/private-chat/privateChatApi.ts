@@ -18,10 +18,7 @@ const privateChatApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: (_result, _error, chatId) => [
-        { type: 'PRIVATE_CHAT', id: chatId },
-        'PRIVATE_CHAT'
-      ],
+      providesTags: ["PRIVATE_CHAT"],
     }),
     sendPrivateMessage: build.mutation({
       query: ({ recipientId, messageInput, userId, file }) => {
@@ -41,6 +38,14 @@ const privateChatApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['PRIVATE_CHAT'],
     }),
+
+    deletePrivateMessage: build.mutation({
+      query: (conversationId) => ({
+        url: `/private-chat/${conversationId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ['PRIVATE_CHAT'],
+    }),
   }),
 });
 
@@ -48,4 +53,5 @@ export const {
   useGetPrivateChatQuery,
   useGetChatByIdQuery,
   useSendPrivateMessageMutation,
+  useDeletePrivateMessageMutation
 } = privateChatApi;

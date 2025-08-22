@@ -1,29 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EllipsisVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { TChat } from "./ChatWindow";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import { initPrivateMessageListener } from "@/utils/socket";
-import { useSendPrivateMessageMutation } from "@/store/api/private-chat/privateChatApi";
+import {
+  useDeletePrivateMessageMutation,
+  useSendPrivateMessageMutation,
+} from "@/store/api/private-chat/privateChatApi";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const ChatConversation = ({
   selectedChat,
   selectedPrivateChatInfo,
-  setShowChatInfo,
-  setShowDeleteModal,
-  setShowMemberModal,
+  setSelectedChatId,
 }: {
   selectedChat: TChat;
   selectedPrivateChatInfo: TChat;
-  setShowChatInfo: (arg0: boolean) => void;
-  setShowDeleteModal: (arg0: boolean) => void;
-  setShowMemberModal: (arg0: boolean) => void;
+  setSelectedChatId: (id: string) => void;
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const me = useAppSelector(selectUser);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState(selectedChat?.messages || []);
-    const [sendPrivateMessage] = useSendPrivateMessageMutation();
+  const [sendPrivateMessage] = useSendPrivateMessageMutation();
+  const [deletePrivateMessage] = useDeletePrivateMessageMutation();
+  const navigate = useNavigate()
+  console.log(selectedChat, "selectedChat");
 
   useEffect(() => {
     if (selectedChat?.messages) {
@@ -42,25 +48,55 @@ const ChatConversation = ({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleDeleteChat = (conversationId: any) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Delete Conversation!",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // Call the delete mutation here
+        try {
+          const res = await deletePrivateMessage(conversationId);
+          console.log(res, "res in deletePrivateMessage");
+          if (res?.data?.count === 1) {
+            Swal.fire("Deleted!", "Your chat has been deleted.", "success");
+            setSelectedChatId("");
+            setMessages([]);
+            navigate("/admin/communication/chat");
+          }
+          
+        } catch (error) {
+          console.error("Error deleting chat:", error);
+          Swal.fire(
+            "Error!",
+            "There was an error deleting your chat.",
+            "error"
+          );
+        }
+      }
+    });
+  };
   const handleSendMessage = async () => {
     if (messageInput.trim() === "") return;
     const userId = me?.id || "";
-  const recipientId = selectedPrivateChatInfo?.participant?.id || "";
+    const recipientId = selectedPrivateChatInfo?.participant?.id || "";
 
     const formData = new FormData();
     formData.append("content", messageInput);
     formData.append("userId", userId);
 
-
     try {
-
       await sendPrivateMessage({
-            recipientId: recipientId,
-            messageInput: messageInput, // Initial greeting message
-            userId: userId || '',
-            file: undefined
-          }).unwrap();
-          // console.log(result)
+        recipientId: recipientId,
+        messageInput: messageInput,
+        userId: userId || "",
+        file: undefined,
+      }).unwrap();
+      // console.log(result)
 
       setMessageInput("");
     } catch (error) {
@@ -68,9 +104,6 @@ const ChatConversation = ({
     }
   };
 
-  // console.log("Selected Chat", selectedChat);
-  // console.log("Selected selectedPrivateChatInfo", selectedPrivateChatInfo);
-  // console.log("Messages", messages);
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}
@@ -80,23 +113,28 @@ const ChatConversation = ({
             <img
               src={(() => {
                 const profile = selectedPrivateChatInfo?.participant?.profile;
-                const name = `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+                const name = `${profile?.firstName ?? ""} ${
+                  profile?.lastName ?? ""
+                }`.trim();
                 if (profile?.profileUrl) return profile.profileUrl;
-                if (name) return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name);
+                if (name)
+                  return (
+                    "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(name)
+                  );
                 return "";
               })()}
               alt={selectedChat?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
-        
           </div>
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-900 capitalize">
-              {(selectedPrivateChatInfo?.participant?.profile?.firstName ?? "") +
+              {(selectedPrivateChatInfo?.participant?.profile?.firstName ??
+                "") +
                 " " +
                 (selectedPrivateChatInfo?.participant?.profile?.lastName ?? "")}
             </h2>
-  
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -122,19 +160,7 @@ const ChatConversation = ({
 
             <div className="absolute top-full *:cursor-pointer right-0 hidden group-hover:block bg-white rounded-2xl overflow-hidden shadow-md w-48 z-10">
               <button
-                onClick={() => setShowChatInfo(true)}
-                className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
-              >
-                Chat Information
-              </button>
-              <button
-                onClick={() => setShowMemberModal(true)}
-                className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
-              >
-                Add Member
-              </button>
-              <button
-                onClick={() => setShowDeleteModal(true)}
+                onClick={() => handleDeleteChat(selectedChat?.conversationId)}
                 className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200 text-red-600"
               >
                 Delete Chat
@@ -147,18 +173,19 @@ const ChatConversation = ({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(70vh-170px)]">
         {messages?.map((message, idx) => {
-          const isMe = message.senderId === me?.id; 
+          const isMe = message.senderId === me?.id;
           // console.log(isMe, "isMe");
           const avatar =
             message.sender?.profile?.profileUrl ||
             "https://ui-avatars.com/api/?name=" +
-                        encodeURIComponent(
-                          message.sender.profile?.firstName +
-                            " " +
-                            message.sender.profile?.lastName
-                        )
+              encodeURIComponent(
+                message.sender.profile?.firstName +
+                  " " +
+                  message.sender.profile?.lastName
+              );
 
-          const messageKey = message.id ?? `${message.senderId ?? 'msg'}-${idx}`;
+          const messageKey =
+            message.id ?? `${message.senderId ?? "msg"}-${idx}`;
 
           return (
             <div
