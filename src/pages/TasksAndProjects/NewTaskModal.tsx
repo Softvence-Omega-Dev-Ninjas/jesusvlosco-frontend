@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -17,10 +19,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { DateTimePicker } from "./DateTimePicker";
 import { taskSchema } from "./schemas/createTask.scheme";
-import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+// Assuming you have a new hook to fetch users by project ID
 import { useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { toLocal24HourString } from "@/utils/timeUtils";
-import { useCreateTaskMutation } from "@/store/api/admin/task-and-projects";
+
+import { useCreateTaskMutation, useGetProjectDetailsQuery } from "@/store/api/admin/task-and-projects";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -32,10 +35,9 @@ interface NewTaskModalProps {
 }
 
 export function NewTaskModal({ trigger }: NewTaskModalProps) {
-  const { data: users, isLoading: isUserLoading } = useGetAllUserQuery({ limit: 100 });
+  // Use a new query hook that takes projectId as a parameter.
+  // The skip option will prevent the query from running until projectId is available.
   const { data: projects, isLoading: isProjectLoading } = useGetAllProjectsQuery(undefined);
-
-  console.log(users);
   const [createTask] = useCreateTaskMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
@@ -50,12 +52,19 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
     control,
     reset,
     watch,
+    setValue, // We will use setValue to reset the assignUserId field
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
   });
 
+  // Watch the projectId field to conditionally fetch users
+  const projectId = watch("projectId");
   const attachment = watch("attachment");
+
+  // Conditionally fetch users only if a projectId is selected
+  const { data: users, isLoading: isUserLoading } = useGetProjectDetailsQuery({ projectId }, { skip: !projectId });
+  console.log(users);
 
   // This function now explicitly resets each field to its initial empty state.
   const resetForm = () => {
@@ -72,7 +81,6 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
     });
     setIsSubmitting(false);
     setIsDrafting(false);
-    // Increment the key to force re-render and reset the file input
     setFormKey((prevKey) => prevKey + 1);
   };
 
@@ -177,7 +185,13 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
               name="projectId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setValue("assignUserId", ""); // Reset the user when a new project is selected
+                  }}
+                  value={field.value ?? ""}
+                >
                   <SelectTrigger className={cn("w-full border border-slate-300", errors.projectId && "border-red-500")}>
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
@@ -210,17 +224,19 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                     <Button
                       variant="outline"
                       role="combobox"
+                      // Disable the button if no project is selected
+                      disabled={!projectId}
                       className={cn("w-full justify-between border border-slate-300 font-normal", errors.assignUserId && "border-red-500")}
                     >
                       {field.value
-                        ? users?.data?.find((user: any) => user?.id === field.value)?.profile?.firstName +
+                        ? users?.data?.projectUsers?.find((user: any) => user?.userId === field.value)?.user?.profile?.firstName +
                           " " +
-                          users?.data?.find((user: any) => user?.id === field.value)?.profile?.lastName
+                          users?.data?.projectUsers?.find((user: any) => user?.userId === field.value)?.user?.profile?.lastName
                         : "Select user"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0 bg-white max-h-[200px] overflow-y-scroll border border-slate-100 mb-2">
+                  <PopoverContent className="w-[400px] mx-auto p-0 bg-white max-h-[200px] overflow-y-scroll border border-slate-100 mb-2">
                     <Command>
                       <CommandInput placeholder="Search user..." className="h-9 border-none" />
                       <CommandGroup>
@@ -230,20 +246,20 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                           </div>
                         )}
                         {!isUserLoading &&
-                          users?.data?.map((user: any) => (
+                          users?.data?.projectUsers?.map((user: any) => (
                             <CommandItem
                               className="cursor-pointer hover:bg-slate-50"
                               key={user?.id}
-                              value={`${user?.profile?.firstName} ${user?.profile?.lastName}`}
+                              value={`${user?.user?.profile?.firstName} ${user?.user?.profile?.lastName}`}
                               onSelect={() => {
-                                field.onChange(user?.id);
+                                field.onChange(user?.userId);
                               }}
                             >
-                              {`${user?.profile?.firstName} ${user?.profile?.lastName}`}
-                              <Check className={cn("ml-auto h-4 w-4", user?.id === field.value ? "opacity-100" : "opacity-0")} />
+                              {`${user?.user?.profile?.firstName} ${user?.user?.profile?.lastName}`}
+                              <Check className={cn("ml-auto h-4 w-4", user?.userId === field.value ? "opacity-100" : "opacity-0")} />
                             </CommandItem>
                           ))}
-                        {!isUserLoading && users?.data?.length === 0 && <CommandEmpty>No users found.</CommandEmpty>}
+                        {!isUserLoading && users?.data?.projectUsers?.length === 0 && <CommandEmpty>No users found for this project.</CommandEmpty>}
                       </CommandGroup>
                     </Command>
                   </PopoverContent>

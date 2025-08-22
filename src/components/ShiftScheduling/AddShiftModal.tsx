@@ -1,12 +1,13 @@
 import React, { useRef, useEffect } from "react";
 import { X, ChevronDown } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetAllProjectUserQuery } from "@/store/api/user/project/projectApi";
 import { useCreateSchedulingRequestMutation } from "@/store/api/user/scheduling/schedulingApi";
 import { toast } from "sonner";
 import { toISODate } from "@/utils/formatDateToMDY";
+import GoogleMapsLocationPicker from "./GoogleMapsLocationPicker";
 
 interface AddShiftModalProps {
   onClose: () => void;
@@ -19,17 +20,14 @@ const schema = z.object({
   endDate: z.string().min(1, "End date is required"),
   endTime: z.string().min(1, "End time is required"),
   managerNote: z.string().optional(),
+  locationCoordinates: z.object({
+    address: z.string().min(1, "Location is required"),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+  }),
 });
 
 type FormValues = z.infer<typeof schema>;
-
-// const projects = [
-//   "Metro Shopping Center",
-//   "Downtown Office Complex",
-//   "Riverside Mall",
-//   "Corporate Plaza",
-//   "Tech Hub Center",
-// ];
 
 const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
   const {
@@ -37,6 +35,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -48,19 +47,8 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
       endTime: "",
       managerNote: "",
     },
-    //     defaultValues: {
-    //       project: "Metro Shopping Center",
-    //       startDate: "19/06/2025",
-    //       endDate: "21/06/2025",
-    //       startTime: "09:00",
-    //       endTime: "17:00",
-    //       managerNote: "",
-    //     },
   });
 
-  // const [showProjectDropdown, setShowProjectDropdown] = useState(false);
-  // const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  // const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const { data, isLoading } = useGetAllProjectUserQuery(null);
   console.log({ data });
   const projects = data?.data;
@@ -151,12 +139,16 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
     console.log("Form submitted:", data);
     const startISO = toISODate(startDate, startTime);
     const endISO = toISODate(endDate, endTime);
+
     try {
       const scheduleData = {
         projectId: data?.projectId,
         note: data?.managerNote,
         startTime: startISO,
         endTime: endISO,
+        location: data?.locationCoordinates?.address || "",
+        locationLat: data?.locationCoordinates?.latitude,
+        locationLng: data?.locationCoordinates?.longitude,
       };
       const result = await createSchedule(scheduleData).unwrap();
       if (result.success) {
@@ -290,6 +282,61 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
                       {errors.endTime.message}
                     </p>
                   )}
+                </div>
+
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Location
+                  </label>
+                  <div className="relative flex-1">
+                    <GoogleMapsLocationPicker
+                      value={{
+                        address: watch("location"),
+                        latitude: watch("locationLat"),
+                        longitude: watch("locationLng"),
+                      }}
+                      onChange={(val) => {
+                        setValue("location", val!.address || "", {
+                          shouldValidate: true,
+                        });
+                        setValue("locationLat", val!.latitude, {
+                          shouldValidate: true,
+                        });
+                        setValue("locationLng", val!.longitude, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      placeholder="Click to select location on map"
+                      apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                      // className="w-full px-3 py-2  rounded-full bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:none] [-webkit-appearance:none]"
+                      className=" rounded-full"
+                    />
+                    <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                  </div>
+                  {errors.location && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.location.message}
+                    </p>
+                  )}
+                </div> */}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <Controller
+                    name="locationCoordinates"
+                    control={control}
+                    render={({ field }) => (
+                      <GoogleMapsLocationPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Click to select location on map"
+                        className="w-full"
+                        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                      />
+                    )}
+                  />
                 </div>
 
                 {/* Notes */}

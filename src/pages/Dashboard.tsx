@@ -18,7 +18,6 @@ import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
 import { ShiftNotifications } from "../components/Dashboard/ShiftNotifications";
 import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
-import { formatTimeRange } from "@/utils/timeUtils";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -28,44 +27,51 @@ const Dashboard: React.FC = () => {
 
   //assigned employee data call
   const { data: assignedUsersdata } = useGetAllAssignedUsersQuery({
-    page: 1,
-    limit: 10,
-    status: "DRAFT",
     orderBy: "asc",
   });
 
-  const employees = React.useMemo(() => {
-    if (!assignedUsersdata) return [];
+const employees = React.useMemo(() => {
+  if (!assignedUsersdata) return [];
 
-    return assignedUsersdata.data.map((user: any) => {
-      const name =
-        `${user.profile?.firstName || ""} ${
-          user.profile?.lastName || ""
-        }`.trim() || "Unknown";
-      const role =
-        user.profile?.jobTitle?.replace(/_/g, " ") || user.role || "Unknown";
-      const avatar =
-        user.profile?.profileUrl;
-      const project =
-        user.projects && user.projects.length > 0
-          ? user.projects[0].title
-          : "No Project";
-      const shift =
-        user.shift && user.shift.length > 0
-          ? user.shift[0]?.shiftTitle
-          : "Morning";
+  return assignedUsersdata.data.map((user: any) => {
+    const name =
+      `${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`.trim() ||
+      "Unknown";
 
-      const rawDate = user.createdAt || new Date().toISOString();
-      const dateObj = new Date(rawDate);
-      const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(
-        dateObj.getMonth() + 1
-      ).padStart(2, "0")}/${dateObj.getFullYear()}`;
+    const role = user.profile?.jobTitle?.replace(/_/g, " ") || "Employee";
+
+    const avatar = user.profile?.profileUrl || "";
+
+    const project = user.project?.title || "No Project";
+
+    const shift = user.shift?.shiftType || "Morning";
+
+    // Format date as dd/mm/yyyy
+    const dateObj = new Date(user.date);
+    const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(
+      dateObj.getMonth() + 1
+    ).padStart(2, "0")}/${dateObj.getFullYear()}`;
 
       const start =
         user.shift && user.shift.length > 0 && user.shift[0].startTime;
       const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
 
-      const time = formatTimeRange(start, end, { hour12: true }).toLowerCase();
+      const startFormatted = new Date(start)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
+      const endFormatted = new Date(end)
+        .toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .toLowerCase();
+
+      const time = `${startFormatted}-${endFormatted}`;
       return {
         id: user.id,
         name,
