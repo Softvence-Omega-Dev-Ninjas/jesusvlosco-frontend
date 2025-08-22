@@ -392,23 +392,25 @@ const Admin: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
+        <div className="flex flex-wrap  gap-2 w-full sm:w-auto justify-start sm:justify-end">
           <button className="flex cursor-pointer items-center px-6 py-2 bg-[#4E53B1] text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-[#3f44a0] transition">
             All Categories
           </button>
 
-          <button className="flex items-center cursor-pointer gap-2 px-6 py-2 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none">
+          <button className="hidden items-center cursor-pointer gap-2 px-6 py-2 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none">
             <IoFilterOutline className="text-xl" />
             Filter
           </button>
 
           {/* Action Dropdown Component */}
-          <ActionDropdown
-            showActionDropdown={showActionDropdown}
-            toggleActionDropdown={toggleActionDropdown}
-            actionDropdownRef={actionDropdownRef}
-            actionDropdownButtonRef={actionDropdownButtonRef}
-          />
+          <div className="hidden">
+            <ActionDropdown
+              showActionDropdown={showActionDropdown}
+              toggleActionDropdown={toggleActionDropdown}
+              actionDropdownRef={actionDropdownRef}
+              actionDropdownButtonRef={actionDropdownButtonRef}
+            />
+          </div>
         </div>
       </div>
 
