@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   useEffect,
   useRef,
@@ -40,6 +41,7 @@ interface ChatMessage {
 }
 
 export interface TChat {
+  conversationId(conversationId: any): any;
   id: number;
   chatId: string;
   lastMessage: {
@@ -70,8 +72,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
     // const chatTabs = ["All", "Unread", "Team"];
     // const [activeChatTab, setActiveChatTab] = useState("All");
     const [selectedChatId, setSelectedChatId] = useState<string>();
-    const [showChatInfo, setShowChatInfo] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // const [showChatInfo, setShowChatInfo] = useState(false);
     const [showAddMemberModal, setShowMemberModal] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     // const [searchTerm, setSearchTerm] = useState("");
@@ -81,14 +82,10 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
     // Add the send message mutation
     const [sendPrivateMessage] = useSendPrivateMessageMutation();
 
-    console.log(showChatInfo, showDeleteModal);
+    // console.log(showChatInfo);
 
     const { data: conversationsData } = useGetPrivateChatQuery([]);
     const privateChats = conversationsData?.data || [];
-
-    // const filteredChats = privateChats.filter((chat: Chat) => {
-    //    return chat.participant.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-    // });
 
     // console.log("Filtered Chats:", filteredChats);
     const { data: privateChatData } = useGetChatByIdQuery(selectedChatId);
@@ -162,8 +159,6 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
 
     // Handle chat selection on mobile
     const handleChatSelect = (chatId: string) => {
-      // console.log("handleChatSelect called with chatId:", chatId);
-      // console.log("Setting selectedChatId to:", chatId);
       setSelectedChatId(chatId);
       setMobileView("chat");
       if (user?.role === "ADMIN") {
@@ -171,10 +166,8 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       }
     };
 
-    // Handle back navigation on mobile
     const handleBackToList = () => {
       setMobileView("list");
-      // setShowChatInfo(false);
     };
 
     const modalRef = useRef<HTMLDivElement>(null);
@@ -197,7 +190,6 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       };
     }, [setShowDropdown]);
 
-    // Prevent scroll chaining: when user scrolls inside chat list, don't let page scroll
     useEffect(() => {
       const el = chatListRef.current;
       if (!el) return;
@@ -345,7 +337,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
                   ref={modalRef}
                   className="absolute top-full *:cursor-pointer right-0 bg-white rounded-2xl overflow-hidden shadow-md w-48 z-10"
                 >
-                  <button
+                  {/* <button
                     onClick={() => {
                       // setShowChatInfo(true);
                       setMobileView("info");
@@ -354,15 +346,15 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
                     className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
                   >
                     Chat Information
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     onClick={() => {
                       setShowMemberModal(true);
                     }}
                     className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200"
                   >
                     Add Member
-                  </button>
+                  </button> */}
                   <button
                     // onClick={() => setShowDeleteModal(true)}
                     className="block w-full py-3 px-4 text-left hover:bg-gray-100 transition-colors duration-200 text-red-600"
@@ -378,11 +370,9 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
           <div className="hidden md:flex flex-1">
             {selectedChatId ? (
               <ChatConversation
+                setSelectedChatId={setSelectedChatId}
                 selectedChat={privateChatData}
-                selectedPrivateChatInfo={selectedChat}
-                setShowChatInfo={setShowChatInfo}
-                setShowDeleteModal={setShowDeleteModal}
-                setShowMemberModal={setShowMemberModal}
+                selectedPrivateChatInfo={selectedChat}     
               />
             ) : (
               // <div>Hello world</div>
@@ -458,27 +448,6 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
             </div>
           </div>
         </div>
-
-        {/* Chat Info Sidebar - Hidden on mobile when in list/chat view */}
-        {/* {showChatInfo && (
-        <div className={`${mobileView === "info" ? "flex" : "hidden"} md:flex`}>
-          <ChatInfoSidebar
-            selectedChat={selectedChat}
-            setShowChatInfo={setShowChatInfo}
-            setMobileView={setMobileView}
-          />
-        </div>
-      )} */}
-
-        {/* Delete Confirmation Modal */}
-        {/* {showDeleteModal && (
-        <ChatDeleteModal
-          selectedChat={selectedChat}
-          setShowDeleteModal={setShowDeleteModal}
-          handleDeleteChat={handleDeleteChat}
-        />
-      )} */}
-
         {showAddMemberModal && (
           <MemberSelectorModal setShowMemberModal={setShowMemberModal} />
         )}

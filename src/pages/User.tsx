@@ -565,7 +565,7 @@ const User: React.FC = () => {
       </header>
 
       {/* Control Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row  sm:items-center sm:justify-between gap-4 mb-6">
         <div className="relative w-full sm:max-w-md">
           <input
             type="text"
@@ -598,7 +598,7 @@ const User: React.FC = () => {
             All Categories
           </button>
 
-          <div className="relative">
+          <div className="relative hidden">
             <button
               ref={filterButtonRef} // Assign ref to the "Filter" button
               className="flex items-center cursor-pointer gap-2 px-6 py-2 text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none"
@@ -706,7 +706,7 @@ const User: React.FC = () => {
               )}
           </div>
 
-          <div className="relative">
+          <div className="relative hidden">
             <button
               ref={threeDotsButtonRef}
               className="flex items-center px-2 py-2 cursor-pointer bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none"

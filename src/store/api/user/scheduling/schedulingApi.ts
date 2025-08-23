@@ -24,6 +24,12 @@ const schedulingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["TIME_CLOCK"],
     }),
+    currentShift: build.query({
+      query: () => ({
+        url: `/employee/time-clock/shift/current-clock`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -31,4 +37,5 @@ export const {
   useGetAllUserTimeClockQuery,
   useCreateSchedulingRequestMutation,
   useDeleteSchedulingRequestMutation,
+  useCurrentShiftQuery,
 } = schedulingApi;

@@ -67,6 +67,8 @@ import CreateTeam from "@/pages/Admin/CreateTeam";
 import TasksAndProjects from "@/pages/TasksAndProjects/TasksAndProjects";
 import AdminRoute from "./AdminRoutes";
 import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
+// import ShiftSchedule from "@/pages/userpages/ShiftSchedule";
+// import EmailLogin from "@/pages/EmailLogin";
 import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
@@ -113,13 +115,19 @@ const routes = createBrowserRouter([
         path: "user-schedule",
         element: <Schedule />,
         children: [
+          // {
+          //   path: "user-shiftschedule",
+          //   element: <ShiftSchedule />,
+          // },
           {
             path: "user-shiftschedule",
             element: <UserShiftScheduling></UserShiftScheduling>,
           },
           {
             path: "user-overviewProjects/:id",
-            element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>,
+            element: (
+              <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>
+            ),
           },
           { path: "user-timeclock", element: <UserTimeClock /> },
 

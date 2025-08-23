@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Clock, CheckCircle, XCircle, Plus } from "lucide-react";
 import AddShiftModal from "./AddShiftModal";
@@ -8,17 +9,25 @@ import {
 } from "@/store/api/user/scheduling/schedulingApi";
 import { formatDateRange } from "@/utils/formatDateRange";
 import { toast } from "sonner";
+import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { toLocalTimeString } from "@/utils/timeUtils";
 
 interface TimeEntry {
   clockIn: string;
   clockOut: string;
-  hoursWorked: string;
-  totalHours: string;
 }
 
 const TimeTrackingDashboard: React.FC = () => {
-  const currentDate = "Wednesday, June 25, 2024";
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const { data } = useGetAllUserTimeClockQuery(null);
+  const clockData = useGetClockInOutQuery({});
+  const clock = clockData?.data?.data?.clock;
+  console.log(clock);
   const timeClockRequest = data?.data?.data;
   console.log({ timeClockRequest });
   const [deleteTimeCLock] = useDeleteSchedulingRequestMutation();
@@ -26,10 +35,8 @@ const TimeTrackingDashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const timeEntry: TimeEntry = {
-    clockIn: "07:00 AM",
-    clockOut: "04:00 PM",
-    hoursWorked: "0:36",
-    totalHours: "8:00",
+    clockIn: toLocalTimeString(clock?.clockInAt),
+    clockOut: toLocalTimeString(clock?.clockOutAt),
   };
   const [activities] = useState([
     {
@@ -126,15 +133,15 @@ const TimeTrackingDashboard: React.FC = () => {
                   Clock Out
                 </h3>
                 <p className="text-lg font-semibold text-gray-900">
-                  {timeEntry.clockOut}
+                  {timeEntry.clockOut || "Not clocked out yet"}
                 </p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Hours Today
+                  Status
                 </h3>
                 <p className="text-lg font-semibold text-gray-900">
-                  {timeEntry.hoursWorked} / {timeEntry.totalHours}
+                  {clock?.status || "Not clocked in"}
                 </p>
               </div>
             </div>

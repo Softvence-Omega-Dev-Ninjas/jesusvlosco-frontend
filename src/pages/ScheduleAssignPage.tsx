@@ -24,7 +24,7 @@ interface ProjectFormData {
 const ScheduleAssignPage: React.FC = () => {
     const projects = useGetAllProjectsQuery({});
     const [createProject] = useCreateProjectMutation();
-    const teams = useGetAllTeamDataQuery({});
+    const teams = useGetAllTeamDataQuery({limit: 20});
     const users = useGetAllUserQuery({limit: 1000});
     const managers = users.data?.data
    

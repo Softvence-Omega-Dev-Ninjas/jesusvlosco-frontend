@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { FaSpinner } from "react-icons/fa";
-import { Paperclip, Trash2, X } from "lucide-react";
+import { Check, ChevronsUpDown, Paperclip, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,10 +19,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { DateTimePicker } from "./DateTimePicker";
 import { taskSchema } from "./schemas/createTask.scheme";
-import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+// Assuming you have a new hook to fetch users by project ID
 import { useGetAllProjectsQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
-import { useCreateTaskMutation } from "@/store/api/admin/task-and-projects";
+import { toLocal24HourString } from "@/utils/timeUtils";
+
+import { useCreateTaskMutation, useGetProjectDetailsQuery } from "@/store/api/admin/task-and-projects";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
@@ -28,22 +35,36 @@ interface NewTaskModalProps {
 }
 
 export function NewTaskModal({ trigger }: NewTaskModalProps) {
-  const { data: users, isLoading: isUserLoading } = useGetAllUserQuery(undefined);
+  // Use a new query hook that takes projectId as a parameter.
+  // The skip option will prevent the query from running until projectId is available.
   const { data: projects, isLoading: isProjectLoading } = useGetAllProjectsQuery(undefined);
   const [createTask] = useCreateTaskMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
+
+  // Add a state variable to control the dialog's open state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
     control,
     reset,
     watch,
+    setValue, // We will use setValue to reset the assignUserId field
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
   });
 
+  // Watch the projectId field to conditionally fetch users
+  const projectId = watch("projectId");
   const attachment = watch("attachment");
+
+  // Conditionally fetch users only if a projectId is selected
+  const { data: users, isLoading: isUserLoading } = useGetProjectDetailsQuery({ projectId }, { skip: !projectId });
+  console.log(users);
 
   // This function now explicitly resets each field to its initial empty state.
   const resetForm = () => {
@@ -59,10 +80,13 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       attachment: undefined,
     });
     setIsSubmitting(false);
+    setIsDrafting(false);
+    setFormKey((prevKey) => prevKey + 1);
   };
 
   //Handle publish task
   const handlePublishTask = async (data: TaskFormData) => {
+    setIsSubmitting(true);
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "labels") {
@@ -84,16 +108,20 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       console.log(result);
       if (result?.success) {
         toast.success("Task assigned successfully.");
+        resetForm();
+        setIsModalOpen(false); // Close the dialog on success
       }
-
-      resetForm();
     } catch (error) {
       console.error("Error publishing task:", error);
+      toast.error("Failed to publish task."); // Add a toast for failure
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   //Handle draft task
   const handleDraftTask = async (data: TaskFormData) => {
+    setIsDrafting(true);
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "labels") {
@@ -113,17 +141,29 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       const result = await createTask(formData).unwrap();
       if (result?.success) {
         toast.success("Task draft saved successfully.");
+        resetForm();
+        setIsModalOpen(false); // Close the dialog on success
       }
-      resetForm();
     } catch (error) {
       console.error("Error saving draft task:", error);
+      toast.error("Failed to save draft task."); // Add a toast for failure
+    } finally {
+      setIsDrafting(false);
     }
   };
 
   const showDetails = true; // Hardcoded to true for demonstration of delete button
 
   return (
-    <Dialog onOpenChange={(open) => !open && resetForm()}>
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={(open) => {
+        setIsModalOpen(open);
+        if (!open) {
+          resetForm(); // Reset the form when the dialog is closed
+        }
+      }}
+    >
       <DialogTrigger asChild>{trigger || <Button className="">New Task</Button>}</DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[600px] overflow-y-scroll border-none p-0 bg-white">
         <DialogHeader className="px-6 pt-6 pb-4">
@@ -133,7 +173,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={(e) => e.preventDefault()} className="px-6 pb-6 space-y-4">
+        <form key={formKey} onSubmit={(e) => e.preventDefault()} className="px-6 pb-6 space-y-4">
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Task Details</h3>
           </div>
@@ -145,7 +185,13 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
               name="projectId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setValue("assignUserId", ""); // Reset the user when a new project is selected
+                  }}
+                  value={field.value ?? ""}
+                >
                   <SelectTrigger className={cn("w-full border border-slate-300", errors.projectId && "border-red-500")}>
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
@@ -173,22 +219,51 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
               name="assignUserId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className={cn("w-full border border-slate-300", errors.assignUserId && "border-red-500")}>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-none max-h-60 overflow-y-scroll">
-                    {isUserLoading && (
-                      <div className="w-full h-14 flex items-center justify-center">
-                        <FaSpinner className="animate-spin" />
-                      </div>
-                    )}
-                    {!isUserLoading &&
-                      users?.data?.map((user: any) => {
-                        return <SelectItem key={user?.id} value={user?.id}>{`${user?.profile?.firstName} ${user?.profile?.lastName}`}</SelectItem>;
-                      })}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      // Disable the button if no project is selected
+                      disabled={!projectId}
+                      className={cn("w-full justify-between border border-slate-300 font-normal", errors.assignUserId && "border-red-500")}
+                    >
+                      {field.value
+                        ? users?.data?.projectUsers?.find((user: any) => user?.userId === field.value)?.user?.profile?.firstName +
+                          " " +
+                          users?.data?.projectUsers?.find((user: any) => user?.userId === field.value)?.user?.profile?.lastName
+                        : "Select user"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[400px] mx-auto p-0 bg-white max-h-[200px] overflow-y-scroll border border-slate-100 mb-2">
+                    <Command>
+                      <CommandInput placeholder="Search user..." className="h-9 border-none" />
+                      <CommandGroup>
+                        {isUserLoading && (
+                          <div className="w-full h-14 flex items-center justify-center">
+                            <FaSpinner className="animate-spin" />
+                          </div>
+                        )}
+                        {!isUserLoading &&
+                          users?.data?.projectUsers?.map((user: any) => (
+                            <CommandItem
+                              className="cursor-pointer hover:bg-slate-50"
+                              key={user?.id}
+                              value={`${user?.user?.profile?.firstName} ${user?.user?.profile?.lastName}`}
+                              onSelect={() => {
+                                field.onChange(user?.userId);
+                              }}
+                            >
+                              {`${user?.user?.profile?.firstName} ${user?.user?.profile?.lastName}`}
+                              <Check className={cn("ml-auto h-4 w-4", user?.userId === field.value ? "opacity-100" : "opacity-0")} />
+                            </CommandItem>
+                          ))}
+                        {!isUserLoading && users?.data?.projectUsers?.length === 0 && <CommandEmpty>No users found for this project.</CommandEmpty>}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               )}
             />
             {errors.assignUserId && <p className="text-sm text-red-500 mt-1">{errors.assignUserId.message}</p>}
@@ -251,7 +326,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 label="Start Date & Time"
                 date={field.value}
                 setDate={field.onChange}
-                time={field.value ? field.value.toLocaleTimeString("en-US", { hour12: false }) : ""}
+                time={field.value ? toLocal24HourString(field.value.toISOString()) : ""}
                 setTime={(time) => {
                   const [hours, minutes, seconds] = time.split(":").map(Number);
                   const newDate = field.value || new Date();
@@ -271,7 +346,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 label="End Date & Time"
                 date={field.value}
                 setDate={field.onChange}
-                time={field.value ? field.value.toLocaleTimeString("en-US", { hour12: false }) : ""}
+                time={field.value ? toLocal24HourString(field.value.toISOString()) : ""}
                 setTime={(time) => {
                   const [hours, minutes, seconds] = time.split(":").map(Number);
                   const newDate = field.value || new Date();
@@ -332,9 +407,9 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 variant="outline"
                 className="border-gray-300 bg-transparent cursor-pointer"
                 onClick={handleSubmit(handleDraftTask)}
-                disabled={isSubmitting}
+                disabled={isDrafting}
               >
-                Draft Task
+                {isDrafting ? "Saving..." : "Save Draft"}
               </Button>
             </div>
 
@@ -344,8 +419,11 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
                 variant="ghost"
                 size="sm"
                 className="text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                onClick={resetForm}
-                disabled={isSubmitting}
+                onClick={() => {
+                  // setIsModalOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting || isDrafting}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

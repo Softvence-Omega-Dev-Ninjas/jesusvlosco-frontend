@@ -15,12 +15,14 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
           endBefore: end,
         },
       }),
+      providesTags: ["TASK"],
     }),
     getUserTaskDetails: builder.query({
       query: (id) => ({
         url: `/employee/project/task/${id}`,
         method: "GET",
       }),
+      providesTags: ["TASK"],
     }),
     getallTasksByUsers: builder.query({
       query: ({ taskStatus, searchQuery, groupBy, start, end }) => ({
@@ -34,6 +36,7 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
           endBefore: end,
         },
       }),
+      providesTags: ["TASK"],
     }),
 
     createTask: builder.mutation({
@@ -42,9 +45,34 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["TASK"],
+    }),
+
+    submitTask: builder.mutation({
+      query: ({ taskId, formData }) => ({
+        url: `/employee/project/submit/${taskId}`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["TASK"],
+    }),
+
+    getProjectDetails: builder.query({
+      query: ({ projectId }) => ({
+        url: `/admin/project/${projectId}`,
+        method: "GET",
+      }),
+      providesTags: ["TASK", "PROJECT"],
     }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetTasksQuery, useCreateTaskMutation, useGetallTasksByUsersQuery, useGetUserTaskDetailsQuery } = taskAndProjectApi;
+export const {
+  useGetTasksQuery,
+  useCreateTaskMutation,
+  useGetallTasksByUsersQuery,
+  useGetUserTaskDetailsQuery,
+  useSubmitTaskMutation,
+  useGetProjectDetailsQuery,
+} = taskAndProjectApi;
