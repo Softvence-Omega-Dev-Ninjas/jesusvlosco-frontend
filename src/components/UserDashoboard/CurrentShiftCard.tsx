@@ -42,6 +42,10 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
             </div>
           ))}
         </div>
+        <div className="flex items-center justify-center space-x-5 py-5">
+          <button className="px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold">Clock In </button>
+          <button className="px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold">Clock Out</button>
+        </div>
       </div>
     </div>
   );
