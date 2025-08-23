@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Settings, Menu } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import UserDropdown from './User/UserDropdown';
 
 interface HeaderProps {
@@ -46,11 +46,6 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* Settings */}
-          <button className="p-2 hidden md:block rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-            <Settings className="h-5 w-5" />
           </button>
 
           {/* User profile */}
