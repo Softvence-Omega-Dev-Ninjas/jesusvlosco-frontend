@@ -49,7 +49,7 @@ const Step2VerifyCode: React.FC<Step2VerifyCodeProps> = ({
   };
 
   return (
-    <div className="text-center">
+    <div className="text-center bg-white px-5 py-10 rounded-2xl ">
       <h2 className="text-2xl font-semibold mb-4">Enter the 6 digit code</h2>
       <p className="text-gray-600 mb-6">Sent to {phoneNumber}</p>
       <form onSubmit={handleSubmit}>

@@ -2,20 +2,25 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useAppDispatch } from "@/hooks/useRedux";
+import { loginUser } from "@/store/Slices/AuthSlice/authSlice";
 import {
   useEmailLoginMutation,
   usePhoneLoginMutation,
+  useVarifyPhoneLoginMutation,
 } from "@/store/api/auth/authApi";
 import VerifyCode from "./VerifyCode";
 import VerificationComplete from "./VerificationComplete";
 import { Phone, Mail } from "lucide-react";
 import Step1PhoneNumber from "@/components/Step1PhoneNumber";
+import Step2VerifyCode from "@/components/Step2VerifyCode";
 
 type EmailFormData = {
   email: string;
 };
 
 export default function Login() {
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
@@ -25,10 +30,13 @@ export default function Login() {
 
   const [login, { isLoading }] = useEmailLoginMutation();
   const [step, setStep] = useState(0); // 👈 start from welcome screen
+  const [loginMethod, setLoginMethod] = useState<'phone' | 'email' | null>(null); // Track login method
   const email = watch("email");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneLogin, { isLoading: phoneLoading }] = usePhoneLoginMutation();
+  const [verifyPhoneCode, { isLoading: verifyPhoneLoading }] = useVarifyPhoneLoginMutation();
   const handlePhoneNumberSubmit = async (number: any) => {
+    console.log({ number });
     setPhoneNumber(number);
     try {
       const result = await phoneLogin({ phoneNumber: number }).unwrap();
@@ -43,6 +51,31 @@ export default function Login() {
     }
 
     // Move to the next step
+  };
+
+  const handlePhoneCodeVerification = async (code: string) => {
+    console.log(phoneNumber, code);
+    const isPlusContains = phoneNumber?.includes("+")
+    console.log({isPlusContains, phoneNumber})
+    try {
+      const result = await verifyPhoneCode({
+        phoneNumber: isPlusContains ? phoneNumber.slice(1) : phoneNumber,
+        otp: code,
+      }).unwrap();
+      console.log({ result });
+      if (result?.success) {
+        toast.success(result?.message || "Login Successful");
+        dispatch(
+          loginUser({ ...result?.data?.user, accessToken: result?.data?.token })
+        );
+        setStep(3);
+      } else {
+        toast.error(result?.data?.message || "Something went wrong");
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong");
+      console.log({ error });
+    }
   };
 
   console.log(phoneNumber);
@@ -72,14 +105,20 @@ export default function Login() {
 
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => setStep(1)} // go to phone login
+              onClick={() => {
+                setLoginMethod('phone');
+                setStep(1);
+              }} // go to phone login
               className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
             >
               <Phone size={18} /> Log in with phone
             </button>
 
             <button
-              onClick={() => setStep(10)} // go to email login
+              onClick={() => {
+                setLoginMethod('email');
+                setStep(10);
+              }} // go to email login
               className="flex items-center gap-2 px-5 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
             >
               <Mail size={18} /> Log in with email
@@ -124,7 +163,16 @@ export default function Login() {
           </form>
         </div>
       ) : step === 2 ? (
-        <VerifyCode setStep={setStep} email={email} />
+        // Conditional verification based on login method
+        loginMethod === 'phone' ? (
+          <Step2VerifyCode
+            isLoading={verifyPhoneLoading}
+            phoneNumber={phoneNumber}
+            onVerify={handlePhoneCodeVerification}
+          />
+        ) : (
+          <VerifyCode setStep={setStep} email={email} />
+        )
       ) : (
         <VerificationComplete />
       )}
