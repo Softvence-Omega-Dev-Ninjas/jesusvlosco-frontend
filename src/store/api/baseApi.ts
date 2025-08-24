@@ -4,7 +4,8 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
     // baseUrl: "http://localhost:5005/js",
-    baseUrl: "https://api.lgcglobalcontractingltd.com/js",
+    // baseUrl: "http://148.230.86.72:5005/js",
+    baseUrl: "https://lgcglobalcontractingltd.com/js",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.user?.accessToken || "";
       // console.log({ token });
