@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { FileText, Star, Trash2, X } from "lucide-react";
 
@@ -49,7 +48,6 @@ export default function SurveyPage() {
 
   const [openEndedFields, setOpenEndedFields] = useState<OpenEndedFieldData[]>([]);
 
-
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingFields, setRatingFields] = useState<RatingFieldData[]>([]);
   const addField = (type: string) => {
@@ -79,7 +77,7 @@ export default function SurveyPage() {
   };
 
   const handleSaveOpenEnded = (data: OpenEndedFieldData) => {
-    setOpenEndedFields((prev) => [...prev, data])
+    setOpenEndedFields((prev) => [...prev, data]);
     console.log(data);
   };
 
@@ -148,7 +146,6 @@ export default function SurveyPage() {
                 <label className="text-lg mt-3 font-medium text-[rgba(78,83,177,1)] min-w-max">Survey Title</label>
                 <input
                   onChange={(e) => settile(e.target.value)}
-
                   className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 lg:ml-10 text-sm"
                 />
               </div>
@@ -298,7 +295,7 @@ export default function SurveyPage() {
             </div>
 
             <div className="flex justify-end gap-2 border-t border-gray-300 px-6 py-4 bg-gray-50 rounded-b-md">
-              <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button>
+              {/* <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button> */}
               <button onClick={handlePublish} className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
                 Publish Survey
               </button>

@@ -1,4 +1,5 @@
-// UniversalModal.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Search } from "lucide-react";
 
@@ -76,37 +77,21 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
   selectedFilters,
   onFilterChange,
   selectedDate,
-  // onDateChange,
   fromInitialDate,
   toInitialDate,
   columnOptions,
   onColumnToggle,
   surveyData,
-  teamData, // Destructure new prop
+  teamData,
   initialPosition,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState<ModalPosition>(
-    initialPosition || { x: 0, y: 0 }
-  );
+  const [position, setPosition] = useState<ModalPosition>(initialPosition || { x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Calendar related states (unchanged)
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const parseDateStringToCalendarDate = (dateString?: string): CalendarDate => {
     if (dateString) {
@@ -130,27 +115,13 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
     };
   };
 
-  const initialFrom =
-    fromInitialDate ||
-    (selectedDate
-      ? parseDateStringToCalendarDate(selectedDate.split(" to ")[0])
-      : undefined);
-  const initialTo =
-    toInitialDate ||
-    (selectedDate
-      ? parseDateStringToCalendarDate(selectedDate.split(" to ")[1])
-      : undefined);
+  const initialFrom = fromInitialDate || (selectedDate ? parseDateStringToCalendarDate(selectedDate.split(" to ")[0]) : undefined);
+  const initialTo = toInitialDate || (selectedDate ? parseDateStringToCalendarDate(selectedDate.split(" to ")[1]) : undefined);
 
-  const [fromDate, setFromDate] = useState<CalendarDate>(
-    initialFrom || parseDateStringToCalendarDate()
-  );
-  const [toDate, setToDate] = useState<CalendarDate>(
-    initialTo || parseDateStringToCalendarDate()
-  );
+  const [fromDate, setFromDate] = useState<CalendarDate>(initialFrom || parseDateStringToCalendarDate());
+  const [toDate, setToDate] = useState<CalendarDate>(initialTo || parseDateStringToCalendarDate());
 
-  const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(
-    null
-  );
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(null);
   // End Calendar related states
 
   // API data for filters (unchanged)
@@ -193,37 +164,10 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
       // API call for filters
       if (modalType === "filter") {
-        // const fetchFilterData = async () => {
-        //   setLoadingFilters(true);
-        //   setFilterError(null);
-        //   try {
-        //     // Replace with your actual API endpoint if needed
-        //     const response = await fetch('/api/filters'); // Example API endpoint
-        //     if (!response.ok) {
-        //       throw new Error(`HTTP error! status: ${response.status}`);
-        //     }
-        //     const data: string[] = await response.json();
-        //     setApiFilterOptions(data);
-        //   } catch (error: any) {
-        //     console.error("Failed to fetch filter options:", error);
-        //     setFilterError(`Failed to load filters: ${error.message}`);
-        //   } finally {
-        //     setLoadingFilters(false);
-        //   }
-        // };
-        // This is a placeholder. In a real app, you'd fetch from an API.
-        // For now, hardcode some filter options:
         setApiFilterOptions(["All", "Active", "Completed"]); //
       }
     }
-  }, [
-    isOpen,
-    initialPosition,
-    fromInitialDate,
-    toInitialDate,
-    selectedDate,
-    modalType,
-  ]); //
+  }, [isOpen, initialPosition, fromInitialDate, toInitialDate, selectedDate, modalType]); //
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -322,29 +266,19 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
     const startDate = calendarDateToDate(fromDate);
     const endDate = calendarDateToDate(toDate);
 
-    const [effectiveStartDate, effectiveEndDate] =
-      startDate.getTime() <= endDate.getTime()
-        ? [startDate, endDate]
-        : [endDate, startDate];
+    const [effectiveStartDate, effectiveEndDate] = startDate.getTime() <= endDate.getTime() ? [startDate, endDate] : [endDate, startDate];
 
     return dateToCheck >= effectiveStartDate && dateToCheck <= effectiveEndDate;
   };
 
   const onCalendarDayClick = (day: number) => {
     const newDay = String(day).padStart(2, "0");
-    const clickedDate = new Date(
-      parseInt(fromDate.year),
-      monthNameToNumber(fromDate.month),
-      day
-    );
+    const clickedDate = new Date(parseInt(fromDate.year), monthNameToNumber(fromDate.month), day);
 
     const currentFromDateObj = calendarDateToDate(fromDate);
     const currentToDateObj = calendarDateToDate(toDate);
 
-    if (
-      selectedCalendarDay === null ||
-      currentFromDateObj.getTime() === currentToDateObj.getTime()
-    ) {
+    if (selectedCalendarDay === null || currentFromDateObj.getTime() === currentToDateObj.getTime()) {
       setFromDate({ day: newDay, month: fromDate.month, year: fromDate.year });
       setToDate({ day: newDay, month: fromDate.month, year: fromDate.year });
       setSelectedCalendarDay(day);
@@ -390,17 +324,9 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
       return new Date(parseInt(year), monthNum + 1, 0).getDate();
     };
 
-    const firstDayOfMonth = new Date(
-      parseInt(fromDate.year),
-      monthNames.indexOf(fromDate.month),
-      1
-    ).getDay();
+    const firstDayOfMonth = new Date(parseInt(fromDate.year), monthNames.indexOf(fromDate.month), 1).getDay();
 
-    const prevMonthDate = new Date(
-      parseInt(fromDate.year),
-      monthNames.indexOf(fromDate.month),
-      0
-    );
+    const prevMonthDate = new Date(parseInt(fromDate.year), monthNames.indexOf(fromDate.month), 0);
     const daysInPrevMonth = prevMonthDate.getDate();
 
     const calendarDays: (number | null)[] = [];
@@ -436,16 +362,11 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={fromDate.day}
-                    onChange={(e) =>
-                      setFromDate({ ...fromDate, day: e.target.value })
-                    }
+                    onChange={(e) => setFromDate({ ...fromDate, day: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 31 }, (_, i) => (
-                      <option
-                        key={i + 1}
-                        value={String(i + 1).padStart(2, "0")}
-                      >
+                      <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
                         {String(i + 1).padStart(2, "0")}
                       </option>
                     ))}
@@ -453,9 +374,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={fromDate.month}
-                    onChange={(e) =>
-                      setFromDate({ ...fromDate, month: e.target.value })
-                    }
+                    onChange={(e) => setFromDate({ ...fromDate, month: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {monthNames.map((month) => (
@@ -467,9 +386,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={fromDate.year}
-                    onChange={(e) =>
-                      setFromDate({ ...fromDate, year: e.target.value })
-                    }
+                    onChange={(e) => setFromDate({ ...fromDate, year: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 10 }, (_, i) => (
@@ -485,16 +402,11 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={toDate.day}
-                    onChange={(e) =>
-                      setToDate({ ...toDate, day: e.target.value })
-                    }
+                    onChange={(e) => setToDate({ ...toDate, day: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 31 }, (_, i) => (
-                      <option
-                        key={i + 1}
-                        value={String(i + 1).padStart(2, "0")}
-                      >
+                      <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
                         {String(i + 1).padStart(2, "0")}
                       </option>
                     ))}
@@ -502,9 +414,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={toDate.month}
-                    onChange={(e) =>
-                      setToDate({ ...toDate, month: e.target.value })
-                    }
+                    onChange={(e) => setToDate({ ...toDate, month: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {monthNames.map((month) => (
@@ -516,9 +426,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                   <select
                     className="px-2 py-2 border rounded-md text-sm cursor-pointer"
                     value={toDate.year}
-                    onChange={(e) =>
-                      setToDate({ ...toDate, year: e.target.value })
-                    }
+                    onChange={(e) => setToDate({ ...toDate, year: e.target.value })}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
                     {Array.from({ length: 10 }, (_, i) => (
@@ -540,10 +448,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 <div className="grid grid-cols-7 gap-y-2 text-center">
                   {calendarDays.map((day, index) => {
                     const isPreviousMonthDay = index < firstDayOfMonth;
-                    const isNextMonthDay =
-                      index >=
-                      firstDayOfMonth +
-                        daysInMonth(fromDate.month, fromDate.year);
+                    const isNextMonthDay = index >= firstDayOfMonth + daysInMonth(fromDate.month, fromDate.year);
 
                     const isSelected = day !== null && isDateInRange(day);
 
@@ -552,9 +457,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                         key={index}
                         onClick={() => day !== null && onCalendarDayClick(day)}
                         className={`text-sm rounded-md w-9 h-9 flex items-center justify-center ${
-                          day === null || isPreviousMonthDay || isNextMonthDay
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "cursor-pointer"
+                          day === null || isPreviousMonthDay || isNextMonthDay ? "text-gray-400 cursor-not-allowed" : "cursor-pointer"
                         } ${
                           isSelected
                             ? "bg-[#FFBA5C] text-black font-medium"
@@ -583,23 +486,14 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               <span>Filter Options</span>
             </div>
             <div className="p-4">
-              {loadingFilters && (
-                <div className="text-gray-500">Loading filters...</div>
-              )}
+              {loadingFilters && <div className="text-gray-500">Loading filters...</div>}
               {filterError && <div className="text-red-500">{filterError}</div>}
-              {!loadingFilters &&
-                !filterError &&
-                apiFilterOptions.length === 0 && (
-                  <div className="text-gray-500">No filters available.</div>
-                )}
+              {!loadingFilters && !filterError && apiFilterOptions.length === 0 && <div className="text-gray-500">No filters available.</div>}
               {!loadingFilters &&
                 !filterError &&
                 apiFilterOptions.length > 0 &&
                 apiFilterOptions.map((filter: string) => (
-                  <label
-                    key={filter}
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
+                  <label key={filter} className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-primary rounded border-gray-300"
@@ -621,10 +515,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               style={{ cursor: isDragging ? "grabbing" : "grab" }}
             >
               <div className="relative flex items-center no-drag">
-                <Search
-                  size={16}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-                />
+                <Search size={16} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search members"
@@ -637,37 +528,26 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               {columnOptions
                 ?.filter((col) => col.id !== "checkbox" && col.id !== "action")
                 .map((column) => (
-                  <label
-                    key={column.id}
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
+                  <label key={column.id} className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-primary rounded border-gray-300"
                       checked={column.isVisible}
-                      onChange={() =>
-                        onColumnToggle && onColumnToggle(column.id)
-                      }
+                      onChange={() => onColumnToggle && onColumnToggle(column.id)}
                     />
                     <span className="ml-2 text-gray-700">{column.label}</span>
                   </label>
                 ))}
             </div>
             <div className="p-3 border-t border-gray-200">
-              <button
-                className="w-full bg-primary text-white py-1.5 rounded-md text-sm"
-                onClick={onClose}
-              >
+              <button className="w-full bg-primary text-white py-1.5 rounded-md text-sm" onClick={onClose}>
                 Apply
               </button>
             </div>
           </>
         );
       case "quickView":
-        if (!surveyData)
-          return (
-            <div className="p-4 text-red-500">No survey data available.</div>
-          );
+        if (!surveyData) return <div className="p-4 text-red-500">No survey data available.</div>;
         return (
           <div>
             <div
@@ -682,10 +562,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
                 <strong>Title:</strong> {surveyData.title}
               </p>
               <p className="mb-2">
-                <strong>Status:</strong>{" "}
-                <span className={`${getStatusBadge(surveyData.status)}`}>
-                  {surveyData.status}
-                </span>
+                <strong>Status:</strong> <span className={`${getStatusBadge(surveyData.status)}`}>{surveyData.status}</span>
               </p>
               <p className="mb-2">
                 <strong>Duration:</strong>{" "}
@@ -740,20 +617,14 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               </button>
               </Link> */}
 
-              <button
-                className="border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 cursor-pointer "
-                onClick={onClose}
-              >
+              <button className="border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 cursor-pointer " onClick={onClose}>
                 Close
               </button>
             </div>
           </div>
         );
       case "teamMembers": // NEW: Case for "teamMembers" modal
-        if (!teamData)
-          return (
-            <div className="p-4 text-red-500">No team data available.</div>
-          );
+        if (!teamData) return <div className="p-4 text-red-500">No team data available.</div>;
         return (
           <>
             <div
@@ -762,10 +633,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
               style={{ cursor: isDragging ? "grabbing" : "grab" }}
             >
               <span> {teamData.teamName}</span>
-              <button
-                className="text-gray-500 hover:text-gray-700 no-drag"
-                onClick={onClose}
-              >
+              <button className="text-gray-500 hover:text-gray-700 no-drag" onClick={onClose}>
                 &times;
               </button>
             </div>

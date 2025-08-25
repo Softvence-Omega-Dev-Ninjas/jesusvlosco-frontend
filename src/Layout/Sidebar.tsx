@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { logoutUser } from "@/store/Slices/AuthSlice/authSlice";
-import logo from "./../assets/logo.jpg"; // Adjust the path as necessary
 
 interface SidebarProps {
   isOpen: boolean;
@@ -160,7 +159,7 @@ const navigation: NavigationItem[] = [
     name: "Tasks & Projects",
     icon: FolderOpen,
     path: "/admin/tasks-projects",
-    badge: 1,
+    // badge: 1,
   },
   {
     name: "Settings",
@@ -177,16 +176,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     dispatch(logoutUser());
     navigate("/");
   };
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([
-    "Communication",
-  ]);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(["Communication"]);
 
   const toggleSubmenu = (menuName: string) => {
-    setExpandedMenus((prev) =>
-      prev.includes(menuName)
-        ? prev.filter((name) => name !== menuName)
-        : [...prev, menuName]
-    );
+    setExpandedMenus((prev) => (prev.includes(menuName) ? prev.filter((name) => name !== menuName) : [...prev, menuName]));
   };
 
   const handleNavClick = (hasSubmenu?: boolean) => {
@@ -205,9 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const renderNavigationItem = (item: NavigationItem) => {
     const isExpanded = expandedMenus.includes(item.name);
     // const isActive = item.path ? location.pathname === item.path : false;
-    const isSubmenuItemActive = item.submenu
-      ? isSubmenuActive(item.submenu)
-      : false;
+    const isSubmenuItemActive = item.submenu ? isSubmenuActive(item.submenu) : false;
 
     return (
       <div key={item.name} className="">
@@ -216,22 +207,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClick={() => toggleSubmenu(item.name)}
             className={`
               group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg mb-1 transition-all duration-200
-              ${
-                isSubmenuItemActive
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              }
+              ${isSubmenuItemActive ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"}
             `}
           >
             <div className="flex items-center">
               <item.icon
                 className={`
                   mr-3 h-5 w-5 flex-shrink-0 transition-colors duration-200
-                  ${
-                    isSubmenuItemActive
-                      ? "text-blue-600"
-                      : "text-gray-500 group-hover:text-gray-700"
-                  }
+                  ${isSubmenuItemActive ? "text-blue-600" : "text-gray-500 group-hover:text-gray-700"}
                 `}
               />
               <span>{item.name}</span>
@@ -245,17 +228,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               )}
               <div className="transition-transform duration-200">
                 {isExpanded ? (
-                  <ChevronDown
-                    className={`h-4 w-4 ${
-                      isSubmenuItemActive ? "text-blue-600" : "text-gray-500"
-                    }`}
-                  />
+                  <ChevronDown className={`h-4 w-4 ${isSubmenuItemActive ? "text-blue-600" : "text-gray-500"}`} />
                 ) : (
-                  <ChevronRight
-                    className={`h-4 w-4 ${
-                      isSubmenuItemActive ? "text-blue-600" : "text-gray-500"
-                    }`}
-                  />
+                  <ChevronRight className={`h-4 w-4 ${isSubmenuItemActive ? "text-blue-600" : "text-gray-500"}`} />
                 )}
               </div>
             </div>
@@ -267,11 +242,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClick={() => handleNavClick()}
             className={({ isActive }) => `
               group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg mb-1 transition-all duration-200
-              ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              }
+              ${isActive ? "bg-blue-600 text-white shadow-md" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"}
             `}
           >
             {({ isActive }) => (
@@ -280,11 +251,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <item.icon
                     className={`
                       mr-3 h-5 w-5 flex-shrink-0 transition-colors duration-200
-                      ${
-                        isActive
-                          ? "text-white"
-                          : "text-gray-500 group-hover:text-gray-700"
-                      }
+                      ${isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700"}
                     `}
                   />
                   <span>{item.name}</span>
@@ -294,11 +261,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <span
                     className={`
                     inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full
-                    ${
-                      isActive
-                        ? "bg-blue-500 text-white"
-                        : "bg-blue-500 text-white"
-                    }
+                    ${isActive ? "bg-blue-500 text-white" : "bg-blue-500 text-white"}
                   `}
                   >
                     {item.badge}
@@ -325,11 +288,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={() => handleNavClick()}
                   className={({ isActive }) => `
                     group flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                    ${
-                      isActive
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }
+                    ${isActive ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}
                   `}
                 >
                   {({ isActive }) => (
@@ -337,11 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       <subItem.icon
                         className={`
                           mr-3 h-4 w-4 flex-shrink-0 transition-colors duration-200
-                          ${
-                            isActive
-                              ? "text-white"
-                              : "text-gray-400 group-hover:text-gray-600"
-                          }
+                          ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}
                         `}
                       />
                       {subItem.name}
@@ -363,7 +318,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
           <nav className="flex-grow mt-6 pb-4 overflow-y-auto">
             <div className="text-4xl font-bold text-[#4E53B1] ml-6 mb-7">
-              <img className="px-2" src={logo} alt="" />
+              Logo
             </div>
             <div className="px-3 space-y-1">
               {navigation.map(renderNavigationItem)}
@@ -390,9 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         `}
       >
         <nav className="mt-6 pb-20 overflow-y-auto h-full">
-          <div className="px-3 space-y-1">
-            {navigation.map(renderNavigationItem)}
-          </div>
+          <div className="px-3 space-y-1">{navigation.map(renderNavigationItem)}</div>
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-4 border-t border-gray-200 pt-4 bg-white">

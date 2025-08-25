@@ -67,7 +67,7 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
       if (!geocoderRef.current) {
         geocoderRef.current = new google.maps.Geocoder();
       }
-      if (!autocompleteServiceRef.current) {
+      if (!autocompleteServiceRef.current && typeof google.maps.places !== "undefined") {
         autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
       }
     }
@@ -75,8 +75,14 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
 
   // Initialize PlacesService when map is loaded
   const onMapLoad = useCallback((map: google.maps.Map) => {
-    if (!placesServiceRef.current) {
+    if (
+      !placesServiceRef.current &&
+      typeof google.maps.places !== "undefined" &&
+      typeof google.maps.places.PlacesService !== "undefined"
+    ) {
       placesServiceRef.current = new google.maps.places.PlacesService(map);
+    } else if (typeof google.maps.places === "undefined" || typeof google.maps.places.PlacesService === "undefined") {
+      console.error("Google Maps Places library is not loaded. Please check your API key and libraries configuration.");
     }
   }, []);
 
