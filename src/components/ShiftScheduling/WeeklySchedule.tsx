@@ -68,10 +68,10 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
   const users = projectInformation?.projectUsers || [];
   const userList = users?.filter((user: TProjectUser) => user.user?.role != "ADMIN") || [];
   
-  console.log("Users Data:", userList);
-  console.log("Shifts Data:", getShifts.data);
-  console.log("Shifts loading:", getShifts.isLoading);
-  console.log("Shifts error:", getShifts.error);
+  // console.log("Users Data:", userList);
+  // console.log("Shifts Data:", getShifts.data);
+  // console.log("Shifts loading:", getShifts.isLoading);
+  // console.log("Shifts error:", getShifts.error);
 
   const userIds = userList.map((user: TProjectUser) => user.user?.id).filter(Boolean);
   console.log("User IDs:", userIds);
@@ -157,7 +157,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
     dayDate: Date,
     userId: string
   ): ShiftData[] => {
-    console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
+    // console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
 
     // Safety check: ensure data exists and is an array
     if (!getShifts.data || !Array.isArray(getShifts.data)) {
@@ -178,19 +178,19 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
       const isDateMatch = isSameDay(shiftDate, dayDate);
       const isUserMatch = shift.users && shift.users.some && shift.users.some((user) => user.id === userId);
 
-      if (isDateMatch && isUserMatch) {
-          console.log('✅ USER SHIFT MATCH FOUND!', {
-              userId,
-              shiftDate: shift.date,
-              shiftStatus: shift.shiftStatus,
-              employee: shift.users?.[0]?.profile?.firstName || 'No name'
-          });
-      }
+      // if (isDateMatch && isUserMatch) {
+      //     console.log('✅ USER SHIFT MATCH FOUND!', {
+      //         userId,
+      //         shiftDate: shift.date,
+      //         shiftStatus: shift.shiftStatus,
+      //         employee: shift.users?.[0]?.profile?.firstName || 'No name'
+      //     });
+      // }
 
       return isDateMatch && isUserMatch;
     });
 
-    console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
+    // console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
     return matchingShifts;
   };
   const days = getDaysForWeek();
@@ -223,10 +223,10 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
     );
   }
 
-  console.log('=== WEEK DAYS ===');
-  days.forEach((day, index) => {
-      console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
-  });
+  // console.log('=== WEEK DAYS ===');
+  // days.forEach((day, index) => {
+  //     console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
+  // });
 
   return (
     <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm overflow-x-auto">

@@ -17,6 +17,12 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TASK"],
     }),
+    getSingleTask: builder.query({
+      query: (id) => ({
+        url: `/admin/task/${id}`,
+        method: "GET",
+      }),
+    }),
     getUserTaskDetails: builder.query({
       query: (id) => ({
         url: `/employee/project/task/${id}`,
@@ -75,4 +81,5 @@ export const {
   useGetUserTaskDetailsQuery,
   useSubmitTaskMutation,
   useGetProjectDetailsQuery,
+  useGetSingleTaskQuery,
 } = taskAndProjectApi;

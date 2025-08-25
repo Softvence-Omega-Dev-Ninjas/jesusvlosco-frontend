@@ -43,6 +43,8 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
   const [isDrafting, setIsDrafting] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
+  console.log(projects, "Projects");
+
   // Add a state variable to control the dialog's open state
   const [isModalOpen, setIsModalOpen] = useState(false);
 

@@ -10,7 +10,7 @@ const shiftApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ['ShiftScheduling', 'ADMIN_USER'],
+      invalidatesTags: ['ShiftScheduling', 'ADMIN_USER', 'CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
     }),
 
     // GET - All shifts
