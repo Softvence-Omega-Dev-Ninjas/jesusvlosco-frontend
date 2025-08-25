@@ -13,6 +13,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
 import { TProject, TProjectUser } from "@/types/projectType";
 import Swal from "sweetalert2";
+// import { useGetTasksQuery } from "@/store/api/admin/task-and-projects";
 
 interface LocationCoordinates {
   latitude: number;
@@ -122,6 +123,9 @@ const EmployeeAvailability = ({
   projectInformation: TProject;
 }) => {
   const currentProjectId = useParams().id;
+  // TODO
+  // const [getTask, setToGetTask] = useState<string | null>(null);
+  // const getTasks = useGetTasksQuery(g);
   const projectUsers = projectInformation?.projectUsers || [];
   const userList =
     projectUsers?.filter((user: TProjectUser) => user.user?.role != "ADMIN") ||
@@ -206,7 +210,7 @@ const EmployeeAvailability = ({
 
     // Convert form data to API format
     const formData: ShiftAPIData = {
-      currentUserId: userIds[0] || "", // Use the first userId as currentUserId
+      currentUserId: userIds[0], // Use the first userId as currentUserId
       currentProjectId: currentProjectId || data.currentProjectId || "",
       date: convertToISOString(data.date, data.startTime), // Use start time for date
       shiftStatus: status,
@@ -224,10 +228,18 @@ const EmployeeAvailability = ({
       userIds: userIds, // Use the current state to ensure latest values
     };
 
+    // Debug logging
+    console.log('Form data before validation:', {
+      locationCoordinates: data.locationCoordinates,
+      locationLat: formData.locationLat,
+      locationLng: formData.locationLng
+    });
+
     if (formData.locationLat === 0 && formData.locationLng === 0) {
+      console.log('Location validation failed - coordinates are 0,0');
       Swal.fire({
-        icon: "error",
-        title: "Invalid Location",
+        icon: "info",
+        title: "Select a Specific Location",
         text: "Please select a valid location on the map.",
       });
       return;
@@ -266,8 +278,9 @@ const EmployeeAvailability = ({
       return;
     }
 
+    userIds[0] = userId;
     // Update local state
-    const newUserIds = [...userIds, userId];
+    const newUserIds = userIds;
     setUserIds(newUserIds);
 
     // Update React Hook Form field with the new array

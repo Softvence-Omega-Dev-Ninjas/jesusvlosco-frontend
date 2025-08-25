@@ -317,8 +317,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-30 p">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
           <nav className="flex-grow mt-6 pb-4 overflow-y-auto">
-            <div className="text-4xl font-bold text-[#4E53B1] ml-6 mb-7">Logo</div>
-            <div className="px-3 space-y-1">{navigation.map(renderNavigationItem)}</div>
+            <div className="text-4xl font-bold text-[#4E53B1] ml-6 mb-7">
+              Logo
+            </div>
+            <div className="px-3 space-y-1">
+              {navigation.map(renderNavigationItem)}
+            </div>
           </nav>
 
           <div className="flex-shrink-0 px-3 pb-4 border-t border-gray-200 pt-4">

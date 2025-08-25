@@ -1,13 +1,95 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { toast } from "sonner";
+import { useSendUpdateLocationMutation } from "@/store/api/clockInOut/clockinoutapi";
+import { getCurrentLocationWithGoogleMaps, formatLocationForAPI } from "@/utils/googleMapsLocation";
 import { AlarmIcon } from "./icons";
 import { Shift } from "./types";
+import Swal from "sweetalert2";
 
 interface CurrentShiftCardProps {
   shift: Shift;
   team: any[]; 
 }
 
+
+
 const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
+  const [isClockingIn, setIsClockingIn] = useState(false);
+  const [sendUpdateLocation] = useSendUpdateLocationMutation();
+
+  console.log(shift, "Shift Information")
+  const getCurrentLocationAndClockIn = async () => {
+    setIsClockingIn(true);
+
+    try {
+      // Get current location using Google Maps API for better accuracy
+      const locationResult = await getCurrentLocationWithGoogleMaps();
+      
+      // Format location data for API
+      const formattedLocation = formatLocationForAPI(locationResult);
+      
+      console.log('📍 Accurate location obtained via Google Maps:', formattedLocation);
+      
+      // Send location update to backend with enhanced data
+      const response = await sendUpdateLocation({
+        lat: formattedLocation.latitude,
+        lng: formattedLocation.longitude,
+        action: 'CLOCK_IN',
+      }).unwrap();
+
+      
+      console.log('📡 Clock-in location updated successfully:', response);
+      toast.success(`Clocked in successfully! 📍 ${formattedLocation.address}`);
+      
+    } catch (error: any) {
+      console.error('❌ Location error:', error);
+        Swal.fire({
+          title: 'Clock-In Failed',
+          text: error.data.message || 'Unable to clock in. Please try again.',
+          icon: 'error',
+          timer: 2000,
+        })
+   
+      
+    } finally {
+      setIsClockingIn(false);
+    }
+  };
+
+  const handleClockIn = () => {
+    getCurrentLocationAndClockIn();
+  };
+
+  const handleClockOut = async () => {
+    try{
+      const locationResult = await getCurrentLocationWithGoogleMaps();
+      
+      // Format location data for API
+      const formattedLocation = formatLocationForAPI(locationResult);
+      
+      console.log('📍 Accurate location obtained via Google Maps:', formattedLocation);
+      
+      // Send location update to backend with enhanced data
+      const response = await sendUpdateLocation({
+        lat: formattedLocation.latitude,
+        lng: formattedLocation.longitude,
+        action: 'CLOCK_OUT',
+      }).unwrap();
+      console.log('📡 Clock-out location updated successfully:', response);
+      toast.success(`Clocked out successfully! 📍 ${formattedLocation.address}`);
+    } catch (error: any) {
+      console.error('❌ Clock-out error:', error);
+      Swal.fire({
+        title: 'Clock-Out Failed',
+        text: error.data.message || 'Unable to clock out. Please try again.',
+        icon: 'error',
+        timer: 2000,
+      });
+    }
+    // Clock out logic without location update
+
+  };
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
       <div className="flex items-center justify-between mb-5">
@@ -41,6 +123,22 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
               )} alt="Default Profile" />
             </div>
           ))}
+        </div>
+        <div className="flex items-center justify-center space-x-5 py-5">
+          <button 
+            onClick={handleClockIn}
+            disabled={isClockingIn || shift.startTime ==="No shift"}
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold ${shift.startTime ==="No shift" ? "disabled:cursor-not-allowed disabled opacity-50" : ""}`}
+          >
+            {isClockingIn ? 'Clocking In...' : 'Clock In'}
+          </button>
+          <button 
+            onClick={handleClockOut}
+            disabled={shift.startTime ==="No shift"}
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold ${shift.startTime ==="No shift" ? "disabled:cursor-not-allowed disabled opacity-50" : ""}`}
+          >
+            Clock Out
+          </button>
         </div>
       </div>
     </div>

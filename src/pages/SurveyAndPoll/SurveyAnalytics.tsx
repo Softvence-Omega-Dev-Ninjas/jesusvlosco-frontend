@@ -28,9 +28,9 @@ const SurveyAnalytics = () => {
                   <h4 className="text-xl text-primary font-semibold">{stat?.title}</h4>
                   <p className="text-base  my-2 text-primary">{stat?.description}</p>
                 </div>
-                <CircularProgress percentage={stat?.responsePercentage} />
+                <CircularProgress percentage={Math.round(stat?.responsePercentage || 0)} />
                 <div className="text-center mt-4 text-[#949494]">
-                  <p className="  mt-2">Response Rate: {stat?.responsePercentage}%</p>
+                  <p className="  mt-2">Response Rate: {Math.round(stat?.responsePercentage || 0)}%</p>
                   <p className=" ">
                     ({stat?.respondedCount} of {stat?.totalAssigned} responded)
                   </p>
