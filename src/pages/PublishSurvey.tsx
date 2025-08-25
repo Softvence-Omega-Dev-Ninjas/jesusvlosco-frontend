@@ -1,5 +1,3 @@
-"use client";
-
 import { AssignByStep } from "@/components/Servey/assign-by-step";
 import { mockUsers, surveySteps } from "@/components/Servey/data/survey-data";
 import { useSurveyState } from "@/components/Servey/hooks/use-survey-state";

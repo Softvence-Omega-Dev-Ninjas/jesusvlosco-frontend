@@ -1,5 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "../../baseApi";
+interface SurveyQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
 
+interface SurveyMetadata {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+interface SurveyResponse {
+  success: boolean;
+  message: string;
+  data: any[];
+  metadata: SurveyMetadata;
+}
 const createSurveyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // POST - Create project
@@ -21,8 +40,25 @@ const createSurveyApi = baseApi.injectEndpoints({
     }),
 
     //  Get all surveys
-    getAllSurveys: builder.query({
-      query: () => "/admin/survey/get-all",
+    getAllSurveys: builder.query<SurveyResponse, SurveyQueryParams | void>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+
+        if (params?.page) {
+          searchParams.append("page", params.page.toString());
+        }
+        if (params?.limit) {
+          searchParams.append("limit", params.limit.toString());
+        }
+        if (params?.search) {
+          searchParams.append("search", params.search);
+        }
+
+        const queryString = searchParams.toString();
+
+        console.log("Query String", queryString);
+        return `/admin/survey/get-all${queryString ? `?${queryString}` : ""}`;
+      },
       providesTags: ["survey"],
     }),
 
@@ -50,6 +86,13 @@ const createSurveyApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["survey"],
     }),
+
+    //Get survey analytics
+    //  Get all surveys
+    getSurveyAnalytics: builder.query({
+      query: () => "/admin/survey-response/responses/analytics",
+      providesTags: ["survey"],
+    }),
   }),
 });
 
@@ -60,4 +103,5 @@ export const {
   useGetSurveyByIdQuery,
   useUpdateSurveyMutation,
   useDeleteSurveyMutation,
+  useGetSurveyAnalyticsQuery,
 } = createSurveyApi;
