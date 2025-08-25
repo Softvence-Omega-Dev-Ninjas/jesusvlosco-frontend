@@ -4,7 +4,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
     // baseUrl: "http://localhost:5005/js",
-    baseUrl: "https://api.lgcglobalcontractingltd.com/js",
+    baseUrl: "https://lgcglobalcontractingltd.com/js",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.user?.accessToken || "";
       // console.log({ token });
@@ -33,6 +33,7 @@ export const baseApi = createApi({
     "TIME_CLOCK",
     "Like",
     "TASK",
+    "CLOCK_IN_OUT"
   ],
   endpoints: () => ({}),
 });

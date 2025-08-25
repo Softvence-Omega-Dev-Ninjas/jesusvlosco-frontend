@@ -14,8 +14,9 @@ import { CompanyUpdate, Shift, Task } from "@/components/UserDashoboard/types";
 
 import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
 // import { useGetUserInformationQuery } from "@/store/api/user/userinformation/userInfoApi";
-import { toLocalTimeString } from "@/utils/timeUtils";
+// import { toLocalTimeString } from "@/utils/timeUtils";
 import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { formatTimeFromISO } from "@/utils/formatDateToMDY";
 
 // API Shift Data Interface based on your actual response
 interface ApiShiftData {
@@ -81,12 +82,12 @@ const UserDashboard: React.FC = () => {
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
     ? {
-        startTime: toLocalTimeString(currentApiShift.startTime),
-        endTime: toLocalTimeString(currentApiShift.endTime),
-        date: new Date(currentApiShift.date).toLocaleDateString(undefined, { 
-          weekday: "long", 
-          month: "long", 
-          day: "numeric" 
+        startTime: formatTimeFromISO(currentApiShift.startTime), // Convert ISO string to local time
+        endTime: formatTimeFromISO(currentApiShift.endTime),
+        date: new Date(currentApiShift.date).toLocaleDateString(undefined, {
+          weekday: "long",
+          month: "long",
+          day: "numeric"
         }),
         location: currentApiShift.location || "",
         team: [], // Team data might need to be fetched separately or processed differently

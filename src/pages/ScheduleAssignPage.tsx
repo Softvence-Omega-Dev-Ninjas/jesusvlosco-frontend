@@ -24,11 +24,13 @@ interface ProjectFormData {
 const ScheduleAssignPage: React.FC = () => {
     const projects = useGetAllProjectsQuery({});
     const [createProject] = useCreateProjectMutation();
-    const teams = useGetAllTeamDataQuery({limit: 20});
-    const users = useGetAllUserQuery({limit: 1000});
-    const managers = users.data?.data
+    const teams = useGetAllTeamDataQuery({limit: 5});
+  const users = useGetAllUserQuery({limit: 1000});
+  // Ensure managers is always an array to avoid calling .map on undefined
+  const managers = users.data?.data || []
    
     const allTeams = teams.data?.data?.teams || [];
+    console.log(allTeams, "Teams");
   
     const allProjects = (projects as any).data?.data?.projects || [];
 
