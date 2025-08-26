@@ -8,7 +8,7 @@ import { SummaryStep } from "@/components/Servey/summary-step";
 import type React from "react";
 
 export const PublishSurvey: React.FC = () => {
-  const { currentStep, setCurrentStep, settings, handleNext, handleCancel, handleAssignByChange, handleUserSelectionChange, handleSettingsChange } =
+  const { currentStep, setCurrentStep, settings, handleNext, handleAssignByChange, handleUserSelectionChange, handleSettingsChange } =
     useSurveyState();
 
   const renderCurrentStep = () => {
@@ -53,13 +53,13 @@ export const PublishSurvey: React.FC = () => {
 
         {currentStep < 3 && (
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-4">
-            <button
+            {/* <button
               onClick={handleCancel}
               disabled={currentStep === 0}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
-            </button>
+            </button> */}
             <button onClick={handleNext} className="bg-[#4E53B1] text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-0">
               Next
             </button>
