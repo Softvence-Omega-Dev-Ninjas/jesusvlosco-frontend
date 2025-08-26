@@ -24,7 +24,7 @@ export const baseApi = createApi({
     "BADGE",
     "RECOGNATION",
     "ShiftScheduling",
-    "Team",
+    "TEAM",
     "COMMENT",
     "PRIVATE_CHAT",
     "TEAM_CHAT",
