@@ -126,7 +126,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({ settings }) => {
 
       <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
         <button
-          // onClick={onConfirm}
+          onClick={() => navigate("/admin/survey-poll")}
           className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors order-1 sm:order-2"
         >
           Cancel
