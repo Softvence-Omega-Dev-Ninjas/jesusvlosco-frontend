@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  HiOutlineChevronDown,
   HiOutlineBell,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
@@ -63,7 +62,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
   console.log("Project Information:", projectInformation);
   // Note: We're fetching shift data directly from API instead of using props
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+  // const [isTemplateOpen, setIsTemplateOpen] = useState(false);
   const getShifts = useGetAllShiftsQuery({});
   const users = projectInformation?.projectUsers || [];
   const userList = users?.filter((user: TProjectUser) => user.user?.role != "ADMIN") || [];
@@ -230,7 +229,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
 
   return (
     <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm overflow-x-auto">
-      {isTemplateOpen && (
+      {/* {isTemplateOpen && (
         <div className="fixed top-0 right-0 h-full w-full sm:w-[320px] bg-white shadow-xl z-50 transition-transform border-l flex flex-col rounded-none sm:rounded-lg">
           <div className="flex items-center justify-between p-4">
             <h2 className="text-lg font-semibold text-gray-700">Shifts</h2>
@@ -269,7 +268,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       <h1 className="text-[rgba(78,83,177,1)] mb-2 text-lg font-bold">
         Weekly Schedule
@@ -277,7 +276,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
 
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3 min-w-[450px]">
         <div className="flex items-center gap-2 flex-wrap">
-          <button className="flex items-center justify-center border-indigo-300 text-[rgba(78,83,177,1)] px-2 font-bold py-1.5 rounded-full">
+          {/* <button className="flex items-center justify-center border-indigo-300 text-[rgba(78,83,177,1)] px-2 font-bold py-1.5 rounded-full">
             <img
               className="rounded-full border  px-2 font-bold py-1  mt-1"
               src="../src/assets/filter.png"
@@ -286,7 +285,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
           </button>
           <button className="flex items-center gap-1 text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50">
             Week <HiOutlineChevronDown className="w-4 h-4" />
-          </button>
+          </button> */}
 
           <div className="flex items-center gap-1 bg-white border border-indigo-300 rounded-full px-1">
             <button
@@ -306,7 +305,7 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
             </button>
           </div>
 
-          {!isTemplateOpen && (
+          {/* {!isTemplateOpen && (
             <div
               onClick={() => setIsTemplateOpen(true)}
               className="fixed top-120 right-0 h-34 w-4 sm:w-6 md:w-8 lg:w-8 bg-[rgba(78,83,177,1)] text-white text-[20px] font-semibold flex items-center justify-center cursor-pointer rounded-l-md z-50"
@@ -315,17 +314,17 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
                 Templates
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button className="text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50 flex items-center gap-1">
-            Actions <HiOutlineChevronUp className="w-4 h-4 " />
+          <button className="hidden text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50  items-center gap-1">
+            Actions <HiOutlineChevronUp className="w-4 h-4" />
           </button>
-          <button className="text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50 flex items-center gap-1">
+          <button className="hidden text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50  items-center gap-1">
             Add <HiOutlineChevronUp className="w-4 h-4" />
           </button>
-          <button className="text-sm bg-[rgba(78,83,177,1)] text-white px-4 py-1.5 rounded-full flex items-center gap-1 hover:bg-indigo-800">
+          <button className="hidden text-sm bg-[rgba(78,83,177,1)] text-white px-4 py-1.5 rounded-full  items-center gap-1 hover:bg-indigo-800">
             Publish <HiOutlineBell className="w-4 h-4" />
           </button>
         </div>

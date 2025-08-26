@@ -72,6 +72,7 @@ import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
 import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 import SurveyStatisticsPage from "@/pages/SurveyAndPoll/SurveyStatisticsPage";
 import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
+import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -270,7 +271,10 @@ const routes = createBrowserRouter([
         ],
       },
 
-      {},
+      {
+        path: "manage-teams",
+        element: <ManageTeams />,
+      },
       {
         path: "add-user",
         element: <AddUserProfile></AddUserProfile>,

@@ -2,12 +2,12 @@ import { useState } from "react";
 import { BsStopwatch } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { Tab } from "@headlessui/react";
-import { RiDeleteBin6Line } from "react-icons/ri";
+// import { RiDeleteBin6Line } from "react-icons/ri";
 import ShiftTemplateDropdown from "./ShiftTemplateDropdown";
 import EmployeeCardPopup from "./EmployeeCardPopup";
 import GoogleMapsLocationPicker from "./GoogleMapsLocationPicker";
 // import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 
 import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
@@ -61,13 +61,7 @@ interface ShiftAPIData {
   saveAsTemplate: boolean;
 }
 
-const tasksList = [
-  "Metro Shopping Center",
-  "City Bridge Renovations",
-  "Golden Hills Estates",
-  "Riverside Apartments",
-  "The Commerce Hub",
-];
+
 
 const activityLog = [
   {
@@ -123,9 +117,7 @@ const EmployeeAvailability = ({
   projectInformation: TProject;
 }) => {
   const currentProjectId = useParams().id;
-  // TODO
-  // const [getTask, setToGetTask] = useState<string | null>(null);
-  // const getTasks = useGetTasksQuery(g);
+  
   const projectUsers = projectInformation?.projectUsers || [];
   const userList =
     projectUsers?.filter((user: TProjectUser) => user.user?.role != "ADMIN") ||
@@ -133,14 +125,15 @@ const EmployeeAvailability = ({
   console.log(projectUsers);
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [checkedTasks, setCheckedTasks] = useState<string[]>([
-    "e8b962e7-467f-46f2-a9e6-c927adadba32",
-  ]);
-  const [newTask, setNewTask] = useState("");
-  const [showInput, setShowInput] = useState(false);
+  const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
+  // const [newTask, setNewTask] = useState("");
+  // const [showInput, setShowInput] = useState(false);
+  const navigate = useNavigate();
   const [userIds, setUserIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [createShift] = useCreateShiftMutation();
+
+  // TODO
 
   // React Hook Form setup
   const { control, handleSubmit, setValue, getValues, reset } =
@@ -188,13 +181,13 @@ const EmployeeAvailability = ({
     });
   };
 
-  const handleAddTask = () => {
-    if (newTask) {
-      tasksList.push(newTask);
-      setNewTask("");
-      setShowInput(false);
-    }
-  };
+  // const handleAddTask = () => {
+  //   if (newTask) {
+  //     tasksList.push(newTask);
+  //     setNewTask("");
+  //     setShowInput(false);
+  //   }
+  // };
 
   // Form submission handlers
   const onSubmit = (
@@ -258,10 +251,10 @@ const EmployeeAvailability = ({
     setUserIds([]); // Clear userIds after submission
   };
 
-  const handleSaveDraft = () => {
-    const formData = getValues();
-    onSubmit(formData, "DRAFT");
-  };
+  // const handleSaveDraft = () => {
+  //   const formData = getValues();
+  //   onSubmit(formData, "DRAFT");
+  // };
 
   const handlePublish = () => {
     const formData = getValues();
@@ -297,10 +290,10 @@ const EmployeeAvailability = ({
     );
   };
 
-  const handleSaveTemplate = () => {
-    const formData = getValues();
-    onSubmit(formData, "TEMPLATE");
-  };
+  // const handleSaveTemplate = () => {
+  //   const formData = getValues();
+  //   onSubmit(formData, "TEMPLATE");
+  // };
 
   const handleDelete = () => {
     reset();
@@ -565,7 +558,7 @@ const EmployeeAvailability = ({
                               >
                                 Publish
                               </button>
-                              <button
+                              {/* <button
                                 type="button"
                                 className="border border-indigo-300 px-4 py-2 text-[rgba(78,83,177,1)] rounded-lg min-w-max text-sm"
                                 onClick={handleSaveDraft}
@@ -578,13 +571,14 @@ const EmployeeAvailability = ({
                                 onClick={handleSaveTemplate}
                               >
                                 Save as Template
-                              </button>
+                              </button> */}
+
                               <button
                                 type="button"
-                                className="text-red-500 ml-auto text-xl"
+                                className="text-red-500 border border-gray-300 px-4 py-2 rounded-lg ml-auto font-semibold"
                                 onClick={handleDelete}
                               >
-                                <RiDeleteBin6Line />
+                                Cancel
                               </button>
                             </div>
                           </div>
@@ -593,63 +587,54 @@ const EmployeeAvailability = ({
 
                       <Tab.Panel>
                         <ul className="text-sm mt-6 space-y-2">
-                          {tasksList.map((task, index) => (
+                          {projectInformation?.tasks?.map((task, index) => (
                             <li
                               key={index}
                               className="flex items-center mt-6 justify-between"
                             >
                               <label className="flex items-center gap-2">
+                               
                                 <input
                                   type="checkbox"
-                                  checked={checkedTasks.includes(task)}
-                                  onChange={() => toggleTask(task)}
+                                  checked={checkedTasks.includes(task.id)}
+                                  onChange={() => toggleTask(task.id)}
                                   className="accent-green-600"
                                 />
-                                <span
-                                  className={
-                                    checkedTasks.includes(task)
-                                      ? "line-through"
-                                      : ""
-                                  }
-                                >
-                                  {task}
-                                </span>
-                              </label>
-                              <img
-                                src={`https://i.pravatar.cc/30?img=${
-                                  index + 1
-                                }`}
+                                 <img
+                                src={task.attachment? task.attachment : `https://i.pravatar.cc/30?img=${index + 1}`}
                                 className="w-8 h-8 rounded-full object-cover"
                                 alt="profile"
                               />
+                                <span
+                                  className={
+                                   (checkedTasks.includes(task.id) || String(task.status).toUpperCase() === "DONE")
+                                      ? "line-through text-base"
+                                      : "text-base font-semibold"
+                                  }
+                                >
+                                  {task.title}
+                                </span>
+                          
+                              </label>
+                              <div className="space-x-3">
+                                 <span className={`${task.status === "DONE" ? "text-green-500" : "text-yellow-500"} text-xs border border-gray-300 rounded-full p-1`}>
+                                  {task.status}
+                                </span>
+                                <span className={`${task.labels === "HIGH" ? "bg-red-500" : "bg-green-500"} text-white font-semibold text-xs border border-gray-300 rounded-full p-1`}>
+                                  Priority: {task.labels}
+                                </span>
+                              </div>
                             </li>
                           ))}
                         </ul>
 
                         <button
                           className="mb-3 px-3 py-1 text-sm rounded-lg mt-10 border border-gray-300 text-black hover:bg-indigo-200"
-                          onClick={() => setShowInput(true)}
+                          onClick={() => navigate("/admin/tasks-projects")}
                         >
                           Add Task +
                         </button>
 
-                        {showInput && (
-                          <div className="flex gap-2 mt-3">
-                            <input
-                              type="text"
-                              value={newTask}
-                              onChange={(e) => setNewTask(e.target.value)}
-                              placeholder="Enter new task"
-                              className="w-full px-3 py-1 border border-gray-300 rounded-md"
-                            />
-                            <button
-                              onClick={handleAddTask}
-                              className="px-3 py-1 bg-green-500 text-white rounded-md"
-                            >
-                              Add
-                            </button>
-                          </div>
-                        )}
                       </Tab.Panel>
 
                       <Tab.Panel>

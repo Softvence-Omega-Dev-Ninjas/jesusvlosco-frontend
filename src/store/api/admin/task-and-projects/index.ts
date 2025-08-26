@@ -15,13 +15,14 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
           endBefore: end,
         },
       }),
-      providesTags: ["TASK"],
+      providesTags: ["TASK", "ADMIN_USER"],
     }),
     getSingleTask: builder.query({
       query: (id) => ({
         url: `/admin/task/${id}`,
         method: "GET",
       }),
+      providesTags: ["TASK"],
     }),
     getUserTaskDetails: builder.query({
       query: (id) => ({
@@ -51,7 +52,7 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["TASK"],
+      invalidatesTags: ["TASK", "PROJECT", "ADMIN_USER"],
     }),
 
     submitTask: builder.mutation({
@@ -60,7 +61,7 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: formData,
       }),
-      invalidatesTags: ["TASK"],
+      invalidatesTags: ["TASK", "PROJECT", "ADMIN_USER"],
     }),
 
     getProjectDetails: builder.query({
