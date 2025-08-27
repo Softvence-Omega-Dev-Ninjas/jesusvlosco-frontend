@@ -17,6 +17,8 @@ import FilterColumnModal from "@/components/Admin/FilterColumnModal";
 import { Link } from "react-router-dom";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import Pagination from "@/utils/Pagination";
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
 
 // --- START: New definitions for Filter Options ---
 
@@ -187,6 +189,7 @@ const initialUsers: User[] = [
 
 const Admin: React.FC = () => {
   const [users] = useState<User[]>(initialUsers);
+   const user = useSelector((state: RootState) => state.user.user);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -425,6 +428,7 @@ const Admin: React.FC = () => {
         isAnyModalOpen={isAnyModalOpen}
         toggleFilterColumnModal={toggleFilterColumnModal}
         filterColumnButtonRef={filterColumnButtonRef}
+        currentUserRole={user?.role}
       />
 
       {!isLoading && allUsers?.length !== 0 && (

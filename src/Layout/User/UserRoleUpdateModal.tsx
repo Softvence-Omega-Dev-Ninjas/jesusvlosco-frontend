@@ -53,6 +53,7 @@ export default function UpdateRoleModal({
               <SelectContent className="bg-white">
                 <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
               </SelectContent>
             </Select>
           </div>
