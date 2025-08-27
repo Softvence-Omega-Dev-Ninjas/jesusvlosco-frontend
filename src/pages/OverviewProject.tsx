@@ -348,15 +348,17 @@ const OverviewProject = () => {
                             <div className="space-y-1">
                               <div className="text-sm font-medium text-gray-500 space-y-2">
                                {
-                                employee.user.shift.length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
-                                  <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
-                                    <div className="text-xs text-gray-500">
-                                      {shift.shiftTitle}
+                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
+                                  shift.projectId === projectId ? (
+                                    <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
+                                      <div className="text-xs text-gray-500">
+                                        {shift.shiftTitle}
+                                      </div>
+                                      <div>
+                                        ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
+                                      </div>
                                     </div>
-                                    <div>
-                                      ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
-                                    </div>
-                                  </div>
+                                  ) : " "
                                 ))
                                }
                               </div>
@@ -367,7 +369,7 @@ const OverviewProject = () => {
                           <div>
                             <div className="text-sm text-gray-700 space-y-3">
                               {
-                                employee.user.shift.length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
+                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
                                   <div key={shift.id} className="space-y-1">
                                     {parseISODate(shift.date)?.toLocaleDateString()}
                                   </div>

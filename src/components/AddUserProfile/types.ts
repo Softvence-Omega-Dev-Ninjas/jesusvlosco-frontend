@@ -2,6 +2,8 @@ export interface FormData {
   firstName: string;
   lastName: string;
   phone: string;
+  countryCode: string;
+  dialCode: string;
   email: string;
   gender: string;
   employeeID: string;
@@ -49,5 +51,5 @@ export interface Tab {
   label: string;
 }
 
-export type TRole =  "ADMIN" |  "EMPLOYEE" ;
+export type TRole =  "ADMIN" |  "EMPLOYEE" | "MANAGER" | "SUPER_ADMIN";
 // export type TRole = "SUPER_ADMIN" | "ADMIN" | "USER" | "EMPLOYEE" | "MANAGER";

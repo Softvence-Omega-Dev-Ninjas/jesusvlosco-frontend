@@ -1,6 +1,18 @@
 import { ChevronDown, Edit } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormData } from "./types";
+import { customList } from "country-codes-list";
+
+// Generate array of all country codes
+const countryCodes = Object.values(
+  customList(
+    "countryCode",
+    "{countryCode} | {countryNameEn} | +{countryCallingCode}"
+  )
+).map((item: string) => {
+  const [code, name, dialCode] = item.split(" | ");
+  return { code, name, dialCode: dialCode.replace("+", "") }; // Remove + sign
+});
 
 interface PersonalInfoFormProps {
   formData: FormData;
@@ -39,6 +51,14 @@ const PersonalInfoForm = ({
   const [departmentOpen, setDepartmentOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
+
+  // Update dial code when country code changes
+  useEffect(() => {
+    const selectedCountry = countryCodes.find((c) => c.code === formData.countryCode);
+    if (selectedCountry && selectedCountry.dialCode !== formData.dialCode) {
+      handleInputChange("dialCode", selectedCountry.dialCode);
+    }
+  }, [formData.countryCode, formData.dialCode, handleInputChange]);
 
 
   return (
@@ -82,18 +102,36 @@ const PersonalInfoForm = ({
           />
         </div>
 
-        {/* Phone Number */}
+        {/* Phone Number with Country Code */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Phone number
           </label>
-          <input
-            type="tel"
-            placeholder="Enter phone number here"
-            value={formData.phone}
-            onChange={(e) => handleInputChange("phone", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
+          <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
+            <select
+              className="bg-white outline-none pl-3 pr-1 py-2 min-w-fit border-r border-gray-300"
+              value={formData.countryCode}
+              onChange={(e) => handleInputChange("countryCode", e.target.value)}
+            >
+              {countryCodes.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.code}
+                </option>
+              ))}
+            </select>
+
+            <span className="text-gray-500 px-2 whitespace-nowrap">
+              {formData.dialCode}
+            </span>
+
+            <input
+              type="tel"
+              className="flex-1 min-w-0 outline-none py-2 pr-3"
+              placeholder="e.g., 4454545"
+              value={formData.phone}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Email ID */}

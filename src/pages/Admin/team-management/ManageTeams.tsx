@@ -35,7 +35,7 @@ const ManageTeams = () => {
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     // Pagination
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 8;
 
     const navigate = useNavigate();
     // console.log(teamsResponse, "Teams Response");
