@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
 
 interface UpdateRoleModalProps {
   open: boolean;
@@ -33,6 +35,9 @@ export default function UpdateRoleModal({
   onConfirm,
   name,
 }: UpdateRoleModalProps) {
+ const user = useSelector((state: RootState) => state.user.user);
+ 
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md bg-white border-0">
@@ -53,7 +58,11 @@ export default function UpdateRoleModal({
               <SelectContent className="bg-white">
                 <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                {
+                  user?.role === "SUPER_ADMIN" && (
+                    <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                  )
+                }
               </SelectContent>
             </Select>
           </div>
