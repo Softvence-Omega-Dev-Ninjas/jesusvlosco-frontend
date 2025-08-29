@@ -16,7 +16,7 @@ import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
 // import { useGetUserInformationQuery } from "@/store/api/user/userinformation/userInfoApi";
 // import { toLocalTimeString } from "@/utils/timeUtils";
 import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
-import { formatTimeFromISO } from "@/utils/formatDateToMDY";
+import { formatTimeFromISO, formatDateWithWeekday } from "@/utils/formatDateToMDY";
 
 // API Shift Data Interface based on your actual response
 interface ApiShiftData {
@@ -77,18 +77,14 @@ const UserDashboard: React.FC = () => {
   //   : undefined;
 
   // Use the latest shift from today, or fallback to shiftData from clock API
-  const currentApiShift = shiftData || shiftData;
+  const currentApiShift = shiftData;
 
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
     ? {
         startTime: formatTimeFromISO(currentApiShift.startTime), // Convert ISO string to local time
         endTime: formatTimeFromISO(currentApiShift.endTime),
-        date: new Date(currentApiShift.date).toLocaleDateString(undefined, {
-          weekday: "long",
-          month: "long",
-          day: "numeric"
-        }),
+        date: formatDateWithWeekday(currentApiShift.date),
         location: currentApiShift.location || "",
         team: [], // Team data might need to be fetched separately or processed differently
       }

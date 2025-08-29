@@ -14,7 +14,7 @@ const ShiftScheduler: FC = () => {
   return (
     <div className="flex flex-col gap-5 items-start lg:flex-row w-full h-full">
       <EmployeeAvailability projectInformation={projectData} />
-      <WeeklyScheduleGrid projectInformation={projectData} />
+      <WeeklyScheduleGrid />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
 import AddUnavailabilityModal from "@/components/ShiftScheduling/AddUnavailabilityModal";
 import VisibilityToggle from "@/components/ShiftScheduling/VisibilityToggle";
 import { useParams } from "react-router-dom";
+import { formatTimeFromISO, formatWeekdayShort, formatDateShort } from "@/utils/formatDateToMDY";
 // import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { useGetUserProjectDetailsQuery } from "@/store/api/user/project/projectApi";
 
@@ -125,20 +126,19 @@ export default function UserShiftScheduling() {
     const week = [];
     const start = new Date(startDate);
     start.setDate(start.getDate() - start.getDay() + 1); // Start from Monday
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
+
       week.push({
-        short: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        date: `${date.getMonth() + 1}/${date.getDate()}`,
+        short: formatWeekdayShort(date.toISOString()),
+        date: formatDateShort(date.toISOString()),
         fullDate: date.toISOString().split('T')[0]
       });
     }
     return week;
-  };
-
-  const days = generateWeekDates(currentWeekStart);
+  };  const days = generateWeekDates(currentWeekStart);
 
   // Transform users data to employee format
   const employees: Employee[] = users.map((userProject: UserProject) => ({
@@ -185,16 +185,8 @@ export default function UserShiftScheduling() {
     });
 
     if (shift) {
-      const startTime = new Date(shift.startTime).toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true 
-      });
-      const endTime = new Date(shift.endTime).toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true 
-      });
+      const startTime = formatTimeFromISO(shift.startTime);
+      const endTime = formatTimeFromISO(shift.endTime);
 
       return {
         id: shift.id,
