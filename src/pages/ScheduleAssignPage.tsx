@@ -26,6 +26,7 @@ const ScheduleAssignPage: React.FC = () => {
     const [createProject] = useCreateProjectMutation();
     const teams = useGetAllTeamDataQuery({limit: 50});
   const users = useGetAllUserQuery({limit: 1000});
+  
   // Ensure managers is always an array to avoid calling .map on undefined
   const managers = users.data?.data || []
    
@@ -110,7 +111,7 @@ const ScheduleAssignPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProjects.length ? (
             filteredProjects.map((project: TProject) => (
               <ProjectCard

@@ -17,14 +17,27 @@ const projectApi = baseApi.injectEndpoints({
     }),
 
     getUserProjectDetails: build.query({
-    query: (id) => ({
-      url: `/employee/dashboard/assigned-users/${id}`,
-      method: "GET",
+      query: (id) => ({
+        url: `/employee/dashboard/assigned-users/${id}`,
+        method: "GET",
+      }),
+    }),
+    updateProjectUser: build.mutation({
+      query: (data) => ({
+        url: `/admin/project/${data.id}/assign-employees`,
+        method: "PATCH",
+        body:{
+          employees: data.employees
+        },
+      }),
+      invalidatesTags: ["PROJECT", "ShiftScheduling", "SCHEDULING_USER"],
     }),
   }),
-  }),
-
- 
 });
 
-export const { useGetAllProjectUserQuery, useGetMyProjectsQuery, useGetUserProjectDetailsQuery } = projectApi;
+export const {
+  useGetAllProjectUserQuery,
+  useGetMyProjectsQuery,
+  useGetUserProjectDetailsQuery,
+  useUpdateProjectUserMutation,
+} = projectApi;
