@@ -9,7 +9,8 @@ const clockinoutapi = baseApi.injectEndpoints({
         body: {
           "lat": location.lat,
           "lng": location.lng,
-          "action": location.action
+          "action": location.action,
+          "date": new Date().toISOString()
         },
       }),
       invalidatesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
@@ -17,7 +18,7 @@ const clockinoutapi = baseApi.injectEndpoints({
 
     getClockInOut: build.query({
       query: () => ({
-        url: "/employee/time-clock/shift/current-clock",
+        url: `/employee/time-clock/shift/current-clock?date=${new Date().toISOString()}`,
         method: "GET",
       }),
       providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],

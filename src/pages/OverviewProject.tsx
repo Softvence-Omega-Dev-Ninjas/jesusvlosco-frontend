@@ -10,6 +10,7 @@ import {
   Tally1,
   LoaderCircle,
 } from "lucide-react";
+import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
 
 // Imported local image assets
 import user1 from "../assets/user1.png";
@@ -29,7 +30,6 @@ import {
   useGetAllTimeOffRequestsQuery,
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
-import { formatTimeFromISO, parseISODate } from "@/utils/formatDateToMDY";
 
 const OverviewProject = () => {
   const projectId = useParams().id;
@@ -57,11 +57,7 @@ const OverviewProject = () => {
         req.user?.profile?.profileUrl ||
         `https://i.pravatar.cc/40?img=${Math.random()}`,
       type: req.reason,
-      date: new Date(req.startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
+      date: formatDateFull(req.startDate),
       status: req.status?.toLowerCase(),
     })) || [];
 
@@ -371,7 +367,7 @@ const OverviewProject = () => {
                               {
                                 employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
                                   <div key={shift.id} className="space-y-1">
-                                    {parseISODate(shift.date)?.toLocaleDateString()}
+                                    {formatDateFull(shift.date)}
                                   </div>
                                 ))
                               }

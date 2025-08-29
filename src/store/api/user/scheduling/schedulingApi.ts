@@ -31,6 +31,21 @@ const schedulingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TIME_CLOCK", 'CLOCK_IN_OUT', 'SCHEDULING_USER'],
     }),
+    getProjectUsersWithShift: build.query({
+      query: (id) => ({
+        url: `/shift/assigned-users/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["TIME_CLOCK", 'CLOCK_IN_OUT', 'SCHEDULING_USER'],
+    }),
+
+    deleteShift: build.mutation({
+      query: (id) => ({
+        url: `/shift/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TIME_CLOCK", 'CLOCK_IN_OUT', 'SCHEDULING_USER', 'PROJECT'],
+    }),
   }),
 });
 
@@ -39,4 +54,6 @@ export const {
   useCreateSchedulingRequestMutation,
   useDeleteSchedulingRequestMutation,
   useCurrentShiftQuery,
+  useGetProjectUsersWithShiftQuery,
+  useDeleteShiftMutation
 } = schedulingApi;

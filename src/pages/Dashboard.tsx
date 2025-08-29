@@ -8,6 +8,7 @@ import {
 import { LoaderCircle } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
 import { Chat } from "../components/Dashboard/Chat";
 import { Achievement } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
@@ -56,22 +57,10 @@ const employees = React.useMemo(() => {
         user.shift && user.shift.length > 0 && user.shift[0].startTime;
       const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
 
-      const startFormatted = new Date(start)
-        .toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .toLowerCase();
-      const endFormatted = new Date(end)
-        .toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .toLowerCase();
+      const startFormatted = start ? formatTimeFromISO(start).toLowerCase() : "";
+      const endFormatted = end ? formatTimeFromISO(end).toLowerCase() : "";
 
-      const time = `${startFormatted}-${endFormatted}`;
+      const time = startFormatted && endFormatted ? `${startFormatted}-${endFormatted}` : "";
       return {
         id: user.id,
         name,
@@ -98,14 +87,9 @@ const employees = React.useMemo(() => {
     timeOffRequestsData?.data?.map((req: any) => ({
       id: req.id,
       name: req.user?.profile?.firstName || "Unknown User", // or backend name field
-      avatar:
-        req.user?.profile?.profileUrl,
+      avatar: req.user?.profile?.profileUrl,
       type: req.reason,
-      date: new Date(req.startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
+      date: formatDateFull(req.startDate),
       status: req.status?.toLowerCase(),
       userId: req.userId,
     })) || [];
