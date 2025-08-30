@@ -7,7 +7,8 @@ import {
 import AddUnavailabilityModal from "@/components/ShiftScheduling/AddUnavailabilityModal";
 import VisibilityToggle from "@/components/ShiftScheduling/VisibilityToggle";
 import { useParams } from "react-router-dom";
-import { formatTimeFromISO, formatWeekdayShort, formatDateShort } from "@/utils/formatDateToMDY";
+import { formatTimeFromISO } from "@/utils/formatDateToMDY";
+import { generateWeekDatesForUserScheduling } from "@/utils/dateUtils";
 // import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { useGetUserProjectDetailsQuery } from "@/store/api/user/project/projectApi";
 
@@ -65,7 +66,7 @@ export default function UserShiftScheduling() {
   const [showAddUnavailability, setShowAddUnavailability] = useState(false);
   const [showVisibilityToggle, setShowVisibilityToggle] = useState(false);
   const [exportScope, setExportScope] = useState<"everyone" | "only-me">("everyone");
-  const [currentWeekStart] = useState(new Date());
+  // const [currentWeekStart] = useState(new Date());
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   
@@ -122,25 +123,7 @@ export default function UserShiftScheduling() {
   }
 
   // Generate current week dates
-  const generateWeekDates = (startDate: Date) => {
-    const week = [];
-    const start = new Date(startDate);
-    start.setDate(start.getDate() - start.getDay() + 1); // Start from Monday
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-
-      week.push({
-        short: formatWeekdayShort(date.toISOString()),
-        date: formatDateShort(date.toISOString()),
-        fullDate: date.toISOString().split('T')[0]
-      });
-    }
-    return week;
-  };  const days = generateWeekDates(currentWeekStart);
-
-  // Transform users data to employee format
+  const days = generateWeekDatesForUserScheduling();  // Transform users data to employee format
   const employees: Employee[] = users.map((userProject: UserProject) => ({
     id: userProject.user.id.toString(),
     name: `${userProject.user.firstName} ${userProject.user.lastName}`,
@@ -194,6 +177,7 @@ export default function UserShiftScheduling() {
         time: `${startTime} - ${endTime}`,
         location: shift.location,
         title: shift.title,
+        date: shift.date,
         isOffDay: false
       };
     }
@@ -296,7 +280,7 @@ export default function UserShiftScheduling() {
                         className="p-2 sm:p-4 text-center font-medium text-gray-900 min-w-24 sm:min-w-32"
                       >
                         <div className="text-xs sm:text-sm">
-                          {day.short} {day.date}
+                          {day.day} {day.date}
                         </div>
                       </th>
                     ))}
@@ -361,6 +345,11 @@ export default function UserShiftScheduling() {
                                     {shift.isOffDay && (
                                       <div className="text-xs text-red-600 font-medium">
                                         Off Day
+                                      </div>
+                                    )}
+                                    {shift?.date && (
+                                      <div className="text-xs text-gray-500">
+                                        With: {new Date(shift.date).toLocaleDateString()}
                                       </div>
                                     )}
                                   </div>
