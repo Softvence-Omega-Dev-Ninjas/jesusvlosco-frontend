@@ -36,15 +36,14 @@ export const parseISODate = (isoString: string): Date | null => {
 };
 
 export const formatTimeFromISO = (isoString: string): string => {
-  const date = new Date(isoString).toLocaleTimeString()
-  if (!date) return isoString; // Return original if parsing fails
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString; // fallback if invalid
 
-  const [hours, minutes] = date.split(":").map(Number);
-  const ampm = hours >= 12 ? "PM" : "AM";
- 
-  const strHours = hours < 10 ? `0${hours}` : `${hours}`;
-  const strMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  return `${strHours}:${strMinutes} ${ampm}`;
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // <-- ensures 12 hour format
+  });
 };
 
 // Additional utility functions for consistent timezone handling

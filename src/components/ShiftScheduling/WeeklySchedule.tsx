@@ -68,10 +68,10 @@ const WeeklyScheduleGrid = () => {
     isLoading,
     refetch,
   } = useGetProjectUsersWithShiftQuery(projectIdd);
-  console.log(projectInformationNew, "Project Information");
+  // console.log(projectInformationNew, "Project Information");
   const [deleteShift] = useDeleteShiftMutation();
   const thisProjectInformation = projectInformationNew?.data as ProjectUser[];
-  console.log(thisProjectInformation, "Projects Array Information []");
+  // console.log(thisProjectInformation, "Projects Array Information []");
 
   // State management
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -108,16 +108,16 @@ const WeeklyScheduleGrid = () => {
 
   // Extract users and shifts from the new data structure
   const userList = thisProjectInformation || [];
-  const projectUsers = userList.map((item) => item.user);
+  // const projectUsers = userList.map((item) => item.user);
 
-  console.log("📊 New Data Structure:", {
-    totalUsers: userList.length,
-    users: projectUsers.map((u) => ({
-      id: u.id,
-      name: `${u.firstName} ${u.lastName}`,
-    })),
-    projectId: projectId,
-  });
+  // console.log("📊 New Data Structure:", {
+  //   totalUsers: userList.length,
+  //   users: projectUsers.map((u) => ({
+  //     id: u.id,
+  //     name: `${u.firstName} ${u.lastName}`,
+  //   })),
+  //   projectId: projectId,
+  // });
 
   // Utility functions for handling ISO date formats
   const parseISODate = (isoString: string): Date | null => {
@@ -159,7 +159,7 @@ const WeeklyScheduleGrid = () => {
         saveAsTemplate: data.saveAsTemplate,
       };
 
-      console.log("API Data being sent:", apiData);
+      // console.log("API Data being sent:", apiData);
 
       // Validate all required shift data before sending to API
       const validation = validateShiftData(apiData);
@@ -215,17 +215,31 @@ const WeeklyScheduleGrid = () => {
     // Set selected user
     setSelectedUserId(userId);
 
-    // Parse the shift date to get date and time components
+    // Extract shift date & times
     const shiftDate = parseISODate(shift.date);
     const startTime = parseISODate(shift.startTime);
     const endTime = parseISODate(shift.endTime);
 
     if (shiftDate && startTime && endTime) {
-      // Format date to YYYY-MM-DD for the form
-      const formattedDate = shiftDate.toISOString().split("T")[0];
-      // Extract time directly from ISO string to avoid timezone conversion (slice HH:MM from "2025-08-28T08:00:00.000Z")
-      const formattedStartTime = shift.startTime.slice(11, 16); // HH:MM format
-      const formattedEndTime = shift.endTime.slice(11, 16); // HH:MM format
+      // Convert shift date & times into local formats
+      const dateObj = new Date(shift.date);
+      const startObj = new Date(shift.startTime);
+      const endObj = new Date(shift.endTime);
+
+      // Format date as YYYY-MM-DD (local)
+      const formattedDate = dateObj.toLocaleDateString("en-CA"); // gives YYYY-MM-DD reliably
+
+      // Format time as HH:MM (24-hour or 12-hour depending on need)
+      const formattedStartTime = startObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, 
+      });
+      const formattedEndTime = endObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
 
       // Pre-fill form with existing shift data
       setValue("userIds", [userId]);
@@ -255,7 +269,7 @@ const WeeklyScheduleGrid = () => {
 
   // Handler for deleting a shift
   const handleDeleteShift = async (shiftid: string) => {
-    console.log("Delete shift:", shiftid);
+    // console.log("Delete shift:", shiftid);
 
     const result = await Swal.fire({
       title: "Delete Shift?",
@@ -294,7 +308,7 @@ const WeeklyScheduleGrid = () => {
 
   // Updated handleAddShift function to open modal with pre-filled data
   const handleAddShift = (userId: string, date: Date) => {
-    console.log("Add shift for user:", userId, "on date:", date);
+    // console.log("Add shift for user:", userId, "on date:", date);
 
     // Set selected user
     setSelectedUserId(userId);
