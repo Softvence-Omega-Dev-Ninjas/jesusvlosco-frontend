@@ -16,6 +16,7 @@ import {
 } from "@/store/api/user/scheduling/schedulingApi";
 import { useParams } from "react-router-dom";
 import { formatTimeFromISO } from "@/utils/formatDateToMDY";
+import { generateWeekDatesForWeeklySchedule, formatDateRange, goToPreviousWeek, goToNextWeek, isSameDay, convertToISOFormat } from "@/utils/dateUtils";
 import Swal from "sweetalert2";
 import GoogleMapsLocationPicker from "./GoogleMapsLocationPicker";
 import { ShiftAPIData, ShiftFormData } from "@/types/shift";
@@ -126,24 +127,6 @@ const WeeklyScheduleGrid = () => {
     } catch {
       return null;
     }
-  };
-
-  const isSameDay = (date1: Date, date2: Date): boolean => {
-    // Simple date comparison using date strings (YYYY-MM-DD format)
-    const date1Str = date1.toISOString().split("T")[0];
-    const date2Str = date2.toISOString().split("T")[0];
-    return date1Str === date2Str;
-  };
-
-  // Helper function to convert local date and time to UTC ISO format
-  const convertToISOFormat = (date: string, time: string): string => {
-    console.log("Convert to ISO Format:", date, time);
-    // date is in YYYY-MM-DD format, time is in HH:MM format (local)
-    // Create a Date object interpreting date and time as UTC
-    const localDateTime = new Date(`${date}T${time}:00Z`);
-    // Convert to UTC ISO string
-    console.log("Converted ISO String:", localDateTime.toISOString());
-    return localDateTime.toISOString();
   };
 
   // Validation function for all required shift data
@@ -329,63 +312,7 @@ const WeeklyScheduleGrid = () => {
     setIsModalOpen(true);
   };
 
-  const getDaysForWeek = (): {
-    day: string;
-    date: string;
-    fullDate: Date;
-  }[] => {
-    const days = [];
-    const startDate = new Date(currentDate);
-    const dayOfWeek = startDate.getDay();
-    const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    startDate.setDate(diff);
-
-    for (let i = 0; i < 7; i++) {
-      const currentDay = new Date(startDate);
-      currentDay.setDate(startDate.getDate() + i);
-      days.push({
-        day: currentDay.toLocaleString("default", { weekday: "short" }),
-        date: formatDate(currentDay),
-        fullDate: new Date(currentDay),
-      });
-    }
-
-    return days;
-  };
-
-  const formatDate = (date: Date): string => {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
-
-  const formatDateRange = (): string => {
-    const startDate = new Date(currentDate);
-    const dayOfWeek = startDate.getDay();
-    const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    startDate.setDate(diff);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-
-    return `${startDate.toLocaleString("default", {
-      month: "short",
-    })} ${startDate.getDate()} - ${endDate.toLocaleString("default", {
-      month: "short",
-    })} ${endDate.getDate()}`;
-  };
-
-  const goToPreviousWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 7);
-    setCurrentDate(newDate);
-  };
-
-  const goToNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentDate(newDate);
-  };
-
-  const days = getDaysForWeek();
+  const days = generateWeekDatesForWeeklySchedule();
 
   // Show loading state
   if (isLoading) {
@@ -423,16 +350,16 @@ const WeeklyScheduleGrid = () => {
           </h3>
           <div className="flex items-center gap-2">
             <button
-              onClick={goToPreviousWeek}
+              onClick={() => setCurrentDate(goToPreviousWeek(currentDate))}
               className="p-1 rounded-md hover:bg-gray-200 transition-colors"
             >
               <HiOutlineChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
             <span className="text-sm text-gray-600 min-w-max">
-              {formatDateRange()}
+              {formatDateRange(currentDate)}
             </span>
             <button
-              onClick={goToNextWeek}
+              onClick={() => setCurrentDate(goToNextWeek(currentDate))}
               className="p-1 rounded-md hover:bg-gray-200 transition-colors"
             >
               <HiOutlineChevronRight className="w-5 h-5 text-gray-600" />
