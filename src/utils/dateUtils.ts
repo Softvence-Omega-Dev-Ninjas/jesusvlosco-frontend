@@ -176,17 +176,18 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
 };
 
 /**
- * Convert local date and time to UTC ISO format
- * @param date - Date in YYYY-MM-DD format
- * @param time - Time in HH:MM format
- * @returns ISO string
+ * Convert local date + time to proper UTC ISO string
+ * @param date - "YYYY-MM-DD" local date
+ * @param time - "HH:MM" local time
+ * @returns correct ISO string in UTC
  */
 export const convertToISOFormat = (date: string, time: string): string => {
-  // date is in YYYY-MM-DD format, time is in HH:MM format (local)
-  // Create a Date object interpreting date and time as UTC
-  const localDateTime = new Date(`${date}T${time}:00Z`);
-  // Convert to UTC ISO string
-  return localDateTime.toISOString();
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute] = time.split(':').map(Number);
+
+  // Treat the values as local and convert to UTC
+  const localDate = new Date(year, month - 1, day, hour, minute, 0);
+  return localDate.toISOString();
 };
 
 /**

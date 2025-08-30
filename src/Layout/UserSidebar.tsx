@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch } from '@/hooks/useRedux';
 import { logoutUser } from '@/store/Slices/AuthSlice/authSlice';
-import logo from "./../assets/logo.jpg"; // Adjust the path as necessary
+import logo from "./../assets/logo.jpg";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -54,7 +54,7 @@ const navigation: NavigationItem[] = [
     },
 
     {
-        name: 'user',
+        name: 'User',
         icon: User,
         path: '/user/user-profile',
     },
@@ -82,7 +82,7 @@ const navigation: NavigationItem[] = [
         name: 'Tasks & Projects',
         icon: FolderOpen,
         path: '/user/user-task',
-        badge: 1,
+        // badge: 1,
     },
 
 ];

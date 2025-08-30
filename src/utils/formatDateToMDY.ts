@@ -36,53 +36,23 @@ export const parseISODate = (isoString: string): Date | null => {
 };
 
 export const formatTimeFromISO = (isoString: string): string => {
-  const date = parseISODate(isoString);
+  const date = new Date(isoString).toLocaleTimeString()
   if (!date) return isoString; // Return original if parsing fails
 
-  let hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
+  const [hours, minutes] = date.split(":").map(Number);
   const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
+ 
   const strHours = hours < 10 ? `0${hours}` : `${hours}`;
   const strMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
   return `${strHours}:${strMinutes} ${ampm}`;
 };
 
 // Additional utility functions for consistent timezone handling
-export const formatDateFromISO = (isoString: string, options: {
-  weekday?: boolean;
-  month?: 'short' | 'long';
-  day?: boolean;
-  year?: boolean;
-} = {}): string => {
-  const date = parseISODate(isoString);
+export const formatDateFromISO = (isoString: string): string => {
+  const date = new Date(isoString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   if (!date) return isoString;
 
-  const parts: string[] = [];
-
-  if (options.weekday) {
-    const weekday = date.toLocaleString('en-US', { weekday: 'long', timeZone: 'UTC' });
-    parts.push(weekday);
-  }
-
-  if (options.month) {
-    const month = date.toLocaleString('en-US', {
-      month: options.month,
-      timeZone: 'UTC'
-    });
-    parts.push(month);
-  }
-
-  if (options.day) {
-    parts.push(date.getUTCDate().toString());
-  }
-
-  if (options.year) {
-    parts.push(date.getUTCFullYear().toString());
-  }
-
-  return parts.join(' ');
+  return date;
 };
 
 export const formatWeekdayShort = (isoString: string): string => {

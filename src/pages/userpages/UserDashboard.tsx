@@ -16,7 +16,7 @@ import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
 // import { useGetUserInformationQuery } from "@/store/api/user/userinformation/userInfoApi";
 // import { toLocalTimeString } from "@/utils/timeUtils";
 import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
-import { formatTimeFromISO } from "@/utils/formatDateToMDY";
+import { formatDateFromISO, formatTimeFromISO } from "@/utils/formatDateToMDY";
 
 // API Shift Data Interface based on your actual response
 interface ApiShiftData {
@@ -49,8 +49,8 @@ const UserDashboard: React.FC = () => {
   const data = useGetClockInOutQuery({});
   const shiftData = data?.data?.data?.shift as ApiShiftData | undefined;
   const teamMembers = data?.data?.data?.teamMembers as any | undefined;
-  console.log(teamMembers, "Team members")
-  console.log("Current Shift Data Check:", shiftData);
+  // console.log(teamMembers, "Team members")
+  // console.log("Current Shift Data Check:", shiftData);
   
   // const userData = useGetUserInformationQuery({})
   // const shifts = userData?.data?.data?.shift as ApiShiftData[] | undefined;
@@ -78,24 +78,24 @@ const UserDashboard: React.FC = () => {
 
   // Use the latest shift from today, or fallback to shiftData from clock API
   const currentApiShift = shiftData;
-  console.log(currentApiShift, "Current API Shift Data")
+  // console.log(currentApiShift, "Current API Shift Data")
 
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
     ? {
         startTime: formatTimeFromISO(currentApiShift.startTime), // Convert ISO string to local time
         endTime: formatTimeFromISO(currentApiShift.endTime),
-        date: new Date().toLocaleDateString("default", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }                    ),
+        date: formatDateFromISO(currentApiShift.date),
         location: currentApiShift.location || "",
         team: [], // Team data might need to be fetched separately or processed differently
       }
     : undefined;
 
     console.log(currentShiftFromApi, " Current Shift Formatted");
-    console.log("Raw API Shift Data:", currentApiShift);
-    console.log("Shift Title:", currentApiShift?.shiftTitle);
-    console.log("Job:", currentApiShift?.job);
-    console.log("Shift Type:", currentApiShift?.shiftType);
+    // console.log("Raw API Shift Data:", currentApiShift);
+    // console.log("Shift Title:", currentApiShift?.shiftTitle);
+    // console.log("Job:", currentApiShift?.job);
+    // console.log("Shift Type:", currentApiShift?.shiftType);
 
   // Fallback shift data when no API data is available
   const fallbackShift: Shift = {

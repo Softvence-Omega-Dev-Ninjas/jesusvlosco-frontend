@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { logoutUser } from "@/store/Slices/AuthSlice/authSlice";
+import logo from "./../assets/logo.jpg";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -318,7 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
           <nav className="flex-grow mt-6 pb-4 overflow-y-auto">
             <div className="text-4xl font-bold text-[#4E53B1] ml-6 mb-7">
-              Logo
+              <img className="px-2" src={logo} alt="" />
             </div>
             <div className="px-3 space-y-1">
               {navigation.map(renderNavigationItem)}
