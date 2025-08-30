@@ -12,6 +12,7 @@ interface IUser {
   profile: {
     firstName: string;
     lastName: string;
+    profileUrl: string;
   };
   lastLoginAt: string; // ISO date string
   createdAt: string;

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import AlertBanner from "@/components/UserDashoboard/AlertBanner";
+// import AlertBanner from "@/components/UserDashoboard/AlertBanner";
 import CompanyUpdateItem from "@/components/UserDashoboard/CompanyUpdateItem";
 import CurrentShiftCard from "@/components/UserDashoboard/CurrentShiftCard";
 import {
@@ -160,11 +160,11 @@ const UserDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-4">
       <div className="w-full mx-auto">
-        <AlertBanner
+        {/* <AlertBanner
           message="Urgent Shift change for tomorrow, your shift starts at 8:00 AM instead of 9:00 AM"
           type="warning"
           onDismiss={() => console.log("Alert dismissed")}
-        />
+        /> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">

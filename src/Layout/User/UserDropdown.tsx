@@ -12,7 +12,7 @@ const UserDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector(selectUser);
-  console.log("Access Token:", user);
+  console.log("Access Token:", user?.accessToken);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   useEffect(() => {
@@ -31,7 +31,7 @@ const UserDropdown: React.FC = () => {
   const handleLogout = () => {
     dispatch(logoutUser());
     toast.success("Logout successfull");
-    navigate("/email-login");
+    navigate("/");
   };
 
   return (
@@ -41,19 +41,28 @@ const UserDropdown: React.FC = () => {
         className="flex items-center space-x-3 cursor-pointer group"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-          <span className="text-white text-sm font-medium">
-            {
-              ((user?.profile?.firstName[0] as string) +
-                user?.profile?.lastName[0]) as string
-            }
-          </span>
+       <div className="flex items-center gap-2">
+          {user?.profile?.profileUrl ? (
+            <img
+              src={user?.profile?.profileUrl}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">
+                {`${user?.profile?.firstName?.[0] ?? ""}${user?.profile?.lastName?.[0] ?? ""}`}
+              </span>
+            </div>
+          )}
+
+          <div className="hidden sm:block">
+            <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
+              {`${user?.profile?.firstName ?? ""} ${user?.profile?.lastName ?? ""}`}
+            </p>
+          </div>
         </div>
-        <div className="hidden sm:block">
-          <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
-            {user?.profile?.firstName + " " + user?.profile?.lastName}{" "}
-          </p>
-        </div>
+
         <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-blue-600" />
       </div>
 
@@ -62,7 +71,7 @@ const UserDropdown: React.FC = () => {
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
           <ul className="py-1">
             <li>
-              <UpdateProfileModal />
+              <UpdateProfileModal preProfileUrl={user?.profile?.profileUrl} />
             </li>
             <li>
               <button

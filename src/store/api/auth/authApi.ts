@@ -39,7 +39,7 @@ const authApi = baseApi.injectEndpoints({
     }),
     updateProfile: build.mutation({
       query: (credentials) => ({
-        url: `/admin/user/${credentials?.id}`,
+        url: `/employee/user/profile`,
         method: "PATCH",
         body: credentials?.formData,
       }),
