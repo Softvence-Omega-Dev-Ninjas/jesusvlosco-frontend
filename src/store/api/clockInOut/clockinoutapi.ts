@@ -25,8 +25,16 @@ const clockinoutapi = baseApi.injectEndpoints({
     }),
 
     getClockSheet: build.query({
+      query: ({ from, to }) => ({
+         url: `/employee/time-clock/clock-sheet?from=${from}&to=${to}`,
+        method: "GET",
+      }),
+      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+    }),
+
+     getClockHistory: build.query({
       query: () => ({
-        url: "/employee/time-clock/clock-sheet",
+        url: "/employee/time-clock/history",
         method: "GET",
       }),
       providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
@@ -38,6 +46,6 @@ const clockinoutapi = baseApi.injectEndpoints({
 export const {
   useSendUpdateLocationMutation,
   useGetClockInOutQuery,
-  useGetClockSheetQuery
-
+  useGetClockSheetQuery,
+  useGetClockHistoryQuery
 } = clockinoutapi;

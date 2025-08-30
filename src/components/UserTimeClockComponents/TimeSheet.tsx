@@ -25,7 +25,7 @@ export default function TimeSheet() {
     to: dateRange.to
   });
   
-  console.log("clockSheets", clockSheets);
+  // console.log("clockSheets", clockSheets);
 
   // Helper functions
   const formatDate = (dateString: string | number | Date) => {
@@ -86,33 +86,6 @@ export default function TimeSheet() {
     });
   };
 
-  // Calculate totals from API data
-  const calculateTotals = () => {
-    if (!clockSheets?.data?.data?.clockSheet?.result) {
-      return { regular: 0, overtime: 0, paidTimeOff: 0, totalPaid: 0, unpaidTimeOff: 0 };
-    }
-    
-    let totalRegular = 0;
-    let totalOvertime = 0;
-    
-    clockSheets.data.data.clockSheet.result.forEach((week: { days: any[]; }) => {
-      week.days.forEach((day: { entries: any[]; }) => {
-        day.entries.forEach((entry: { regular: any; overtime: any; }) => {
-          totalRegular += entry.regular || 0;
-          totalOvertime += entry.overtime || 0;
-        });
-      });
-    });
-    
-    return {
-      regular: totalRegular.toFixed(2),
-      overtime: totalOvertime.toFixed(2),
-      paidTimeOff: 0, // You can add this field to your API if needed
-      totalPaid: (totalRegular + totalOvertime).toFixed(2),
-      unpaidTimeOff: 0 // You can add this field to your API if needed
-    };
-  };
-
   // Show loading state
   if (clockSheets?.isLoading) {
     return (
@@ -132,9 +105,10 @@ export default function TimeSheet() {
   }
 
   // Extract data and sort by latest first
-  const totals = calculateTotals();
+  // const totals = calculateTotals();
   const userData = clockSheets?.data?.data?.clockSheet?.user;
   const rawWeeklyData = clockSheets?.data?.data?.clockSheet?.result || [];
+  const paymentData = clockSheets?.data?.data?.paymentData
   
   // Sort weekly data by weekStart date (latest first)
   const weeklyData = [...rawWeeklyData].sort((a, b) => 
@@ -217,42 +191,48 @@ export default function TimeSheet() {
       <div className="flex flex-wrap gap-4 lg:gap-6 mb-8 items-center">
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {totals.regular}
+            {Number(paymentData?.payPerDay?.regularPayRate ?? 0).toFixed(2)} $
           </div>
-          <div className="text-xs lg:text-sm text-gray-600">Regular</div>
+          <div className="text-xs lg:text-sm text-gray-600">Regular Pay per day</div>
         </div>
-        <div className="text-base lg:text-lg font-medium text-gray-900">+</div>
+
+        <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
+
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {totals.overtime}
+            {Number(paymentData?.payPerDay?.overTimePayRate ?? 0).toFixed(2)} $
           </div>
-          <div className="text-xs lg:text-sm text-gray-600">1.5 X Overtime</div>
+          <div className="text-xs lg:text-sm text-gray-600">Overtime Pay per day</div>
         </div>
-        <div className="text-base lg:text-lg font-medium text-gray-900">+</div>
+
+        <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
+
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {totals.paidTimeOff}
+            {Number(paymentData?.totalRegularHour ?? 0).toFixed(2)}
           </div>
-          <div className="text-xs lg:text-sm text-gray-600">Paid time off</div>
+          <div className="text-xs lg:text-sm text-gray-600">Regular Total Hours</div>
         </div>
+
+        <div className="text-base lg:text-lg font-medium text-gray-900">+</div>
+
+        <div className="text-center">
+          <div className="text-xl lg:text-2xl font-bold text-gray-900">
+            {Number(paymentData?.totalOvertimeHour ?? 0).toFixed(2)}
+          </div>
+          <div className="text-xs lg:text-sm text-gray-600">Overtime Total Hours</div>
+        </div>
+
         <div className="text-base lg:text-lg font-medium text-gray-900">=</div>
+
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {totals.totalPaid}
+            {(
+              Number(paymentData?.totalRegularHour ?? 0) +
+              Number(paymentData?.totalOvertimeHour ?? 0)
+            ).toFixed(2)}
           </div>
           <div className="text-xs lg:text-sm text-gray-600">Total Paid Hours</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {totals.unpaidTimeOff}
-          </div>
-          <div className="text-xs lg:text-sm text-gray-600">Unpaid time off</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            --
-          </div>
-          <div className="text-xs lg:text-sm text-gray-600">Pay per dates</div>
         </div>
       </div>
 
@@ -288,7 +268,7 @@ export default function TimeSheet() {
                     Regular
                   </th>
                   <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">
-                    OvertimeX1.5
+                    Overtime
                   </th>
                   <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
                     Notes
@@ -299,7 +279,7 @@ export default function TimeSheet() {
                 {weeklyData.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="text-center py-8 text-gray-500">
-                      No timesheet data available for the selected period
+                      No time sheet data available for the selected period
                     </td>
                   </tr>
                 ) : (
@@ -336,16 +316,6 @@ export default function TimeSheet() {
                                 <td className="text-gray-500 bg-white min-w-[100px] sm:min-w-[120px] text-sm">
                                   {entry.shift?.title != null ? String(entry.shift.title) : ""}
                                 </td>
-                                {/* <td className="py-3 px-2 sm:px-4">
-                                  <select
-                                    className="border border-gray-300 rounded-full px-2 sm:px-4 py-2 text-gray-500 bg-white min-w-[100px] sm:min-w-[120px] text-sm"
-                                    value={selectedProjects[rowId] ?? (entry.shift?.title != null ? String(entry.shift.title) : "")}
-                                    onChange={(e) => handleProjectSelect(rowId, e.target.value)}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value={entry.shift?.title != null ? String(entry.shift.title) : ""}>{entry.shift?.title}</option>
-                                  </select>
-                                </td> */}
                                 <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">
                                   {formatTime(entry.start)}
                                 </td>

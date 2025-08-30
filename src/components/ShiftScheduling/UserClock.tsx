@@ -9,7 +9,7 @@ import {
 } from "@/store/api/user/scheduling/schedulingApi";
 import { formatDateRange } from "@/utils/formatDateRange";
 import { toast } from "sonner";
-import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { useGetClockHistoryQuery, useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { toLocalTimeString } from "@/utils/timeUtils";
 
 interface TimeEntry {
@@ -27,9 +27,9 @@ const TimeTrackingDashboard: React.FC = () => {
   const { data } = useGetAllUserTimeClockQuery(null);
   const clockData = useGetClockInOutQuery({});
   const clock = clockData?.data?.data?.clock;
-  console.log(clock);
+  // console.log(clock);
   const timeClockRequest = data?.data?.data;
-  console.log({ timeClockRequest });
+  // console.log({ timeClockRequest });
   const [deleteTimeCLock] = useDeleteSchedulingRequestMutation();
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,36 +38,9 @@ const TimeTrackingDashboard: React.FC = () => {
     clockIn: toLocalTimeString(clock?.clockInAt),
     clockOut: toLocalTimeString(clock?.clockOutAt),
   };
-  const [activities] = useState([
-    {
-      id: 1,
-      type: "Clocked in",
-      message: "Your work has started",
-      icon: "clock-in",
-      color: "text-green-600",
-    },
-    {
-      id: 2,
-      type: "Timesheet approved",
-      message: "Your timesheet for June 24 has been approved",
-      icon: "check",
-      color: "text-green-600",
-    },
-    {
-      id: 3,
-      type: "Clocked out",
-      message: "Your work has ended",
-      icon: "clock-out",
-      color: "text-red-600",
-    },
-    {
-      id: 4,
-      type: "Clocked in",
-      message: "Your work has started",
-      icon: "clock-in",
-      color: "text-green-600",
-    },
-  ]);
+
+  const clockHistory = useGetClockHistoryQuery({}).currentData?.data;
+  // console.log("clockHistory", clockHistory);
 
   const handleCancelRequest = async (id: number) => {
     const toastId = toast.loading("loading.....");
@@ -125,7 +98,7 @@ const TimeTrackingDashboard: React.FC = () => {
                   Clock In
                 </h3>
                 <p className="text-lg font-semibold text-gray-900">
-                  {timeEntry.clockIn}
+                  {timeEntry.clockIn || "Not clocked in yet"}
                 </p>
               </div>
               <div>
@@ -207,33 +180,44 @@ const TimeTrackingDashboard: React.FC = () => {
                 </div>
               </div>
 
+             
               {/* Recent Activity */}
               <div>
                 <div className="p-6  border-gray-200">
                   <h2 className="text-xl font-semibold text-[#4E53B1] flex items-center gap-2">
-                    Recent activity
+                    Clock History
                   </h2>
                 </div>
 
                 <div className="p-6 space-y-4">
-                  {activities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div className="flex-shrink-0 w-8 h-8 mt-2 bg-gray-100 rounded-full flex items-center justify-center">
-                        {getActivityIcon(activity.icon, activity.color)}
+                  {clockHistory?.length > 0 ? (
+                    clockHistory.slice(0, 4).map((activity: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 mt-2 bg-gray-100 rounded-full flex items-center justify-center">
+                          {getActivityIcon(
+                            activity.type === "CLOCK_IN" ? "clock-in" : "clock-out",
+                            activity.type === "CLOCK_IN" ? "text-green-600" : "text-red-600"
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-1">
+                            {activity.title} at  {toLocalTimeString(activity.time)}
+                          </h3>
+                          {/* <p className="text-sm text-gray-600">
+                            Date: {activity.date}
+                          </p> */}
+                          <p className="text-sm text-gray-500">
+                            Location: {activity.location}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 mb-1">
-                          {activity.type}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {activity.message}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">No clock history found</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -261,15 +245,6 @@ const TimeTrackingDashboard: React.FC = () => {
                 <AddShiftModal onClose={() => setIsShiftModalOpen(false)} />
               )}
 
-              {/* <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Plus className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Add a time off request
-                </span>
-              </button> */}
               <TimeOffRequestModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
