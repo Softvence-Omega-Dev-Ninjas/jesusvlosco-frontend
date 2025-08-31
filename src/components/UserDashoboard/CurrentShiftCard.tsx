@@ -5,91 +5,48 @@ import { useSendUpdateLocationMutation } from "@/store/api/clockInOut/clockinout
 import { getCurrentLocationWithGoogleMaps, formatLocationForAPI } from "@/utils/googleMapsLocation";
 import { AlarmIcon } from "./icons";
 import { Shift } from "./types";
-import Swal from "sweetalert2";
 
 interface CurrentShiftCardProps {
   shift: Shift;
-  team: any[]; 
+  team: any[];
 }
 
-
-
 const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
-  const [isClockingIn, setIsClockingIn] = useState(false);
+  const [isClocking, setIsClocking] = useState(false);
+  const [isClockOut, setIsClockOut] = useState(false);
   const [sendUpdateLocation] = useSendUpdateLocationMutation();
 
-  console.log(shift, "Shift Information")
-  const getCurrentLocationAndClockIn = async () => {
-    setIsClockingIn(true);
-
+  // 🔹 Common function for Clock In / Out
+  const handleClockAction = async (action: "CLOCK_IN" | "CLOCK_OUT") => {
+    if(action === "CLOCK_IN") {
+      setIsClocking(true);
+    }else {
+      setIsClockOut(true);
+    }
     try {
-      // Get current location using Google Maps API for better accuracy
       const locationResult = await getCurrentLocationWithGoogleMaps();
-      
-      // Format location data for API
       const formattedLocation = formatLocationForAPI(locationResult);
-      
-      console.log('📍 Accurate location obtained via Google Maps:', formattedLocation);
-      
-      // Send location update to backend with enhanced data
+
       const response = await sendUpdateLocation({
         lat: formattedLocation.latitude,
         lng: formattedLocation.longitude,
-        action: 'CLOCK_IN',
+        action,
       }).unwrap();
 
-      
-      console.log('📡 Clock-in location updated successfully:', response);
-      toast.success(`Clocked in successfully! 📍 ${formattedLocation.address}`);
-      
+      console.log(`📡 ${action} response:`, response);
+
+      // ✅ Use API message if available
+      toast.success(response.message || `${action.replace("_", " ")} successful!`);
     } catch (error: any) {
-      console.error('❌ Location error:', error);
-        Swal.fire({
-          title: 'Clock-In Failed',
-          text: error.data.message || 'Unable to clock in. Please try again.',
-          icon: 'error',
-          timer: 2000,
-        })
-   
-      
+      console.error(`❌ ${action} error:`, error);
+
+      toast.error(error?.data?.message || "Something went wrong");
     } finally {
-      setIsClockingIn(false);
+      setIsClocking(false);
+      setIsClockOut(false);
     }
   };
 
-  const handleClockIn = () => {
-    getCurrentLocationAndClockIn();
-  };
-
-  const handleClockOut = async () => {
-    try{
-      const locationResult = await getCurrentLocationWithGoogleMaps();
-      
-      // Format location data for API
-      const formattedLocation = formatLocationForAPI(locationResult);
-      
-      console.log('📍 Accurate location obtained via Google Maps:', formattedLocation);
-      
-      // Send location update to backend with enhanced data
-      const response = await sendUpdateLocation({
-        lat: formattedLocation.latitude,
-        lng: formattedLocation.longitude,
-        action: 'CLOCK_OUT',
-      }).unwrap();
-      console.log('📡 Clock-out location updated successfully:', response);
-      toast.success(`Clocked out successfully! 📍 ${formattedLocation.address}`);
-    } catch (error: any) {
-      console.error('❌ Clock-out error:', error);
-      Swal.fire({
-        title: 'Clock-Out Failed',
-        text: error.data.message || 'Unable to clock out. Please try again.',
-        icon: 'error',
-        timer: 2000,
-      });
-    }
-    // Clock out logic without location update
-
-  };
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
       <div className="flex items-center justify-between mb-5">
@@ -110,34 +67,41 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
       <div className="text-center">
         <p className="text-gray-600 mb-5">Your Team members</p>
         <div className="flex justify-center space-x-2">
-          {team?.map((member : any, index: number) => (
+          {team?.map((member: any, index: number) => (
             <div
               key={index}
               className="w-14 h-14 bg-[#C8CAE7] rounded-full flex items-center justify-center text-[#484848] font-bold text-2xl"
             >
-              <img className="rounded-full" src={member.profileUrl || "https://ui-avatars.com/api/?name=" +
-              encodeURIComponent(
-                member.firstName +
-                  " " +
-                  member.lastName
-              )} alt="Default Profile" />
+              <img
+                className="rounded-full"
+                src={
+                  member.profileUrl ||
+                  "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(`${member.firstName} ${member.lastName}`)
+                }
+                alt="Profile"
+              />
             </div>
           ))}
         </div>
         <div className="flex items-center justify-center space-x-5 py-5">
-          <button 
-            onClick={handleClockIn}
-            disabled={isClockingIn || shift.startTime ==="No shift"}
-            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold ${shift.startTime ==="No shift" ? "disabled:cursor-not-allowed disabled opacity-50" : ""}`}
+          <button
+            onClick={() => handleClockAction("CLOCK_IN")}
+            disabled={isClocking || shift.startTime === "No shift"}
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold ${
+              shift.startTime === "No shift" ? "disabled:cursor-not-allowed opacity-50" : ""
+            }`}
           >
-            {isClockingIn ? 'Clocking In...' : 'Clock In'}
+            {isClocking ? "Processing..." : "Clock In"}
           </button>
-          <button 
-            onClick={handleClockOut}
-            disabled={shift.startTime ==="No shift"}
-            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold ${shift.startTime ==="No shift" ? "disabled:cursor-not-allowed disabled opacity-50" : ""}`}
+          <button
+            onClick={() => handleClockAction("CLOCK_OUT")}
+            disabled={isClockOut || shift.startTime === "No shift"}
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold ${
+              shift.startTime === "No shift" ? "disabled:cursor-not-allowed opacity-50" : ""
+            }`}
           >
-            Clock Out
+            {isClockOut ? "Processing..." : "Clock Out"}
           </button>
         </div>
       </div>
