@@ -8,16 +8,36 @@ const clockinoutapi = baseApi.injectEndpoints({
         method: "POST",
         body: {
           "lat": location.lat,
-          "lng": location.lng
+          "lng": location.lng,
+          "action": location.action,
+          "date": new Date().toISOString()
         },
       }),
+      invalidatesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
     }),
 
     getClockInOut: build.query({
       query: () => ({
-        url: "/employee/time-clock/shift/current-clock",
+        url: `/employee/time-clock/shift/current-clock?date=${new Date().toISOString()}`,
         method: "GET",
       }),
+      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+    }),
+
+    getClockSheet: build.query({
+      query: ({ from, to }) => ({
+         url: `/employee/time-clock/clock-sheet?from=${from}&to=${to}`,
+        method: "GET",
+      }),
+      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+    }),
+
+     getClockHistory: build.query({
+      query: () => ({
+        url: "/employee/time-clock/history",
+        method: "GET",
+      }),
+      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
     }),
 
   }),
@@ -26,5 +46,6 @@ const clockinoutapi = baseApi.injectEndpoints({
 export const {
   useSendUpdateLocationMutation,
   useGetClockInOutQuery,
-
+  useGetClockSheetQuery,
+  useGetClockHistoryQuery
 } = clockinoutapi;

@@ -17,9 +17,7 @@ const CreateTeam: React.FC = () => {
   
   const userList = (Array.isArray(getUsers?.data?.data) ? getUsers!.data!.data : []).filter(
     (user: TUser) =>
-      user.role !== "ADMIN" &&
-      (user.projects?.length ?? 0) === 0 &&
-      (user.shift?.length ?? 0) === 0
+      user.role !== "ADMIN" && user.role !== "SUPER_ADMIN"
   );
   console.log(userList);
   const handleUserSelection = (userId: string, isSelected: boolean) => {

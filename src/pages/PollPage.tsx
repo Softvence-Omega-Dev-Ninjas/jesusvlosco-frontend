@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Plus, X, Pencil, FileText } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
 
 export default function PollPage() {
   const [pollTitle, setPollTitle] = useState("");
@@ -30,10 +31,6 @@ export default function PollPage() {
   }, [showModal]);
 
   const handleCreateNewPoll = () => setShowModal(false);
-  const handleUseTemplate = () => {
-    setShowModal(false);
-    navigate("/admin/poll-template");
-  };
 
   // Validate function
   const validate = () => {
@@ -226,24 +223,23 @@ export default function PollPage() {
       {showModal && (
         <div className="fixed inset-0 bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-[2px]">
           <div className="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center space-y-6 max-w-sm w-full border border-purple-200">
-            <h4 className="text-xl font-semibold text-gray-800 mb-4">Choose an Option</h4>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full justify-center">
               <button
                 onClick={handleCreateNewPoll}
-                className="flex flex-col items-center justify-center p-6 bg-[#4E53B1] text-white font-semibold rounded-lg w-full sm:w-1/2"
+                className="flex flex-row gap-2 cursor-pointer items-center justify-center p-6 bg-[#4E53B1] hover:bg-[#474ed3] text-white font-semibold rounded-lg w-full"
                 type="button"
               >
-                <Pencil size={32} className="mb-2" />
+                <FaEdit size={20} />
                 <span>Create a new</span>
               </button>
-              <button
+              {/* <button
                 onClick={handleUseTemplate}
                 className="flex flex-col items-center justify-center p-6 bg-white text-gray-800 font-semibold rounded-lg border w-full sm:w-1/2"
                 type="button"
               >
                 <FileText size={32} className="mb-2" />
                 <span>Use a template</span>
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

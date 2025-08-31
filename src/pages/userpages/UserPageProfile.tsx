@@ -1,11 +1,23 @@
 import distance from "../../assets/distance.png";
 import calendar from "../../assets/calendar_month (1).png";
 import { BiEditAlt } from "react-icons/bi";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useGetUserProfileQuery } from "@/store/api/auth/authApi";
 import { useUpdateEmployeeMutation } from "@/store/api/admin/user/userApi";
 import Swal from "sweetalert2";
+import { customList } from "country-codes-list";
+
+// Generate array of all country codes
+const countryCodes = Object.values(
+  customList(
+    "countryCode",
+    "{countryCode} | {countryNameEn} | +{countryCallingCode}"
+  )
+).map((item: string) => {
+  const [code, name, dialCode] = item.split(" | ");
+  return { code, name, dialCode: dialCode.replace("+", "") }; // Remove + sign
+});
 
 const formatDate = (isoDate?: string) => {
   if (!isoDate) return "";
@@ -15,6 +27,25 @@ const formatDate = (isoDate?: string) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+// Helper function to parse existing phone numbers
+const parsePhoneNumber = (fullPhone?: string) => {
+  if (!fullPhone) return { countryCode: "US", dialCode: "1", phone: "" };
+  
+  // Find matching country code by checking if the phone starts with any dial code
+  for (const country of countryCodes) {
+    if (fullPhone.startsWith(country.dialCode)) {
+      return {
+        countryCode: country.code,
+        dialCode: country.dialCode,
+        phone: fullPhone.substring(country.dialCode.length)
+      };
+    }
+  }
+  
+  // Default to US if no match found
+  return { countryCode: "US", dialCode: "1", phone: fullPhone };
 };
 
 const UserPageProfile = () => {
@@ -34,12 +65,17 @@ const UserPageProfile = () => {
     gender: string;
     email: string;
     phone: string;
+    countryCode: string;
+    dialCode: string;
     address: string;
     state: string;
     country: string;
     nationality: string;
     dateOfBirth: string;
   };
+
+  // Parse phone number for initial values
+  const parsedPhone = parsePhoneNumber(userData?.phone);
 
   // Initialize react-hook-form
   const {
@@ -54,7 +90,9 @@ const UserPageProfile = () => {
       lastName: userData?.profile?.lastName || "",
       gender: userData?.profile?.gender || "",
       email: userData?.email || "",
-      phone: userData?.phone || "",
+      phone: parsedPhone.phone,
+      countryCode: parsedPhone.countryCode,
+      dialCode: parsedPhone.dialCode,
       address: userData?.profile?.address || "",
       state: userData?.profile?.state || "",
       country: userData?.profile?.country || "",
@@ -63,8 +101,17 @@ const UserPageProfile = () => {
     },
   });
 
-  // Watch the dateOfBirth field
+  // Watch the dateOfBirth field and country code
   const dateOfBirth = watch("dateOfBirth");
+  const currentCountryCode = watch("countryCode");
+
+  // Update dial code when country code changes
+  useEffect(() => {
+    const selectedCountry = countryCodes.find((c) => c.code === currentCountryCode);
+    if (selectedCountry) {
+      setValue("dialCode", selectedCountry.dialCode);
+    }
+  }, [currentCountryCode, setValue]);
 
   // console.log(userInfo);
   if (userInfo.status === "pending") {
@@ -78,13 +125,19 @@ const UserPageProfile = () => {
       // Create submission data - use form values for dirty fields, userData for unchanged fields
       const submissionData: Record<string, string> = {};
 
+      // Combine dial code and phone number for submission (without + sign)
+      const fullPhoneNumber = `${data.dialCode}${data.phone}`;
+
       // For each field, check if it was edited (dirty) or use original userData
+      const parsedOriginalPhone = parsePhoneNumber(userData?.phone);
       const fieldMapping = {
         firstName: userData?.profile?.firstName || "",
         lastName: userData?.profile?.lastName || "",
         gender: userData?.profile?.gender || "",
         email: userData?.email || "",
         phone: userData?.phone || "",
+        countryCode: parsedOriginalPhone.countryCode,
+        dialCode: parsedOriginalPhone.dialCode,
         address: userData?.profile?.address || "",
         state: userData?.profile?.state || "",
         country: userData?.profile?.country || "",
@@ -95,12 +148,22 @@ const UserPageProfile = () => {
       // Use edited values if field is dirty, otherwise use original userData values
       Object.keys(fieldMapping).forEach((field) => {
         const fieldKey = field as keyof FormData;
-        if (dirtyFields[fieldKey]) {
-          // Field was edited, use form value
-          submissionData[field] = data[fieldKey];
-        } else {
-          // Field was not edited, use original userData value
-          submissionData[field] = fieldMapping[fieldKey];
+        if (field === 'phone') {
+          // For phone, check if phone, countryCode, or dialCode were edited
+          if (dirtyFields.phone || dirtyFields.countryCode || dirtyFields.dialCode) {
+            submissionData[field] = fullPhoneNumber;
+          } else {
+            submissionData[field] = fieldMapping[fieldKey];
+          }
+        } else if (field !== 'countryCode' && field !== 'dialCode') {
+          // Skip countryCode and dialCode from submission as they're only for UI
+          if (dirtyFields[fieldKey]) {
+            // Field was edited, use form value
+            submissionData[field] = data[fieldKey];
+          } else {
+            // Field was not edited, use original userData value
+            submissionData[field] = fieldMapping[fieldKey];
+          }
         }
       });
 
@@ -263,11 +326,30 @@ const UserPageProfile = () => {
             <label className="block text-sm mb-1 text-[#484848]">
               Phone Number
             </label>
-            <input
-              {...register("phone")}
-              readOnly={readOnly}
-              className="w-full border-2 border-gray-200 text-gray-500 rounded-lg p-2"
-            />
+            <div className="flex items-center border-2 border-gray-200 rounded-lg focus-within:border-gray-400">
+              <select
+                {...register("countryCode")}
+                disabled={readOnly}
+                className="bg-white outline-none pl-3 pr-1 py-2 min-w-fit border-r border-gray-300 text-gray-500"
+              >
+                {countryCodes.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.code}
+                  </option>
+                ))}
+              </select>
+
+              <span className="text-gray-500 px-2 whitespace-nowrap">
+                {watch("dialCode")}
+              </span>
+
+              <input
+                {...register("phone")}
+                readOnly={readOnly}
+                className="flex-1 min-w-0 outline-none py-2 pr-3 text-gray-500"
+                placeholder="e.g., 4454545"
+              />
+            </div>
           </div>
           <div className="">
             <label className="block text-sm mb-1 text-[#484848]">Address</label>

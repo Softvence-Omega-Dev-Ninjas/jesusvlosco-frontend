@@ -4,7 +4,7 @@ type TDepartment = "DEVELOPMENT";
 
 type TTaskLabel = "LOW" | "MEDIUM" | "HIGH";
 
-type TTaskStatus = "OPEN" | "DAFT" | "OVERDUE" | "COMPLETED" | "IN_PROGRESS";
+type TTaskStatus = "OPEN" | "DAFT" | "OVERDUE" | "DONE" | "IN_PROGRESS";
 
 import { TProfile, TPayroll, TShift } from './shared';
 

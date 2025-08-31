@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
-import { MapPin, X, Navigation } from "lucide-react";
+import { MapPin, X, Navigation, Search, Loader } from "lucide-react";
 
 interface LocationCoordinates {
   latitude: number;
@@ -43,8 +43,17 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
     );
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [addressText, setAddressText] = useState(value?.address || "");
+  
+  // Search functionality state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -52,12 +61,47 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
     libraries: ["places", "geometry"],
   });
 
-  // Initialize geocoder when maps API is loaded
+  // Initialize geocoder and search services when maps API is loaded
   React.useEffect(() => {
-    if (isLoaded && !geocoderRef.current) {
-      geocoderRef.current = new google.maps.Geocoder();
+    if (isLoaded) {
+      console.log('Google Maps API loaded successfully');
+
+      if (!geocoderRef.current) {
+        geocoderRef.current = new google.maps.Geocoder();
+        console.log('Geocoder initialized');
+      }
+
+      // Check if Places library is available
+      if (typeof google.maps.places === "undefined") {
+        console.error("Google Maps Places library is not available. This may be due to:");
+        console.error("1. Places API not enabled for your API key");
+        console.error("2. Incorrect API key");
+        console.error("3. Network connectivity issues");
+        console.error("4. API quota exceeded");
+        return;
+      }
+
+      if (!autocompleteServiceRef.current) {
+        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+        console.log('AutocompleteService initialized');
+      }
+    } else {
+      console.log('Google Maps API not yet loaded');
     }
   }, [isLoaded]);
+
+  // Initialize PlacesService when map is loaded
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    if (
+      !placesServiceRef.current &&
+      typeof google.maps.places !== "undefined" &&
+      typeof google.maps.places.PlacesService !== "undefined"
+    ) {
+      placesServiceRef.current = new google.maps.places.PlacesService(map);
+    } else if (typeof google.maps.places === "undefined" || typeof google.maps.places.PlacesService === "undefined") {
+      console.error("Google Maps Places library is not loaded. Please check your API key and libraries configuration.");
+    }
+  }, []);
 
   // Update address display when value changes
   React.useEffect(() => {
@@ -165,8 +209,217 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
   const clearLocation = useCallback(() => {
     setSelectedPosition(null);
     setAddressText("");
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
     onChange(null);
   }, [onChange]);
+
+  // Fallback search using Geocoder API
+  const searchWithGeocoder = useCallback(async (query: string) => {
+    if (!geocoderRef.current) {
+      console.error('Geocoder not available');
+      setIsSearching(false);
+      return;
+    }
+
+    try {
+      console.log('Searching with Geocoder for:', query);
+
+      const response = await geocoderRef.current.geocode({
+        address: query,
+        // Add location bias
+        bounds: {
+          north: mapCenter.lat + 0.1,
+          south: mapCenter.lat - 0.1,
+          east: mapCenter.lng + 0.1,
+          west: mapCenter.lng - 0.1,
+        },
+      });
+
+      setIsSearching(false);
+
+      if (response.results && response.results.length > 0) {
+        // Convert geocoder results to suggestion format
+        const mockSuggestions = response.results.slice(0, 5).map((result, index) => ({
+          place_id: result.place_id || `geocoder-${index}`,
+          description: result.formatted_address,
+          structured_formatting: {
+            main_text: result.formatted_address.split(',')[0],
+            secondary_text: result.formatted_address.split(',').slice(1).join(',').trim(),
+          },
+          types: result.types || [],
+        }));
+
+        setSuggestions(mockSuggestions as google.maps.places.AutocompletePrediction[]);
+        setShowSuggestions(true);
+        console.log('Geocoder suggestions set:', mockSuggestions.length);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        console.log('No geocoder results found');
+      }
+    } catch (error) {
+      console.error('Geocoder search failed:', error);
+      setIsSearching(false);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [mapCenter]);
+
+  // Search for location suggestions
+  const searchLocations = useCallback(async (query: string) => {
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    try {
+      // Try Places API first
+      if (autocompleteServiceRef.current) {
+        const request = {
+          input: query,
+          // Add location bias for better results
+          location: new google.maps.LatLng(mapCenter.lat, mapCenter.lng),
+          radius: 50000, // 50km radius
+        };
+
+        console.log('Searching with Places API for:', query);
+
+        autocompleteServiceRef.current.getPlacePredictions(request, (predictions, status) => {
+          setIsSearching(false);
+          console.log('Places API search status:', status);
+          console.log('Places API predictions:', predictions);
+
+          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setSuggestions(predictions);
+            setShowSuggestions(true);
+            console.log('Places API suggestions set:', predictions.length);
+          } else {
+            console.warn('Places API failed, trying Geocoder fallback. Status:', status);
+            // Fallback to Geocoder API
+            searchWithGeocoder(query);
+          }
+        });
+      } else {
+        console.log('Places API not available, using Geocoder fallback');
+        // Fallback to Geocoder API
+        searchWithGeocoder(query);
+      }
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setIsSearching(false);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [mapCenter, searchWithGeocoder]);  // Handle search input changes with debouncing
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchLocations(query);
+    }, 300);
+  }, [searchLocations]);
+
+  // Get detailed information about a selected place
+  const getPlaceDetails = useCallback(async (placeId: string, description: string) => {
+    if (!placesServiceRef.current) {
+      console.error('PlacesService not initialized, trying to initialize...');
+      // If PlacesService is not available, try geocoding as fallback
+      if (geocoderRef.current) {
+        try {
+          const geocodeResult = await geocoderRef.current.geocode({ placeId: placeId });
+          if (geocodeResult.results && geocodeResult.results.length > 0) {
+            const result = geocodeResult.results[0];
+            const location = result.geometry.location;
+            const lat = location.lat();
+            const lng = location.lng();
+            
+            setSelectedPosition({ lat, lng });
+            setMapCenter({ lat, lng });
+            
+            const locationData: LocationCoordinates = {
+              latitude: lat,
+              longitude: lng,
+              address: result.formatted_address || description,
+            };
+
+            setAddressText(locationData.address || '');
+            setSearchQuery(description);
+            setShowSuggestions(false);
+            console.log('Location selected via geocoding:', locationData);
+            onChange(locationData);
+            return;
+          }
+        } catch (error) {
+          console.error('Geocoding fallback failed:', error);
+        }
+      }
+      return;
+    }
+
+    const request: google.maps.places.PlaceDetailsRequest = {
+      placeId: placeId,
+      fields: ['geometry', 'formatted_address', 'name', 'place_id'],
+    };
+
+    placesServiceRef.current.getDetails(request, (place, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && place && place.geometry) {
+        const location = place.geometry.location;
+        if (location) {
+          const lat = location.lat();
+          const lng = location.lng();
+          
+          setSelectedPosition({ lat, lng });
+          setMapCenter({ lat, lng });
+          
+          const locationData: LocationCoordinates = {
+            latitude: lat,
+            longitude: lng,
+            address: place.formatted_address || place.name || description,
+          };
+
+          setAddressText(locationData.address || '');
+          setSearchQuery(place.name || description);
+          setShowSuggestions(false);
+          console.log('Location selected via PlacesService:', locationData);
+          onChange(locationData);
+        }
+      } else {
+        console.error('Place details request failed:', status);
+      }
+    });
+  }, [onChange]);
+
+  // Handle suggestion selection
+  const handleSuggestionClick = useCallback((suggestion: google.maps.places.AutocompletePrediction) => {
+    console.log('Suggestion clicked:', suggestion.description);
+    // Immediately hide suggestions but keep modal open
+    setShowSuggestions(false);
+    setSearchQuery(suggestion.structured_formatting.main_text);
+    
+    // Small delay to ensure map and services are ready
+    setTimeout(() => {
+      getPlaceDetails(suggestion.place_id, suggestion.description);
+    }, 100);
+  }, [getPlaceDetails]);
+
+  // Clear search
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }, []);
 
   // Handle confirm selection
   const handleConfirm = () => {
@@ -234,6 +487,63 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
               </div>
             </div>
 
+            {/* Search Section */}
+            <div className="p-4 border-b bg-gray-50">
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    placeholder="Search for restaurants, addresses, landmarks..."
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                    {isSearching && <Loader className="animate-spin h-4 w-4 text-blue-500" />}
+                    {searchQuery && (
+                      <button
+                        onClick={clearSearch}
+                        className="p-1 text-gray-400 hover:text-red-500"
+                        title="Clear search"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Search Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.place_id}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-2">
+                          <MapPin className="mt-1 text-gray-400 flex-shrink-0" size={16} />
+                          <div>
+                            <div className="font-medium text-gray-900">
+                              {suggestion.structured_formatting.main_text}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {suggestion.structured_formatting.secondary_text}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <p className="text-xs text-gray-600 mt-2">
+                💡 Search for a location above or click anywhere on the map below
+              </p>
+            </div>
+
             {/* Map Container */}
             <div className="relative">
               <GoogleMap
@@ -241,6 +551,7 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
                 center={mapCenter}
                 zoom={selectedPosition ? 15 : 10}
                 onClick={handleMapClick}
+                onLoad={onMapLoad}
                 options={{
                   zoomControl: true,
                   streetViewControl: false,
@@ -259,9 +570,7 @@ const GoogleMapsLocationPicker: React.FC<GoogleMapsLocationPickerProps> = ({
               {/* Instructions overlay */}
               <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-md p-3 shadow-md max-w-xs">
                 <p className="text-sm text-gray-700">
-                  <strong>Click anywhere on the map</strong> to select a
-                  location, or use the "Current Location" button to use your GPS
-                  location.
+                  <strong>Search above</strong> or <strong>click anywhere on the map</strong> to select a location. You can also use the "Current Location" button to use your GPS location.
                 </p>
               </div>
             </div>

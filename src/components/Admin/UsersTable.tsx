@@ -5,6 +5,7 @@ import { LoaderIcon, Settings2 } from "lucide-react"; // Assuming this icon is u
 import { User } from "@/pages/Admin";
 import { PiUserCircleLight } from "react-icons/pi";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
+import UserActionDropdown from "@/Layout/User/UserActionDropdown";
 
 interface UsersTableProps {
   users: User[];
@@ -22,6 +23,7 @@ interface UsersTableProps {
   toggleFilterColumnModal: () => void;
   // FIX: Allow null for the ref's current property for the filter button
   filterColumnButtonRef: React.RefObject<HTMLButtonElement | null>;
+  currentUserRole?: string;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
@@ -34,6 +36,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   isAnyModalOpen,
   toggleFilterColumnModal,
   filterColumnButtonRef, // Destructure the ref
+  currentUserRole,
 }) => {
   const allUsersSelected =
     selectedUserIds.length === users?.length && users?.length > 0;
@@ -166,18 +169,24 @@ const UsersTable: React.FC<UsersTableProps> = ({
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <button
-                        ref={filterColumnButtonRef} // Attach the ref to the settings button
-                        onClick={toggleFilterColumnModal}
-                        className="p-1 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        title="Filter columns"
-                      >
-                        <Settings2 className="w-5 h-5 text-gray-500" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {currentUserRole === "SUPER_ADMIN" && (
+                          <span>Actions</span>
+                        )}
+                        <button
+                          ref={filterColumnButtonRef} // Attach the ref to the settings button
+                          onClick={toggleFilterColumnModal}
+                          className="p-1 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          title="Filter columns"
+                        >
+                          <Settings2 className="w-5 h-5 text-gray-500" />
+                        </button>
+                      </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y relative divide-gray-200">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {users?.map((user: any) => (
                     <tr
                       key={user.id}
@@ -238,7 +247,15 @@ const UsersTable: React.FC<UsersTableProps> = ({
                         {formatDateToMDY(user?.lastLoginAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {/* Action button for individual user if needed */}
+                        {currentUserRole === "SUPER_ADMIN" && (
+                          <UserActionDropdown
+                            id={user?.id}
+                            firstName={user?.profile?.firstName}
+                            lastName={user?.profile?.lastName}
+                            email={user?.email}
+                            role={user?.role}
+                          />
+                        )}
                       </td>
                     </tr>
                   ))}

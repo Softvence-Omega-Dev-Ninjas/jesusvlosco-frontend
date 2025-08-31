@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import EducationForm from "@/components/AddUserProfile/EducationForm";
 import ExperienceForm from "@/components/AddUserProfile/ExperienceForm";
 import Header from "@/components/AddUserProfile/Header";
@@ -19,7 +20,9 @@ import {
   useCreateUserMutation,
   useCreateUserPayRollMutation,
 } from "@/store/api/admin/user/userApi";
+import { RootState } from "@/store/store";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -117,12 +120,14 @@ const institutionOptions = [
   "Other",
 ];
 const AddUserProfile = () => {
+  const user = useSelector((state: RootState) => state.user.user);
+  console.log(user)
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [params] = useSearchParams();
   console.log();
   const [selectedRole, setSelectedRole] = useState<TRole>(
-    (params.get("role") as "ADMIN" | "EMPLOYEE") || "EMPLOYEE"
+    (params.get("role") as "ADMIN" | "EMPLOYEE" | "SUPER_ADMIN") || "EMPLOYEE"
   );
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [createUserPayroll, { isLoading: isPayrollLoading }] =
@@ -140,6 +145,8 @@ const AddUserProfile = () => {
     firstName: "",
     lastName: "",
     phone: "",
+    countryCode: "US",
+    dialCode: "1",
     email: "",
     gender: "",
     employeeID: "",
@@ -320,6 +327,8 @@ const AddUserProfile = () => {
         firstName: "",
         lastName: "",
         phone: "",
+        countryCode: "US",
+        dialCode: "1",
         email: "",
         gender: "",
         employeeID: "",
@@ -367,10 +376,20 @@ const AddUserProfile = () => {
   const handlePersonalInfo = async (formData: FormData) => {
     console.log({ formData });
     formData.role = selectedRole;
+    
+    // Combine dial code and phone number for submission (without + sign)
+    const fullPhoneNumber = `${formData.dialCode}${formData.phone}`;
+    
     const personalFormData = new FormData();
     // formData.role = selectedRole || 'EMPLOYEE';
     for (const key in formData) {
-      personalFormData.append(key, formData[key as keyof FormData] as string);
+      if (key === 'phone') {
+        // Submit the full phone number with country code (without + sign)
+        personalFormData.append(key, fullPhoneNumber);
+      } else if (key !== 'countryCode' && key !== 'dialCode') {
+        // Skip countryCode and dialCode from submission as they're only for UI
+        personalFormData.append(key, formData[key as keyof FormData] as string);
+      }
     }
 
     try {
@@ -410,7 +429,18 @@ const AddUserProfile = () => {
         setActiveTab("experience");
       }
       console.log(result);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      const messages = (error as any)?.data?.message ?? (error as any)?.message;
+      if (Array.isArray(messages)) {
+        messages.forEach((msg: string) => toast.error(msg));
+      } else if (typeof messages === "string") {
+        toast.error(messages);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+     
+    }
   };
 
   const handleExperience = async (data: Experience[]) => {

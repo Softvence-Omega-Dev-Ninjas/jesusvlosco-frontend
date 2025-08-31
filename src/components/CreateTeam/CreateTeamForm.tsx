@@ -6,11 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const createTeamSchema = z.object({
   name: z.string().min(2, "Team name is required"),
   description: z.string().min(10, "Write at least 10 characters"),
-  department: z.enum(["IT", "DEVELOPMENT", "HR", "FINANCE", "MARKETING", "SEALS"]),
+  department: z.enum([
+    "IT",
+    "DEVELOPMENT",
+    "HR",
+    "FINANCE",
+    "MARKETING",
+    "SEALS",
+  ]),
   image: z.any().optional(),
 });
 
-export type FormValues = z.infer<typeof createTeamSchema> & { image?: FileList | null };
+export type FormValues = z.infer<typeof createTeamSchema> & {
+  image?: FileList | null;
+};
 
 const departmentOptions: FormValues["department"][] = [
   "IT",
@@ -103,7 +112,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
       onSubmit={handleSubmit(internalOnSubmit)}
       className="space-y-6 min-w-md"
     >
-      <div>
+      <div className="flex flex-col items-center gap-5">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Team Image Preview
         </label>
@@ -136,6 +145,44 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
             </div>
           </div>
         )}
+        {/* File input button */}
+        <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+          <input
+            ref={(e) => {
+              fileInputRef.current = e;
+            }}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={handleImageChange}
+          />
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
+          </svg>
+          Choose File
+        </label>
+
+        <div className="flex items-center gap-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Team Image
+          </label>
+          <div className="flex flex-col items-start gap-4"></div>
+          {selectedFileName && (
+            <p className="text-sm text-gray-600">
+              Selected: {selectedFileName}
+            </p>
+          )}
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -199,45 +246,6 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
           {errors.department && (
             <p className="text-red-500 text-sm mt-1">
               {errors.department.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Team Image
-          </label>
-          <div className="flex flex-col items-start gap-4">
-            {/* File input button */}
-            <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
-              <input
-                ref={(e) => {
-                  fileInputRef.current = e;
-                }}
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={handleImageChange}
-              />
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              Choose File
-            </label>
-          </div>
-          {selectedFileName && (
-            <p className="text-sm text-gray-600 mt-2">
-              Selected: {selectedFileName}
             </p>
           )}
         </div>

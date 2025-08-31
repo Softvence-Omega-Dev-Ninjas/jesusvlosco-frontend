@@ -1,12 +1,12 @@
-
 import { useState } from "react";
-import { FileText, Star, Trash2, X } from "lucide-react";
+import { Star, Trash2, X } from "lucide-react";
 
 import Modal from "@/components/Servey-poll/Modal";
 import DropdownFieldModal from "@/components/Servey-poll/DropdownFieldModal";
 import OpenEndedFieldModal from "@/components/Servey-poll/OpenEndedFieldModal";
 import RatingFieldModal from "@/components/Servey-poll/RatingFieldModal";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
 
 interface DropdownFieldData {
   question: string;
@@ -49,7 +49,6 @@ export default function SurveyPage() {
 
   const [openEndedFields, setOpenEndedFields] = useState<OpenEndedFieldData[]>([]);
 
-
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingFields, setRatingFields] = useState<RatingFieldData[]>([]);
   const addField = (type: string) => {
@@ -79,7 +78,7 @@ export default function SurveyPage() {
   };
 
   const handleSaveOpenEnded = (data: OpenEndedFieldData) => {
-    setOpenEndedFields((prev) => [...prev, data])
+    setOpenEndedFields((prev) => [...prev, data]);
     console.log(data);
   };
 
@@ -148,7 +147,6 @@ export default function SurveyPage() {
                 <label className="text-lg mt-3 font-medium text-[rgba(78,83,177,1)] min-w-max">Survey Title</label>
                 <input
                   onChange={(e) => settile(e.target.value)}
-
                   className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 lg:ml-10 text-sm"
                 />
               </div>
@@ -298,7 +296,7 @@ export default function SurveyPage() {
             </div>
 
             <div className="flex justify-end gap-2 border-t border-gray-300 px-6 py-4 bg-gray-50 rounded-b-md">
-              <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button>
+              {/* <button className="border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-100">Save as template</button> */}
               <button onClick={handlePublish} className="bg-[rgba(78,83,177,1)] text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
                 Publish Survey
               </button>
@@ -314,22 +312,22 @@ export default function SurveyPage() {
 
       {/* Initial Option Modal */}
       <Modal isOpen={showModal}>
-        <h2 className="text-lg font-semibold mb-6 text-center">Choose an Option</h2>
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* <h2 className="text-lg font-semibold mb-6 text-center">Choose an Option</h2> */}
+        <div className="flex flex-row gap-4">
           <button
             onClick={() => setShowModal(false)}
-            className="flex-1 py-10 bg-[rgba(78,83,177,1)] text-white rounded-lg flex flex-col items-center hover:bg-indigo-700"
+            className="cursor-pointer flex-1 py-4 bg-[rgba(78,83,177,1)] hover:bg-[#474ed3] text-white rounded-lg flex items-center justify-center gap-2"
           >
-            <img src="../src/assets/FrameCreate.png" alt="Edit" className="w-6 h-6 mb-1" />
+            <FaEdit size={20} />
             Create a new
           </button>
-          <button
+          {/* <button
             onClick={() => setShowModal(false)}
             className="flex-1 py-10 bg-white text-gray-800 rounded-lg border border-gray-300 flex flex-col items-center hover:bg-gray-100"
           >
             <FileText size={24} className="mb-1" />
             Use a template
-          </button>
+          </button> */}
         </div>
       </Modal>
 

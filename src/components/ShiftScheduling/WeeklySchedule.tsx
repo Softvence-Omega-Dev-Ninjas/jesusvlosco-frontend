@@ -1,80 +1,123 @@
 import { useState } from "react";
 import {
-  HiOutlineChevronDown,
   HiOutlineBell,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
   HiOutlineChevronUp,
+  HiOutlinePencil,
+  HiOutlineTrash,
 } from "react-icons/hi";
 import { CiCirclePlus } from "react-icons/ci";
-import { useGetAllShiftsQuery } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
+import { useForm, Controller } from "react-hook-form";
+import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
+import {
+  useDeleteShiftMutation,
+  useGetProjectUsersWithShiftQuery,
+} from "@/store/api/user/scheduling/schedulingApi";
+import { useParams } from "react-router-dom";
 import { formatTimeFromISO } from "@/utils/formatDateToMDY";
-import { TProject, TProjectUser } from "@/types/projectType";
+import { generateWeekDatesForWeeklySchedule, formatDateRange, goToPreviousWeek, goToNextWeek, isSameDay, convertToISOFormat } from "@/utils/dateUtils";
+import Swal from "sweetalert2";
+import GoogleMapsLocationPicker from "./GoogleMapsLocationPicker";
+import { ShiftAPIData, ShiftFormData } from "@/types/shift";
+import { validateShiftData } from "@/utils/validation";
 
-interface ShiftData {
-  id?: string;
-  allDay: boolean;
-  createdAt: string;
-  date: string; // ISO format: "2025-08-12T08:00:00.000Z"
-  endTime: string; // ISO format: "2025-08-12T16:00:00.000Z"
-  job: string;
-  location: string;
-  note: string;
-  shiftActivity: unknown[];
+// New interfaces for the project users with shifts data
+interface UserShiftData {
+  id: string;
+  title: string;
+  projectId: string;
+  date: string; // ISO format: "2025-08-27T08:00:00.000Z"
+  startTime: string; // ISO format: "2025-08-27T08:00:00.000Z"
+  endTime: string; // ISO format: "2025-08-27T16:00:00.000Z"
   shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
-  shiftTask: unknown[];
-  shiftTitle: string;
-  startTime: string; // ISO format: "2025-08-12T08:00:00.000Z"
-  updatedAt: string;
-  users: Array<{
-    createdAt: string;
-    email: string;
-    employeeId: string;
-    id: string;
-    isLogin: boolean;
-    isVerified: boolean;
-    lastLoginAt: string;
-    otpExpiresAt: string | null;
-    password: string;
-    phone: string;
-    pinCode: string;
-    role: string;
-    updatedAt: string;
-    profile: {
-      address: string;
-      city: string;
-      country: string;
-      createdAt: string;
-      department: string;
-      dob: string;
-      firstName: string;
-      gender: string;
-      id: string;
-      jobTitle: string;
-      lastName: string;
-      nationality: string;
-      profileUrl: string;
-      updatedAt: string;
-    };
-  }>;
+  location: string;
+  lat: number;
+  lng: number;
+  note: string;
+  job: string;
+  allDay: boolean;
 }
 
-const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProject }) => {
-  console.log("Project Information:", projectInformation);
-  // Note: We're fetching shift data directly from API instead of using props
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
-  const getShifts = useGetAllShiftsQuery({});
-  const users = projectInformation?.projectUsers || [];
-  const userList = users?.filter((user: TProjectUser) => user.user?.role != "ADMIN") || [];
-  
-  console.log("Users Data:", userList);
-  console.log("Shifts Data:", getShifts.data);
-  console.log("Shifts loading:", getShifts.isLoading);
-  console.log("Shifts error:", getShifts.error);
+interface ProjectUser {
+  user: {
+    id: string;
+    email: string;
+    isAvailable: boolean;
+    firstName: string;
+    lastName: string;
+    profileUrl: string;
+    offDay: string[];
+  };
+  project: {
+    id: string;
+    title: string;
+    location: string;
+  };
+  shifts: UserShiftData[]; // User's assigned shifts
+  allShifts: UserShiftData[]; // All project shifts
+}
 
-  const userIds = userList.map((user: TProjectUser) => user.user?.id).filter(Boolean);
-  console.log("User IDs:", userIds);
+// Interfaces for form data
+
+const WeeklyScheduleGrid = () => {
+  console.log("Using new project users API data");
+  const projectIdd = useParams().id;
+  const {
+    data: projectInformationNew,
+    isLoading,
+    refetch,
+  } = useGetProjectUsersWithShiftQuery(projectIdd);
+  // console.log(projectInformationNew, "Project Information");
+  const [deleteShift] = useDeleteShiftMutation();
+  const thisProjectInformation = projectInformationNew?.data as ProjectUser[];
+  // console.log(thisProjectInformation, "Projects Array Information []");
+
+  // State management
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  // API hooks - We'll use the new data instead of the old getAllShifts
+  const [createShift] = useCreateShiftMutation();
+  const { id: projectId } = useParams();
+
+  // Form management with React Hook Form
+  const { control, handleSubmit, setValue, getValues, reset } =
+    useForm<ShiftFormData>({
+      defaultValues: {
+        currentUserId: "",
+        currentProjectId: projectId || "",
+        date: new Date().toISOString().split("T")[0], // Today's date in YYYY-MM-DD format
+        startTime: "",
+        endTime: "",
+        shiftTitle: "",
+        job: "",
+        location: "",
+        locationLng: 0,
+        locationLat: 0,
+        locationCoordinates: null,
+        note: "",
+        allDay: false,
+        userIds: [],
+        taskIds: [],
+        shiftStatus: "PUBLISHED",
+        saveAsTemplate: false,
+      },
+    });
+
+  // Extract users and shifts from the new data structure
+  const userList = thisProjectInformation || [];
+  // const projectUsers = userList.map((item) => item.user);
+
+  // console.log("📊 New Data Structure:", {
+  //   totalUsers: userList.length,
+  //   users: projectUsers.map((u) => ({
+  //     id: u.id,
+  //     name: `${u.firstName} ${u.lastName}`,
+  //   })),
+  //   projectId: projectId,
+  // });
 
   // Utility functions for handling ISO date formats
   const parseISODate = (isoString: string): Date | null => {
@@ -86,117 +129,207 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
     }
   };
 
-  const isSameDay = (date1: Date, date2: Date): boolean => {
-    // Normalize both dates to local timezone for comparison
-    const normalizeDate = (date: Date) => {
-      const normalized = new Date(date);
-      normalized.setHours(0, 0, 0, 0);
-      return normalized;
-    };
+  // Validation function for all required shift data
 
-    const norm1 = normalizeDate(date1);
-    const norm2 = normalizeDate(date2);
-    
-    return norm1.getTime() === norm2.getTime();
-  };
+  // Form submission handlers
+  const onSubmit = async (
+    data: ShiftFormData,
+    status: "PUBLISHED" | "DRAFT" | "TEMPLATE"
+  ) => {
+    try {
+      console.log("Form data before API call:", data);
 
-  // Format ISO datetime to time string in hh:mm AM/PM format, always padded
+      const locationCoordinates = data.locationCoordinates;
+      const apiData: ShiftAPIData = {
+        currentUserId: data.userIds[0] || selectedUserId,
+        currentProjectId: projectId || "",
+        date: convertToISOFormat(data.date, data.startTime),
+        shiftStatus: status,
+        startTime: convertToISOFormat(data.date, data.startTime),
+        endTime: convertToISOFormat(data.date, data.endTime),
+        shiftTitle: data.shiftTitle,
+        allDay: data.allDay,
+        job: data.job,
+        userIds: data.userIds.length > 0 ? data.userIds : [selectedUserId],
+        taskIds: data.taskIds,
+        location: locationCoordinates?.address || data.location,
+        locationLng: locationCoordinates?.longitude || data.locationLng,
+        locationLat: locationCoordinates?.latitude || data.locationLat,
+        note: data.note,
+        saveAsTemplate: data.saveAsTemplate,
+      };
 
-  const getDaysForWeek = (): {
-    day: string;
-    date: string;
-    fullDate: Date;
-  }[] => {
-    const days = [];
-    const startDate = new Date(currentDate);
-    const dayOfWeek = startDate.getDay();
-    const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    startDate.setDate(diff);
+      // console.log("API Data being sent:", apiData);
 
-    for (let i = 0; i < 7; i++) {
-      const currentDay = new Date(startDate);
-      currentDay.setDate(startDate.getDate() + i);
-      days.push({
-        day: currentDay.toLocaleString("default", { weekday: "short" }),
-        date: formatDate(currentDay),
-        fullDate: new Date(currentDay),
+      // Validate all required shift data before sending to API
+      const validation = validateShiftData(apiData);
+      if (!validation.isValid) {
+        Swal.fire({
+          title: "Validation Error!",
+          text: validation.message,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return; // Stop execution if validation fails
+      }
+
+      const result = await createShift(apiData).unwrap();
+      console.log("Shift created successfully:", result);
+
+      Swal.fire({
+        title: "Success!",
+        text: `Shift ${status.toLowerCase()} successfully!`,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      // Reset form and close modal
+      reset();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creating shift:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to create shift. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
-
-    return days;
   };
 
-  const formatDate = (date: Date): string => {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+  const handlePublish = () => {
+    const formData = getValues();
+    onSubmit(formData, "PUBLISHED");
   };
 
-  const formatDateRange = (): string => {
-    const startDate = new Date(currentDate);
-    const dayOfWeek = startDate.getDay();
-    const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    startDate.setDate(diff);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-
-    return `${startDate.toLocaleString("default", {
-      month: "short",
-    })} ${startDate.getDate()} - ${endDate.toLocaleString("default", {
-      month: "short",
-    })} ${endDate.getDate()}`;
+  const handleCancel = () => {
+    reset();
+    setIsModalOpen(false);
   };
 
-  const changeWeek = (direction: "prev" | "next") => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + (direction === "prev" ? -7 : 7));
-    setCurrentDate(newDate);
-  };
+  // Handler for editing an existing shift
+  const handleEditShift = (shift: UserShiftData, userId: string) => {
+    console.log("Edit shift:", shift);
+    console.log("Edit shift:", shift.id, "for user:", userId);
 
-  // Get all shifts for a specific day (can return multiple shifts)
-  const getShiftsForUserAndDay = (
-    dayDate: Date,
-    userId: string
-  ): ShiftData[] => {
-    console.log(`\n--- Looking for shifts for user ${userId} on: ${dayDate.toDateString()} ---`);
+    // Set selected user
+    setSelectedUserId(userId);
 
-    // Safety check: ensure data exists and is an array
-    if (!getShifts.data || !Array.isArray(getShifts.data)) {
-      console.log('❌ No data available or not an array');
-      return [];
+    // Extract shift date & times
+    const shiftDate = parseISODate(shift.date);
+    const startTime = parseISODate(shift.startTime);
+    const endTime = parseISODate(shift.endTime);
+
+    if (shiftDate && startTime && endTime) {
+      // Convert shift date & times into local formats
+      const dateObj = new Date(shift.date);
+      const startObj = new Date(shift.startTime);
+      const endObj = new Date(shift.endTime);
+
+      // Format date as YYYY-MM-DD (local)
+      const formattedDate = dateObj.toLocaleDateString("en-CA"); // gives YYYY-MM-DD reliably
+
+      // Format time as HH:MM (24-hour or 12-hour depending on need)
+      const formattedStartTime = startObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, 
+      });
+      const formattedEndTime = endObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      // Pre-fill form with existing shift data
+      setValue("userIds", [userId]);
+      setValue("date", formattedDate);
+      setValue("startTime", formattedStartTime);
+      setValue("endTime", formattedEndTime);
+      setValue("shiftTitle", shift.title);
+      setValue("job", shift.job); // Job field might not be available in UserShiftData
+      setValue("location", shift.location);
+      setValue("locationCoordinates", {
+        address: shift.location,
+        longitude: shift.lng,
+        latitude: shift.lat,
+      });
+      setValue("locationLng", shift.lng);
+      setValue("locationLat", shift.lat);
+      setValue("note", shift.note); // Note field might not be available in UserShiftData
+      setValue("currentUserId", userId);
+      setValue("currentProjectId", projectId || "");
+      setValue("shiftStatus", shift.shiftStatus);
+      setValue("allDay", shift.allDay); // If start and end times are the same, treat as all-day
     }
 
-    const matchingShifts = getShifts.data.filter((shift: ShiftData) => {
-      // Parse ISO format date (e.g., "2025-08-12T08:00:00.000Z")
-      const shiftDate = parseISODate(shift.date);
+    // Open the modal
+    setIsModalOpen(true);
+  };
 
-      if (!shiftDate) {
-        console.warn("❌ Invalid date format in shift:", shift.date);
-        return false;
-      }
+  // Handler for deleting a shift
+  const handleDeleteShift = async (shiftid: string) => {
+    // console.log("Delete shift:", shiftid);
 
-      // Check if the date matches AND if the shift belongs to this user
-      const isDateMatch = isSameDay(shiftDate, dayDate);
-      const isUserMatch = shift.users && shift.users.some && shift.users.some((user) => user.id === userId);
-
-      if (isDateMatch && isUserMatch) {
-          console.log('✅ USER SHIFT MATCH FOUND!', {
-              userId,
-              shiftDate: shift.date,
-              shiftStatus: shift.shiftStatus,
-              employee: shift.users?.[0]?.profile?.firstName || 'No name'
-          });
-      }
-
-      return isDateMatch && isUserMatch;
+    const result = await Swal.fire({
+      title: "Delete Shift?",
+      text: `Are you sure you want to delete the shift? This action cannot be undone.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
     });
 
-    console.log(`📊 Found ${matchingShifts.length} shifts for user ${userId} on ${dayDate.toDateString()}`);
-    return matchingShifts;
+    if (!result.isConfirmed) return;
+
+    try {
+      // call RTK Query mutation and unwrap the promise for proper error handling
+      await deleteShift(shiftid).unwrap();
+
+      Swal.fire({
+        title: "Deleted!",
+        text: "The shift has been deleted successfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+      refetch();
+    } catch (error) {
+      console.error("Error deleting shift:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to delete shift. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   };
-  const days = getDaysForWeek();
+
+  // Updated handleAddShift function to open modal with pre-filled data
+  const handleAddShift = (userId: string, date: Date) => {
+    // console.log("Add shift for user:", userId, "on date:", date);
+
+    // Set selected user
+    setSelectedUserId(userId);
+
+    // Format date to YYYY-MM-DD for the form
+    const formattedDate = date.toISOString().split("T")[0];
+
+    // Pre-fill form with selected user and date
+    setValue("userIds", [userId]);
+    setValue("date", formattedDate);
+    setValue("currentUserId", userId);
+    setValue("currentProjectId", projectId || "");
+
+    // Open the modal
+    setIsModalOpen(true);
+  };
+
+  const days = generateWeekDatesForWeeklySchedule();
 
   // Show loading state
-  if (getShifts.isLoading) {
+  if (isLoading) {
     return (
       <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
         <div className="flex items-center justify-center h-32">
@@ -210,122 +343,52 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
   }
 
   // Show error state
-  if (getShifts.error) {
+  if (projectInformationNew.error) {
+    console.error("Error fetching project data:", projectInformationNew.error);
     return (
-      <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
-        <div className="flex items-center justify-center h-32">
-          <div className="text-center">
-            <p className="text-red-600 mb-2">Error loading shifts</p>
-            <p className="text-gray-600 text-sm">Please try refreshing the page</p>
-          </div>
+      <section className="w-full mb-12 bg-red-50 border border-red-200 p-4 rounded-lg shadow-sm">
+        <div className="text-center text-red-600">
+          <p className="font-semibold">Error loading project data</p>
+          <p className="text-sm">Please try refreshing the page</p>
         </div>
       </section>
     );
   }
 
-  console.log('=== WEEK DAYS ===');
-  days.forEach((day, index) => {
-      console.log(`Day ${index}: ${day.day} ${day.date} (${day.fullDate.toDateString()})`);
-  });
-
   return (
-    <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm overflow-x-auto">
-      {isTemplateOpen && (
-        <div className="fixed top-0 right-0 h-full w-full sm:w-[320px] bg-white shadow-xl z-50 transition-transform border-l flex flex-col rounded-none sm:rounded-lg">
-          <div className="flex items-center justify-between p-4">
-            <h2 className="text-lg font-semibold text-gray-700">Shifts</h2>
+    <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Weekly Schedule
+          </h3>
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsTemplateOpen(false)}
-              className="text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setCurrentDate(goToPreviousWeek(currentDate))}
+              className="p-1 rounded-md hover:bg-gray-200 transition-colors"
             >
-              ✕
+              <HiOutlineChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
-          </div>
-
-          <div className="p-4 overflow-y-auto flex-1">
-            <p className="text-sm text-gray-500 mb-2">
-              Drag and drop to the schedule
-            </p>
-            <input
-              type="text"
-              placeholder="Search Templates"
-              className="w-full border border-gray-300 px-3 py-2 rounded mb-4 text-sm"
-            />
-            <div className="space-y-3">
-              <div className="bg-[rgba(78,83,177,1)] text-white p-3 rounded cursor-pointer">
-                <p className="text-sm font-medium">9:00 am – 5:00 pm</p>
-                <p className="text-xs">Morning Shift</p>
-              </div>
-              <div className="bg-[rgba(78,83,177,1)] text-white p-3 rounded cursor-pointer">
-                <p className="text-sm font-medium">10:00 am – 6:00 pm</p>
-                <p className="text-xs">Night Shift</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 border-t">
-            <button className="w-full border border-[rgba(78,83,177,1)] text-[rgba(78,83,177,1)] px-4 py-2 rounded hover:bg-indigo-50 text-sm">
-              Add Template
+            <span className="text-sm text-gray-600 min-w-max">
+              {formatDateRange(currentDate)}
+            </span>
+            <button
+              onClick={() => setCurrentDate(goToNextWeek(currentDate))}
+              className="p-1 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              <HiOutlineChevronRight className="w-5 h-5 text-gray-600" />
             </button>
           </div>
         </div>
-      )}
-
-      <h1 className="text-[rgba(78,83,177,1)] mb-2 text-lg font-bold">
-        Weekly Schedule
-      </h1>
-
-      <div className="flex flex-wrap items-center justify-between mb-6 gap-3 min-w-[450px]">
-        <div className="flex items-center gap-2 flex-wrap">
-          <button className="flex items-center justify-center border-indigo-300 text-[rgba(78,83,177,1)] px-2 font-bold py-1.5 rounded-full">
-            <img
-              className="rounded-full border  px-2 font-bold py-1  mt-1"
-              src="../src/assets/filter.png"
-              alt=""
-            />
-          </button>
-          <button className="flex items-center gap-1 text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50">
-            Week <HiOutlineChevronDown className="w-4 h-4" />
-          </button>
-
-          <div className="flex items-center gap-1 bg-white border border-indigo-300 rounded-full px-1">
-            <button
-              className="text-sm text-[rgba(78,83,177,1)] p-1 rounded-full hover:bg-indigo-50"
-              onClick={() => changeWeek("prev")}
-            >
-              <HiOutlineChevronLeft className="w-4 h-4" />
-            </button>
-            <button className="text-sm text-indigo-700 px-3 py-1.5 rounded-full hover:bg-indigo-50 whitespace-nowrap">
-              {formatDateRange()}
-            </button>
-            <button
-              className="text-sm text-[rgba(78,83,177,1)] p-1 rounded-full hover:bg-indigo-50"
-              onClick={() => changeWeek("next")}
-            >
-              <HiOutlineChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {!isTemplateOpen && (
-            <div
-              onClick={() => setIsTemplateOpen(true)}
-              className="fixed top-120 right-0 h-34 w-4 sm:w-6 md:w-8 lg:w-8 bg-[rgba(78,83,177,1)] text-white text-[20px] font-semibold flex items-center justify-center cursor-pointer rounded-l-md z-50"
-            >
-              <span className="transform -rotate-90 whitespace-nowrap">
-                Templates
-              </span>
-            </div>
-          )}
-        </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button className="text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50 flex items-center gap-1">
-            Actions <HiOutlineChevronUp className="w-4 h-4 " />
+          <button className="hidden text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50  items-center gap-1">
+            Actions <HiOutlineChevronUp className="w-4 h-4" />
           </button>
-          <button className="text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50 flex items-center gap-1">
+          <button className="hidden text-sm border border-indigo-300 text-[rgba(78,83,177,1)] px-3 py-1.5 rounded-full hover:bg-indigo-50  items-center gap-1">
             Add <HiOutlineChevronUp className="w-4 h-4" />
           </button>
-          <button className="text-sm bg-[rgba(78,83,177,1)] text-white px-4 py-1.5 rounded-full flex items-center gap-1 hover:bg-indigo-800">
+          <button className="hidden text-sm bg-[rgba(78,83,177,1)] text-white px-4 py-1.5 rounded-full  items-center gap-1 hover:bg-indigo-800">
             Publish <HiOutlineBell className="w-4 h-4" />
           </button>
         </div>
@@ -350,77 +413,315 @@ const WeeklyScheduleGrid = ({ projectInformation }: { projectInformation: TProje
         <div className="space-y-2">
           {userList.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 text-lg">No employees found in this project</p>
-              <p className="text-gray-400 text-sm mt-2">Add employees to the project to see their shifts</p>
+              <p className="text-gray-500 text-lg">
+                No employees found in this project
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                Add employees to the project to see their shifts
+              </p>
             </div>
           ) : (
-            userList.map((projectUser: TProjectUser, rowIdx: number) => {
-              const user = projectUser.user;
+            userList.map((projectUserData: ProjectUser, rowIdx: number) => {
+              const user = projectUserData.user;
+              const userShifts = projectUserData.shifts; // User's assigned shifts
+
               if (!user) return null;
-              
+
               return (
-              <div key={user.id || rowIdx} className="grid grid-cols-8 gap-2">
-                {/* User name column */}
-                <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 bg-gray-100 border border-gray-300 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-800">
-                      {user.profile?.firstName} {user.profile?.lastName}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {user.profile?.jobTitle?.replace(/_/g, " ") || user.email?.split("@")[0]}
+                <div
+                  key={rowIdx}
+                  className="grid grid-cols-8 gap-2 bg-white rounded-lg p-3 border border-gray-200"
+                >
+                  {/* User column */}
+                  <div className="flex flex-col items-center justify-center">
+                    <img
+                      src={
+                        user.profileUrl ||
+                        `https://i.pravatar.cc/40?img=${rowIdx + 1}`
+                      }
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-10 h-10 rounded-full object-cover mb-1"
+                    />
+                    <p className="text-xs font-medium text-center text-gray-700">
+                      {user.firstName} {user.lastName}
                     </p>
                   </div>
+
+                  {/* Day columns */}
+                  {days.map((day, colIdx) => {
+                    // Find shifts for this user on this specific day
+                    const shiftsForDay = userShifts.filter(
+                      (shift: UserShiftData) => {
+                        const shiftDate = parseISODate(shift.date);
+                        if (!shiftDate) {
+                          console.log(
+                            `❌ Failed to parse date for shift ${shift.id}:`,
+                            shift.date
+                          );
+                          return false;
+                        }
+
+                        const isDateMatch = isSameDay(shiftDate, day.fullDate);
+
+                        // Enhanced debugging
+                        if (isDateMatch) {
+                          console.log(
+                            `✅ Found shift for ${
+                              user.firstName
+                            } on ${day.fullDate.toDateString()}:`,
+                            {
+                              shiftTitle: shift.title,
+                              shiftDate: shiftDate.toDateString(),
+                              startTime: shift.startTime,
+                              endTime: shift.endTime,
+                              status: shift.shiftStatus,
+                            }
+                          );
+                        }
+
+                        return isDateMatch;
+                      }
+                    );
+
+                    // Get the last shift for this day (in case there are multiple)
+                    const dayShift =
+                      shiftsForDay.length > 0
+                        ? shiftsForDay[shiftsForDay.length - 1]
+                        : null;
+
+                    return (
+                      <div key={`${rowIdx}-${colIdx}`} className="space-y-2">
+                        {dayShift ? (
+                          <div
+                            className={`group min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative flex flex-col justify-center items-center gap-2 cursor-pointer ${
+                              dayShift.shiftStatus === "PUBLISHED"
+                                ? "bg-indigo-200 border border-[rgba(78,83,177,1)] hover:bg-indigo-300"
+                                : "bg-white border-2 border-indigo-400 hover:bg-indigo-50"
+                            }`}
+                          >
+                            {/* Hover Actions - Edit and Delete buttons */}
+                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditShift(dayShift, user.id);
+                                }}
+                                className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded text-xs transition-colors shadow-sm"
+                                title="Edit Shift"
+                              >
+                                <HiOutlinePencil className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteShift(dayShift.id);
+                                }}
+                                className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded text-xs transition-colors shadow-sm"
+                                title="Delete Shift"
+                              >
+                                <HiOutlineTrash className="w-3 h-3" />
+                              </button>
+                            </div>
+
+                            <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
+                              {formatTimeFromISO(dayShift.startTime)} -{" "}
+                              {formatTimeFromISO(dayShift.endTime)}
+                            </p>
+
+                            <p className="text-sm text-center font-semibold text-purple-800">
+                              {dayShift.title}
+                            </p>
+
+                            <p className="text-xs text-center text-gray-600">
+                              {dayShift.location}
+                            </p>
+                          </div>
+                        ) : (
+                          /* Empty cell with consistent styling */
+                          <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
+                            <CiCirclePlus
+                              onClick={() =>
+                                handleAddShift(user.id, day.fullDate)
+                              }
+                              className="text-2xl text-gray-400 hover:text-gray-600"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                
-                {/* 7 day columns for this user */}
-                {days.map((day, colIdx) => {
-                  const shiftsForUserAndDay = getShiftsForUserAndDay(
-                    day.fullDate,
-                    user.id
-                  );
-                  // Get only the last shift if multiple shifts exist for this user on this day
-                  const lastShift =
-                    shiftsForUserAndDay.length > 0
-                      ? shiftsForUserAndDay[shiftsForUserAndDay.length - 1]
-                      : null;
-                  return (
-                    <div key={`${rowIdx}-${colIdx}`} className="space-y-2">
-                      {lastShift ? (
-                        <div
-                          className={`min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 transition-all relative flex flex-col justify-center items-center gap-2 ${
-                            lastShift.shiftStatus === "PUBLISHED"
-                              ? "bg-indigo-200 border border-[rgba(78,83,177,1)]"
-                              : "bg-white border-2 border-indigo-400"
-                          }`}
-                        >
-                          <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
-                            {formatTimeFromISO(lastShift.startTime)} -{" "}
-                            {formatTimeFromISO(lastShift.endTime)}
-                          </p>
-
-                          <p className="text-sm text-center font-semibold text-purple-800">
-                            {lastShift.shiftTitle}
-                          </p>
-
-                          <p className="text-xs text-center text-gray-600">
-                            {lastShift.location}
-                          </p>
-                        </div>
-                      ) : (
-                        /* Empty cell with consistent styling */
-                        <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
-                          <CiCirclePlus className="text-2xl text-gray-400 hover:text-gray-600" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
               );
             })
           )}
         </div>
       </div>
+
+      {/* Shift Scheduling Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Schedule Shift
+              </h2>
+              <button
+                onClick={handleCancel}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Shift Details Form */}
+            <form
+              onSubmit={handleSubmit((data) => onSubmit(data, "PUBLISHED"))}
+            >
+              <div className="space-y-4 text-sm">
+                {/* Date and All Day Toggle */}
+                <div className="flex items-center justify-between">
+                  <label className="font-medium">Date</label>
+                  <Controller
+                    name="date"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        type="date"
+                        {...field}
+                        className="border border-gray-300 px-3 py-2 rounded-md"
+                      />
+                    )}
+                  />
+                  <div className="flex items-center gap-2">
+                    <span>All Day</span>
+                    <Controller
+                      name="allDay"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="accent-[rgba(78,83,177,1)] w-4 h-4"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Start and End Time */}
+                <div className="flex gap-4 items-center">
+                  <label className="font-medium">Start</label>
+                  <Controller
+                    name="startTime"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        type="time"
+                        {...field}
+                        className="border border-gray-300 px-3 py-2 rounded-md"
+                      />
+                    )}
+                  />
+                  <label className="font-medium">End</label>
+                  <Controller
+                    name="endTime"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        type="time"
+                        {...field}
+                        className="border border-gray-300 px-3 py-2 rounded-md"
+                      />
+                    )}
+                  />
+                  <span className="ml-auto text-gray-600">08:00 Hours</span>
+                </div>
+
+                {/* Shift Title */}
+                <Controller
+                  name="shiftTitle"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      placeholder="Shift Title"
+                      {...field}
+                      className="w-full border border-gray-300 rounded-md p-3"
+                    />
+                  )}
+                />
+
+                {/* Job */}
+                <Controller
+                  name="job"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      placeholder="Job"
+                      {...field}
+                      className="w-full border border-gray-300 rounded-md p-3"
+                    />
+                  )}
+                />
+
+                {/* Location Picker */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Location
+                  </label>
+                  <Controller
+                    name="locationCoordinates"
+                    control={control}
+                    render={({ field }) => (
+                      <GoogleMapsLocationPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Click to select location on map"
+                        className="w-full"
+                        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Notes */}
+                <Controller
+                  name="note"
+                  control={control}
+                  render={({ field }) => (
+                    <textarea
+                      placeholder="Type Description"
+                      {...field}
+                      rows={3}
+                      className="w-full border border-gray-300 rounded-md p-3"
+                    />
+                  )}
+                />
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    className="bg-[rgba(78,83,177,1)] text-white px-6 py-2 rounded-lg text-sm hover:bg-indigo-800"
+                    onClick={handlePublish}
+                  >
+                    Publish
+                  </button>
+                  <button
+                    type="button"
+                    className="text-red-500 border border-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-red-50"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

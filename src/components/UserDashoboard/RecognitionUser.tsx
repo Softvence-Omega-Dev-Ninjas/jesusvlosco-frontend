@@ -4,7 +4,7 @@ import { BadgeIcon, Crown, Gem } from "./icons";
 interface Achievement {
   id: string;
   title: string;
-  date: string;
+  createdAt: string;
   recipient: string;
 }
 
@@ -27,7 +27,7 @@ export const RecognitionUser: React.FC<{
           <BadgeIcon />
         </div>
         <h3 className="font-semibold text-gray-800 text-lg">
-          Recognition & Engagement
+          Recognition 
         </h3>
       </div>
 
@@ -50,7 +50,7 @@ export const RecognitionUser: React.FC<{
                 {achievement.title}
               </div>
               <div className="text-gray-600 text-xs leading-relaxed">
-                Badge received by {achievement.recipient} on {achievement.date}
+                Badge received by {achievement.recipient} on {new Date(achievement.createdAt).toLocaleDateString()}
               </div>
             </div>
           </div>

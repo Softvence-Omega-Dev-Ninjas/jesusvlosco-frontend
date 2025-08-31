@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import User from '@/pages/User'; // Assuming this path is correct
 import Admin from '@/pages/Admin'; // Assuming this path is correct
+import SuperAdmin from '@/pages/SuperAdmin'; // Import SuperAdmin component
 import UserProfile from '@/pages/UserProfile';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
 
 export const UserLayout = () => {
     // State to keep track of the active tab: 'user' or 'admin'
     // Initialize with 'user' or 'admin' directly.
-    const [activeTab, setActiveTab] = useState('user'); // Corrected default to 'user'
+    const [activeTab, setActiveTab] = useState('user');
+    const user = useSelector((state: RootState) => state.user.user);
+    console.log(user?.role) // Corrected default to 'user'
     const location = useLocation();
+    const navigate = useNavigate();
 
     const renderContent = () => {
         // Check if the current path includes '/user-profile'
@@ -23,6 +29,8 @@ export const UserLayout = () => {
             return <User />;
         } else if (activeTab === 'admin') {
             return <Admin />
+        } else if (activeTab === 'superadmin') {
+            return <SuperAdmin />
         }
         return null; // Fallback
     };
@@ -60,6 +68,27 @@ export const UserLayout = () => {
                                 }`}
                         >
                             Admins
+                        </button>
+
+                        {/* Super Admin Tab Button - Only show if user is SUPER_ADMIN */}
+                        {user?.role === 'SUPER_ADMIN' && (
+                            <button
+                                onClick={() => setActiveTab('superadmin')}
+                                className={`py-2 px-4 rounded-md transition duration-200 ${activeTab === 'superadmin'
+                                    ? 'bg-[#4E53B1] text-white shadow-md'
+                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                    }`}
+                            >
+                                Super Admin
+                            </button>
+                        )}
+
+                        <button
+                            onClick={() => navigate('/admin/manage-teams')} // Correctly set to 'admin'
+                            className={`py-2 px-4 rounded-md transition duration-200 bg-gray-200 text-gray-800 hover:bg-gray-300
+                                }`}
+                        >
+                            Manage Teams
                         </button>
                     </div>
 

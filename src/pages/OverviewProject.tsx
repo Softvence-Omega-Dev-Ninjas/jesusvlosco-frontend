@@ -10,6 +10,7 @@ import {
   Tally1,
   LoaderCircle,
 } from "lucide-react";
+import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
 
 // Imported local image assets
 import user1 from "../assets/user1.png";
@@ -29,7 +30,6 @@ import {
   useGetAllTimeOffRequestsQuery,
 } from "@/store/api/admin/dashboard/TimeOffRequestsApi";
 import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
-import { formatTimeFromISO, parseISODate } from "@/utils/formatDateToMDY";
 
 const OverviewProject = () => {
   const projectId = useParams().id;
@@ -57,11 +57,7 @@ const OverviewProject = () => {
         req.user?.profile?.profileUrl ||
         `https://i.pravatar.cc/40?img=${Math.random()}`,
       type: req.reason,
-      date: new Date(req.startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
+      date: formatDateFull(req.startDate),
       status: req.status?.toLowerCase(),
     })) || [];
 
@@ -348,15 +344,17 @@ const OverviewProject = () => {
                             <div className="space-y-1">
                               <div className="text-sm font-medium text-gray-500 space-y-2">
                                {
-                                employee.user.shift.length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
-                                  <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
-                                    <div className="text-xs text-gray-500">
-                                      {shift.shiftTitle}
+                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
+                                  shift.projectId === projectId ? (
+                                    <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
+                                      <div className="text-xs text-gray-500">
+                                        {shift.shiftTitle}
+                                      </div>
+                                      <div>
+                                        ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
+                                      </div>
                                     </div>
-                                    <div>
-                                      ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
-                                    </div>
-                                  </div>
+                                  ) : " "
                                 ))
                                }
                               </div>
@@ -367,9 +365,9 @@ const OverviewProject = () => {
                           <div>
                             <div className="text-sm text-gray-700 space-y-3">
                               {
-                                employee.user.shift.length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
+                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
                                   <div key={shift.id} className="space-y-1">
-                                    {parseISODate(shift.date)?.toLocaleDateString()}
+                                    {formatDateFull(shift.date)}
                                   </div>
                                 ))
                               }

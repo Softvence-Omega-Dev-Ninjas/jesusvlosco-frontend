@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Settings, Menu } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import UserDropdown from './User/UserDropdown';
 
 interface HeaderProps {
@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Search and user section */}
         <div className="flex items-center space-x-4">
           {/* Search bar - hidden on small screens */}
-          <div className="hidden md:flex relative">
+          {/* <div className="hidden md:flex relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
@@ -35,22 +35,17 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               placeholder="Search"
               className="block w-80 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </div>
+          </div> */}
 
           {/* Mobile search button */}
-          <button className="hidden md:block p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+          {/* <button className="hidden md:block p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
             <Search className="h-5 w-5" />
-          </button>
+          </button> */}
 
           {/* Notifications */}
           <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* Settings */}
-          <button className="p-2 hidden md:block rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-            <Settings className="h-5 w-5" />
           </button>
 
           {/* User profile */}

@@ -10,7 +10,14 @@ const createPoolApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    getPollStatistics: builder.query({
+      query: () => ({
+        url: "/pool/pool-response/all",
+        method: "GET",
+      }),
+      providesTags: ["survey"],
+    }),
   }),
 });
 
-export const {useCreatePoolMutation }= createPoolApi
+export const { useCreatePoolMutation, useGetPollStatisticsQuery } = createPoolApi;

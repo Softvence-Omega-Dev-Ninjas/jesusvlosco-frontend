@@ -22,7 +22,7 @@ export const Chat = () => {
           <div>
             <h2 className="text-2xl font-semibold mb-3 text-primary">Chat</h2>
             <p className="text-gray-700 text-sm md:text-base">
-              This is where your team chat messages will appear.
+              This is where your private chat messages will appear.
             </p>
           </div>
 

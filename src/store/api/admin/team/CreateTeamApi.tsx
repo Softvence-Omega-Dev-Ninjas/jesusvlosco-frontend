@@ -11,7 +11,7 @@ const teamApi = baseApi.injectEndpoints({
         
         body,
       }),
-      invalidatesTags: ['Team', 'ADMIN_USER'],
+      invalidatesTags: ['TEAM', 'ADMIN_USER'],
     }),
 
     // GET - All teams
@@ -20,9 +20,26 @@ const teamApi = baseApi.injectEndpoints({
         url: "admin/team/get-all-teams",
         method: "GET",
       }),
-      providesTags: ['Team'],
+      providesTags: ['TEAM'],
+    }),
+
+    deleteTeam: builder.mutation({
+      query: (teamId) => ({
+        url: `admin/team/${teamId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ['TEAM', 'ADMIN_USER'],
+    }),
+
+    updateTeamInfo: builder.mutation({
+      query: (teamData) => ({
+        url: `admin/team/${teamData.id}`,
+        method: "PATCH",
+        body: teamData,
+      }),
+      invalidatesTags: ['TEAM', 'ADMIN_USER'],
     }),
   }),
 });
 
-export const { useCreateTeamMutation, useGetAllTeamsQuery } = teamApi;
+export const { useCreateTeamMutation, useGetAllTeamsQuery, useDeleteTeamMutation , useUpdateTeamInfoMutation } = teamApi;

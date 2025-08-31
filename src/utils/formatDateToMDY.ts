@@ -36,17 +36,61 @@ export const parseISODate = (isoString: string): Date | null => {
 };
 
 export const formatTimeFromISO = (isoString: string): string => {
-  const date = parseISODate(isoString);
-  if (!date) return isoString; // Return original if parsing fails
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString; // fallback if invalid
 
-  let hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-  const strHours = hours < 10 ? `0${hours}` : `${hours}`;
-  const strMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  return `${strHours}:${strMinutes} ${ampm}`;
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // <-- ensures 12 hour format
+  });
+};
+
+// Additional utility functions for consistent timezone handling
+export const formatDateFromISO = (isoString: string): string => {
+  const date = new Date(isoString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  if (!date) return isoString;
+
+  return date;
+};
+
+export const formatWeekdayShort = (isoString: string): string => {
+  const date = parseISODate(isoString);
+  if (!date) return '';
+
+  const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return weekdayNames[date.getUTCDay()];
+};
+
+export const formatDateShort = (isoString: string): string => {
+  const date = parseISODate(isoString);
+  if (!date) return '';
+
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+export const formatDateFull = (isoString: string): string => {
+  const date = parseISODate(isoString);
+  if (!date) return '';
+
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+export const formatDateWithWeekday = (isoString: string): string => {
+  const date = parseISODate(isoString);
+  if (!date) return '';
+
+  const weekday = date.toLocaleString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${weekday}, ${day}-${month}-${year}`;
 };
 
 export function toISODate(dateStr: string, timeStr: string): string {

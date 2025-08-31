@@ -30,7 +30,7 @@ import ShiftScheduling from "@/pages/ShiftScheduling";
 import SidebarSetting from "@/pages/SidebarSetting";
 import SurveyAndPoll from "@/pages/SurveyAndPoll";
 import SurveyDetails from "@/pages/SurveyDetails";
-import SurveyMainPage from "@/pages/SurveyMainPage";
+import SurveyMainPage from "@/pages/SurveyAndPoll/SurveyMainPage";
 import SurveyResponse from "@/pages/SurveyResponse";
 import SurveyTemplate from "@/pages/SurveyTemplate";
 // import TaskAndProject from "@/pages/TaskAndProject/";
@@ -67,9 +67,12 @@ import CreateTeam from "@/pages/Admin/CreateTeam";
 import TasksAndProjects from "@/pages/TasksAndProjects/TasksAndProjects";
 import AdminRoute from "./AdminRoutes";
 import ScheduleAssignPage from "@/pages/ScheduleAssignPage";
-// import ShiftSchedule from "@/pages/userpages/ShiftSchedule";
+import ShiftSchedule from "@/pages/userpages/ShiftSchedule";
 // import EmailLogin from "@/pages/EmailLogin";
 import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
+import SurveyStatisticsPage from "@/pages/SurveyAndPoll/SurveyStatisticsPage";
+import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
+import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -115,19 +118,17 @@ const routes = createBrowserRouter([
         path: "user-schedule",
         element: <Schedule />,
         children: [
-          // {
-          //   path: "user-shiftschedule",
-          //   element: <ShiftSchedule />,
-          // },
           {
             path: "user-shiftschedule",
+            element: <ShiftSchedule />,
+          },
+          {
+            path: "user-shiftschedule/:id",
             element: <UserShiftScheduling></UserShiftScheduling>,
           },
           {
             path: "user-overviewProjects/:id",
-            element: (
-              <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>
-            ),
+            element: <ShiftSchedulingProjectDetails></ShiftSchedulingProjectDetails>,
           },
           { path: "user-timeclock", element: <UserTimeClock /> },
 
@@ -226,7 +227,13 @@ const routes = createBrowserRouter([
         ],
       },
 
-      { path: "survey-poll", element: <SurveyMainPage /> },
+      {
+        path: "survey-poll",
+        element: <SurveyMainPage />,
+        // children: [{ path: "survey", element: <SurveyPage /> }],
+      },
+      { path: "poll-analytics", element: <PollStatisticsPage /> },
+      { path: "survey-analytics", element: <SurveyStatisticsPage /> },
       { path: "create-team", element: <CreateTeam /> },
       { path: "survey-response", element: <SurveyResponse /> },
       { path: "survey-details/", element: <SurveyDetails /> },
@@ -264,7 +271,10 @@ const routes = createBrowserRouter([
         ],
       },
 
-      {},
+      {
+        path: "manage-teams",
+        element: <ManageTeams />,
+      },
       {
         path: "add-user",
         element: <AddUserProfile></AddUserProfile>,

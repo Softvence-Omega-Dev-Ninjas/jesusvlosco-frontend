@@ -4,9 +4,13 @@ import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function UpdateProfileModal() {
+export default function UpdateProfileModal({
+  preProfileUrl
+}: {
+  preProfileUrl?: string;
+}) {
   const [openModal, setOpenModal] = useState(false);
-  const [profileUrl, setProfileUrl] = useState("");
+  const [profileUrl, setProfileUrl] = useState(preProfileUrl || "");
   const [file, setFile] = useState<File | null>();
   const user = useAppSelector(selectUser);
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
