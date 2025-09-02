@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { logoutUser } from "@/store/Slices/AuthSlice/authSlice";
@@ -35,66 +36,6 @@ interface NavigationItem {
   }[];
   badge?: number;
 }
-
-// const navigation: NavigationItem[] = [
-//     {
-//         name: 'Dashboard',
-//         icon: LayoutDashboard,
-//         path: '/'
-//     },
-//     {
-//         name: 'Communication',
-//         path: '/communication',
-
-//         icon: MessageSquare,
-//         hasSubmenu: true,
-//         submenu: [
-//             { name: 'Messages', icon: Award, path: '/communication/chat' },
-//             { name: 'Recognition', icon: Mail, path: '/communication/recognition' }
-//         ]
-//     },
-//     {
-//         name: 'User',
-//         path: '/user',
-
-//         icon: MessageSquare,
-//         hasSubmenu: true,
-//         submenu: [
-//             { name: 'User', icon: Award, path: '/user/user' },
-//             { name: 'User Profile', icon: Mail, path: '/user/user-profile' }
-//         ]
-//     },
-
-//     {
-//         name: 'Survey & Poll',
-//         icon: BarChart3,
-//         path: '/survey-poll'
-//     },
-//     {
-//         name: 'Scheduling',
-//         path: '/schedule',
-//         icon: Calendar,
-//         hasSubmenu: true,
-//         submenu: [
-//             { name: 'Shift Scheduling', icon: Calendar, path: '/schedule/shiftschedule' },
-//             { name: 'Time Clock', icon: Calendar, path: '/schedule/timeclock' },
-//             { name: 'Time Sheets', icon: Calendar, path: '/schedule/timesheet' },
-//             { name: 'TimeOff Request', icon: Calendar, path: '/schedule/timeoffrequest' },
-//         ]
-//     },
-//     {
-//         name: 'Tasks & Projects',
-//         icon: FolderOpen,
-//         path: '/tasks-projects',
-//         badge: 1
-//     },
-//     {
-//         name: 'Settings',
-//         icon: Settings,
-//         path: '/settings'
-//     },
-// ];
-
 const navigation: NavigationItem[] = [
   {
     name: "Dashboard",
@@ -153,6 +94,11 @@ const navigation: NavigationItem[] = [
         name: "TimeOff Request",
         icon: Calendar,
         path: "/admin/schedule/timeoffrequest",
+      },
+      {
+        name: "Clock In Request",
+        icon: Clock,
+        path: "/admin/schedule/clock-in-request",
       },
     ],
   },
@@ -321,9 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div className="text-4xl font-bold text-[#4E53B1] ml-6 mb-7">
               <img className="px-2" src={logo} alt="" />
             </div>
-            <div className="px-3 space-y-1">
-              {navigation.map(renderNavigationItem)}
-            </div>
+            <div className="px-3 space-y-1">{navigation.map(renderNavigationItem)}</div>
           </nav>
 
           <div className="flex-shrink-0 px-3 pb-4 border-t border-gray-200 pt-4">

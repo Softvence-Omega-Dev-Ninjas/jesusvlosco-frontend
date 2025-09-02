@@ -3,14 +3,12 @@ import React, { useState } from "react";
 import { Clock, CheckCircle, XCircle, Plus } from "lucide-react";
 import AddShiftModal from "./AddShiftModal";
 import { TimeOffRequestModal } from "./AddTimeModal";
-import {
-  useDeleteSchedulingRequestMutation,
-  useGetAllUserTimeClockQuery,
-} from "@/store/api/user/scheduling/schedulingApi";
+import { useDeleteSchedulingRequestMutation, useGetAllUserTimeClockQuery } from "@/store/api/user/scheduling/schedulingApi";
 import { formatDateRange } from "@/utils/formatDateRange";
 import { toast } from "sonner";
 import { useGetClockHistoryQuery, useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { toLocalTimeString } from "@/utils/timeUtils";
+import AddClockInRequestModal from "./AddClockInRequestModal/AddClockInRequestModal";
 
 interface TimeEntry {
   clockIn: string;
@@ -86,36 +84,22 @@ const TimeTrackingDashboard: React.FC = () => {
           {/* Current Status */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#4E53B1]">
-                Current Status
-              </h2>
+              <h2 className="text-xl font-semibold text-[#4E53B1]">Current Status</h2>
             </div>
             <p className="text-sm text-gray-600 mb-6">{currentDate}</p>
 
             <div className="grid grid-cols-3 gap-8">
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Clock In
-                </h3>
-                <p className="text-lg font-semibold text-gray-900">
-                  {timeEntry.clockIn || "Not clocked in yet"}
-                </p>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Clock In</h3>
+                <p className="text-lg font-semibold text-gray-900">{timeEntry.clockIn || "Not clocked in yet"}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Clock Out
-                </h3>
-                <p className="text-lg font-semibold text-gray-900">
-                  {timeEntry.clockOut || "Not clocked out yet"}
-                </p>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Clock Out</h3>
+                <p className="text-lg font-semibold text-gray-900">{timeEntry.clockOut || "Not clocked out yet"}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Status
-                </h3>
-                <p className="text-lg font-semibold text-gray-900">
-                  {clock?.status || "Not clocked in"}
-                </p>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Status</h3>
+                <p className="text-lg font-semibold text-gray-900">{clock?.status || "Not clocked in"}</p>
               </div>
             </div>
           </div>
@@ -125,36 +109,20 @@ const TimeTrackingDashboard: React.FC = () => {
               {/* My Requests */}
               <div className=" ">
                 <div className="p-6  border-gray-200">
-                  <h2 className="text-xl font-semibold text-[#4E53B1] flex items-center gap-2">
-                    My Requests
-                  </h2>
+                  <h2 className="text-xl font-semibold text-[#4E53B1] flex items-center gap-2">My Requests</h2>
                 </div>
 
                 <div className="p-6 space-y-4 ">
                   {timeClockRequest?.map((request: any) => (
-                    <div
-                      key={request.id}
-                      className="border  border-gray-200 rounded-lg p-4 py-11 bg-gray-50"
-                    >
+                    <div key={request.id} className="border  border-gray-200 rounded-lg p-4 py-11 bg-gray-50">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 mb-1">
-                            {formatDateRange(
-                              request?.startTime,
-                              request?.endTime
-                            )}
-                          </p>
+                          <p className="font-medium text-gray-900 mb-1">{formatDateRange(request?.startTime, request?.endTime)}</p>
                           {/* <p className="text-gray-600 text-sm">
                             {request.type}
                           </p> */}
                         </div>
-                        <span
-                          className={getStatusBadge(
-                            request.status === "DRAFT" ? "pending" : "approved"
-                          )}
-                        >
-                          {request?.status}
-                        </span>
+                        <span className={getStatusBadge(request.status === "DRAFT" ? "pending" : "approved")}>{request?.status}</span>
                       </div>
 
                       {request.status === "DRAFT" ? (
@@ -165,9 +133,7 @@ const TimeTrackingDashboard: React.FC = () => {
                           Cancel request
                         </button>
                       ) : (
-                        <div className="px-4 py-2 bg-green-700 text-white rounded-full text-sm font-medium inline-block">
-                          Approved
-                        </div>
+                        <div className="px-4 py-2 bg-green-700 text-white rounded-full text-sm font-medium inline-block">Approved</div>
                       )}
                       {/* 
                       {request.status === "Approved" && (
@@ -180,22 +146,16 @@ const TimeTrackingDashboard: React.FC = () => {
                 </div>
               </div>
 
-             
               {/* Recent Activity */}
               <div>
                 <div className="p-6  border-gray-200">
-                  <h2 className="text-xl font-semibold text-[#4E53B1] flex items-center gap-2">
-                    Clock History
-                  </h2>
+                  <h2 className="text-xl font-semibold text-[#4E53B1] flex items-center gap-2">Clock History</h2>
                 </div>
 
                 <div className="p-6 space-y-4">
                   {clockHistory?.length > 0 ? (
                     clockHistory.slice(0, 4).map((activity: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg"
-                      >
+                      <div key={index} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg">
                         <div className="flex-shrink-0 w-8 h-8 mt-2 bg-gray-100 rounded-full flex items-center justify-center">
                           {getActivityIcon(
                             activity.type === "CLOCK_IN" ? "clock-in" : "clock-out",
@@ -204,14 +164,12 @@ const TimeTrackingDashboard: React.FC = () => {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium text-gray-900 mb-1">
-                            {activity.title} at  {toLocalTimeString(activity.time)}
+                            {activity.title} at {toLocalTimeString(activity.time)}
                           </h3>
                           {/* <p className="text-sm text-gray-600">
                             Date: {activity.date}
                           </p> */}
-                          <p className="text-sm text-gray-500">
-                            Location: {activity.location}
-                          </p>
+                          <p className="text-sm text-gray-500">Location: {activity.location}</p>
                         </div>
                       </div>
                     ))
@@ -228,27 +186,26 @@ const TimeTrackingDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Request Actions */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Request
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Request</h3>
             <div className="space-y-3">
               <button
                 onClick={() => setIsShiftModalOpen(true)}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Plus className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Add a shift request
-                </span>
+                <span className="text-sm font-medium text-gray-700">Add a shift request</span>
               </button>
-              {isShiftModalOpen && (
-                <AddShiftModal onClose={() => setIsShiftModalOpen(false)} />
-              )}
+              {/* <button
+                onClick={() => setIsShiftModalOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Plus className="w-5 h-5 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Add Clock In Request</span>
+              </button> */}
+              <AddClockInRequestModal />
+              {isShiftModalOpen && <AddShiftModal onClose={() => setIsShiftModalOpen(false)} />}
 
-              <TimeOffRequestModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-              />
+              <TimeOffRequestModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             </div>
           </div>
         </div>
