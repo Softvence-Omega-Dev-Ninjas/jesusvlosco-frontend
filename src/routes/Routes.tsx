@@ -267,7 +267,7 @@ const routes = createBrowserRouter([
         children: [
           { index: true, element: <User /> },
           { path: "user", element: <Chat /> },
-          { path: "user-profile", element: <UserProfile /> },
+          { path: "user-profile/:id", element: <UserProfile /> },
         ],
       },
 

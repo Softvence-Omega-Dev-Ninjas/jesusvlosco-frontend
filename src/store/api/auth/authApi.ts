@@ -54,7 +54,7 @@ const authApi = baseApi.injectEndpoints({
     }),
     getProfile: build.query({
       query: (credentials) => ({
-        url: `/admin/user/id/${credentials?.id}`,
+        url: `/admin/user/id/${credentials}`,
       }),
     }),
     getUserProfile: build.query({

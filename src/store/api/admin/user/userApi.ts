@@ -80,6 +80,16 @@ const userApi = baseApi.injectEndpoints({
         };
       },
     }),
+    updateFullInfoUser: build.mutation({
+      query: ({ data, userId }) => {
+        console.log({ data, userId });
+        return {
+          url: `/admin/user/${userId}/full`,
+          method: "PATCH",
+          body: data,
+        };
+      },
+    }),
 
     updateEmployee: build.mutation({
       query: ({ data }) => {
@@ -144,4 +154,5 @@ export const {
 
   // Update employee
   useUpdateEmployeeMutation,
+  useUpdateFullInfoUserMutation,
 } = userApi;
