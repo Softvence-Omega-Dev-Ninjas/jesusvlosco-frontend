@@ -21,7 +21,7 @@ import PendingRequestModal from "@/components/TimeSheets/PendingRequestModal";
 import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
-import { useGetAllTimeClockAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
+import { useGetAllTimeClockAdminQuery, useGetAllTimeSheetAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerRetina,
@@ -31,19 +31,28 @@ L.Icon.Default.mergeOptions({
 // --- End Leaflet Default Icon Fix ---
 
 // 2. INTERFACES
-interface Employee {
-  id: number;
-  name: string;
-  avatar: string;
-  project: string;
-  location: string;
+interface TimeSheetEntry {
+  id?: string; // Add optional id field for React key
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    profileUrl?: string;
+  };
+  shift: {
+    title: string;
+    location: string;
+  } | null;
   clockIn: string;
   clockOut: string;
+  clockInLng: number;
+  clockInLat: number;
   totalHours: string;
-  regular: string;
-  overtime: string;
-  paidTimeOff: string;
+  regularHours: string;
+  overTime: string;
   regularPayment: string;
+  overTimePayment: string;
+  totalPayment: string;
 }
 
 interface ActivityItem {
@@ -55,121 +64,33 @@ interface ActivityItem {
 
 // 3. TIMESHEETS COMPONENT
 export default function TimeSheets() {
+  
   // 3.1. STATE MANAGEMENT
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedTimePeriod, setSelectedTimePeriod] =
-    useState<string>("19/06/2025");
+  // State for selected date (use simple date string for input)
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
+  );
+  
+  // Format date for API (convert YYYY-MM-DD to ISO string)
+  const formatDateForAPI = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toISOString();
+  };
+
   const { data } = useGetAllTimeClockAdminQuery(null);
+  const { data: timeSheetData } = useGetAllTimeSheetAdminQuery(formatDateForAPI(selectedDate));
+  console.log("Time Sheet Data:", timeSheetData);
+  console.log("Time Sheet Entries:", timeSheetData?.data);
+  console.log("Selected Date (formatted for API):", formatDateForAPI(selectedDate));
 
   const pendingTimeClockRequest = data?.data?.filter(
-    (el: any) => el.shiftStatus === "DRAFT"
+    (el: { shiftStatus: string }) => el.shiftStatus === "DRAFT"
   );
   console.log({ pendingTimeClockRequest });
   const [selectedActivityDate, setSelectedActivityDate] =
     useState<string>("19/06");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
-
-  // 3.2. DUMMY DATA
-  const employeeData: Employee[] = [
-    {
-      id: 1,
-      name: "Jane Cooper",
-      avatar: "https://randomuser.me/api/portraits/women/45.jpg",
-      project: "Metro Shopping Center",
-      location: "Los Angeles, California",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 2,
-      name: "Robert Fox",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      project: "Riverside Apartments",
-      location: "Chicago, Illinois",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 3,
-      name: "Esther Howard",
-      avatar: "https://randomuser.me/api/portraits/women/27.jpg",
-      project: "City Bridge Renovations",
-      location: "Miami, Florida",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 4,
-      name: "Desirae Botosh",
-      avatar: "https://randomuser.me/api/portraits/women/63.jpg",
-      project: "Tech Campus Phase 2",
-      location: "Seattle, Washington",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 5,
-      name: "Marley Stanton",
-      avatar: "https://randomuser.me/api/portraits/men/18.jpg",
-      project: "Golden Hills Estates",
-      location: "New York City",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 6,
-      name: "Kaylynn Stanton",
-      avatar: "https://randomuser.me/api/portraits/women/12.jpg",
-      project: "City Bridge Renovations",
-      location: "Miami, Florida",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-    {
-      id: 7,
-      name: "Brandon Vaccaro",
-      avatar: "https://randomuser.me/api/portraits/men/77.jpg",
-      project: "Metro Shopping Center",
-      location: "Los Angeles, California",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-    },
-  ];
 
   const activityData: ActivityItem[] = [
     {
@@ -225,11 +146,36 @@ export default function TimeSheets() {
   ];
 
   // 3.3. DERIVED DATA & HELPERS
-  const filteredData: Employee[] = employeeData.filter(
-    (employee: Employee) =>
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.location.toLowerCase().includes(searchQuery.toLowerCase())
+  // Transform API data to display format
+  const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
+  
+  // Helper function to format time
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "N/A";
+    const date = new Date(timeString);
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  // Filter timesheet data based on search query
+  const filteredTimeSheetData: TimeSheetEntry[] = timeSheetEntries.filter(
+    (entry: TimeSheetEntry) => {
+      // Safely get user name with null checks
+      const userName = entry?.user?.name?.toLowerCase() || '';
+      
+      // Safely get shift info with null checks
+      const shiftTitle = entry?.shift?.title?.toLowerCase() || '';
+      const shiftLocation = entry?.shift?.location?.toLowerCase() || '';
+      
+      const query = searchQuery.toLowerCase();
+      
+      return userName.includes(query) ||
+             shiftTitle.includes(query) ||
+             shiftLocation.includes(query);
+    }
   );
 
   const handlePendingRequestsClick = (): void => {
@@ -277,24 +223,19 @@ export default function TimeSheets() {
 
         {/* --- DASHBOARD HEADER SECTION --- */}
         <section className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
-          {/* Time Period Dropdown */}
+          {/* Date Picker */}
           <div className="flex items-center space-x-2">
-            <span className="text-gray-700 font-medium">Time Period:</span>
+            <span className="text-gray-700 font-medium">Select Date:</span>
             <div className="relative">
-              <select
-                className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSelectedTimePeriod(e.target.value)
+              <input
+                type="date"
+                className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]"
+                value={selectedDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSelectedDate(e.target.value)
                 }
-                value={selectedTimePeriod}
-              >
-                <option value="19/06/2025">19/06/2025</option>
-                <option value="recent-7-days">Recent 7 Days</option>
-                <option value="last-30-days">Last 30 Days</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <DropdownArrowIcon className="fill-current h-4 w-4" />
-              </div>
+                max={new Date().toISOString().split('T')[0]} // Prevent future dates
+              />
             </div>
           </div>
 
@@ -374,7 +315,7 @@ export default function TimeSheets() {
                     scope="col"
                     className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[200px]"
                   >
-                    Project
+                    Shift
                   </th>
                   <th
                     scope="col"
@@ -421,56 +362,82 @@ export default function TimeSheets() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((employee: Employee) => (
-                  <tr key={employee.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={employee.avatar}
-                            alt={employee.name}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {employee.name}
+                {filteredTimeSheetData.length > 0 ? (
+                  // Use real API data
+                  filteredTimeSheetData.map((entry: TimeSheetEntry, index: number) => {
+                    // Safely extract user data with null checks
+                    const userName = entry?.user?.name || 'Unknown User';
+                    const profileUrl = entry?.user?.profileUrl || 'https://randomuser.me/api/portraits/men/77.jpg';
+                    
+                    // Safely extract shift data with null checks
+                    const shiftTitle = entry?.shift?.title || 'No Shift Assigned';
+                    const shiftLocation = entry?.shift?.location || 'No Location';
+                    
+                    // Use entry.id if available, otherwise fall back to user.id + index
+                    const rowKey = entry.id || `${entry.user.id}-${index}`;
+                    
+                    return (
+                    <tr key={rowKey} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              className="h-10 w-10 rounded-full"
+                              src={profileUrl}
+                              alt={userName}
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {userName}
+                            </div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {shiftTitle}
+                        </div>
+                        <div className="text-sm text-gray-500 flex items-center">
+                          <LocationPinIcon className="w-4 h-4 mr-1" />
+                          {shiftLocation}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatTime(entry.clockIn || '')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatTime(entry.clockOut || '')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {entry.totalHours || '0'} hours
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {entry.regularHours || '0'} hours
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {entry.overTime || '0'} hours
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        N/A
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${parseFloat(entry.regularPayment || '0').toFixed(2)}
+                      </td>
+                    </tr>
+                    );
+                  })
+                ) : (
+                  // Show message when no data is available
+                  <tr>
+                    <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                      <div className="flex flex-col items-center">
+                        <div className="text-lg font-medium mb-2">No timesheet data found</div>
+                        <div className="text-sm">Please select a different date or check if there are any entries for the selected period.</div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {employee.project}
-                      </div>
-                      <div className="text-sm text-gray-500 flex items-center">
-                        <LocationPinIcon className="w-4 h-4 mr-1" />
-                        {employee.location}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.clockIn}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.clockOut}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.totalHours}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.regular}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.overtime}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.paidTimeOff}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.regularPayment}
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

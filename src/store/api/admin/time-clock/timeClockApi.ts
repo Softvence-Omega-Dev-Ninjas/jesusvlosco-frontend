@@ -17,8 +17,16 @@ const timeClockApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["TIME_CLOCK"],
     }),
+
+    getAllTimeSheetAdmin: build.query({
+      query: (date) => ({
+        url: `/admin/time-clock/time-sheet?date=${date}`,
+        method: "GET",
+      }),
+      providesTags: ["TIME_CLOCK"],
+    }),
   }),
 });
 
-export const { useGetAllTimeClockAdminQuery, useUpdateTimeClockAdminMutation } =
+export const { useGetAllTimeClockAdminQuery, useUpdateTimeClockAdminMutation, useGetAllTimeSheetAdminQuery } =
   timeClockApi;
