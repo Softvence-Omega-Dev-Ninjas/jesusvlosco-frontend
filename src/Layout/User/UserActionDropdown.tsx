@@ -7,12 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, UserCog, Trash2 } from "lucide-react";
+import { MoreVertical, UserCog, Trash2, UserCircle } from "lucide-react";
 import UpdateRoleModal from "./UserRoleUpdateModal";
 import DeleteUserModal from "./UserDeleteModal";
 import { toast } from "sonner";
 import { useUpdateRoleMutation } from "@/store/api/auth/authApi";
 import { useDeleteUserMutation } from "@/store/api/admin/user/userApi";
+import { useNavigate } from "react-router-dom";
 // import UpdateRoleModal from "@/components/modals/UpdateRoleModal";
 // import DeleteUserModal from "@/components/modals/DeleteUserModal";
 
@@ -34,7 +35,7 @@ export default function UserActionDropdown({
   const [updateRoleOpen, setUpdateRoleOpen] = useState(false);
   const [deleteUserOpen, setDeleteUserOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState("EMPLOYEE");
-
+  const navigate = useNavigate();
   const [updateRole] = useUpdateRoleMutation();
   const [deleteUser] = useDeleteUserMutation();
   const handleUpdateRole = async () => {
@@ -102,6 +103,13 @@ export default function UserActionDropdown({
           >
             <UserCog className="mr-2 h-4 w-4" />
             Update Role
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer hover:bg-slate-200 transition-colors duration-300"
+            onClick={() => navigate(`/admin/user/user-profile/${id}`)}
+          >
+            <UserCircle className="mr-2 h-4 w-4" />
+            Update Information
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDeleteUserOpen(true)}

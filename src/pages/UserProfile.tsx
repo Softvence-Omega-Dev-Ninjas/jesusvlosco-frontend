@@ -1,130 +1,125 @@
 import backArrow from "@/assets/arrow_back.svg";
 import UserProfileHeader from "@/components/UserProfile/UserProfileHeader";
-import UserProfileTabs from "@/components/UserProfile/UserProfileTabs";
-import { useUpdateUserMutation } from "@/store/api/admin/user/userApi";
-import { parseISO } from "date-fns"; // For parsing/formatting dates
+import UserProfileTabsNew from "@/components/UserProfile/UserProfileTabsNew";
+import { useUpdateFullInfoUserMutation } from "@/store/api/admin/user/userApi";
+import { useGetProfileQuery } from "@/store/api/auth/authApi";
+import { TUser } from "@/types/usertype";
+import { UpdateUserFormData } from "@/types/updateUserTypes";
 import React, { useState } from "react";
-
-// Define a comprehensive interface for the entire user profile data
-interface UserProfileData {
-  profileUrl: string;
-  name: string;
-  title: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  dob: Date | null; // Changed to Date | null
-  email: string;
-  phone: string;
-  address: string;
-  state: string;
-  country: string;
-  pinCode: string;
-  nationality: string;
-}
-
-// Dummy user data
-const initialUser: UserProfileData = {
-  profileUrl:
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  name: "Leslie Alexander",
-  title: "Senior Software Engineer",
-  firstName: "Leslie",
-  lastName: "Alexander",
-  gender: "Female",
-  dob: parseISO("1998-07-25"), // Parse the string into a Date object
-  email: "info@example.com",
-  phone: "+123 456 789",
-  address: "1901 Thorndridge Cir. Shiloh, Hawaii 81063",
-  state: "Los Angelos",
-  country: "America",
-  pinCode: "1203",
-  nationality: "American",
-};
-
-interface PersonalInfoFormData {
-  firstName: string;
-  lastName: string;
-  gender: string;
-  dob: Date | null;
-  email: string;
-  phone: string;
-  address: string;
-  state: string;
-  country: string;
-  pinCode: string;
-  nationality: string;
-}
+import { useNavigate, useParams } from "react-router-dom";
 
 const UserProfile: React.FC = () => {
-  const [user, setUser] = useState<UserProfileData>(initialUser);
+  const id = useParams().id;
+  const { data: getUserProfileResponse, isLoading, error, refetch } = useGetProfileQuery(id);
+  const [updateFullInfoUser] = useUpdateFullInfoUserMutation();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-const [updateUser] = useUpdateUserMutation();
+  const navigate = useNavigate();
+
+  console.log('User Profile Response:', getUserProfileResponse);
+
+  const userData: TUser | null = getUserProfileResponse?.success ? getUserProfileResponse.data : null;
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    // When cancelling, reset the user state to the original initial values
-    // to discard any unsaved changes in the form.
-    setUser(initialUser);
   };
 
-  const handleSavePersonalInformation = async (
-    updatedData: PersonalInfoFormData
-  ) => {
-    const userToSave: UserProfileData = {
-      ...user, // retain existing fields like avatar, title, etc.
-      ...updatedData,
-      name: `${updatedData.firstName} ${updatedData.lastName}`,
-    };
-
-      const personalFormData = new FormData();
-    // formData.role = selectedRole || 'EMPLOYEE';
-    for (const key in userToSave) {
-      const value = userToSave[key as keyof UserProfileData];
-      personalFormData.append(key, value instanceof Date ? value.toISOString() : String(value));
+  const handleSaveUpdates = async (updateData: UpdateUserFormData) => {
+    if (!userData?.id) {
+      console.error('No user ID available for update');
+      return;
     }
 
     try {
-      const result = await updateUser({data: personalFormData, userId: "7f787ded-b061-4dfd-b136-7fb26f353a20"}).unwrap();
-      console.log({ result });
-      if (result?.success) {
-       
-      }
-    } catch (error: any) {
-      console.log({ error });
+      console.log('Updating user with data:', updateData);
       
+      // Format the data according to the API expectation
+      const apiPayload = {
+        profile: updateData.profile,
+        experiences: updateData.experiences,
+        educations: updateData.educations,
+        payroll: updateData.payroll
+      };
+
+      const result = await updateFullInfoUser({
+        data: apiPayload,
+        userId: userData.id
+      }).unwrap();
+
+      console.log('Update result:', result);
+      refetch();
+      if (result?.success) {
+        console.log('User updated successfully');
+        setIsEditing(false);
+        // Optionally, you can refetch the user data here
+      } else {
+        console.error('Update failed:', result);
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
     }
-
-   
-    setUser(userToSave);
-    setIsEditing(false);
-    console.log("Updated User Data for Saving:", userToSave);
   };
 
-  const headerUser = {
-    profileUrl: user.profileUrl,
-    name: user.name,
-    title: user.title,
-  };
+  const headerUser = userData ? {
+    profileUrl: userData.profile?.profileUrl || '',
+    name: `${userData.profile?.firstName || ''} ${userData.profile?.lastName || ''}`.trim() || 'Unknown User',
+    title: userData.profile?.jobTitle || 'No Job Title',
+  } : null;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#4E53B1]"></div>
+          <p className="mt-4 text-gray-600">Loading user profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600">Error loading user profile</p>
+          <p className="text-gray-600 mt-2">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">No user data available</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="">
       <div className="flex items-center gap-2">
-        <img src={backArrow} alt="" />
-        <span className=" text-[#4E53B1] font-bold text-2xl">User profile</span>
+        <img onClick={() => navigate(-1)} src={backArrow} alt="" />
+        <span className="text-[#4E53B1] font-bold text-2xl">User profile</span>
       </div>
-      <UserProfileHeader
-        user={headerUser}
-        onEditClick={handleEditClick}
+      
+      {headerUser && (
+        <UserProfileHeader
+          user={headerUser}
+          onEditClick={handleEditClick}
+          isEditing={isEditing}
+        />
+      )}
+      
+      <UserProfileTabsNew
+        userData={userData}
         isEditing={isEditing}
-      />
-      <UserProfileTabs
-        user={user}
-        isEditing={isEditing}
-        onSavePersonalInformation={handleSavePersonalInformation}
+        onSave={handleSaveUpdates}
         onCancelEdit={handleCancelEdit}
       />
     </div>

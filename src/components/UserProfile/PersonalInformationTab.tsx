@@ -4,6 +4,14 @@ import React, { useEffect, useState } from "react";
 import DateInput from "./DateInput"; // Import the new DateInput
 import FormInput from "./FormInput";
 
+// Gender options from AddUserProfile
+const genderOptions = [
+  { label: "Male", value: "MALE" },
+  { label: "Female", value: "FEMALE" },
+  { label: "Other", value: "OTHER" },
+  { label: "Prefer not to say", value: "PREFER_NOT_TO_SAY" },
+];
+
 // Define the interface for the personal information form data
 interface PersonalInfoFormData {
   firstName: string;
@@ -47,7 +55,7 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
     });
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -104,13 +112,33 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
           onChange={handleChange}
           readOnly={!isEditing}
         />
-        <FormInput
-          label="Gender"
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          readOnly={!isEditing}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gender
+          </label>
+          {isEditing ? (
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="">Select gender</option>
+              {genderOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={genderOptions.find(opt => opt.value === formData.gender)?.label || formData.gender}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
+            />
+          )}
+        </div>
         <DateInput
           label="Date of Birth"
           name="dateOfBirth"
@@ -123,7 +151,7 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
           name="email"
           value={formData.email}
           onChange={handleChange}
-          readOnly={!isEditing}
+          readOnly={true}
           type="email"
         />
         <FormInput
@@ -131,7 +159,7 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
           name="phoneNumber"
           value={formData.phone}
           onChange={handleChange}
-          readOnly={!isEditing}
+          readOnly={true}
           type="tel"
         />
         <FormInput
