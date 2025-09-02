@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useGetClockSheetQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { useState } from "react";

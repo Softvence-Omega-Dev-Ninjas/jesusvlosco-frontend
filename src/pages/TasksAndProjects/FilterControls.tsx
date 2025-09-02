@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DateRange } from "@/components/TimeOffRequest/EmployeeDetailModal";
 import ShiftCalendar from "@/components/TimeOffRequest/ShiftCalendar";
 import { Input } from "@/components/ui/input";

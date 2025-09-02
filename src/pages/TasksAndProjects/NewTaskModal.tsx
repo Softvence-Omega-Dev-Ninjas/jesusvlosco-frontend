@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-
 import type React from "react";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -167,7 +166,7 @@ export function NewTaskModal({ trigger }: NewTaskModalProps) {
       }}
     >
       <DialogTrigger asChild>{trigger || <Button className="">New Task</Button>}</DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[600px] overflow-y-scroll border-none p-0 bg-white">
+      <DialogContent className="sm:max-w-[500px] max-h-[600px] overflow-y-scroll border-none p-0 bg-white overflow-x-hidden">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle className="text-lg font-semibold text-[#4E53B1] flex items-center gap-2">
             <span className="text-[#4E53B1]">+</span>

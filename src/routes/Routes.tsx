@@ -73,6 +73,7 @@ import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 import SurveyStatisticsPage from "@/pages/SurveyAndPoll/SurveyStatisticsPage";
 import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
 import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
+import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -224,6 +225,7 @@ const routes = createBrowserRouter([
           // dynamic
           { path: "useroffdetails", element: <UserOffDeatils /> },
           { path: "timeoffrequest", element: <TimeOffRequest /> },
+          { path: "clock-in-request", element: <ClockInRequest /> },
         ],
       },
 
