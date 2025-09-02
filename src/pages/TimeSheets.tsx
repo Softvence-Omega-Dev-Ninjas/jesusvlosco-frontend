@@ -178,6 +178,59 @@ export default function TimeSheets() {
     }
   );
 
+  // Helper function to get unique user locations for map markers
+  const getUniqueUserLocations = () => {
+    const uniqueUsers = new Map();
+    
+    filteredTimeSheetData.forEach((entry: TimeSheetEntry) => {
+      const userId = entry.user.id;
+      const userName = entry.user.name;
+      const lat = entry.clockInLat;
+      const lng = entry.clockInLng;
+      const profileUrl = entry.user.profileUrl;
+      const shiftTitle = entry.shift?.title || 'No Shift Assigned';
+      
+      // Only add if we have valid coordinates and haven't seen this user yet
+      if (lat && lng && !uniqueUsers.has(userId)) {
+        uniqueUsers.set(userId, {
+          id: userId,
+          name: userName,
+          lat: lat,
+          lng: lng,
+          profileUrl: profileUrl,
+          shiftTitle: shiftTitle,
+          clockIn: entry.clockIn,
+          clockOut: entry.clockOut
+        });
+      }
+    });
+    
+    return Array.from(uniqueUsers.values());
+  };
+
+  const uniqueUserLocations = getUniqueUserLocations();
+  console.log("Unique User Locations for Map:", uniqueUserLocations);
+
+  // Custom map icons
+  const customIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    shadowSize: [41, 41]
+  });
+
+  // Custom icon for user locations (blue marker)
+  const userLocationIcon = new L.Icon({
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    shadowSize: [41, 41]
+  });
+
   const handlePendingRequestsClick = (): void => {
     setIsModalOpen(true); // Open the modal when button is clicked
   };
@@ -196,15 +249,6 @@ export default function TimeSheets() {
     border: "1px solid #e5e7eb",
     overflow: "hidden",
   };
-
-  const customIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-    shadowSize: [41, 41],
-  });
 
   // 3.4. RENDER METHOD (JSX Structure)
   return (
@@ -445,13 +489,29 @@ export default function TimeSheets() {
 
         {/* --- REAL MAP SECTION --- */}
         <section className="mt-6">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">
-            Map Location
-          </h3>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Employee Locations ({uniqueUserLocations.length} users)
+            </h3>
+            {uniqueUserLocations.length > 0 && (
+              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                🔵 = Employee Clock-in Location
+              </div>
+            )}
+          </div>
+          
+          {uniqueUserLocations.length === 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p className="text-yellow-800 text-sm">
+                📍 No employee locations found for the selected date. Select a different date to view employee locations on the map.
+              </p>
+            </div>
+          )}
+          
           <MapContainer
-            key="dhaka-map" // Key helps React re-render correctly on prop changes
-            center={dhakaCoordinates}
-            zoom={mapZoom}
+            key="employee-locations-map"
+            center={uniqueUserLocations.length > 0 ? [uniqueUserLocations[0].lat, uniqueUserLocations[0].lng] : dhakaCoordinates}
+            zoom={uniqueUserLocations.length > 0 ? 12 : mapZoom}
             style={mapStyle}
             scrollWheelZoom={true}
           >
@@ -459,9 +519,42 @@ export default function TimeSheets() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={dhakaCoordinates} icon={customIcon}>
-              <Popup>A general location in Dhaka, Bangladesh.</Popup>
-            </Marker>
+            {uniqueUserLocations.map((userLocation) => (
+              <Marker 
+                key={userLocation.id} 
+                position={[userLocation.lat, userLocation.lng]} 
+                icon={userLocationIcon}
+              >
+                <Popup>
+                  <div className="p-2">
+                    <div className="flex items-center space-x-3 mb-2">
+                      {userLocation.profileUrl && (
+                        <img 
+                          src={userLocation.profileUrl} 
+                          alt={userLocation.name}
+                          className="w-10 h-10 rounded-full"
+                        />
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{userLocation.name}</h4>
+                        <p className="text-sm text-gray-600">{userLocation.shiftTitle}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p><strong>Clock In:</strong> {formatTime(userLocation.clockIn)}</p>
+                      <p><strong>Clock Out:</strong> {formatTime(userLocation.clockOut)}</p>
+                      <p><strong>Location:</strong> {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}</p>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+            {/* Fallback marker when no user locations available */}
+            {uniqueUserLocations.length === 0 && (
+              <Marker position={dhakaCoordinates} icon={customIcon}>
+                <Popup>No employee locations found for the selected date.</Popup>
+              </Marker>
+            )}
           </MapContainer>
         </section>
 
