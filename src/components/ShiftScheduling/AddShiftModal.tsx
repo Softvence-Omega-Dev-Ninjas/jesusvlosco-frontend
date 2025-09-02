@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -52,8 +53,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
   const { data, isLoading } = useGetAllProjectUserQuery(null);
   console.log({ data });
   const projects = data?.data;
-  const [createSchedule, { isLoading: createIsLoading }] =
-    useCreateSchedulingRequestMutation();
+  const [createSchedule, { isLoading: createIsLoading }] = useCreateSchedulingRequestMutation();
   const startDateRef = useRef<HTMLDivElement>(null);
   const endDateRef = useRef<HTMLDivElement>(null);
 
@@ -66,15 +66,9 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
   // handle click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        startDateRef.current &&
-        !startDateRef.current.contains(event.target as Node)
-      ) {
+      if (startDateRef.current && !startDateRef.current.contains(event.target as Node)) {
       }
-      if (
-        endDateRef.current &&
-        !endDateRef.current.contains(event.target as Node)
-      ) {
+      if (endDateRef.current && !endDateRef.current.contains(event.target as Node)) {
       }
     };
 
@@ -109,9 +103,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
     const [startDay, startMonth, startYear] = startDate.split("/");
     const [endDay, endMonth, endYear] = endDate.split("/");
 
-    const start = new Date(
-      `${startYear}-${startMonth}-${startDay}T${startTime}:00`
-    );
+    const start = new Date(`${startYear}-${startMonth}-${startDay}T${startTime}:00`);
     let end = new Date(`${endYear}-${endMonth}-${endDay}T${endTime}:00`);
 
     if (end < start) {
@@ -124,9 +116,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
     const hours = Math.floor(diffHours);
     const minutes = Math.round((diffHours - hours) * 60);
 
-    return `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
   };
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -162,18 +152,12 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div
-      className="fixed bg-black/30 inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto"
-      onClick={handleOutsideClick}
-    >
+    <div className="fixed bg-black/30 inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={handleOutsideClick}>
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 border-b-2 border-gray-300 bg-white p-6 pb-0 flex items-center justify-between">
           <h1 className="text-lg font-medium text-gray-900 mt-2">Add Shift</h1>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -185,9 +169,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
               <div className="lg:col-span-2 space-y-6">
                 {/* Project */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Project</label>
                   <div className="relative w-full">
                     <select
                       {...register("projectId")}
@@ -207,81 +189,54 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
                     </select>
 
                     {/* Chevron Icon */}
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                    />
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                   </div>
 
-                  {errors.projectId && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.projectId.message}
-                    </p>
-                  )}
+                  {errors.projectId && <p className="text-red-500 text-sm mt-1">{errors.projectId.message}</p>}
                 </div>
 
                 {/* Start Date / Time */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Starts
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Starts</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="date"
                       value={formatDateForInput(startDate)}
                       onChange={(e) => handleDateChange(e.target.value, true)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-full bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:none] [-webkit-appearance:none]"
-                      min={formatDateForInput(
-                        new Date().toLocaleDateString("en-GB")
-                      )}
+                      min={formatDateForInput(new Date().toLocaleDateString("en-GB"))}
                     />
-                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                      At:
-                    </span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">At:</span>
                     <input
                       type="time"
                       {...register("startTime")}
                       className="px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
-                  {errors.startTime && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.startTime.message}
-                    </p>
-                  )}
+                  {errors.startTime && <p className="text-red-500 text-sm mt-1">{errors.startTime.message}</p>}
                 </div>
 
                 {/* End Date / Time */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ends
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ends</label>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1" ref={endDateRef}>
                       <input
                         type="date"
                         value={formatDateForInput(endDate)}
-                        onChange={(e) =>
-                          handleDateChange(e.target.value, false)
-                        }
+                        onChange={(e) => handleDateChange(e.target.value, false)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-full bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:none] [-webkit-appearance:none]"
                         min={formatDateForInput(startDate)}
                       />
                     </div>
-                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                      At:
-                    </span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">At:</span>
                     <input
                       type="time"
                       {...register("endTime")}
                       className="px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
-                  {errors.endTime && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.endTime.message}
-                    </p>
-                  )}
+                  {errors.endTime && <p className="text-red-500 text-sm mt-1">{errors.endTime.message}</p>}
                 </div>
 
                 {/* <div>
@@ -321,9 +276,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
                 </div> */}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                   <Controller
                     name="locationCoordinates"
                     control={control}
@@ -341,9 +294,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
 
                 {/* Notes */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Shift attachments
-                  </h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Shift attachments</h3>
                   <textarea
                     {...register("managerNote")}
                     placeholder="Add manager note"
@@ -365,14 +316,8 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ onClose }) => {
               {/* Right Column */}
               <div className="lg:col-span-1">
                 <div className="bg-indigo-100 rounded-lg p-6 text-center h-full lg:h-60 mt-3 flex flex-col justify-center">
-                  <div className="text-sm text-indigo-600 mb-2">
-                    Total hours
-                  </div>
-                  <div className="text-3xl font-bold text-indigo-800">
-                    {startDate && endDate && startTime && endTime
-                      ? calculateHours()
-                      : "N/A"}
-                  </div>
+                  <div className="text-sm text-indigo-600 mb-2">Total hours</div>
+                  <div className="text-3xl font-bold text-indigo-800">{startDate && endDate && startTime && endTime ? calculateHours() : "N/A"}</div>
                 </div>
               </div>
             </div>
