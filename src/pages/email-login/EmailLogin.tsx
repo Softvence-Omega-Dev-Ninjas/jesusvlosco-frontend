@@ -100,8 +100,9 @@ export default function Login() {
       {step === 0 ? (
         // 🔹 Welcome Screen
         <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md text-center">
-          <h2 className="text-2xl font-bold text-indigo-600 mb-3">Welcome</h2>
-          <p className="text-gray-600 mb-8">Log in to your company app</p>
+          <h2 className="text-2xl font-bold text-indigo-600 mb-2">Welcome to</h2>
+          <h2 className="text-2xl font-bold text-indigo-600 mb-3">LGC Global Contracting Ltd.</h2>
+          <p className="text-gray-600 mb-8">Log in to your account</p>
 
           <div className="flex gap-3 justify-center">
             <button
@@ -109,7 +110,7 @@ export default function Login() {
                 setLoginMethod('phone');
                 setStep(1);
               }} // go to phone login
-              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
+              className="flex items-center gap-2 px-5 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition min-w-max"
             >
               <Phone size={18} /> Log in with phone
             </button>
@@ -119,7 +120,7 @@ export default function Login() {
                 setLoginMethod('email');
                 setStep(10);
               }} // go to email login
-              className="flex items-center gap-2 px-5 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              className="flex items-center gap-2 px-5 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition min-w-max"
             >
               <Mail size={18} /> Log in with email
             </button>

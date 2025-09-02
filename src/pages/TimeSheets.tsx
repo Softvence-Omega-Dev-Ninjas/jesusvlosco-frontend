@@ -240,10 +240,10 @@ export default function TimeSheets() {
   };
 
   // Map Configuration
-  const dhakaCoordinates: [number, number] = [23.8103, 90.4125]; // Corrected coordinates for central Dhaka
+  const defaultCoordinates: [number, number] = [ 51.1514578, -114.0825065]; // Corrected coordinates for central Dhaka
   const mapZoom = 15; // Good initial zoom level for city view
   const mapStyle = {
-    height: "350px", // Adjusted height to be visually balanced
+    height: "550px", // Adjusted height to be visually balanced
     width: "100%",
     borderRadius: "0.5rem",
     border: "1px solid #e5e7eb",
@@ -488,7 +488,7 @@ export default function TimeSheets() {
         </section>
 
         {/* --- REAL MAP SECTION --- */}
-        <section className="mt-6">
+        <section className="mt-6 ">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-semibold text-gray-800">
               Employee Locations ({uniqueUserLocations.length} users)
@@ -510,7 +510,7 @@ export default function TimeSheets() {
           
           <MapContainer
             key="employee-locations-map"
-            center={uniqueUserLocations.length > 0 ? [uniqueUserLocations[0].lat, uniqueUserLocations[0].lng] : dhakaCoordinates}
+            center={uniqueUserLocations.length > 0 ? [uniqueUserLocations[0].lat, uniqueUserLocations[0].lng] : defaultCoordinates}
             zoom={uniqueUserLocations.length > 0 ? 12 : mapZoom}
             style={mapStyle}
             scrollWheelZoom={true}
@@ -551,7 +551,7 @@ export default function TimeSheets() {
             ))}
             {/* Fallback marker when no user locations available */}
             {uniqueUserLocations.length === 0 && (
-              <Marker position={dhakaCoordinates} icon={customIcon}>
+              <Marker position={defaultCoordinates} icon={customIcon}>
                 <Popup>No employee locations found for the selected date.</Popup>
               </Marker>
             )}
