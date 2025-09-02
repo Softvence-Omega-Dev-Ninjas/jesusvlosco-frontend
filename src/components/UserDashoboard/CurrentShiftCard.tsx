@@ -2,25 +2,35 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSendUpdateLocationMutation } from "@/store/api/clockInOut/clockinoutapi";
-import { getCurrentLocationWithGoogleMaps, formatLocationForAPI } from "@/utils/googleMapsLocation";
+import {
+  getCurrentLocationWithGoogleMaps,
+  formatLocationForAPI,
+} from "@/utils/googleMapsLocation";
 import { AlarmIcon } from "./icons";
 import { Shift } from "./types";
 
 interface CurrentShiftCardProps {
   shift: Shift;
   team: any[];
+  isClockedIn: boolean;
+  isClockedOut: boolean;
 }
 
-const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
+const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
+  shift,
+  team,
+  isClockedIn,
+  isClockedOut,
+}) => {
   const [isClocking, setIsClocking] = useState(false);
   const [isClockOut, setIsClockOut] = useState(false);
   const [sendUpdateLocation] = useSendUpdateLocationMutation();
 
   // 🔹 Common function for Clock In / Out
   const handleClockAction = async (action: "CLOCK_IN" | "CLOCK_OUT") => {
-    if(action === "CLOCK_IN") {
+    if (action === "CLOCK_IN") {
       setIsClocking(true);
-    }else {
+    } else {
       setIsClockOut(true);
     }
     try {
@@ -35,8 +45,10 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
 
       console.log(`📡 ${action} response:`, response);
 
-      // ✅ Use API message if available
-      toast.success(response.message || `${action.replace("_", " ")} successful!`);
+      // Use API message if available
+      toast.success(
+        response.message || `${action.replace("_", " ")} successful!`
+      );
     } catch (error: any) {
       console.error(`❌ ${action} error:`, error);
 
@@ -46,6 +58,16 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
       setIsClockOut(false);
     }
   };
+
+  const isClockInButtonDisabled =
+    isClocking ||
+    (isClockedIn && !isClockedOut) ||
+    shift.startTime === "No shift";
+  const isClockOutButtonDisabled =
+    isClockOut ||
+    isClockedOut ||
+    !isClockedIn ||
+    shift.startTime === "No shift";
 
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
@@ -87,18 +109,22 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({ shift, team }) => {
         <div className="flex items-center justify-center space-x-5 py-5">
           <button
             onClick={() => handleClockAction("CLOCK_IN")}
-            disabled={isClocking || shift.startTime === "No shift"}
+            disabled={isClockInButtonDisabled}
             className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold ${
-              shift.startTime === "No shift" ? "disabled:cursor-not-allowed opacity-50" : ""
+              isClockInButtonDisabled || shift.startTime === "No shift"
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
             {isClocking ? "Processing..." : "Clock In"}
           </button>
           <button
             onClick={() => handleClockAction("CLOCK_OUT")}
-            disabled={isClockOut || shift.startTime === "No shift"}
+            disabled={isClockOutButtonDisabled}
             className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold ${
-              shift.startTime === "No shift" ? "disabled:cursor-not-allowed opacity-50" : ""
+              isClockOutButtonDisabled || shift.startTime === "No shift"
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
             {isClockOut ? "Processing..." : "Clock Out"}

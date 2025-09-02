@@ -37,14 +37,18 @@ interface ApiShiftData {
 const UserDashboard: React.FC = () => {
   // Get shift data from API
   const data = useGetClockInOutQuery({});
-  const shiftData = data?.data?.data?.shift as ApiShiftData | undefined;
+  const currentApiShift = data?.data?.data?.shift as ApiShiftData | undefined;
   const teamMembers = data?.data?.data?.teamMembers as any | undefined;
+  const clock = data?.data?.data?.clock as any | undefined;
   // console.log(teamMembers, "Team members")
-  // console.log("Current Shift Data Check:", shiftData);
+  // console.log(currentApiShift, "Current API Shift Data")
+  // console.log("Dashboard Data", data?.data?.data);
+  const isClockedIn = clock?.clockInAt ? true : false;
+  const isClockedOut = clock?.clockOutAt ? true : false;
+  // console.log("isClockedIn", isClockedIn, "isClockedOut", isClockedOut);
 
   // Use the latest shift from today, or fallback to shiftData from clock API
-  const currentApiShift = shiftData;
-  // console.log(currentApiShift, "Current API Shift Data")
+  
 
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
@@ -77,7 +81,12 @@ const UserDashboard: React.FC = () => {
       <div className="w-full mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            <CurrentShiftCard shift={currentShiftFromApi || fallbackShift} team={teamMembers} />
+            <CurrentShiftCard 
+            shift={currentShiftFromApi || fallbackShift} 
+            team={teamMembers} 
+            isClockedIn={isClockedIn}
+            isClockedOut={isClockedOut}
+            />
           </div>
 
           <div>
