@@ -15,12 +15,19 @@ import {
   useGetProjectUsersWithShiftQuery,
 } from "@/store/api/user/scheduling/schedulingApi";
 import { useParams } from "react-router-dom";
-import { formatTimeFromISO } from "@/utils/formatDateToMDY";
-import { generateWeekDatesForWeeklySchedule, formatDateRange, goToPreviousWeek, goToNextWeek, isSameDay, convertToISOFormat } from "@/utils/dateUtils";
+import {
+  generateWeekDatesForWeeklySchedule,
+  formatDateRange,
+  goToPreviousWeek,
+  goToNextWeek,
+  isSameDayInTimeZone,
+} from "@/utils/dateUtils";
 import Swal from "sweetalert2";
 import GoogleMapsLocationPicker from "./GoogleMapsLocationPicker";
 import { ShiftAPIData, ShiftFormData } from "@/types/shift";
 import { validateShiftData } from "@/utils/validation";
+import { DateTime } from "luxon";
+import { userDefaultTimeZone } from "@/utils/dateUtils"; // you already had this helper
 
 // New interfaces for the project users with shifts data
 interface UserShiftData {
@@ -58,10 +65,11 @@ interface ProjectUser {
   allShifts: UserShiftData[]; // All project shifts
 }
 
-// Interfaces for form data
-
 const WeeklyScheduleGrid = () => {
-  console.log("Using new project users API data");
+  const timeZone = userDefaultTimeZone();
+  // debug
+  // console.log("Detected timeZone:", timeZone);
+
   const projectIdd = useParams().id;
   const {
     data: projectInformationNew,
@@ -70,19 +78,20 @@ const WeeklyScheduleGrid = () => {
   } = useGetProjectUsersWithShiftQuery(projectIdd);
   // console.log(projectInformationNew, "Project Information");
   const [deleteShift] = useDeleteShiftMutation();
-  const thisProjectInformation = projectInformationNew?.data as ProjectUser[];
-  // console.log(thisProjectInformation, "Projects Array Information []");
+  const thisProjectInformation = projectInformationNew?.data as
+    | ProjectUser[]
+    | undefined;
 
-  // State management
+  // State
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
 
-  // API hooks - We'll use the new data instead of the old getAllShifts
+  // API hooks
   const [createShift] = useCreateShiftMutation();
   const { id: projectId } = useParams();
 
-  // Form management with React Hook Form
+  // Form management
   const { control, handleSubmit, setValue, getValues, reset } =
     useForm<ShiftFormData>({
       defaultValues: {
@@ -108,30 +117,38 @@ const WeeklyScheduleGrid = () => {
 
   // Extract users and shifts from the new data structure
   const userList = thisProjectInformation || [];
-  // const projectUsers = userList.map((item) => item.user);
 
-  // console.log("📊 New Data Structure:", {
-  //   totalUsers: userList.length,
-  //   users: projectUsers.map((u) => ({
-  //     id: u.id,
-  //     name: `${u.firstName} ${u.lastName}`,
-  //   })),
-  //   projectId: projectId,
-  // });
-
-  // Utility functions for handling ISO date formats
-  const parseISODate = (isoString: string): Date | null => {
-    try {
-      const date = new Date(isoString);
-      return isNaN(date.getTime()) ? null : date;
-    } catch {
-      return null;
-    }
+  // Helpers using Luxon
+  const toUTCISO = (dateIso: string, timeHHMM: string) => {
+    // dateIso: "YYYY-MM-DD", timeHHMM: "HH:mm"
+    // Interpret in user's timeZone, then convert to UTC ISO string
+    return DateTime.fromISO(`${dateIso}T${timeHHMM}`, { zone: timeZone })
+      .toUTC()
+      .toISO();
   };
 
-  // Validation function for all required shift data
+  const startOfLocalDayToUTCISO = (dateIso: string) => {
+    return DateTime.fromISO(`${dateIso}T00:00`, { zone: timeZone })
+      .toUTC()
+      .toISO();
+  };
 
-  // Form submission handlers
+  const isoToLocalDate = (iso: string) =>
+    DateTime.fromISO(iso).setZone(timeZone).toISODate(); // YYYY-MM-DD
+
+  const isoToLocalTime = (iso: string) =>
+    DateTime.fromISO(iso).setZone(timeZone).toFormat("HH:mm");
+
+  const isoToLocalTimeShort = (iso: string) =>
+    DateTime.fromISO(iso).setZone(timeZone).toFormat("h:mm a");
+
+  // const isSameLocalDay = (isoA: string | Date, isoB: string | Date) => {
+  //   const a = typeof isoA === "string" ? DateTime.fromISO(isoA) : DateTime.fromJSDate(isoA);
+  //   const b = typeof isoB === "string" ? DateTime.fromISO(isoB) : DateTime.fromJSDate(isoB);
+  //   return a.setZone(timeZone).toISODate() === b.setZone(timeZone).toISODate();
+  // };
+
+  // onSubmit: convert local inputs -> UTC ISO strings using Luxon
   const onSubmit = async (
     data: ShiftFormData,
     status: "PUBLISHED" | "DRAFT" | "TEMPLATE"
@@ -140,13 +157,15 @@ const WeeklyScheduleGrid = () => {
       console.log("Form data before API call:", data);
 
       const locationCoordinates = data.locationCoordinates;
+
       const apiData: ShiftAPIData = {
         currentUserId: data.userIds[0] || selectedUserId,
         currentProjectId: projectId || "",
-        date: convertToISOFormat(data.date, data.startTime),
+        // date as UTC ISO representing start of that local day
+        date: startOfLocalDayToUTCISO(data.date) || "",
         shiftStatus: status,
-        startTime: convertToISOFormat(data.date, data.startTime),
-        endTime: convertToISOFormat(data.date, data.endTime),
+        startTime: toUTCISO(data.date, data.startTime) || "",
+        endTime: toUTCISO(data.date, data.endTime) || "",
         shiftTitle: data.shiftTitle,
         allDay: data.allDay,
         job: data.job,
@@ -159,9 +178,7 @@ const WeeklyScheduleGrid = () => {
         saveAsTemplate: data.saveAsTemplate,
       };
 
-      // console.log("API Data being sent:", apiData);
-
-      // Validate all required shift data before sending to API
+      // Validate before API call
       const validation = validateShiftData(apiData);
       if (!validation.isValid) {
         Swal.fire({
@@ -170,7 +187,7 @@ const WeeklyScheduleGrid = () => {
           icon: "error",
           confirmButtonText: "OK",
         });
-        return; // Stop execution if validation fails
+        return;
       }
 
       const result = await createShift(apiData).unwrap();
@@ -186,6 +203,7 @@ const WeeklyScheduleGrid = () => {
       // Reset form and close modal
       reset();
       setIsModalOpen(false);
+      refetch();
     } catch (error) {
       console.error("Error creating shift:", error);
       Swal.fire({
@@ -207,70 +225,39 @@ const WeeklyScheduleGrid = () => {
     setIsModalOpen(false);
   };
 
-  // Handler for editing an existing shift
+  // Edit existing shift: convert UTC -> local for form fields
   const handleEditShift = (shift: UserShiftData, userId: string) => {
-    console.log("Edit shift:", shift);
-    console.log("Edit shift:", shift.id, "for user:", userId);
-
-    // Set selected user
     setSelectedUserId(userId);
 
-    // Extract shift date & times
-    const shiftDate = parseISODate(shift.date);
-    const startTime = parseISODate(shift.startTime);
-    const endTime = parseISODate(shift.endTime);
+    const shiftDateIso = isoToLocalDate(shift.startTime); // date based on startTime local
+    const formattedStartTime = isoToLocalTime(shift.startTime); // HH:mm
+    const formattedEndTime = isoToLocalTime(shift.endTime); // HH:mm
 
-    if (shiftDate && startTime && endTime) {
-      // Convert shift date & times into local formats
-      const dateObj = new Date(shift.date);
-      const startObj = new Date(shift.startTime);
-      const endObj = new Date(shift.endTime);
+    setValue("userIds", [userId]);
+    setValue("date", shiftDateIso || "");
+    setValue("startTime", formattedStartTime);
+    setValue("endTime", formattedEndTime);
+    setValue("shiftTitle", shift.title);
+    setValue("job", shift.job);
+    setValue("location", shift.location);
+    setValue("locationCoordinates", {
+      address: shift.location,
+      longitude: shift.lng,
+      latitude: shift.lat,
+    });
+    setValue("locationLng", shift.lng);
+    setValue("locationLat", shift.lat);
+    setValue("note", shift.note);
+    setValue("currentUserId", userId);
+    setValue("currentProjectId", projectId || "");
+    setValue("shiftStatus", shift.shiftStatus);
+    setValue("allDay", shift.allDay);
 
-      // Format date as YYYY-MM-DD (local)
-      const formattedDate = dateObj.toLocaleDateString("en-CA"); // gives YYYY-MM-DD reliably
-
-      // Format time as HH:MM (24-hour or 12-hour depending on need)
-      const formattedStartTime = startObj.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false, 
-      });
-      const formattedEndTime = endObj.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      // Pre-fill form with existing shift data
-      setValue("userIds", [userId]);
-      setValue("date", formattedDate);
-      setValue("startTime", formattedStartTime);
-      setValue("endTime", formattedEndTime);
-      setValue("shiftTitle", shift.title);
-      setValue("job", shift.job); // Job field might not be available in UserShiftData
-      setValue("location", shift.location);
-      setValue("locationCoordinates", {
-        address: shift.location,
-        longitude: shift.lng,
-        latitude: shift.lat,
-      });
-      setValue("locationLng", shift.lng);
-      setValue("locationLat", shift.lat);
-      setValue("note", shift.note); // Note field might not be available in UserShiftData
-      setValue("currentUserId", userId);
-      setValue("currentProjectId", projectId || "");
-      setValue("shiftStatus", shift.shiftStatus);
-      setValue("allDay", shift.allDay); // If start and end times are the same, treat as all-day
-    }
-
-    // Open the modal
     setIsModalOpen(true);
   };
 
-  // Handler for deleting a shift
+  // Delete shift
   const handleDeleteShift = async (shiftid: string) => {
-    // console.log("Delete shift:", shiftid);
-
     const result = await Swal.fire({
       title: "Delete Shift?",
       text: `Are you sure you want to delete the shift? This action cannot be undone.`,
@@ -285,9 +272,7 @@ const WeeklyScheduleGrid = () => {
     if (!result.isConfirmed) return;
 
     try {
-      // call RTK Query mutation and unwrap the promise for proper error handling
       await deleteShift(shiftid).unwrap();
-
       Swal.fire({
         title: "Deleted!",
         text: "The shift has been deleted successfully.",
@@ -306,29 +291,23 @@ const WeeklyScheduleGrid = () => {
     }
   };
 
-  // Updated handleAddShift function to open modal with pre-filled data
-  const handleAddShift = (userId: string, date: Date) => {
-    // console.log("Add shift for user:", userId, "on date:", date);
-
-    // Set selected user
+  // When adding a new shift from cell -> date may be Date object
+  const handleAddShift = (userId: string, date: Date | string) => {
     setSelectedUserId(userId);
 
-    // Format date to YYYY-MM-DD for the form
-    const formattedDate = date.toISOString().split("T")[0];
+    const inputDate =
+      typeof date === "string" ? new Date(date) : (date as Date);
+    const formattedDate = inputDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
-    // Pre-fill form with selected user and date
     setValue("userIds", [userId]);
     setValue("date", formattedDate);
     setValue("currentUserId", userId);
     setValue("currentProjectId", projectId || "");
-
-    // Open the modal
     setIsModalOpen(true);
   };
 
   const days = generateWeekDatesForWeeklySchedule();
 
-  // Show loading state
   if (isLoading) {
     return (
       <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
@@ -342,8 +321,7 @@ const WeeklyScheduleGrid = () => {
     );
   }
 
-  // Show error state
-  if (projectInformationNew.error) {
+  if (projectInformationNew?.error) {
     console.error("Error fetching project data:", projectInformationNew.error);
     return (
       <section className="w-full mb-12 bg-red-50 border border-red-200 p-4 rounded-lg shadow-sm">
@@ -423,7 +401,7 @@ const WeeklyScheduleGrid = () => {
           ) : (
             userList.map((projectUserData: ProjectUser, rowIdx: number) => {
               const user = projectUserData.user;
-              const userShifts = projectUserData.shifts; // User's assigned shifts
+              const userShifts = projectUserData.shifts || [];
 
               if (!user) return null;
 
@@ -449,41 +427,34 @@ const WeeklyScheduleGrid = () => {
 
                   {/* Day columns */}
                   {days.map((day, colIdx) => {
-                    // Find shifts for this user on this specific day
+                    // Find shifts for this user on this specific day (local time comparison)
                     const shiftsForDay = userShifts.filter(
                       (shift: UserShiftData) => {
-                        const shiftDate = parseISODate(shift.date);
-                        if (!shiftDate) {
-                          console.log(
-                            `❌ Failed to parse date for shift ${shift.id}:`,
-                            shift.date
+                        try {
+                          // Compare the local date of shift start with the local date of the cell
+                          const isMatch = isSameDayInTimeZone(
+                            shift.date,
+                            day.fullDate
+                          );
+                          if (isMatch) {
+                            console.log(
+                              `Found shift for ${user.firstName} on`,
+                              day.fullDate,
+                              shift
+                            );
+                          }
+                          return isMatch;
+                        } catch (err) {
+                          console.warn(
+                            "Failed to match shift date:",
+                            err,
+                            shift
                           );
                           return false;
                         }
-
-                        const isDateMatch = isSameDay(shiftDate, day.fullDate);
-
-                        // Enhanced debugging
-                        if (isDateMatch) {
-                          console.log(
-                            `✅ Found shift for ${
-                              user.firstName
-                            } on ${day.fullDate.toDateString()}:`,
-                            {
-                              shiftTitle: shift.title,
-                              shiftDate: shiftDate.toDateString(),
-                              startTime: shift.startTime,
-                              endTime: shift.endTime,
-                              status: shift.shiftStatus,
-                            }
-                          );
-                        }
-
-                        return isDateMatch;
                       }
                     );
 
-                    // Get the last shift for this day (in case there are multiple)
                     const dayShift =
                       shiftsForDay.length > 0
                         ? shiftsForDay[shiftsForDay.length - 1]
@@ -499,7 +470,6 @@ const WeeklyScheduleGrid = () => {
                                 : "bg-white border-2 border-indigo-400 hover:bg-indigo-50"
                             }`}
                           >
-                            {/* Hover Actions - Edit and Delete buttons */}
                             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
                               <button
                                 onClick={(e) => {
@@ -524,8 +494,8 @@ const WeeklyScheduleGrid = () => {
                             </div>
 
                             <p className="text-xs mt-2 px-1 font-medium text-indigo-800 mb-2 text-center">
-                              {formatTimeFromISO(dayShift.startTime)} -{" "}
-                              {formatTimeFromISO(dayShift.endTime)}
+                              {isoToLocalTimeShort(dayShift.startTime)} -{" "}
+                              {isoToLocalTimeShort(dayShift.endTime)}
                             </p>
 
                             <p className="text-sm text-center font-semibold text-purple-800">
@@ -537,7 +507,6 @@ const WeeklyScheduleGrid = () => {
                             </p>
                           </div>
                         ) : (
-                          /* Empty cell with consistent styling */
                           <div className="min-h-[100px] lg:w-40 lg:h-32.5 rounded-md p-2 border border-dashed border-gray-300 bg-white flex items-center justify-center hover:border-gray-400 transition-colors cursor-pointer">
                             <CiCirclePlus
                               onClick={() =>

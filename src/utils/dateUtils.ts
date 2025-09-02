@@ -1,4 +1,4 @@
-import { formatWeekdayShort } from './formatDateToMDY';
+import { formatWeekdayShort } from "./formatDateToMDY";
 
 export interface WeekDay {
   day?: string; // For WeeklySchedule compatibility
@@ -36,7 +36,7 @@ export const generateWeekDatesForUserScheduling = () => {
       short: formatWeekdayShort(date.toISOString()),
       day: date.toLocaleString("default", { weekday: "short" }),
       date: formatDate(date),
-      fullDate: date.toISOString().split('T')[0]
+      fullDate: date.toISOString().split("T")[0],
     });
   }
 
@@ -61,7 +61,7 @@ export const generateWeekDatesForWeeklySchedule = () => {
     days.push({
       day: currentDay.toLocaleString("default", { weekday: "short" }),
       date: formatDate(currentDay),
-      fullDate: new Date(currentDay)
+      fullDate: new Date(currentDay).toLocaleString("en-US"),
     });
   }
 
@@ -83,8 +83,8 @@ export const formatDate = (date: Date): string => {
  * @returns Formatted date string
  */
 export const formatDateShortLocal = (date: Date): string => {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
 };
@@ -95,7 +95,7 @@ export const formatDateShortLocal = (date: Date): string => {
  * @returns Short weekday name
  */
 export const formatWeekdayShortLocal = (date: Date): string => {
-  const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   return weekdayNames[date.getDay()];
 };
 
@@ -137,7 +137,7 @@ export const getWeekRange = (currentDate: Date): WeekRange => {
   return {
     startDate,
     endDate,
-    formatted: formatDateRange(currentDate)
+    formatted: formatDateRange(currentDate),
   };
 };
 
@@ -182,8 +182,8 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
  * @returns correct ISO string in UTC
  */
 export const convertToISOFormat = (date: string, time: string): string => {
-  const [year, month, day] = date.split('-').map(Number);
-  const [hour, minute] = time.split(':').map(Number);
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
 
   // Treat the values as local and convert to UTC
   const localDate = new Date(year, month - 1, day, hour, minute, 0);
@@ -232,8 +232,16 @@ export const isDateInCurrentWeek = (date: Date, currentDate: Date): boolean => {
  * @returns Day name
  */
 export const getDayName = (dayIndex: number): string => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return days[dayIndex] || '';
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return days[dayIndex] || "";
 };
 
 /**
@@ -243,13 +251,133 @@ export const getDayName = (dayIndex: number): string => {
  */
 export const getDayNameFromISO = (isoDay: string): string => {
   const dayMap: { [key: string]: string } = {
-    'MONDAY': 'Mon',
-    'TUESDAY': 'Tue',
-    'WEDNESDAY': 'Wed',
-    'THURSDAY': 'Thu',
-    'FRIDAY': 'Fri',
-    'SATURDAY': 'Sat',
-    'SUNDAY': 'Sun'
+    MONDAY: "Mon",
+    TUESDAY: "Tue",
+    WEDNESDAY: "Wed",
+    THURSDAY: "Thu",
+    FRIDAY: "Fri",
+    SATURDAY: "Sat",
+    SUNDAY: "Sun",
   };
   return dayMap[isoDay.toUpperCase()] || isoDay;
+};
+
+export const userDefaultTimeZone = () =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+/**
+ * Convert a local date (YYYY-MM-DD) + time (HH:MM) in `timeZone` to UTC ISO string.
+ * Example: convertLocalDateTimeToUTC("2025-09-02","08:28","America/Denver")
+ * returns "2025-09-02T14:28:00.000Z" (MDT -> UTC)
+ */
+export const convertLocalDateTimeToUTC = (
+  date: string,
+  time: string,
+  timeZone: string = userDefaultTimeZone()
+): string => {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+
+  // Treat input as if it's a UTC timestamp for those Y/M/D H:m values (reference point)
+  const assumedUtcMs = Date.UTC(year, month - 1, day, hour, minute, 0);
+
+  // Format that assumedUtc date into the target timeZone to extract its local parts
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = dtf.formatToParts(new Date(assumedUtcMs));
+  const p = (type: string) => parts.find((x) => x.type === type)?.value || "00";
+
+  const tzY = Number(p("year"));
+  const tzM = Number(p("month"));
+  const tzD = Number(p("day"));
+  const tzH = Number(p("hour"));
+  const tzMin = Number(p("minute"));
+  const tzS = Number(p("second"));
+
+  // millis for those extracted parts (interpreting them as UTC)
+  const tzPartsAsUtcMs = Date.UTC(tzY, tzM - 1, tzD, tzH, tzMin, tzS);
+
+  // offset between the assumedUtc and the representation in the target timezone
+  const offsetMs = assumedUtcMs - tzPartsAsUtcMs;
+
+  // The real UTC instant for the *input local* Y/M/D H:m is:
+  const realUtcMs = Date.UTC(year, month - 1, day, hour, minute, 0) - offsetMs;
+
+  return new Date(realUtcMs).toISOString();
+};
+
+/**
+ * Convert UTC ISO string -> local { date: "YYYY-MM-DD", time: "HH:MM" } in `timeZone`.
+ */
+export const convertUTCToLocal = (
+  utcISOString: string,
+  timeZone: string = userDefaultTimeZone()
+): { date: string; time: string } => {
+  const d = new Date(utcISOString);
+  const dtfDate = new Intl.DateTimeFormat("en", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const dtfTime = new Intl.DateTimeFormat("en", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const partsDate = dtfDate.formatToParts(d);
+  const p = (type: string) =>
+    partsDate.find((x) => x.type === type)?.value || "00";
+
+  const yyyy = p("year");
+  const mm = p("month");
+  const dd = p("day");
+
+  // time parts (using dtfTime)
+  const partsTime = dtfTime.formatToParts(d);
+  const get = (type: string) =>
+    partsTime.find((x) => x.type === type)?.value || "00";
+  const hh = get("hour");
+  const min = get("minute");
+
+  return {
+    date: `${yyyy}-${mm}-${dd}`, // YYYY-MM-DD
+    time: `${hh.padStart(2, "0")}:${min.padStart(2, "0")}`, // HH:MM (24h)
+  };
+};
+
+/**
+ * Compare whether two dates represent the same calendar DAY in the provided timeZone.
+ * Works with Date | string (ISO) inputs.
+ */
+export const isSameDayInTimeZone = (
+  a: Date | string,
+  b: Date | string,
+  timeZone: string = userDefaultTimeZone()
+): boolean => {
+  const toYMD = (input: Date | string) => {
+    const d = typeof input === "string" ? new Date(input) : input;
+    const dtf = new Intl.DateTimeFormat("en", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const parts = dtf.formatToParts(d);
+    const p = (type: string) =>
+      parts.find((x) => x.type === type)?.value || "00";
+    return `${p("year")}-${p("month")}-${p("day")}`;
+  };
+
+  return toYMD(a) === toYMD(b);
 };
