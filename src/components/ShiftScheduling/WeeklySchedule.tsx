@@ -142,12 +142,6 @@ const WeeklyScheduleGrid = () => {
   const isoToLocalTimeShort = (iso: string) =>
     DateTime.fromISO(iso).setZone(timeZone).toFormat("h:mm a");
 
-  // const isSameLocalDay = (isoA: string | Date, isoB: string | Date) => {
-  //   const a = typeof isoA === "string" ? DateTime.fromISO(isoA) : DateTime.fromJSDate(isoA);
-  //   const b = typeof isoB === "string" ? DateTime.fromISO(isoB) : DateTime.fromJSDate(isoB);
-  //   return a.setZone(timeZone).toISODate() === b.setZone(timeZone).toISODate();
-  // };
-
   // onSubmit: convert local inputs -> UTC ISO strings using Luxon
   const onSubmit = async (
     data: ShiftFormData,
@@ -306,7 +300,7 @@ const WeeklyScheduleGrid = () => {
     setIsModalOpen(true);
   };
 
-  const days = generateWeekDatesForWeeklySchedule();
+  const days = generateWeekDatesForWeeklySchedule(currentDate);
 
   if (isLoading) {
     return (
