@@ -75,6 +75,7 @@ import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
 import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
 import SingleUserSheet from "@/Layout/UserLayout/SingleUserSheet";
+import UserClockInRequest from "@/pages/ClockInRequest/UserClockInRequest";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -121,11 +122,11 @@ const routes = createBrowserRouter([
         element: <Schedule />,
         children: [
           {
-            path: "user-shiftschedule",
+            path: "user-shift-schedule",
             element: <ShiftSchedule />,
           },
           {
-            path: "user-shiftschedule/:id",
+            path: "user-shift-schedule/:id",
             element: <UserShiftScheduling></UserShiftScheduling>,
           },
           {
@@ -137,6 +138,10 @@ const routes = createBrowserRouter([
           {
             path: "user-timeoffrequest",
             element: <UserTimeOffRequests></UserTimeOffRequests>,
+          },
+          {
+            path: "user-clock-in-request",
+            element: <UserClockInRequest />,
           },
         ],
       },

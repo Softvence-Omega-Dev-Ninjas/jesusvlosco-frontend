@@ -15,17 +15,29 @@ const VerifyCode: React.FC<Step2VerifyCodeProps> = ({ email, setStep }) => {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
   const [verify, { isLoading }] = useVarifyemailLoginMutation();
   const dispatch = useAppDispatch();
+
   const handleChange = (index: number, value: string) => {
-    // Ensure only digits are entered
     const numericValue = value.replace(/\D/g, "");
 
-    // Only update if it's a single digit or empty string (for backspace clearing)
+    // Paste handling: if pasting into the first field and length >= 2, distribute
+    if (index === 0 && numericValue.length > 1) {
+      const newCode = Array(6)
+        .fill("")
+        .map((_, i) => numericValue[i] || "");
+      setCode(newCode);
+      // Focus the last filled input
+      const lastIdx = Math.min(numericValue.length - 1, 5);
+      setTimeout(() => {
+        document.getElementById(`code-input-${lastIdx}`)?.focus();
+      }, 0);
+      return;
+    }
+
     if (numericValue.length <= 1) {
       const newCode = [...code];
       newCode[index] = numericValue;
       setCode(newCode);
 
-      // Auto-focus to the next input if a digit was entered and it's not the last input
       if (numericValue && index < 5) {
         document.getElementById(`code-input-${index + 1}`)?.focus();
       }
@@ -52,11 +64,11 @@ const VerifyCode: React.FC<Step2VerifyCodeProps> = ({ email, setStep }) => {
           loginUser({ ...result?.data?.user, accessToken: result?.data?.token })
         );
         setStep(3);
-      } 
+      }
       console.log(result.data.token);
     } catch (error: any) {
-        toast.error(error?.data?.message)
-        console.log(error)
+      toast.error(error?.data?.message);
+      console.log(error);
     }
   };
 
@@ -70,13 +82,26 @@ const VerifyCode: React.FC<Step2VerifyCodeProps> = ({ email, setStep }) => {
             <input
               key={index}
               id={`code-input-${index}`}
-              type="text" // Changed to 'text' to allow initial empty string, but we'll enforce numeric input
-              inputMode="numeric" // Suggests numeric keyboard on mobile
-              pattern="[0-9]" // HTML5 pattern for single digit
-              maxLength={1} // Ensures only one character can be typed
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]"
+              maxLength={1}
               value={digit}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 handleChange(index, e.target.value)
+              }
+              onPaste={
+                index === 0
+                  ? (e) => {
+                      const paste = e.clipboardData
+                        .getData("text")
+                        .replace(/\D/g, "");
+                      if (paste.length > 1) {
+                        e.preventDefault();
+                        handleChange(0, paste);
+                      }
+                    }
+                  : undefined
               }
               onKeyDown={(e: KeyboardEvent<HTMLInputElement>) =>
                 handleKeyDown(index, e)
@@ -86,12 +111,6 @@ const VerifyCode: React.FC<Step2VerifyCodeProps> = ({ email, setStep }) => {
             />
           ))}
         </div>
-        <p className="text-sm text-gray-500 mb-4">
-          Didn't get the code?{" "}
-          <button type="button" className="text-blue-600 hover:underline">
-            More options
-          </button>
-        </p>
         <button
           disabled={isLoading}
           type="submit"
