@@ -1,15 +1,9 @@
-// src/TimeSheets.tsx
 
-// 1. IMPORTS & LEAFLET CONFIGURATION
-// External Libraries
 import L from "leaflet";
 import "leaflet/dist/leaflet.css"; // Leaflet's core CSS
 import React, { useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-
-// Custom Icons (ensure these paths are correct in your project)
 import {
-  DropdownArrowIcon,
   LocationPinIcon,
   SearchIcon,
 } from "@/components/TimeSheets/Icons";
@@ -55,12 +49,7 @@ interface TimeSheetEntry {
   totalPayment: string;
 }
 
-interface ActivityItem {
-  id: number;
-  time: string;
-  avatars: string[]; // Array of avatar URLs for users involved
-  description: string;
-}
+
 
 // 3. TIMESHEETS COMPONENT
 export default function TimeSheets() {
@@ -88,62 +77,7 @@ export default function TimeSheets() {
     (el: { shiftStatus: string }) => el.shiftStatus === "DRAFT"
   );
   console.log({ pendingTimeClockRequest });
-  const [selectedActivityDate, setSelectedActivityDate] =
-    useState<string>("19/06");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
-
-  const activityData: ActivityItem[] = [
-    {
-      id: 1,
-      time: "12:37 am",
-      avatars: [
-        "https://randomuser.me/api/portraits/men/77.jpg", // Admin
-        "https://randomuser.me/api/portraits/women/45.jpg", // Jane Cooper
-      ],
-      description:
-        "Admin approved Jane Employees shift on 18/06/2025 from 08:00 to 05:00",
-    },
-    {
-      id: 2,
-      time: "12:32 am",
-      avatars: [
-        "https://randomuser.me/api/portraits/men/32.jpg", // Employee
-        "https://randomuser.me/api/portraits/women/27.jpg", // Esther Howard
-      ],
-      description:
-        "Employee requested to add a new shift on 18/06/2025 from 08:00 to 05:00",
-    },
-    {
-      id: 3,
-      time: "11:38 am",
-      avatars: [
-        "https://randomuser.me/api/portraits/men/77.jpg",
-        "https://randomuser.me/api/portraits/women/27.jpg",
-      ],
-      description:
-        "Admin approved Jane Employees shift on 18/06/2025 from 08:00 to 05:00",
-    },
-    {
-      id: 4,
-      time: "12:30 am",
-      avatars: [
-        "https://randomuser.me/api/portraits/men/18.jpg",
-        "https://randomuser.me/api/portraits/women/12.jpg",
-      ],
-      description:
-        "Employee requested to add a new shift on 18/06/2025 from 08:00 to 05:00",
-    },
-    {
-      id: 5,
-      time: "12:00 am",
-      avatars: [
-        "https://randomuser.me/api/portraits/men/77.jpg",
-        "https://randomuser.me/api/portraits/women/63.jpg",
-      ],
-      description:
-        "Admin approved Jane Employees shift on 18/06/2025 from 08:00 to 05:00",
-    },
-  ];
 
   // 3.3. DERIVED DATA & HELPERS
   // Transform API data to display format
@@ -308,37 +242,6 @@ export default function TimeSheets() {
                   setSearchQuery(e.target.value)
                 }
               />
-            </div>
-          </div>
-        </section>
-
-        {/* --- TOP SUMMARY SECTION --- */}
-        <section className="flex py-4 justify-between gap-2">
-          <div className="flex gap-10">
-            <div>
-              <p className="text-xl font-bold text-gray-900">08.00</p>
-              <p className="text-sm text-gray-500">Regular</p>
-            </div>
-            <div className="flex items-center">+</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">--</p>
-              <p className="text-sm text-gray-500">Overtime</p>
-            </div>
-            <div className="flex items-center">+</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">00:00</p>
-              <p className="text-sm text-gray-500">Paid time off</p>
-            </div>
-            <div className="flex items-center">=</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">08:00</p>
-              <p className="text-sm text-gray-500">Total Paid Hours</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-center pl-4">
-            <div>
-              <p className="text-xl font-bold text-gray-900">00:00</p>
-              <p className="text-sm text-gray-500">Unpaid time off</p>
             </div>
           </div>
         </section>
@@ -558,86 +461,6 @@ export default function TimeSheets() {
           </MapContainer>
         </section>
 
-        {/* --- ACTIVITY SECTION --- */}
-        <section className="mt-6 bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Activity</h3>
-
-          {/* Activity Date Filter */}
-          <div className="flex items-center space-x-2 mb-6">
-            <button className="px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-md font-medium text-sm">
-              {selectedActivityDate}
-            </button>
-            <div className="relative">
-              <select
-                className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={selectedActivityDate}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSelectedActivityDate(e.target.value)
-                }
-              >
-                <option value="19/06">19/06</option>
-                <option value="today">Today</option>
-                <option value="yesterday">Yesterday</option>
-                <option value="last-week">Last Week</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                {/* You might need a CalendarIcon here if you have one, otherwise DropdownArrowIcon */}
-                <DropdownArrowIcon className="fill-current h-4 w-4" />
-              </div>
-            </div>
-          </div>
-
-          {/* Activity List */}
-          <div className="space-y-4">
-            {activityData.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-4">
-                {/* Time Column */}
-                <div className="flex-shrink-0 w-[80px] text-right pt-1">
-                  <span className="text-sm font-medium text-gray-500">
-                    {activity.time}
-                  </span>
-                </div>
-
-                {/* Activity Details */}
-                <div className="flex-grow flex items-start space-x-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  {/* Clock Icon - Replace with your actual ClockIcon component if available */}
-                  <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                  </div>
-
-                  {/* Avatars */}
-                  <div className="flex-shrink-0 flex -space-x-2 overflow-hidden">
-                    {activity.avatars.map((avatarUrl, index) => (
-                      <img
-                        key={index}
-                        className="inline-block h-8 w-8 rounded-full ring-2 ring-white"
-                        src={avatarUrl}
-                        alt={`Activity participant ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Description */}
-                  <div className="flex-grow text-sm text-gray-700 leading-relaxed pt-1">
-                    {activity.description}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       {/* --- MODAL --- */}
