@@ -74,6 +74,7 @@ import SurveyStatisticsPage from "@/pages/SurveyAndPoll/SurveyStatisticsPage";
 import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
 import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
+import UserClockInRequest from "@/pages/ClockInRequest/UserClockInRequest";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -136,6 +137,10 @@ const routes = createBrowserRouter([
           {
             path: "user-timeoffrequest",
             element: <UserTimeOffRequests></UserTimeOffRequests>,
+          },
+          {
+            path: "user-clock-in-request",
+            element: <UserClockInRequest />,
           },
         ],
       },

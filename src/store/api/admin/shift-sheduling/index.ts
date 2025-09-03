@@ -24,6 +24,18 @@ const shiftScheduleApi = baseApi.injectEndpoints({
       },
       providesTags: ["CLOCK_IN_OUT"],
     }),
+    getAllClockInRequestForUser: builder.query({
+      query: ({ currentPage }) => {
+        return {
+          url: `/employee/request-time-clock`,
+          method: "GET",
+          params: {
+            page: currentPage,
+          },
+        };
+      },
+      providesTags: ["CLOCK_IN_OUT"],
+    }),
     addClockInRequest: builder.mutation({
       query: (body) => ({
         url: `/employee/request-time-clock/request`,
@@ -40,7 +52,20 @@ const shiftScheduleApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["CLOCK_IN_OUT"],
     }),
+    cancelClockInRequest: builder.mutation({
+      query: ({ id }) => ({
+        url: `/employee/request-time-clock/cancel/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["CLOCK_IN_OUT"],
+    }),
   }),
 });
-export const { useGetAllShiftsOfAUserQuery, useAddClockInRequestMutation, useGetAllClockInRequestForAdminQuery, useUpdateClockInRequestMutation } =
-  shiftScheduleApi;
+export const {
+  useGetAllShiftsOfAUserQuery,
+  useAddClockInRequestMutation,
+  useGetAllClockInRequestForAdminQuery,
+  useUpdateClockInRequestMutation,
+  useGetAllClockInRequestForUserQuery,
+  useCancelClockInRequestMutation,
+} = shiftScheduleApi;
