@@ -10,7 +10,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
 import { Chat } from "../components/Dashboard/Chat";
-import { Achievement } from "../components/Dashboard/dashboard";
 import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
 import MapLocation from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
@@ -19,12 +18,15 @@ import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
 import { ShiftNotifications } from "../components/Dashboard/ShiftNotifications";
 import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
+import { useGetAdminDashStatsQuery, useGetLatestSurveyandPollQuery } from "@/store/api/admin/dashboard/adminDashboardStatApi";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
-  
+  const { data: adminDashStats } = useGetAdminDashStatsQuery({});
+  const {data: latestSurPoll} = useGetLatestSurveyandPollQuery({})
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
+  console.log("Survey and Poll:", latestSurPoll);
 
   //assigned employee data call
   const { data: assignedUsersdata } = useGetAllAssignedUsersQuery({
@@ -131,34 +133,6 @@ const employees = React.useMemo(() => {
     }
   };
 
-  const achievements: Achievement[] = [
-    { id: "1", title: "Team Player", date: "June 17, 2025", recipient: "You" },
-    {
-      id: "2",
-      title: "Outstanding Contribution to Project X",
-      date: "June 17, 2025",
-      recipient: "You",
-    },
-    {
-      id: "3",
-      title: "Outstanding Contribution to Project X",
-      date: "June 17, 2025",
-      recipient: "You",
-    },
-    {
-      id: "4",
-      title: "Outstanding Contribution to Project X",
-      date: "June 17, 2025",
-      recipient: "You",
-    },
-    {
-      id: "5",
-      title: "Outstanding Contribution to Project X",
-      date: "June 17, 2025",
-      recipient: "You",
-    },
-  ];
-
   if (!timeOffRequestsData || !assignedUsersdata) {
     return (
       <div className="flex justify-center items-center p-10 bg-gray-5 min-h-screen">
@@ -174,7 +148,7 @@ const employees = React.useMemo(() => {
           {/* Left Column - Main Content */}
           <div className="lg:col-span-3 space-y-8">
             <QuickActions />
-            <SurveyPoll />
+            <SurveyPoll data={latestSurPoll} />
             <EmployeeTable employees={employees} />
             {/* <RecognitionTable recognitions={recognitions} /> */}
             <RecognitionTable />
@@ -189,8 +163,8 @@ const employees = React.useMemo(() => {
               onApprove={handleApprove}
               onDecline={handleDecline}
             />
-            <ShiftNotifications />
-            <RecognitionEngagement achievements={achievements} />
+            <ShiftNotifications shiftNotifications={adminDashStats?.data?.shiftNotifications} />
+            <RecognitionEngagement achievements={adminDashStats?.data?.recognitionNotifications} />
           </div>
         </div>
       </div>

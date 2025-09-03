@@ -190,21 +190,28 @@ const SingleUserSheet = () => {
               </p>
             </div>
             <div className="flex space-x-3">
-              <Button
-                variant="outline"
-                onClick={handleReject}
-                className="flex items-center space-x-2 px-6 py-3 border-red-300 text-red-700 hover:bg-red-50"
-              >
-                <XCircle className="h-5 w-5" />
-                <span className="font-medium">Reject Timesheet</span>
-              </Button>
-              <Button
-                onClick={handleAccept}
-                className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
-              >
-                <CheckCircle className="h-5 w-5" />
-                <span>Approve Timesheet</span>
-              </Button>
+             {
+                userSheet?.data?.payroll?.status ==="PENDING" ? <>
+
+               <Button
+                 variant="outline"
+                 onClick={handleReject}
+                 className="flex items-center space-x-2 px-6 py-3 border-red-300 text-red-700 hover:bg-red-50"
+               >
+                 <XCircle className="h-5 w-5" />
+                 <span className="font-medium">Reject Timesheet</span>
+               </Button>
+               <Button
+                 onClick={handleAccept}
+                 className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+               >
+                 <CheckCircle className="h-5 w-5" />
+                 <span>Approve Timesheet</span>
+               </Button>
+             </> : <div>
+                <span className="font-semibold">Status: <span className={`${userSheet?.data?.payroll?.status === "APPROVED" ? "bg-green-600" : "bg-red-600"} text-white px-3 py-2 rounded-md`}>{userSheet?.data?.payroll?.status}</span></span>
+             </div>
+             }
             </div>
           </div>
         </section>

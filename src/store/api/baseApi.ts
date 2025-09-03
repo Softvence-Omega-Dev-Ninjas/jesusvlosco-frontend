@@ -35,7 +35,8 @@ export const baseApi = createApi({
     "Like",
     "TASK",
     "CLOCK_IN_OUT",
-    "CLOCK_SHEET"
+    "CLOCK_SHEET",
+    "NOTIFICATION"
   ],
   endpoints: () => ({}),
 });
