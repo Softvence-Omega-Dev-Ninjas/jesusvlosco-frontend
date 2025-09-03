@@ -175,7 +175,7 @@ export default function TimeSheets() {
 
   // Map Configuration
   const defaultCoordinates: [number, number] = [ 51.1514578, -114.0825065]; // Corrected coordinates for central Dhaka
-  const mapZoom = 15; // Good initial zoom level for city view
+  const mapZoom = 11; // Good initial zoom level for city view
   const mapStyle = {
     height: "550px", // Adjusted height to be visually balanced
     width: "100%",
