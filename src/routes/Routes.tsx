@@ -74,6 +74,7 @@ import SurveyStatisticsPage from "@/pages/SurveyAndPoll/SurveyStatisticsPage";
 import PollStatisticsPage from "@/pages/SurveyAndPoll/PollStatisticsPage";
 import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
+import SingleUserSheet from "@/Layout/UserLayout/SingleUserSheet";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -220,6 +221,7 @@ const routes = createBrowserRouter([
               { index: true, element: <TimeSheets /> },
               { path: "time", element: <TimeSheets /> },
               { path: "payroll", element: <Payroll /> },
+              { path: "payroll/:id", element: <SingleUserSheet /> },
             ],
           },
           // dynamic

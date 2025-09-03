@@ -4,10 +4,10 @@
 // External Libraries
 import L from "leaflet";
 import "leaflet/dist/leaflet.css"; // Leaflet's core CSS
-import React, { useState } from "react";
+import { useState } from "react";
 
 // Custom Icons (ensure these paths are correct in your project)
-import { DropdownArrowIcon, SearchIcon } from "@/components/TimeSheets/Icons";
+// import { DropdownArrowIcon, SearchIcon } from "@/components/TimeSheets/Icons";
 
 // --- Leaflet Default Icon Fix (IMPORTANT for marker display) ---
 // This is necessary because Webpack/Vite might not correctly bundle Leaflet's default icons.
@@ -16,29 +16,42 @@ import PendingRequestModal from "@/components/TimeSheets/PendingRequestModal";
 import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
+import { useGetSubmittedClockSheetQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { Link } from "react-router-dom";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerRetina,
   iconUrl: markerIcon,
   shadowUrl: shadow,
 });
-// --- End Leaflet Default Icon Fix ---
 
-// 2. INTERFACES
-interface Employee {
-  id: number;
-  name: string;
-  avatar: string;
-  project: string;
-  location: string;
-  clockIn: string;
-  clockOut: string;
-  totalHours: string;
-  regular: string;
-  overtime: string;
-  paidTimeOff: string;
-  regularPayment: string;
-  totalPay?: string;
+
+interface PayrollEntry {
+  id: string;
+  userId: string;
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  amount: number;
+  status: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    phone: string;
+    employeeID: number;
+    email: string;
+    role: string;
+    isLogin: boolean;
+    lastLoginAt: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      profileUrl: string;
+    };
+  };
 }
 
 interface ActivityItem {
@@ -49,121 +62,122 @@ interface ActivityItem {
 }
 
 export default function Payroll() {
-  // 3. STATE MANAGEMENT
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedTimePeriod, setSelectedTimePeriod] =
-    useState<string>("19/06/2025");
-
+  const [pagination, setPagination] = useState<{ page: number; limit: number }>({
+    page: 1,
+    limit: 10,
+  });
+  const {data: getSubmittedClockSheet, isLoading} = useGetSubmittedClockSheetQuery(pagination);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // New state for modal visibility
 
-  // 3.2. DUMMY DATA
-  const employeeData: Employee[] = [
-    {
-      id: 1,
-      name: "Jane Cooper",
-      avatar: "https://randomuser.me/api/portraits/women/45.jpg",
-      project: "Metro Shopping Center",
-      location: "Los Angeles, California",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 2,
-      name: "Robert Fox",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      project: "Riverside Apartments",
-      location: "Chicago, Illinois",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 3,
-      name: "Esther Howard",
-      avatar: "https://randomuser.me/api/portraits/women/27.jpg",
-      project: "City Bridge Renovations",
-      location: "Miami, Florida",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 4,
-      name: "Desirae Botosh",
-      avatar: "https://randomuser.me/api/portraits/women/63.jpg",
-      project: "Tech Campus Phase 2",
-      location: "Seattle, Washington",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 5,
-      name: "Marley Stanton",
-      avatar: "https://randomuser.me/api/portraits/men/18.jpg",
-      project: "Golden Hills Estates",
-      location: "New York City",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 6,
-      name: "Kaylynn Stanton",
-      avatar: "https://randomuser.me/api/portraits/women/12.jpg",
-      project: "City Bridge Renovations",
-      location: "Miami, Florida",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-    {
-      id: 7,
-      name: "Brandon Vaccaro",
-      avatar: "https://randomuser.me/api/portraits/men/77.jpg",
-      project: "Metro Shopping Center",
-      location: "Los Angeles, California",
-      clockIn: "8:00 AM",
-      clockOut: "6:00 PM",
-      totalHours: "10 hours",
-      regular: "9 hours",
-      overtime: "1 hour",
-      paidTimeOff: "8 hours",
-      regularPayment: "100 US $",
-      totalPay: "100 US $",
-    },
-  ];
+  console.log("getSubmittedClockSheet", getSubmittedClockSheet);
+  // 3.2. DUMMY DATA (Commented out - using real API data now)
+  // const employeeData: Employee[] = [
+  //   {
+  //     id: 1,
+  //     name: "Jane Cooper",
+  //     avatar: "https://randomuser.me/api/portraits/women/45.jpg",
+  //     project: "Metro Shopping Center",
+  //     location: "Los Angeles, California",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Robert Fox",
+  //     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+  //     project: "Riverside Apartments",
+  //     location: "Chicago, Illinois",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Esther Howard",
+  //     avatar: "https://randomuser.me/api/portraits/women/27.jpg",
+  //     project: "City Bridge Renovations",
+  //     location: "Miami, Florida",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Desirae Botosh",
+  //     avatar: "https://randomuser.me/api/portraits/women/63.jpg",
+  //     project: "Tech Campus Phase 2",
+  //     location: "Seattle, Washington",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Marley Stanton",
+  //     avatar: "https://randomuser.me/api/portraits/men/18.jpg",
+  //     project: "Golden Hills Estates",
+  //     location: "New York City",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "Kaylynn Stanton",
+  //     avatar: "https://randomuser.me/api/portraits/women/12.jpg",
+  //     project: "City Bridge Renovations",
+  //     location: "Miami, Florida",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  //   {
+  //     id: 7,
+  //     name: "Brandon Vaccaro",
+  //     avatar: "https://randomuser.me/api/portraits/men/77.jpg",
+  //     project: "Metro Shopping Center",
+  //     location: "Los Angeles, California",
+  //     clockIn: "8:00 AM",
+  //     clockOut: "6:00 PM",
+  //     totalHours: "10 hours",
+  //     regular: "9 hours",
+  //     overtime: "1 hour",
+  //     paidTimeOff: "8 hours",
+  //     regularPayment: "100 US $",
+  //     totalPay: "100 US $",
+  //   },
+  // ];
 
   const activityData: ActivityItem[] = [
     {
@@ -219,16 +233,12 @@ export default function Payroll() {
   ];
 
   // 3.3. DERIVED DATA & HELPERS
-  const filteredData: Employee[] = employeeData.filter(
-    (employee: Employee) =>
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handlePendingRequestsClick = (): void => {
-    setIsModalOpen(true); // Open the modal when button is clicked
-  };
+  // const filteredData: Employee[] = employeeData.filter(
+  //   (employee: Employee) =>
+  //     employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     employee.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     employee.location.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
 
   const closeModal = (): void => {
     setIsModalOpen(false); // Close the modal
@@ -246,92 +256,6 @@ export default function Payroll() {
           isModalOpen ? "opacity-50 pointer-events-none" : ""
         } transition-all duration-300`}
       >
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Time Clock</h2>
-
-        {/* --- DASHBOARD HEADER SECTION --- */}
-        <section className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
-          {/* Time Period Dropdown */}
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-700 font-medium">Time Period:</span>
-            <div className="relative">
-              <select
-                className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSelectedTimePeriod(e.target.value)
-                }
-                value={selectedTimePeriod}
-              >
-                <option value="19/06/2025">19/06/2025</option>
-                <option value="recent-7-days">Recent 7 Days</option>
-                <option value="last-30-days">Last 30 Days</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <DropdownArrowIcon className="fill-current h-4 w-4" />
-              </div>
-            </div>
-          </div>
-
-          {/* Search and Pending Requests */}
-          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            {/* Pending Requests Button (Badge) */}
-            <button
-              onClick={handlePendingRequestsClick}
-              className="relative flex items-center justify-center px-4 py-2 rounded-full border border-yellow-500 text-yellow-700 font-semibold text-sm bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200 whitespace-nowrap"
-            >
-              <span className="absolute -top-2 -left-2 flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-orange-500 rounded-full">
-                1
-              </span>
-              <span className="block leading-tight">Pending Requests</span>
-            </button>
-
-            <div className="relative w-full bg-white sm:w-auto">
-              {/* Search Input */}
-              <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="py-2 px-4 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearchQuery(e.target.value)
-                }
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* --- TOP SUMMARY SECTION --- */}
-        <div className="py-4 flex justify-between gap-2  ">
-          <div className="flex gap-10">
-            <div>
-              <p className="text-xl font-bold text-gray-900">183.75</p>
-              <p className="text-sm text-gray-500">Regular</p>
-            </div>
-            <div className="flex items-center">+</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">11</p>
-              <p className="text-sm text-gray-500">1.5 X Overtime</p>
-            </div>
-            <div className="flex items-center">+</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">8</p>
-              <p className="text-sm text-gray-500">Paid time off</p>
-            </div>
-            <div className="flex items-center">=</div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">202.75</p>
-              <p className="text-sm text-gray-500">Total Paid Hours</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold text-gray-900">0</p>
-              <p className="text-sm text-gray-500">Unpaid time off</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-center border-l border-gray-200 pl-4">
-            <p className="text-xl font-bold text-gray-900">2340,58 US$</p>
-            <p className="text-sm text-gray-500">Pay per dates</p>
-          </div>
-        </div>
 
         {/* --- MAIN TABLE CONTENT SECTION --- */}
         <section className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
@@ -384,60 +308,173 @@ export default function Payroll() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((employee) => (
-                  <tr key={employee.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {/* Placeholder for profile picture */}
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={employee.avatar}
-                            alt={employee.name}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {employee.name}
-                          </div>
-                        </div>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        <span className="ml-2 text-gray-500">Loading payroll data...</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {employee.totalHours}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {employee.regular}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {employee.overtime}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {employee.paidTimeOff}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap ">
-                      <div className="text-sm text-gray-900">
-                        {employee.totalPay}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex place-self-center">
-                      <button className="inline-flex cursor-pointer items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#4E53B1] hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Open
-                      </button>
                     </td>
                   </tr>
-                ))}
+                ) : getSubmittedClockSheet?.data?.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                      No payroll entries found
+                    </td>
+                  </tr>
+                ) : (
+                  getSubmittedClockSheet?.data?.map((payrollEntry: PayrollEntry) => (
+                    <tr key={payrollEntry.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {/* Employee profile picture */}
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              className="h-10 w-10 rounded-full"
+                              src={payrollEntry.user?.profile?.profileUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(`${payrollEntry.user?.profile?.firstName || 'User'} ${payrollEntry.user?.profile?.lastName || ''}`)}
+                              alt={`${payrollEntry.user?.profile?.firstName || 'User'} ${payrollEntry.user?.profile?.lastName || ''}`}
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {payrollEntry.user?.profile?.firstName || 'User'} {payrollEntry.user?.profile?.lastName || ''}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              ID: {payrollEntry.user?.employeeID || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {payrollEntry.totalHours?.toFixed(2)} hours
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {payrollEntry.regularHours?.toFixed(2)} hours
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {payrollEntry.overtimeHours?.toFixed(2)} hours
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(payrollEntry.startDate).toLocaleDateString()} - {new Date(payrollEntry.endDate).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          ${payrollEntry.amount?.toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-2 place-self-center">
+                        <Link to={`${payrollEntry.id}`} className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-900">
+                          Open
+                        </Link>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          payrollEntry.status === 'PENDING' 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : payrollEntry.status === 'APPROVED'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {payrollEntry.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination Controls */}
+          {getSubmittedClockSheet?.metadata && (
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                  disabled={pagination.page === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: Math.min(getSubmittedClockSheet.metadata.totalPage, prev.page + 1) }))}
+                  disabled={pagination.page === getSubmittedClockSheet.metadata.totalPage}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing{' '}
+                    <span className="font-medium">
+                      {(pagination.page - 1) * pagination.limit + 1}
+                    </span>{' '}
+                    to{' '}
+                    <span className="font-medium">
+                      {Math.min(pagination.page * pagination.limit, getSubmittedClockSheet.metadata.total)}
+                    </span>{' '}
+                    of{' '}
+                    <span className="font-medium">{getSubmittedClockSheet.metadata.total}</span>{' '}
+                    results
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                      disabled={pagination.page === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    {/* Page Numbers */}
+                    {Array.from({ length: Math.min(5, getSubmittedClockSheet.metadata.totalPage) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(getSubmittedClockSheet.metadata.totalPage - 4, pagination.page - 2)) + i;
+                      if (pageNum > getSubmittedClockSheet.metadata.totalPage) return null;
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPagination(prev => ({ ...prev, page: pageNum }))}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                            pagination.page === pageNum
+                              ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                    
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: Math.min(getSubmittedClockSheet.metadata.totalPage, prev.page + 1) }))}
+                      disabled={pagination.page === getSubmittedClockSheet.metadata.totalPage}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Next</span>
+                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </div>
 
