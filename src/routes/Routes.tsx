@@ -121,11 +121,11 @@ const routes = createBrowserRouter([
         element: <Schedule />,
         children: [
           {
-            path: "user-shiftschedule",
+            path: "user-shift-schedule",
             element: <ShiftSchedule />,
           },
           {
-            path: "user-shiftschedule/:id",
+            path: "user-shift-schedule/:id",
             element: <UserShiftScheduling></UserShiftScheduling>,
           },
           {
