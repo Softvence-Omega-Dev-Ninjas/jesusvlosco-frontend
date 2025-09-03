@@ -22,12 +22,22 @@ interface Employee {
 // Main App component
 const EmployeeManagement = () => {
   // State for form inputs (optional for this design, but good practice)
-   const [employeeName, setEmployeeName] = useState("");
+  const [employeeName, setEmployeeName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
 
-  const { data } = useGetEmployeeManagementQuery(undefined);
+  // Pagination and search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  // Fetch data with pagination and search
+  const { data, isLoading } = useGetEmployeeManagementQuery({
+    searchTerm,
+    page,
+    limit,
+  });
   const [deleteUser] = useDeleteUserMutation();
 
   // Local state to manage employees list for instant UI update after delete
@@ -40,36 +50,11 @@ const EmployeeManagement = () => {
     }
   }, [data]);
 
-  // Filter employees based on inputs and localEmployees state
-  const filteredEmployees =
-    localEmployees.filter((employee: Employee) => {
-      // Check employee name (first + last)
-      const fullName = `${employee.profile?.firstName || ""} ${
-        employee.profile?.lastName || ""
-      }`.toLowerCase();
-      const filterName = employeeName.toLowerCase();
-
-      // Check employeeId (as string)
-      const filterEmployeeId = employeeId.toLowerCase();
-
-      // Check contact number
-      const filterContact = contactNumber.toLowerCase();
-
-      // Check email
-      const filterEmail = email.toLowerCase();
-
-      return (
-        (!filterName || fullName.includes(filterName)) &&
-        (!filterEmployeeId ||
-          employee.employeeID.toString().includes(filterEmployeeId)) &&
-        (!filterContact ||
-          employee.phone.toLowerCase().includes(filterContact)) &&
-        (!filterEmail || employee.email.toLowerCase().includes(filterEmail))
-      );
-    }) || [];
+  // Remove frontend filtering, use API data directly
+  const employees = localEmployees;
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const allEmployeeIds = filteredEmployees.map((emp: Employee) => emp.id);
+  const allEmployeeIds = employees.map((emp: Employee) => emp.id);
   const isAllSelected =
     selectedIds.length === allEmployeeIds.length && allEmployeeIds.length > 0;
 
@@ -107,10 +92,32 @@ const EmployeeManagement = () => {
     }
   };
 
-  
+  // Pagination metadata
+  const total = data?.metadata?.total || 0;
+  const totalPage = data?.metadata?.totalPage || 1;
+
+  // Handlers for pagination
+  const handlePrevPage = () => setPage((p) => Math.max(1, p - 1));
+  const handleNextPage = () => setPage((p) => Math.min(totalPage, p + 1));
+  const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLimit(Number(e.target.value));
+    setPage(1);
+  };
+
+  // Search handler (debounced for better UX)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPage(1);
+      setLimit(10);
+      setSearchTerm(employeeName);
+    }, 400);
+    return () => clearTimeout(timeout);
+    // Only trigger on employeeName change
+    // eslint-disable-next-line
+  }, [employeeName]);
 
   return (
-    <div className="min-h-screen   font-inter">
+    <div className="min-h-screen font-inter">
       {/* Header */}
       <header className="flex justify-center py-6">
         <h1 className="text-2xl font-semibold text-primary">
@@ -208,7 +215,7 @@ const EmployeeManagement = () => {
         {/* Employee Table Section */}
         <section className="mt-8 overflow-x-auto rounded-md bg-white">
           <div className="min-w-full">
-            <table className="min-w-full divide-y  divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="">
                 <tr>
                   <th>
@@ -258,70 +265,206 @@ const EmployeeManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredEmployees.map((employee: Employee, index: number) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(employee.id)}
-                        onChange={() => toggleSelectOne(employee.id)}
-                        className="h-4 w-4 text-primary border-gray-300 rounded"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.employeeID}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            src={
-                              employee.profile?.profileUrl ||
-                              "/default-avatar.png"
-                            }
-                            alt={`${employee.profile?.firstName || ""} ${
-                              employee.profile?.lastName || ""
-                            }`}
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {employee.profile?.firstName}{" "}
-                            {employee.profile?.lastName}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.phone}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(employee.lastLoginAt).toLocaleDateString(
-                        "en-GB",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        }
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                      
-                       onClick={() => handleDelete(employee.id)}
-                      className="px-6 py-2 rounded-2xl bg-[#FFE6E7] text-[#DC1E28] cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                        Remove
-                      </button>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8">
+                      Loading...
                     </td>
                   </tr>
-                ))}
+                ) : employees.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8">
+                      No employees found.
+                    </td>
+                  </tr>
+                ) : (
+                  employees.map((employee: Employee, index: number) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(employee.id)}
+                          onChange={() => toggleSelectOne(employee.id)}
+                          className="h-4 w-4 text-primary border-gray-300 rounded"
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {employee.employeeID}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              src={
+                                employee.profile?.profileUrl ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  employee.profile?.firstName +
+                                    " " +
+                                    employee.profile?.lastName
+                                )}&background=random&size=128`
+                              }
+                              alt={`${employee.profile?.firstName || ""} ${
+                                employee.profile?.lastName || ""
+                              }`}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {employee.profile?.firstName}{" "}
+                              {employee.profile?.lastName}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {employee.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {employee.phone}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(employee.lastLoginAt).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          }
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleDelete(employee.id)}
+                          className="px-6 py-2 rounded-2xl bg-[#FFE6E7] text-[#DC1E28] cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+          </div>
+
+          {/* Improved Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-3 border-t border-gray-100 bg-gray-50 rounded-b-md">
+            <div>
+              <span className="text-sm text-gray-600">
+                Page <span className="font-semibold">{page}</span> of{" "}
+                <span className="font-semibold">{totalPage}</span>
+                {" | "}
+                Total: <span className="font-semibold">{total}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={page === 1}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition
+                ${
+                  page === 1
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-primary border-primary hover:bg-primary hover:text-white"
+                }
+              `}
+                aria-label="Previous Page"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Prev
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPage }, (_, i) => i + 1)
+                  .filter(
+                    (n) =>
+                      n === 1 ||
+                      n === totalPage ||
+                      (n >= page - 1 && n <= page + 1)
+                  )
+                  .map((n, idx, arr) => {
+                    // Add ellipsis if needed
+                    if (idx > 0 && n !== arr[idx - 1] + 1) {
+                      return (
+                        <span
+                          key={`ellipsis-${n}`}
+                          className="px-1 text-gray-400"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => setPage(n)}
+                        className={`w-8 h-8 rounded-full text-sm font-semibold transition
+                        ${
+                          n === page
+                            ? "bg-primary text-white"
+                            : "bg-white text-primary border border-primary hover:bg-primary hover:text-white"
+                        }
+                      `}
+                        disabled={n === page}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+              </div>
+              <button
+                onClick={handleNextPage}
+                disabled={page === totalPage}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition
+                ${
+                  page === totalPage
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-primary border-primary hover:bg-primary hover:text-white"
+                }
+              `}
+                aria-label="Next Page"
+              >
+                Next
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+              <select
+                value={limit}
+                onChange={handleLimitChange}
+                className="ml-2 px-2 py-1 rounded-lg text-sm font-semibold transition
+                bg-white text-primary border border-primary hover:bg-primary hover:text-white"
+              >
+                {[5, 10, 20, 50].map((n) => (
+                  <option key={n} value={n}>
+                    {n} / page
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </section>
       </main>

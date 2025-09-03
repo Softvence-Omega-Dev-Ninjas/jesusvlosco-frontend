@@ -3,6 +3,9 @@ import { Bell, Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import UserDropdown from "./User/UserDropdown";
 import { useGetNotificationDataQuery } from "@/store/api/user/getUserDashboardData";
+import { useGetAdminNotificationsQuery } from "@/store/api/admin/dashboard/dashboardApi";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 
 // Notification type definition
 type NotificationType = {
@@ -20,6 +23,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+  const user = useSelector(selectUser);
+
   const location = useLocation();
   let pageTitle = "Dashboard";
   // Split the path after /user/ and use the second segment if multiple exist
@@ -42,7 +47,10 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     }
   }
 
-  const notification = useGetNotificationDataQuery({});
+  const isUser = user?.role === "EMPLOYEE";
+
+  const userNotification = useGetNotificationDataQuery({});
+  const adminNotification = useGetAdminNotificationsQuery({});
 
   // Notification data and dropdown logic
   const [showNotifications, setShowNotifications] = useState(false);
@@ -65,7 +73,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showNotifications]);
 
-  const notificationData: NotificationType[] = notification?.data?.data || [];
+  const notificationData: NotificationType[] =
+    isUser ? userNotification?.data?.data || [] : adminNotification?.data?.data || [];
 
   return (
     <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2 br">
