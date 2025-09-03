@@ -22,13 +22,18 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const location = useLocation();
   let pageTitle = "Dashboard";
-
+  // Split the path after /user/ and use the second segment if multiple exist
   const userPath = location.pathname.split("/user/")[1];
   if (userPath) {
     const segments = userPath.split("/").filter(Boolean);
-    const lastSegment = segments[segments.length - 1];
-    if (lastSegment) {
-      pageTitle = lastSegment
+    let targetSegment = "";
+    if (segments.length >= 2) {
+      targetSegment = segments[1];
+    } else if (segments.length === 1) {
+      targetSegment = segments[0];
+    }
+    if (targetSegment) {
+      pageTitle = targetSegment
         .split("-")
         .map(
           (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
