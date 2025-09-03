@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Bell, Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import UserDropdown from "./User/UserDropdown";
+import { useGetNotificationDataQuery } from "@/store/api/user/getUserDashboardData";
 
 // Notification type definition
 type NotificationType = {
@@ -21,7 +22,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const location = useLocation();
   let pageTitle = "Dashboard";
-  // Split the path after /user/ and use the last segment (if any)
+
   const userPath = location.pathname.split("/user/")[1];
   if (userPath) {
     const segments = userPath.split("/").filter(Boolean);
@@ -35,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         .join(" ");
     }
   }
+
+  const notification = useGetNotificationDataQuery({});
 
   // Notification data and dropdown logic
   const [showNotifications, setShowNotifications] = useState(false);
@@ -57,63 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showNotifications]);
 
-  const notificationData: NotificationType[] = [
-    {
-      id: "c19ce5db-e62f-47a9-bc30-eff234de4232",
-      type: "UrgentShiftChanged",
-      title: "Urgent Shift Changed",
-      message:
-        "Shift Notification for New Test Shift on Fri Sep 05 2025 11:58:00 GMT+0000 (Coordinated Universal Time)",
-      meta: {
-        date: "2025-09-05T06:00:00.000Z",
-        status: "URGENT_SHIFT_CHANGED",
-        performedBy: "SYSTEM",
-      },
-      createdAt: "2025-09-02T11:59:20.468Z",
-      updatedAt: "2025-09-02T11:59:20.469Z",
-    },
-    {
-      id: "90decd72-b00e-447c-827a-c370d2c72a68",
-      type: "Shift",
-      title: "New Shift Assigned",
-      message:
-        "Shift Notification for New Test Shift on Fri Sep 05 2025 11:58:00 GMT+0000 (Coordinated Universal Time)",
-      meta: {
-        date: "2025-09-05T06:00:00.000Z",
-        status: "ASSIGNED",
-        performedBy: "SYSTEM",
-      },
-      createdAt: "2025-09-02T11:59:10.247Z",
-      updatedAt: "2025-09-02T11:59:10.248Z",
-    },
-    {
-      id: "336e76fd-de04-4aba-97d6-00f72064618a",
-      type: "Shift",
-      title: "New Shift Assigned",
-      message:
-        "Shift Notification for Testing Timezone on Sun Sep 07 2025 23:42:00 GMT+0000 (Coordinated Universal Time)",
-      meta: {
-        date: "2025-09-08T01:42:00.000Z",
-        status: "ASSIGNED",
-        performedBy: "SYSTEM",
-      },
-      createdAt: "2025-09-02T11:42:26.105Z",
-      updatedAt: "2025-09-02T11:42:26.106Z",
-    },
-    {
-      id: "03e3fe75-83eb-4da6-9a99-5aa428311501",
-      type: "Announcement",
-      title: "System Maintenance Notice",
-      message: "We’ll be performing maintenance",
-      meta: {
-        performedBy: "fb57eb85-bc30-4b45-9834-bbf0b035f3e0",
-        publishedAt: "2025-08-31T05:48:31.473Z",
-        announcementId: "1769c363-a41a-47d3-9b14-d5297a97f107",
-      },
-      createdAt: "2025-08-31T05:50:14.198Z",
-      updatedAt: "2025-08-31T05:50:14.198Z",
-    },
-  ];
+  const notificationData: NotificationType[] = notification?.data?.data || [];
 
   return (
     <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2 br">
