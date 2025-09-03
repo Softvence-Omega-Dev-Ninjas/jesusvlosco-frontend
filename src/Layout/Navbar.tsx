@@ -1,12 +1,67 @@
-import React from 'react';
-import { Bell, Menu } from 'lucide-react';
-import UserDropdown from './User/UserDropdown';
+import React, { useRef, useState, useEffect } from "react";
+import { Bell, Menu } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import UserDropdown from "./User/UserDropdown";
+import { useGetNotificationDataQuery } from "@/store/api/user/getUserDashboardData";
+
+// Notification type definition
+type NotificationType = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  meta: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+};
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+  const location = useLocation();
+  let pageTitle = "Dashboard";
+
+  const userPath = location.pathname.split("/user/")[1];
+  if (userPath) {
+    const segments = userPath.split("/").filter(Boolean);
+    const lastSegment = segments[segments.length - 1];
+    if (lastSegment) {
+      pageTitle = lastSegment
+        .split("-")
+        .map(
+          (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        )
+        .join(" ");
+    }
+  }
+
+  const notification = useGetNotificationDataQuery({});
+
+  // Notification data and dropdown logic
+  const [showNotifications, setShowNotifications] = useState(false);
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        bellRef.current &&
+        !bellRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showNotifications]);
+
+  const notificationData: NotificationType[] = notification?.data?.data || [];
+
   return (
     <header className="bg-white  border-b border-gray-200 px-6 py-4 rounded-2xl md:mx-2 br">
       <div className="flex items-center justify-between">
@@ -20,45 +75,66 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
         {/* Page title */}
         <div className="flex-1 lg:flex-none">
-          <h1 className="md:text-2xl font-semibold text-gray-900 md:ml-4 lg:ml-0">Dashboard</h1>
+          <h1 className="md:text-2xl font-semibold text-gray-900 md:ml-4 lg:ml-0">
+            {pageTitle}
+          </h1>
         </div>
 
         {/* Search and user section */}
         <div className="flex items-center space-x-4">
-          {/* Search bar - hidden on small screens */}
-          {/* <div className="hidden md:flex relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search"
-              className="block w-80 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div> */}
-
-          {/* Mobile search button */}
-          {/* <button className="hidden md:block p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-            <Search className="h-5 w-5" />
-          </button> */}
-
           {/* Notifications */}
-          <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-          </button>
+          <div className="relative">
+            <button
+              ref={bellRef}
+              className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 relative"
+              onClick={() => setShowNotifications((v) => !v)}
+            >
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+            </button>
+            {showNotifications && (
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 mt-2 w-80 max-w-xs bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+              >
+                <div className="p-3 border-b font-semibold text-gray-700">
+                  Notifications
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notificationData.length === 0 ? (
+                    <div className="p-4 text-gray-400 text-center text-sm">
+                      No notifications
+                    </div>
+                  ) : (
+                    notificationData.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 transition"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
+                            {notif.type}
+                          </span>
+                          <span className="text-xs text-gray-400 ml-auto">
+                            {new Date(notif.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="font-semibold text-gray-800 text-sm mt-1">
+                          {notif.title}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-0.5">
+                          {notif.message}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* User profile */}
           <UserDropdown />
-          {/* <div className="flex items-center space-x-3 cursor-pointer group">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">NB</span>
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">Natasha Bunny</p>
-            </div>
-            <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-blue-600" />
-          </div> */}
         </div>
       </div>
     </header>

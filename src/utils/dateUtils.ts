@@ -48,9 +48,9 @@ export const generateWeekDatesForUserScheduling = () => {
  * @param currentDate - The current date to base the week on
  * @returns Array of week days
  */
-export const generateWeekDatesForWeeklySchedule = () => {
+export const generateWeekDatesForWeeklySchedule = (currentDate: Date) => {
   const days = [];
-  const startDate = new Date();
+  const startDate = currentDate ? new Date(currentDate) : new Date();
   const dayOfWeek = startDate.getDay();
   const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
   startDate.setDate(diff);
