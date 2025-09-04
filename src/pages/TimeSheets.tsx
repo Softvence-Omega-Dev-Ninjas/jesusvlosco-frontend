@@ -1,7 +1,7 @@
 
 import L from "leaflet";
 import "leaflet/dist/leaflet.css"; // Leaflet's core CSS
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import {
   LocationPinIcon,
@@ -16,6 +16,62 @@ import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
 import { useGetAllTimeClockAdminQuery, useGetAllTimeSheetAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerRetina,
+  iconUrl: markerIcon,
+  shadowUrl: shadow,
+});
+// --- End Leaflet Default Icon Fix ---
+
+// Add custom CSS for user markers and enhanced popups
+const markerStyles = `
+  .custom-user-marker-with-pointer {
+    background: none !important;
+    border: none !important;
+  }
+  .custom-user-marker-with-pointer img {
+    border-radius: 50% !important;
+  }
+  .custom-popup .leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+    border: 1px solid #e5e7eb !important;
+    min-width: 300px !important;
+    max-width: 350px !important;
+  }
+  .custom-popup .leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    max-height: 400px !important;
+    overflow-y: auto !important;
+  }
+  .custom-popup .leaflet-popup-tip {
+    border-top-color: #fff !important;
+  }
+  .custom-popup .leaflet-popup-close-button {
+    color: #6b7280 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    width: 24px !important;
+    height: 24px !important;
+    right: 8px !important;
+    top: 8px !important;
+  }
+  .custom-popup .leaflet-popup-close-button:hover {
+    color: #374151 !important;
+    background: #f3f4f6 !important;
+    border-radius: 50% !important;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = markerStyles;
+  document.head.appendChild(styleSheet);
+}
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerRetina,
@@ -60,6 +116,9 @@ export default function TimeSheets() {
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
   );
+  
+  // Map reference for programmatic control
+  const mapRef = useRef<L.Map | null>(null);
   
   // Format date for API (convert YYYY-MM-DD to ISO string)
   const formatDateForAPI = (dateString: string) => {
@@ -155,15 +214,88 @@ export default function TimeSheets() {
     shadowSize: [41, 41]
   });
 
-  // Custom icon for user locations (blue marker)
-  const userLocationIcon = new L.Icon({
-    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-    shadowSize: [41, 41]
-  });
+  // Custom icon for user locations (user image with location marker)
+  const createUserIcon = (profileUrl: string | undefined, userName: string) => {
+    const imageUrl = profileUrl || 'https://randomuser.me/api/portraits/men/77.jpg';
+    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+    return L.divIcon({
+      html: `
+        <div style="
+          position: relative;
+          width: 55px;
+          height: 60px;
+        ">
+          <!-- Location marker pointer -->
+          <div style="
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #1b24d1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            z-index: 1;
+          "></div>
+
+          <!-- Circular user image -->
+          <div style="
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #11bb5a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            z-index: 2;
+          ">
+            <img
+              src="${imageUrl}"
+              alt="${userName}"
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+              "
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <div style="
+              display: none;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              align-items: center;
+              justify-content: center;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              border-radius: 50%;
+            ">
+              ${initials}
+            </div>
+          </div>
+        </div>
+      `,
+      className: 'custom-user-marker-with-pointer',
+      iconSize: [55, 60],
+      iconAnchor: [27.5, 60], // Center bottom of the marker
+      popupAnchor: [0, -60] // Popup appears above the marker
+    });
+  };
 
   const handlePendingRequestsClick = (): void => {
     setIsModalOpen(true); // Open the modal when button is clicked
@@ -173,11 +305,23 @@ export default function TimeSheets() {
     setIsModalOpen(false); // Close the modal
   };
 
+  // Handle marker click - zoom to max level and center on location
+  const handleMarkerClick = (lat: number, lng: number) => {
+    if (mapRef.current) {
+      const map = mapRef.current;
+      // Set view to the clicked location with maximum zoom level (18-19 is typical max for most tile servers)
+      map.setView([lat, lng], 18, {
+        animate: true,
+        duration: 1.0 // Smooth animation duration in seconds
+      });
+    }
+  };
+
   // Map Configuration
   const defaultCoordinates: [number, number] = [ 51.1514578, -114.0825065]; // Corrected coordinates for central Dhaka
   const mapZoom = 11; // Good initial zoom level for city view
   const mapStyle = {
-    height: "550px", // Adjusted height to be visually balanced
+    height: "650px", // Adjusted height to be visually balanced
     width: "100%",
     borderRadius: "0.5rem",
     border: "1px solid #e5e7eb",
@@ -398,7 +542,7 @@ export default function TimeSheets() {
             </h3>
             {uniqueUserLocations.length > 0 && (
               <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                🔵 = Employee Clock-in Location
+                � = Employee Profile Image (Circular)
               </div>
             )}
           </div>
@@ -417,36 +561,83 @@ export default function TimeSheets() {
             zoom={uniqueUserLocations.length > 0 ? 12 : mapZoom}
             style={mapStyle}
             scrollWheelZoom={true}
+            ref={mapRef}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {uniqueUserLocations.map((userLocation) => (
-              <Marker 
-                key={userLocation.id} 
-                position={[userLocation.lat, userLocation.lng]} 
-                icon={userLocationIcon}
+              <Marker
+                key={userLocation.id}
+                position={[userLocation.lat, userLocation.lng]}
+                icon={createUserIcon(userLocation.profileUrl, userLocation.name)}
+                eventHandlers={{
+                  click: () => handleMarkerClick(userLocation.lat, userLocation.lng)
+                }}
               >
-                <Popup>
-                  <div className="p-2">
-                    <div className="flex items-center space-x-3 mb-2">
+                <Popup 
+                  maxWidth={350} 
+                  minWidth={300}
+                  maxHeight={400}
+                  className="custom-popup"
+                  closeButton={true}
+                  autoClose={false}
+                  closeOnEscapeKey={true}
+                >
+                  <div className="p-4 min-w-[300px] max-w-[340px]">
+                    <div className="flex items-center space-x-3 mb-4">
                       {userLocation.profileUrl && (
                         <img 
                           src={userLocation.profileUrl} 
                           alt={userLocation.name}
-                          className="w-10 h-10 rounded-full"
+                          className="w-14 h-14 rounded-full border-2 border-blue-200 flex-shrink-0"
                         />
                       )}
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{userLocation.name}</h4>
-                        <p className="text-sm text-gray-600">{userLocation.shiftTitle}</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 text-lg truncate">{userLocation.name}</h4>
+                        <p className="text-sm text-blue-600 font-medium truncate">{userLocation.shiftTitle}</p>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <p><strong>Clock In:</strong> {formatTime(userLocation.clockIn)}</p>
-                      <p><strong>Clock Out:</strong> {formatTime(userLocation.clockOut)}</p>
-                      <p><strong>Location:</strong> {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}</p>
+                    
+                    <div className="space-y-3 text-sm">
+                      <div className="grid grid-cols-1 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <p className="text-xs text-green-600 font-medium mb-1">Clock In</p>
+                            <p className="text-green-800 font-semibold text-sm">{formatTime(userLocation.clockIn)}</p>
+                          </div>
+                          <div className="bg-red-50 p-3 rounded-lg">
+                            <p className="text-xs text-red-600 font-medium mb-1">Clock Out</p>
+                            <p className="text-red-800 font-semibold text-sm">{formatTime(userLocation.clockOut)}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-xs text-gray-600 font-medium mb-2">📍 GPS Coordinates</p>
+                          <p className="text-gray-800 font-mono text-sm break-all">
+                            {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-xs text-blue-600 font-medium mb-2">📅 Work Date</p>
+                          <p className="text-blue-800 text-sm font-medium">
+                            {new Date(userLocation.clockIn).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 text-center font-medium">
+                        🔍 Zoomed to maximum level for precise location
+                      </p>
                     </div>
                   </div>
                 </Popup>
