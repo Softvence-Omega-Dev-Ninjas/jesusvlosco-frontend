@@ -35,6 +35,7 @@ export const baseApi = createApi({
     "Like",
     "TASK",
     "CLOCK_IN_OUT",
+    "OVERTIME",
     "CLOCK_SHEET",
     "NOTIFICATION"
   ],

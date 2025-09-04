@@ -14,34 +14,42 @@ declare module 'jspdf' {
     autoTable: typeof autoTable;
   }
 }
+import { FaSpinner } from "react-icons/fa";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { BsThreeDots } from "react-icons/bs";
+import { toast } from "sonner";
+import { useSendOvertimeRequestMutation } from "@/store/api/admin/overtime";
 
 export default function TimeSheet() {
   const [submitClockSheet] = useSubmitClockSheetMutation();
+  const [isOvertimeLoading, setIsOvertimeLoading] = useState(false);
+  const [sendOvertimeRequest] = useSendOvertimeRequestMutation();
   // Date range state for API query
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-    
+
     return {
       from: startOfWeek.toISOString(),
-      to: endOfWeek.toISOString()
+      to: endOfWeek.toISOString(),
     };
   });
 
-  
   // Pass date range to API query
   const clockSheets = useGetClockSheetQuery({
     from: dateRange.from,
-    to: dateRange.to
+    to: dateRange.to,
   });
-  
+
+  console.log("========= clockSheets =========>", clockSheets);
+
   // console.log("clockSheets", clockSheets);
 
   // Helper functions
   const formatDate = (dateString: string | number | Date) => {
     const date = new Date(dateString);
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dayName = days[date.getDay()];
     const day = date.getDate();
     const month = date.getMonth() + 1;
@@ -50,10 +58,10 @@ export default function TimeSheet() {
 
   const formatTime = (dateString: string | number | Date) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -66,22 +74,21 @@ export default function TimeSheet() {
   const formatDateRange = (from: string, to: string) => {
     const startDate = new Date(from);
     const endDate = new Date(to);
-    
+
     const formatDateOnly = (date: Date) => {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       return `${day}/${month}`;
     };
 
     return `${formatDateOnly(startDate)} to ${formatDateOnly(endDate)}`;
   };
 
-
-  const handleDateRangeChange = (direction: 'prev' | 'next') => {
+  const handleDateRangeChange = (direction: "prev" | "next") => {
     const currentStart = new Date(dateRange.from);
     const currentEnd = new Date(dateRange.to);
-    
-    if (direction === 'prev') {
+
+    if (direction === "prev") {
       // Go to previous week
       currentStart.setDate(currentStart.getDate() - 7);
       currentEnd.setDate(currentEnd.getDate() - 7);
@@ -90,10 +97,10 @@ export default function TimeSheet() {
       currentStart.setDate(currentStart.getDate() + 7);
       currentEnd.setDate(currentEnd.getDate() + 7);
     }
-    
+
     setDateRange({
       from: currentStart.toISOString(),
-      to: currentEnd.toISOString()
+      to: currentEnd.toISOString(),
     });
   };
 
@@ -119,19 +126,17 @@ export default function TimeSheet() {
   // const totals = calculateTotals();
   const userData = clockSheets?.data?.data?.clockSheet?.user;
   const rawWeeklyData = clockSheets?.data?.data?.clockSheet?.result || [];
-  const paymentData = clockSheets?.data?.data?.paymentData
-  
-  // Sort weekly data by weekStart date (latest first)
-  const weeklyData = [...rawWeeklyData].sort((a, b) => 
-    new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime()
-  );
+  const paymentData = clockSheets?.data?.data?.paymentData;
 
+  // Sort weekly data by weekStart date (latest first)
+  const weeklyData = [...rawWeeklyData].sort((a, b) => new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime());
+  console.log("========= weeklyData =========>", weeklyData);
   const seeNotes = (notes?: string) => {
     Swal.fire({
-      title: 'Shift Notes',
-      text: notes ?? 'No notes available',
-      icon: 'info',
-      confirmButtonText: 'Close'
+      title: "Shift Notes",
+      text: notes ?? "No notes available",
+      icon: "info",
+      confirmButtonText: "Close",
     });
   };
 
@@ -467,6 +472,25 @@ export default function TimeSheet() {
     });
   };
 
+  const handleSendOvertimeRequest = async (id: string) => {
+    console.log("Overtime Id  ================>", id);
+    setIsOvertimeLoading(true);
+    try {
+      const result = await sendOvertimeRequest({
+        id,
+      }).unwrap();
+      console.log(result);
+      if (result?.success) {
+        toast.success("Overtime request send successfully!");
+      }
+    } catch (error: any) {
+      console.error("Error publishing task:", error);
+      toast.error(error?.data?.message); // Add a toast for failure
+    } finally {
+      setIsOvertimeLoading(false);
+    }
+  };
+
   return (
     <div className="px-4 lg:px-0">
       {/* Header */}
@@ -476,32 +500,24 @@ export default function TimeSheet() {
             <div className="relative">
               <img
                 src={userData?.profileUrl !== "N/A" ? userData?.profileUrl : "https://i.pravatar.cc"}
-                alt={`${userData?.firstName || 'User'} ${userData?.lastName || ''}`}
+                alt={`${userData?.firstName || "User"} ${userData?.lastName || ""}`}
                 className="rounded-full size-10"
               />
             </div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold text-gray-900">
-                {userData?.firstName || 'User'} {userData?.lastName || ''}
+                {userData?.firstName || "User"} {userData?.lastName || ""}
               </h1>
             </div>
           </div>
           <div className="flex items-center gap-2 text-[#484848] font-semibold">
             <span>Pay Period:</span>
             <button className="flex items-center gap-1">
-              <button 
-                onClick={() => handleDateRangeChange('prev')}
-                className="hover:text-gray-600 transition-colors"
-              >
+              <button onClick={() => handleDateRangeChange("prev")} className="hover:text-gray-600 transition-colors">
                 {"<"}
               </button>
-              <span className="mx-2">
-                {formatDateRange(dateRange.from, dateRange.to)}
-              </span>
-              <button 
-                onClick={() => handleDateRangeChange('next')}
-                className="hover:text-gray-600 transition-colors"
-              >
+              <span className="mx-2">{formatDateRange(dateRange.from, dateRange.to)}</span>
+              <button onClick={() => handleDateRangeChange("next")} className="hover:text-gray-600 transition-colors">
                 {">"}
               </button>
             </button>
@@ -513,12 +529,7 @@ export default function TimeSheet() {
           </button>
           <button className="hidden px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors items-center justify-center gap-2">
             Export
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -534,47 +545,36 @@ export default function TimeSheet() {
       <div className="flex justify-between items-center gap-5">
         <div className="flex flex-wrap gap-4 lg:gap-6 mb-8 items-center">
         <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {Number(paymentData?.payPerDay?.regularPayRate ?? 0).toFixed(2)} $
-          </div>
+          <div className="text-xl lg:text-2xl font-bold text-gray-900">{Number(paymentData?.payPerDay?.regularPayRate ?? 0).toFixed(2)} $</div>
           <div className="text-xs lg:text-sm text-gray-600">Regular Pay per day</div>
         </div>
 
-        <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
+          <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
 
         <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {Number(paymentData?.payPerDay?.overTimePayRate ?? 0).toFixed(2)} $
-          </div>
+          <div className="text-xl lg:text-2xl font-bold text-gray-900">{Number(paymentData?.payPerDay?.overTimePayRate ?? 0).toFixed(2)} $</div>
           <div className="text-xs lg:text-sm text-gray-600">Overtime Pay per day</div>
         </div>
 
-        <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
+          <div className="text-base lg:text-lg font-medium text-gray-900">|</div>
 
         <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {Number(paymentData?.totalRegularHour ?? 0).toFixed(2)}
-          </div>
+          <div className="text-xl lg:text-2xl font-bold text-gray-900">{Number(paymentData?.totalRegularHour ?? 0).toFixed(2)}</div>
           <div className="text-xs lg:text-sm text-gray-600">Regular Total Hours</div>
         </div>
 
-        <div className="text-base lg:text-lg font-medium text-gray-900">+</div>
+          <div className="text-base lg:text-lg font-medium text-gray-900">+</div>
 
         <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {Number(paymentData?.totalOvertimeHour ?? 0).toFixed(2)}
-          </div>
+          <div className="text-xl lg:text-2xl font-bold text-gray-900">{Number(paymentData?.totalOvertimeHour ?? 0).toFixed(2)}</div>
           <div className="text-xs lg:text-sm text-gray-600">Overtime Total Hours</div>
         </div>
 
-        <div className="text-base lg:text-lg font-medium text-gray-900">=</div>
+          <div className="text-base lg:text-lg font-medium text-gray-900">=</div>
 
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
-            {(
-              Number(paymentData?.totalRegularHour ?? 0) +
-              Number(paymentData?.totalOvertimeHour ?? 0)
-            ).toFixed(2)}
+            {(Number(paymentData?.totalRegularHour ?? 0) + Number(paymentData?.totalOvertimeHour ?? 0)).toFixed(2)}
           </div>
           <div className="text-xs lg:text-sm text-gray-600">Total Paid Hours</div>
         </div>
@@ -598,124 +598,170 @@ export default function TimeSheet() {
       </div>
 
       {/* Table */}
+      {/* Table */}
       <div className="overflow-x-auto -mx-4 sm:mx-0">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden">
             <table className="min-w-full divide-y divide-gray-300">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    Shift
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    Start
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    End
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    Total Hours
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden md:table-cell">
-                    Daily Total
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">
-                    Weekly Total
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">
-                    Regular
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">
-                    Overtime
-                  </th>
-                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">
-                    Notes
-                  </th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Date</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Shift</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Start</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">End</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Total Hours</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden md:table-cell">Daily Total</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">Weekly Total</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">Regular</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm hidden lg:table-cell">Overtime</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Notes</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Overtime Status</th>
+                  <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-sm">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {weeklyData.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-8 text-gray-500">
+                    <td colSpan={12} className="text-center py-8 text-gray-500">
                       No time sheet data available for the selected period
                     </td>
                   </tr>
                 ) : (
-                  weeklyData.map((week: { weekStart: any; weekEnd: any; weeklyTotal: number; days: any[]; }, weekIndex: number) => (
+                  weeklyData.map((week: { weekStart: any; weekEnd: any; weeklyTotal: number; days: any[] }, weekIndex: number) => (
                     <React.Fragment key={`week-${weekIndex}`}>
                       {/* Week Header */}
                       <tr>
-                        <td
-                          colSpan={10}
-                          className="bg-primary text-white text-center py-3 font-medium"
-                        >
+                        <td colSpan={12} className="bg-primary text-white text-center py-3 font-medium">
                           {formatWeekRange(week.weekStart, week.weekEnd)} (Weekly Total: {week.weeklyTotal?.toFixed(2)} hours)
                         </td>
                       </tr>
-                      
-                      {/* Days and Entries - Sort days by date (latest first) */}
-                      {([...(week.days || [])]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                        .map((day: { entries: any[]; totalHours: number; }, dayIndex: number) => (
-                        <React.Fragment key={`day-${dayIndex}`}>
-                          {/* Sort entries by start time (latest first) */}
-                          {([...(day.entries || [])]).sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime())
-                            .map((entry: { date: any; shift: { title: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }; start: any; end: any; totalHours: number; regular: number; overtime: number; notes: string | undefined; }, entryIndex: number) => {
-                            const isFirstEntryOfDay = entryIndex === 0;
-                            const isFirstWeek = weekIndex === 0;
-                            const isFirstDay = dayIndex === 0;
-                            const isFirstEntry = entryIndex === 0;
-                            
-                            return (
-                              <tr key={`entry-${entryIndex}`} className="border-b border-gray-100">
-                                <td className="py-3 px-2 sm:px-4 text-primary font-medium text-sm">
-                                  {formatDate(entry.date)}
-                                </td>
 
-                                <td className="text-gray-500 bg-white min-w-[100px] sm:min-w-[120px] text-sm">
-                                  {entry.shift?.title != null ? String(entry.shift.title) : ""}
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">
-                                  {formatTime(entry.start)}
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">
-                                  {formatTime(entry.end)}
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">
-                                  {entry.totalHours?.toFixed(2)} Hours
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden md:table-cell">
-                                  {isFirstEntryOfDay ? `${day.totalHours?.toFixed(2)} Hours` : ''}
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
-                                  {isFirstWeek && isFirstDay && isFirstEntry ? `${week.weeklyTotal?.toFixed(2)} Hours` : ''}
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
-                                  {entry.regular?.toFixed(2)} Hours
-                                </td>
-                                <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
-                                  {entry.overtime?.toFixed(2)} Hours
-                                </td>
-                                <td className="py-3 px-2 sm:px-4">
-                                  {entry.notes ? (
-                                    <button 
-                                      className="text-primary hover:text-indigo-800 text-sm"
-                                      title={entry.notes}
-                                      onClick={() => seeNotes(entry.notes)}
-                                    >
-                                      View Notes
-                                    </button>
-                                  ) : (
-                                    <span className="text-gray-400 text-sm">--</span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
+                      {/* Days and Entries - Sort days by date (latest first) */}
+                      {[...(week.days || [])]
+                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                        .map((day: { entries: any[]; totalHours: number }, dayIndex: number) => (
+                          <React.Fragment key={`day-${dayIndex}`}>
+                            {/* Sort entries by start time (latest first) */}
+                            {[...(day.entries || [])]
+                              .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime())
+                              .map(
+                                (
+                                  entry: {
+                                    date: any;
+                                    shift: {
+                                      title:
+                                        | string
+                                        | number
+                                        | bigint
+                                        | boolean
+                                        | React.ReactElement<unknown, string | React.JSXElementConstructor<any>>
+                                        | Iterable<React.ReactNode>
+                                        | Promise<
+                                            | string
+                                            | number
+                                            | bigint
+                                            | boolean
+                                            | React.ReactPortal
+                                            | React.ReactElement<unknown, string | React.JSXElementConstructor<any>>
+                                            | Iterable<React.ReactNode>
+                                            | null
+                                            | undefined
+                                          >
+                                        | null
+                                        | undefined;
+                                    };
+                                    start: any;
+                                    end: any;
+                                    totalHours: number;
+                                    regular: number;
+                                    overtime: number;
+                                    notes: string | undefined;
+                                    overTimeRequestStatus: string;
+                                    id: string;
+                                  },
+                                  entryIndex: number
+                                ) => {
+                                  const isFirstEntryOfDay = entryIndex === 0;
+                                  const isFirstWeek = weekIndex === 0;
+                                  const isFirstDay = dayIndex === 0;
+                                  const isFirstEntry = entryIndex === 0;
+                                  const getStatusColor = (status: string) => {
+                                    switch (status) {
+                                      case "APPROVED":
+                                        return "text-green-600";
+                                      case "REJECTED":
+                                        return "text-red-600";
+                                      case "PENDING":
+                                        return "text-yellow-600";
+                                      default:
+                                        return "text-gray-500";
+                                    }
+                                  };
+
+                                  return (
+                                    <tr key={`entry-${entryIndex}`} className="border-b border-gray-100">
+                                      <td className="py-3 px-2 sm:px-4 text-primary font-medium text-sm">{formatDate(entry?.date)}</td>
+
+                                      <td className="text-gray-500 bg-white min-w-[100px] sm:min-w-[120px] text-sm">
+                                        {entry?.shift?.title != null ? String(entry?.shift?.title) : ""}
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">{formatTime(entry?.start)}</td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">{formatTime(entry?.end)}</td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm">{entry?.totalHours?.toFixed(2)} Hours</td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden md:table-cell">
+                                        {isFirstEntryOfDay ? `${day.totalHours?.toFixed(2)} Hours` : ""}
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
+                                        {isFirstWeek && isFirstDay && isFirstEntry ? `${week.weeklyTotal?.toFixed(2)} Hours` : ""}
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
+                                        {entry?.regular?.toFixed(2)} Hours
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4 text-gray-900 text-sm hidden lg:table-cell">
+                                        {entry?.overtime?.toFixed(2)} Hours
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4">
+                                        {entry?.notes ? (
+                                          <button
+                                            className="text-primary hover:text-indigo-800 text-sm"
+                                            title={entry.notes}
+                                            onClick={() => seeNotes(entry?.notes)}
+                                          >
+                                            View Notes
+                                          </button>
+                                        ) : (
+                                          <span className="text-gray-400 text-sm">--</span>
+                                        )}
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4 text-sm font-semibold">
+                                        <span className={getStatusColor(entry.overTimeRequestStatus)}>{entry?.overTimeRequestStatus}</span>
+                                      </td>
+                                      <td className="py-3 px-2 sm:px-4">
+                                        <div className="relative">
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger className="outline-none hover:scale-105 active:scale-95 duration-700 cursor-pointer">
+                                              <BsThreeDots className="mt-2" />
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent
+                                              side="bottom"
+                                              className="bg-[#f7fbfe] border-none shadow-md shadow-secondary-bg-light outline-none p-2 flex flex-col gap-2"
+                                            >
+                                              <span
+                                                className="hover:text-green-700 hover:bg-green-50 border-2 border-[#e9ebec]  py-2 px-5 rounded-lg hover:bg-light-primary-bg dark:hover:bg-dark-secondary-bg font-medium text-sm w-full cursor-pointer flex items-center justify-center"
+                                                onClick={() => handleSendOvertimeRequest(entry?.id)}
+                                              >
+                                                {isOvertimeLoading ? <FaSpinner className="animate-spin" /> : "Send Request"}
+                                              </span>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                              )}
+                          </React.Fragment>
+                        ))}
                     </React.Fragment>
                   ))
                 )}
