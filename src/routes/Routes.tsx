@@ -77,6 +77,7 @@ import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
 import SingleUserSheet from "@/Layout/UserLayout/SingleUserSheet";
 import UserClockInRequest from "@/pages/ClockInRequest/UserClockInRequest";
 import OvertimeRequest from "@/pages/OvertimeRequest/OvertimeRequest";
+import EmployeeRoutes from "./EmployeeRoutes";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -92,7 +93,7 @@ const routes = createBrowserRouter([
   // ✅ Admin routes grouped here
   {
     path: "/user",
-    element: <UserMain></UserMain>,
+    element:<EmployeeRoutes> <UserMain></UserMain></EmployeeRoutes>,
     children: [
       {
         index: true,
