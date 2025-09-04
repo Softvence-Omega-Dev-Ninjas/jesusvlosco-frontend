@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TaskRow } from "./TaskRow";
 
 export interface ProjectSectionProps {
@@ -40,6 +41,7 @@ export function ProjectSection({ groupName, groupBy, tasks }: ProjectSectionProp
               <th className="px-4 py-2 text-left text-sm font-medium text-[#4E53B1]  tracking-wide">Start time</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#4E53B1]  tracking-wide">Due date</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#4E53B1]  tracking-wide">Assigned to</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#4E53B1]  tracking-wide">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">

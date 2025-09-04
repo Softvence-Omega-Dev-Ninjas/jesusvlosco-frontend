@@ -7,13 +7,13 @@ const clockinoutapi = baseApi.injectEndpoints({
         url: "/employee/time-clock/process-clock",
         method: "POST",
         body: {
-          "lat": location.lat,
-          "lng": location.lng,
-          "action": location.action,
-          "date": new Date().toISOString()
+          lat: location.lat,
+          lng: location.lng,
+          action: location.action,
+          date: new Date().toISOString(),
         },
       }),
-      invalidatesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+      invalidatesTags: ["CLOCK_IN_OUT", "TIME_CLOCK", "SCHEDULING_USER"],
     }),
 
     getClockInOut: build.query({
@@ -21,31 +21,25 @@ const clockinoutapi = baseApi.injectEndpoints({
         url: `/employee/time-clock/shift/current-clock?date=${new Date().toISOString()}`,
         method: "GET",
       }),
-      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+      providesTags: ["CLOCK_IN_OUT", "TIME_CLOCK", "SCHEDULING_USER"],
     }),
 
     getClockSheet: build.query({
       query: ({ from, to }) => ({
-         url: `/employee/time-clock/clock-sheet?from=${from}&to=${to}`,
+        url: `/employee/time-clock/clock-sheet?from=${from}&to=${to}`,
         method: "GET",
       }),
-      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+      providesTags: ["CLOCK_IN_OUT", "TIME_CLOCK", "SCHEDULING_USER", "OVERTIME"],
     }),
 
-     getClockHistory: build.query({
+    getClockHistory: build.query({
       query: () => ({
         url: "/employee/time-clock/history",
         method: "GET",
       }),
-      providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
+      providesTags: ["CLOCK_IN_OUT", "TIME_CLOCK", "SCHEDULING_USER"],
     }),
-
   }),
 });
 
-export const {
-  useSendUpdateLocationMutation,
-  useGetClockInOutQuery,
-  useGetClockSheetQuery,
-  useGetClockHistoryQuery
-} = clockinoutapi;
+export const { useSendUpdateLocationMutation, useGetClockInOutQuery, useGetClockSheetQuery, useGetClockHistoryQuery } = clockinoutapi;
