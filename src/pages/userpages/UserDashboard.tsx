@@ -35,10 +35,10 @@ interface ApiShiftData {
 
 const UserDashboard: React.FC = () => {
   // Get shift data from API
-  const data = useGetClockInOutQuery({});
-  const currentApiShift = data?.data?.data?.shift as ApiShiftData | undefined;
-  const teamMembers = data?.data?.data?.teamMembers as any | undefined;
-  const clock = data?.data?.data?.clock as any | undefined;
+  const { data, isLoading, refetch } = useGetClockInOutQuery({});
+  const currentApiShift = data?.data?.shift as ApiShiftData | undefined;
+  const teamMembers = data?.data?.teamMembers as any | undefined;
+  const clock = data?.data?.clock as any | undefined;
 
   const clockStatus: "ACTIVE" | "COMPLETED" = clock?.status || "ACTIVE";
   // console.log(teamMembers, "Team members")
@@ -89,6 +89,10 @@ const UserDashboard: React.FC = () => {
   const upcomingTasksData = dashboardData?.data?.data?.upcomingTasks ?? [];
   const companyUpdatesData = dashboardData?.data?.data?.companyUpdates ?? [];
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-4">
       <div className="w-full mx-auto">
@@ -100,6 +104,7 @@ const UserDashboard: React.FC = () => {
               // isClockedIn={isClockedIn}
               isClockedOut={isClockedOut}
               clockStatus={clockStatus}
+              refetch={refetch}
             />
           </div>
 

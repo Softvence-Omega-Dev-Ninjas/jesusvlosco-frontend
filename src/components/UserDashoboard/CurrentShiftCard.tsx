@@ -15,6 +15,7 @@ interface CurrentShiftCardProps {
   clockStatus: "ACTIVE" | "COMPLETED";
   // isClockedIn: boolean;
   isClockedOut: boolean;
+  refetch: () => void;
 }
 
 const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
@@ -23,6 +24,7 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   clockStatus,
   // isClockedIn,
   isClockedOut,
+  refetch,
 }) => {
   const [isClocking, setIsClocking] = useState(false);
   const [isClockOut, setIsClockOut] = useState(false);
@@ -58,6 +60,7 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
     } finally {
       setIsClocking(false);
       setIsClockOut(false);
+      refetch(); // Refresh data after action
     }
   };
 
