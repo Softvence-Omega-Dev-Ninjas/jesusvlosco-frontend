@@ -91,7 +91,7 @@ const navigation: NavigationItem[] = [
         path: "/admin/schedule/timesheet",
       },
       {
-        name: "TimeOff Request",
+        name: "TimeOff Lists",
         icon: Calendar,
         path: "/admin/schedule/timeoffrequest",
       },

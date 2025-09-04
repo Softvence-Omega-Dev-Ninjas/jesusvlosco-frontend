@@ -99,9 +99,6 @@ const TimeOffRequest: React.FC = () => {
         }`}
       >
         <div className="flex justify-between items-center pb-4 mb-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-[#4E53B1]">
-            Overview Project 1
-          </h2>
           <button
             onClick={() => window.location.reload()} // simple refresh
             className="flex items-center cursor-pointer gap-2 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600 hover:bg-gray-100 transition-colors duration-200"

@@ -33,18 +33,18 @@ export default function RecognitionTable() {
   const today = new Date();
   const [selectedRecognation, setSelectedRecognation] = useState({});
   console.log({ selectedRecognation });
-  // Get date 10 days ago
-  const tenDaysAgo = new Date();
-  tenDaysAgo.setDate(today.getDate() - 10);
+  
+  // Get last day of current month
+  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   const [fromDate, setFromDate] = useState({
     day: "01",
-    month: "May",
+    month: monthNames[today.getMonth()],
     year: String(today.getFullYear()),
   });
 
   const [toDate, setToDate] = useState({
-    day: String(today.getDate()).padStart(2, "0"),
+    day: String(lastDayOfMonth.getDate()).padStart(2, "0"),
     month: monthNames[today.getMonth()],
     year: String(today.getFullYear()),
   });
@@ -173,7 +173,7 @@ export default function RecognitionTable() {
             onClick={() => setIsDatePickerOpen(true)}
           >
             <Calendar className="w-4 h-4" />
-            {fromDate.day} / 05 to {toDate.day} / 05 ▼
+            {fromDate.day} {fromDate.month} to {toDate.day} {toDate.month} {toDate.year}
           </button>
         </div>
 
