@@ -76,6 +76,7 @@ import ManageTeams from "@/pages/Admin/team-management/ManageTeams";
 import ClockInRequest from "@/pages/ClockInRequest/ClockInRequest";
 import SingleUserSheet from "@/Layout/UserLayout/SingleUserSheet";
 import UserClockInRequest from "@/pages/ClockInRequest/UserClockInRequest";
+import OvertimeRequest from "@/pages/OvertimeRequest/OvertimeRequest";
 // import UserTaskDetails from "@/pages/UserTaskAndProjects/UserTaskDetails";
 
 const routes = createBrowserRouter([
@@ -233,6 +234,7 @@ const routes = createBrowserRouter([
           { path: "useroffdetails", element: <UserOffDeatils /> },
           { path: "timeoffrequest", element: <TimeOffRequest /> },
           { path: "clock-in-request", element: <ClockInRequest /> },
+          { path: "overtime-request", element: <OvertimeRequest /> },
         ],
       },
 

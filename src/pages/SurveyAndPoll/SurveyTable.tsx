@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
+import { useDeleteSurveyMutation, useGetAllSurveysQuery } from "@/store/api/admin/survey/servey";
 import { Eye } from "lucide-react";
 import { FaSpinner } from "react-icons/fa";
 import usePagination from "@/hooks/usePagination";
 import { Survey } from "./SurveyMainPage";
 import CustomPagination from "@/components/shared/CustomPagination/CustomPagination";
+import { MdOutlineDelete } from "react-icons/md";
+import { toast } from "sonner";
 
 const SurveyTable = ({
   setOpenModalType,
@@ -13,6 +15,7 @@ const SurveyTable = ({
   setOpenModalType: React.Dispatch<React.SetStateAction<"filter" | "columns" | "quickView" | "calendar" | "teamMembers" | null>>;
   setSelectedSurveyForQuickView: React.Dispatch<React.SetStateAction<Survey | null>>;
 }) => {
+  const [deleteSurvey] = useDeleteSurveyMutation();
   // pagination hook first
   const { currentPage, goToNext, goToPrevious, goToPage, getPageNumbers, metadata } = usePagination({
     noOfItemPerPage: 10,
@@ -57,6 +60,22 @@ const SurveyTable = ({
         return `${baseClasses} bg-gray-100 text-gray-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
+    }
+  };
+
+  const handleDeleteSurvey = async (id: string) => {
+    console.log("Survey Id=============>", id);
+    try {
+      const result = await deleteSurvey(id).unwrap();
+      console.log(result);
+      if (result?.success) {
+        toast.success("Survey deleted successfully!");
+      }
+    } catch (error: any) {
+      console.error("Error deleting survey:", error);
+      toast.error(error?.data?.message); // Add a toast for failure
+    } finally {
+      // setIsOvertimeLoading(false);
     }
   };
   return (
@@ -109,13 +128,21 @@ const SurveyTable = ({
                         {column.id === "action" && (
                           <div className="flex items-center gap-3">
                             <button
-                              className="text-gray-600"
+                              className="text-gray-600 hover:text-gray-800 cursor-pointer"
                               onClick={() => {
                                 setSelectedSurveyForQuickView(survey);
                                 setOpenModalType("quickView");
                               }}
                             >
                               <Eye size={20} />
+                            </button>
+                            <button
+                              className="text-red-500 hover:text-red-700 cursor-pointer"
+                              onClick={() => {
+                                handleDeleteSurvey(survey?.id);
+                              }}
+                            >
+                              <MdOutlineDelete size={20} />
                             </button>
                           </div>
                         )}
