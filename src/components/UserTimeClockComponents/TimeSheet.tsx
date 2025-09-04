@@ -1,10 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useGetClockSheetQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { useGetClockSheetQuery, useSubmitClockSheetMutation } from "@/store/api/clockInOut/clockinoutapi";
+import { File, Send } from "lucide-react";
 import { useState } from "react";
 import React from "react";
 import Swal from "sweetalert2";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import logo from "@/assets/logo.jpg";
+
+// Extend jsPDF to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: typeof autoTable;
+  }
+}
 
 export default function TimeSheet() {
+  const [submitClockSheet] = useSubmitClockSheetMutation();
   // Date range state for API query
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
@@ -123,6 +135,338 @@ export default function TimeSheet() {
     });
   };
 
+  const handleSubmit = async() => {
+    const data = {
+      from: dateRange.from,
+      to: dateRange.to
+    }
+    try{
+      await submitClockSheet(data).unwrap();
+      Swal.fire({
+        title: 'Success',
+        text: 'Clock sheet submitted successfully',
+        icon: 'success',
+        confirmButtonText: 'Close'
+      });
+    } catch (error) {
+      console.error('Failed to submit clock sheet:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to submit clock sheet',
+        icon: 'error',
+        confirmButtonText: 'Close'
+      });
+    }
+    // Handle form submission
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add company logo
+    try {
+      // Use the imported logo directly with jsPDF
+      // jsPDF can handle image URLs directly
+      doc.addImage(logo, 'JPEG', 20, 15, 60, 30);
+    } catch (error) {
+      console.log('Logo loading failed:', error);
+      // Fallback: create a simple logo placeholder
+      doc.setDrawColor(52, 73, 94);
+      doc.setLineWidth(0.5);
+      doc.rect(20, 15, 55, 25);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("LOGO", 47.5, 30, { align: "center" });
+    }
+    
+    // Company/Header Information with smaller font
+    doc.setFontSize(18); // Reduced from 22
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(52, 73, 94);
+    doc.text("EMPLOYEE TIMESHEET", 140, 25, { align: "center" });
+    
+    // Add line under header
+    doc.setDrawColor(52, 73, 94);
+    doc.setLineWidth(0.5);
+    doc.line(55, 30, 190, 30);
+    
+    // Create two-column layout: Employee Info (left) and Pay Summary (right)
+    const leftColumnX = 20;
+    const rightColumnX = 110;
+    const columnWidth = 80;
+    const rowHeight = 25;
+    
+    // Employee Information Section (Left Column)
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text("Employee Information", leftColumnX, 45);
+    
+    // Employee details box
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.rect(leftColumnX, 48, columnWidth, rowHeight);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const employeeName = `${userData?.firstName || 'User'} ${userData?.lastName || ''}`;
+    doc.text(`Name: ${employeeName}`, leftColumnX + 5, 55);
+    doc.text(`Period: ${formatDateRange(dateRange.from, dateRange.to)}`, leftColumnX + 5, 62);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, leftColumnX + 5, 69);
+    
+    // Pay Summary Section (Right Column)
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Pay Summary", rightColumnX, 45);
+    
+    // Summary box
+    doc.rect(rightColumnX, 48, columnWidth, rowHeight);
+    
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    
+    const regularPayRate = Number(paymentData?.payPerDay?.regularPayRate ?? 0).toFixed(2);
+    const overtimePayRate = Number(paymentData?.payPerDay?.overTimePayRate ?? 0).toFixed(2);
+    const totalRegularHours = Number(paymentData?.totalRegularHour ?? 0).toFixed(2);
+    const totalHours = (Number(paymentData?.totalRegularHour ?? 0) + Number(paymentData?.totalOvertimeHour ?? 0)).toFixed(2);
+    
+    // Left side of pay summary
+    doc.text(`Reg Rate: $${regularPayRate}/day`, rightColumnX + 5, 55);
+    doc.text(`OT Rate: $${overtimePayRate}/day`, rightColumnX + 5, 62);
+    
+    // Right side of pay summary
+    doc.text(`Reg Hours: ${totalRegularHours}`, rightColumnX + 40, 55);
+    doc.text(`Total Hours: ${totalHours}`, rightColumnX + 40, 62);
+    
+    // Calculate and show estimated earnings
+    const regularEarnings = (Number(paymentData?.totalRegularHour ?? 0) * Number(regularPayRate)).toFixed(2);
+    const overtimeEarnings = (Number(paymentData?.totalOvertimeHour ?? 0) * Number(overtimePayRate)).toFixed(2);
+    const totalEarnings = (Number(regularEarnings) + Number(overtimeEarnings)).toFixed(2);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Est. Earnings: $${totalEarnings}`, rightColumnX + 5, 69);
+    
+    // Timesheet Details Section
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Timesheet Details", 20, 93);
+    
+    // Prepare table data with week headers on top
+    const tableData: any[] = [];
+    
+    weeklyData.forEach((week: any) => {
+      // Add week header as separate rows
+      tableData.push([
+        {
+          content: `WEEK: ${formatWeekRange(week.weekStart, week.weekEnd)}`,
+          colSpan: 4,
+          styles: { 
+            fillColor: [52, 73, 94], 
+            textColor: [255, 255, 255], 
+            fontStyle: 'bold', 
+            halign: 'left',
+            fontSize: 10
+          }
+        },
+        {
+          content: `Total Hours: ${week.weeklyTotal?.toFixed(2)}`,
+          colSpan: 4,
+          styles: { 
+            fillColor: [52, 73, 94], 
+            textColor: [255, 255, 255], 
+            fontStyle: 'bold', 
+            halign: 'right',
+            fontSize: 10
+          }
+        }
+      ]);
+      
+      // Add column headers for this week
+      tableData.push([
+        {
+          content: 'Date',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Shift',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Start Time',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'End Time',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Hours',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Daily Total',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Regular',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        },
+        {
+          content: 'Overtime',
+          styles: { fillColor: [70, 90, 110], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 }
+        }
+      ]);
+      
+      // Add days and entries
+      const sortedDays = [...(week.days || [])].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      sortedDays.forEach((day: any) => {
+        const sortedEntries = [...(day.entries || [])].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+        
+        sortedEntries.forEach((entry: any, entryIndex: number) => {
+          const isFirstEntryOfDay = entryIndex === 0;
+          
+          tableData.push([
+            formatDate(entry.date),
+            entry.shift?.title || "Regular",
+            formatTime(entry.start),
+            formatTime(entry.end),
+            `${entry.totalHours?.toFixed(2)}`,
+            isFirstEntryOfDay ? `${day.totalHours?.toFixed(2)}` : '',
+            `${entry.regular?.toFixed(2)}`,
+            `${entry.overtime?.toFixed(2)}`
+          ]);
+        });
+        
+        // Add daily summary if there are multiple entries for the day
+        if (day.entries && day.entries.length > 1) {
+          tableData.push([
+            '', '', '', '', 
+            `Daily Total: ${day.totalHours?.toFixed(2)}h`,
+            '', '', ''
+          ]);
+        }
+      });
+      
+      // Add empty row between weeks for better separation
+      tableData.push(['', '', '', '', '', '', '', '']);
+    });
+    
+    // Add table with enhanced styling
+    autoTable(doc, {
+      startY: 101,
+      head: [], // No main header since we have individual headers per week
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [52, 73, 94],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2,
+        halign: 'center'
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      },
+      columnStyles: {
+        0: { cellWidth: 22, halign: 'left' }, // Date
+        1: { cellWidth: 24, halign: 'left' }, // Shift
+        2: { cellWidth: 20 }, // Start
+        3: { cellWidth: 20 }, // End
+        4: { cellWidth: 16 }, // Hours
+        5: { cellWidth: 20 }, // Daily Total
+        6: { cellWidth: 16 }, // Regular
+        7: { cellWidth: 16 }  // Overtime
+      },
+      margin: { left: 20, right: 20 },
+      didParseCell: function(data) {
+        // Handle week header rows
+        if (data.row.index >= 0 && data.cell.raw && typeof data.cell.raw === 'object' && 'colSpan' in data.cell.raw) {
+          data.cell.styles.fillColor = [52, 73, 94];
+          data.cell.styles.textColor = [255, 255, 255];
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.halign = 'center';
+        }
+        
+        // Highlight daily total rows
+        if (data.row.raw && Array.isArray(data.row.raw) && data.row.raw[4] && 
+            typeof data.row.raw[4] === 'string' && data.row.raw[4].includes('Daily Total:')) {
+          data.cell.styles.fillColor = [233, 236, 239];
+          data.cell.styles.fontStyle = 'bold';
+        }
+        
+        // Style empty rows between weeks
+        if (data.row.raw && Array.isArray(data.row.raw) && data.row.raw.every(cell => cell === '')) {
+          data.cell.styles.fillColor = [255, 255, 255];
+          data.cell.styles.minCellHeight = 5;
+        }
+      }
+    });
+    
+    // Add footer section
+    const finalY = (doc as any).lastAutoTable.finalY || 200;
+    
+    // Add signature section
+    if (finalY < 250) {
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Approval Section", 20, finalY + 20);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      
+      // Employee signature
+      doc.line(20, finalY + 40, 90, finalY + 40);
+      doc.text("Employee Signature", 20, finalY + 45);
+      doc.text("Date: _______________", 20, finalY + 52);
+      
+      // Supervisor signature
+      doc.line(110, finalY + 40, 180, finalY + 40);
+      doc.text("Supervisor Signature", 110, finalY + 45);
+      doc.text("Date: _______________", 110, finalY + 52);
+    }
+    
+    // Add footer with page numbers and disclaimer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      
+      // Footer line
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.line(20, doc.internal.pageSize.height - 20, 190, doc.internal.pageSize.height - 20);
+      
+      // Page numbers
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10, { align: "right" });
+      
+      // Confidentiality notice
+      doc.text("CONFIDENTIAL - Employee Timesheet Document", 20, doc.internal.pageSize.height - 10);
+      
+      // Generated timestamp
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 105, doc.internal.pageSize.height - 10, { align: "center" });
+    }
+    
+    // Save the PDF with a professional filename
+    const fileName = `Timesheet_${employeeName.replace(/\s+/g, '_')}_${formatDateRange(dateRange.from, dateRange.to).replace(/\//g, '-').replace(/\s/g, '')}.pdf`;
+    doc.save(fileName);
+    
+    // Show success message
+    Swal.fire({
+      title: 'PDF Generated Successfully!',
+      text: `Your timesheet for ${formatDateRange(dateRange.from, dateRange.to)} has been downloaded.`,
+      icon: 'success',
+      confirmButtonText: 'OK',
+      timer: 3000
+    });
+  };
+
   return (
     <div className="px-4 lg:px-0">
       {/* Header */}
@@ -187,7 +531,8 @@ export default function TimeSheet() {
       </div>
 
       {/* Summary Cards */}
-      <div className="flex flex-wrap gap-4 lg:gap-6 mb-8 items-center">
+      <div className="flex justify-between items-center gap-5">
+        <div className="flex flex-wrap gap-4 lg:gap-6 mb-8 items-center">
         <div className="text-center">
           <div className="text-xl lg:text-2xl font-bold text-gray-900">
             {Number(paymentData?.payPerDay?.regularPayRate ?? 0).toFixed(2)} $
@@ -233,6 +578,23 @@ export default function TimeSheet() {
           </div>
           <div className="text-xs lg:text-sm text-gray-600">Total Paid Hours</div>
         </div>
+      </div>
+      <div className="flex items-center gap-3 ">
+        <button 
+        onClick={() => handleSubmit()}
+        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+      >
+        <Send className="w-4 h-4" />
+        <span>Submit</span>
+      </button>
+        <button 
+        onClick={exportToPDF}
+        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+      >
+        <File className="w-4 h-4" />
+        <span>Export</span>
+      </button>
+      </div>
       </div>
 
       {/* Table */}
