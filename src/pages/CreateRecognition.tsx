@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 //  this is send reaction page
 import { useState } from "react";
 import user from "@/assets/user1.png";
@@ -6,13 +7,12 @@ import SummeryTab from "@/components/RecognitionTable/SummeryTab";
 import { useNavigate } from "react-router-dom";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
 import { formatDateToMDY } from "@/utils/formatDateToMDY";
-import {
-  useAddRecognationMutation,
-  useGetAllBadgeQuery,
-} from "@/store/api/admin/recognation/recognationApi";
+import { useAddRecognationMutation, useGetAllBadgeQuery } from "@/store/api/admin/recognation/recognationApi";
 import { IBadge } from "@/types/recognation";
 import { toast } from "sonner";
 import { IUser } from "@/types/user";
+import CustomPagination from "@/components/shared/CustomPagination/CustomPagination";
+import usePagination from "@/hooks/usePagination";
 
 const steps = [
   { id: 1, name: "Recipients", current: true },
@@ -187,8 +187,19 @@ const filterOptions = [
 ];
 
 export default function CreateRecognition() {
+  const { currentPage, goToNext, goToPrevious, goToPage, getPageNumbers, metadata } = usePagination({
+    noOfItemPerPage: 10,
+  });
   const [currentStep, setCurrentStep] = useState(1);
-  const { data } = useGetAllUserQuery({limit: 20});
+  const { data, isLoading } = useGetAllUserQuery({ page: currentPage });
+  console.log("=============> Recong===========>", data);
+
+  // update metadata after API response
+  if (data?.metadata && metadata.total !== data.metadata.total) {
+    metadata.total = data.metadata.total;
+    metadata.totalPage = data.metadata.totalPage;
+    metadata.limit = data.metadata.limit;
+  }
   const { data: badgeData } = useGetAllBadgeQuery(null);
 
   const [createRecognation] = useAddRecognationMutation();
@@ -214,11 +225,7 @@ export default function CreateRecognition() {
     }
   };
 
-  const handleSelectEmployee = (
-    index: string,
-    checked: boolean,
-    id: string
-  ) => {
+  const handleSelectEmployee = (index: string, checked: boolean, id: string) => {
     console.log({ checked, index, id });
     if (checked) {
       setSelectedEmployees([...selectedEmployees, id]);
@@ -242,10 +249,10 @@ export default function CreateRecognition() {
         console.log({ result });
         if (result?.success) {
           toast.success("Recognation added");
-          navigate('/admin/communication/recognition')
+          navigate("/admin/communication/recognition");
         }
       } catch (error: any) {
-        console.log({error})
+        console.log({ error });
         toast.error(error?.message || "Something went worng");
       }
       // navigate("/admin/communication/recognition");
@@ -258,13 +265,7 @@ export default function CreateRecognition() {
   };
 
   const handleFilterToggle = (filterId: string) => {
-    setFilters(
-      filters.map((filter) =>
-        filter.id === filterId
-          ? { ...filter, checked: !filter.checked }
-          : filter
-      )
-    );
+    setFilters(filters.map((filter) => (filter.id === filterId ? { ...filter, checked: !filter.checked } : filter)));
   };
 
   // Handle change for any form field
@@ -275,12 +276,8 @@ export default function CreateRecognition() {
     }));
   };
 
-  const selectedBadge = badgeData?.data?.find(
-    (el: IBadge) => el.id === formData.badgeId
-  );
-  const selectedUsersData = data?.data.filter((user: { id: string }) =>
-    selectedEmployees.includes(user.id)
-  );
+  const selectedBadge = badgeData?.data?.find((el: IBadge) => el.id === formData.badgeId);
+  const selectedUsersData = data?.data.filter((user: { id: string }) => selectedEmployees.includes(user.id));
   console.log({ selectedBadge, selectedUsersData });
 
   // console.log({ formData, selectedEmployees });
@@ -311,35 +308,18 @@ export default function CreateRecognition() {
                       onChange={(e) => handleSelectAll(e.target.checked)}
                     />
                   </th>
-                  <th className="px-4 py-3 cursor-pointer   text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-4 py-3  cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    Phone
-                  </th>
-                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">
-                    Last login
-                  </th>
+                  <th className="px-4 py-3 cursor-pointer   text-left text-xs font-bold text-[#484848] uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3  cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">Email</th>
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">Phone</th>
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">Department</th>
+                  <th className="px-4 py-3 cursor-pointer text-left text-xs font-bold text-[#484848] uppercase tracking-wider">Last login</th>
                   <th className="w-8 px-4 py-3">
                     <button
                       onClick={() => setIsFilterModalOpen(true)}
                       className="inline-flex items-center px-3 py-1.5 border cursor-pointer border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                      <svg
-                        className="w-4 h-4 mr-1.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
+                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -354,65 +334,51 @@ export default function CreateRecognition() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data?.data.map((employee: any, index: number) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 border-0 py-2 cursor-pointer"
-                  >
+                  <tr key={index} className="hover:bg-gray-50 border-0 py-2 cursor-pointer">
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        checked={selectedEmployees.includes(
-                          employee?.id.toString()
-                        )}
-                        onChange={(e) =>
-                          handleSelectEmployee(
-                            index.toString(),
-                            e.target.checked,
-                            employee?.id
-                          )
-                        }
+                        checked={selectedEmployees.includes(employee?.id.toString())}
+                        onChange={(e) => handleSelectEmployee(index.toString(), e.target.checked, employee?.id)}
                       />
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {employee?.employeeID}
-                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900">{employee?.employeeID}</td>
                     <td className="px-4 py-4">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-3">
                           <img src={employee?.avatar} alt="" />
                         </div>
                         <span className="text-sm font-medium text-gray-900">
-                          {employee?.profile?.firstName}{" "}
-                          {employee?.profile?.lastName}
+                          {employee?.profile?.firstName} {employee?.profile?.lastName}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee?.email}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee?.phone}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee?.profile?.department}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {formatDateToMDY(employee.lastLoginAt)}
-                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{employee?.email}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{employee?.phone}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{employee?.profile?.department}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">{formatDateToMDY(employee.lastLoginAt)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="flex items-center justify-end mt-6 px-2 py-6">
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={metadata.totalPage}
+                isLoading={isLoading}
+                getPageNumbers={getPageNumbers}
+                goToPage={goToPage}
+                goToPrevious={goToPrevious}
+                goToNext={goToNext}
+              />
+            </div>
           </div>
         );
       case 2:
         return (
           <div className=" bg-white rounded-lg  min-h-screen ">
-            <CreateRecognitionBagde
-              formData={formData}
-              handleChange={handleChange}
-            />
+            <CreateRecognitionBagde formData={formData} handleChange={handleChange} />
           </div>
         );
       case 3:
@@ -437,12 +403,8 @@ export default function CreateRecognition() {
       <div className="flex flex-col items-center justify-center p-6 md:flex-row md:justify-between md:items-center  ">
         {/* Left side - Title and subtitle */}
         <div className="flex flex-col">
-          <h1 className="text-2xl text-center md:text-left font-semibold text-[#4E53B1] mb-1">
-            Recognition
-          </h1>
-          <p className="text-gray-600 text-sm">
-            Celebrate achievements & keep them motivated
-          </p>
+          <h1 className="text-2xl text-center md:text-left font-semibold text-[#4E53B1] mb-1">Recognition</h1>
+          <p className="text-gray-600 text-sm">Celebrate achievements & keep them motivated</p>
         </div>
 
         {/* Right side - Action buttons */}
@@ -463,32 +425,19 @@ export default function CreateRecognition() {
               <div className="flex items-center  justify-center max-w-2xl mx-auto">
                 <div className="flex justify-between items-start w-full max-w-2xl mx-auto">
                   {steps.map((step, stepIdx) => (
-                    <div
-                      key={step.id}
-                      className="relative flex flex-col items-center flex-1"
-                    >
+                    <div key={step.id} className="relative flex flex-col items-center flex-1">
                       {/* Line to next step */}
-                      {stepIdx < steps.length - 1 && (
-                        <div className="absolute top-2 left-1/2 w-full h-0.5 bg-gray-300 z-0" />
-                      )}
+                      {stepIdx < steps.length - 1 && <div className="absolute top-2 left-1/2 w-full h-0.5 bg-gray-300 z-0" />}
 
                       {/* Circle */}
                       <div className="relative z-10">
-                        <div
-                          className={`w-4 h-4 rounded-full ${
-                            currentStep === step.id
-                              ? "bg-[#4E53B1]"
-                              : "bg-gray-400"
-                          }`}
-                        />
+                        <div className={`w-4 h-4 rounded-full ${currentStep === step.id ? "bg-[#4E53B1]" : "bg-gray-400"}`} />
                       </div>
 
                       {/* Step name */}
                       <span
                         className={`mt-2 text-sm font-normal md:font-medium text-center ${
-                          currentStep === step.id
-                            ? "text-[#4E53B1]"
-                            : "text-gray-500"
+                          currentStep === step.id ? "text-[#4E53B1]" : "text-gray-500"
                         }`}
                       >
                         {step.name}
@@ -534,18 +483,8 @@ export default function CreateRecognition() {
                   {/* Search Bar */}
                   <div className="relative mb-4">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg
-                        className="h-4 w-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
                     <input
@@ -560,25 +499,14 @@ export default function CreateRecognition() {
                   {/* Filter Options */}
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {filters.map((filter) => (
-                      <label
-                        key={filter.id}
-                        className="flex items-center cursor-pointer"
-                      >
+                      <label key={filter.id} className="flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={filter.checked}
                           onChange={() => handleFilterToggle(filter.id)}
                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                         />
-                        <span
-                          className={`ml-3 text-sm ${
-                            filter.checked
-                              ? "text-blue-600 font-medium"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {filter.label}
-                        </span>
+                        <span className={`ml-3 text-sm ${filter.checked ? "text-blue-600 font-medium" : "text-gray-700"}`}>{filter.label}</span>
                       </label>
                     ))}
                   </div>
