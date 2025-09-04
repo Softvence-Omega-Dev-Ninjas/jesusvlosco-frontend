@@ -31,7 +31,6 @@ interface ApiShiftData {
   shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
   createdAt: string;
   updatedAt: string;
-  
 }
 
 const UserDashboard: React.FC = () => {
@@ -40,15 +39,29 @@ const UserDashboard: React.FC = () => {
   const currentApiShift = data?.data?.data?.shift as ApiShiftData | undefined;
   const teamMembers = data?.data?.data?.teamMembers as any | undefined;
   const clock = data?.data?.data?.clock as any | undefined;
+
+  const clockStatus: "ACTIVE" | "COMPLETED" = clock?.status || "ACTIVE";
   // console.log(teamMembers, "Team members")
   // console.log(currentApiShift, "Current API Shift Data")
   // console.log("Dashboard Data", data?.data?.data);
-  const isClockedIn = clock?.clockInAt ? true : false;
-  const isClockedOut = clock?.clockOutAt ? true : false;
+  function isValidDateValue(value: any) {
+    return (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      value !== "null" &&
+      value !== "undefined"
+    );
+  }
+
+  const isClockedIn = isValidDateValue(clock?.clockInAt);
+  const isClockedOut = isValidDateValue(clock?.clockOutAt);
+
+  console.log({ isClockedIn, isClockedOut }, "Clocked In/Out Status", clock);
+
   // console.log("isClockedIn", isClockedIn, "isClockedOut", isClockedOut);
 
   // Use the latest shift from today, or fallback to shiftData from clock API
-  
 
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
@@ -81,11 +94,12 @@ const UserDashboard: React.FC = () => {
       <div className="w-full mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            <CurrentShiftCard 
-            shift={currentShiftFromApi || fallbackShift} 
-            team={teamMembers} 
-            isClockedIn={isClockedIn}
-            isClockedOut={isClockedOut}
+            <CurrentShiftCard
+              shift={currentShiftFromApi || fallbackShift}
+              team={teamMembers}
+              // isClockedIn={isClockedIn}
+              isClockedOut={isClockedOut}
+              clockStatus={clockStatus}
             />
           </div>
 

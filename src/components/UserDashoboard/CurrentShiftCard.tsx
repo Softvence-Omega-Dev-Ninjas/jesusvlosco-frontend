@@ -12,14 +12,16 @@ import { Shift } from "./types";
 interface CurrentShiftCardProps {
   shift: Shift;
   team: any[];
-  isClockedIn: boolean;
+  clockStatus: "ACTIVE" | "COMPLETED";
+  // isClockedIn: boolean;
   isClockedOut: boolean;
 }
 
 const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   shift,
   team,
-  isClockedIn,
+  clockStatus,
+  // isClockedIn,
   isClockedOut,
 }) => {
   const [isClocking, setIsClocking] = useState(false);
@@ -60,14 +62,9 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   };
 
   const isClockInButtonDisabled =
-    isClocking ||
-    (isClockedIn && !isClockedOut) ||
-    shift.startTime === "No shift";
+    isClocking || clockStatus === "ACTIVE" || shift.startTime === "No shift";
   const isClockOutButtonDisabled =
-    isClockOut ||
-    isClockedOut ||
-    !isClockedIn ||
-    shift.startTime === "No shift";
+    isClockOut || isClockedOut || shift.startTime === "No shift";
 
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
