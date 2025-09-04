@@ -1,3 +1,4 @@
+import { getShiftDateISOString } from "@/utils/dateUtils";
 import { baseApi } from "../baseApi";
 
 const clockinoutapi = baseApi.injectEndpoints({
@@ -10,7 +11,7 @@ const clockinoutapi = baseApi.injectEndpoints({
           "lat": location.lat,
           "lng": location.lng,
           "action": location.action,
-          "date": new Date().toISOString()
+          "date": getShiftDateISOString()
         },
       }),
       invalidatesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
@@ -18,7 +19,7 @@ const clockinoutapi = baseApi.injectEndpoints({
 
     getClockInOut: build.query({
       query: () => ({
-        url: `/employee/time-clock/shift/current-clock?date=${new Date().toISOString()}`,
+        url: `/employee/time-clock/shift/current-clock?date=${getShiftDateISOString()}`,
         method: "GET",
       }),
       providesTags: ['CLOCK_IN_OUT', 'TIME_CLOCK', 'SCHEDULING_USER'],
