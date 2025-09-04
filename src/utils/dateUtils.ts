@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { formatWeekdayShort } from "./formatDateToMDY";
 
 export interface WeekDay {
@@ -379,5 +380,12 @@ export const isSameDayInTimeZone = (
     return `${p("year")}-${p("month")}-${p("day")}`;
   };
 
-  return toYMD(a) === toYMD(b);
+  return toYMD(a) === toYMD(b); 
+  
 };
+
+export function getShiftDateISOString() {
+  const userTimeZone = userDefaultTimeZone();
+  const dt = DateTime.now().setZone(userTimeZone).startOf("day"); // ✅ normalize to start of day in user tz
+  return dt.toUTC().toISO(); // send start of day in UTC
+}

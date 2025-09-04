@@ -2,7 +2,7 @@
 import CustomPagination from "@/components/shared/CustomPagination/CustomPagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import usePagination from "@/hooks/usePagination";
-import { useGetAllClockInRequestForAdminQuery, useUpdateClockInRequestMutation } from "@/store/api/admin/shift-sheduling";
+import { useCancelClockInRequestMutation, useGetAllClockInRequestForUserQuery } from "@/store/api/admin/shift-sheduling";
 import { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { FaSpinner } from "react-icons/fa";
@@ -41,53 +41,28 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const ClockInRequest = () => {
+const UserClockInRequest = () => {
   const { currentPage, goToNext, goToPrevious, goToPage, getPageNumbers } = usePagination({
     noOfItemPerPage: 10,
   });
-  const [isAccepting, setIsAccepting] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
-  const [updateClockInStatus] = useUpdateClockInRequestMutation();
-  const { data: clockInData, isLoading } = useGetAllClockInRequestForAdminQuery({ currentPage });
+  const [cancelClockInRequest] = useCancelClockInRequestMutation();
+  const { data: clockInData, isLoading } = useGetAllClockInRequestForUserQuery({ currentPage });
   console.log(clockInData);
-  const handleAcceptClockInRequest = async (id: string) => {
-    console.log(id);
-    setIsAccepting(true);
-    try {
-      const result = await updateClockInStatus({
-        id,
-        data: {
-          isApproved: true,
-        },
-      }).unwrap();
-      console.log(result);
-      if (result?.success) {
-        toast.success("Clock-in request Accepted!");
-      }
-    } catch (error: any) {
-      console.error("Error publishing task:", error);
-      toast.error(error?.data?.message); // Add a toast for failure
-    } finally {
-      setIsAccepting(false);
-    }
-  };
-  const handleRejectClockInRequest = async (id: string) => {
+
+  const handleCancelClockInRequest = async (id: string) => {
     setIsRejecting(true);
     try {
-      const result = await updateClockInStatus({
+      const result = await cancelClockInRequest({
         id,
-        data: {
-          isApproved: false,
-        },
       }).unwrap();
       console.log(result);
       if (result?.success) {
-        toast.success("Clock-in request rejected successfully!");
+        toast.success("Clock-in request Cancel successfully!");
       }
     } catch (error: any) {
       console.error("Error publishing task:", error);
       toast.error(error?.data?.message);
-      // Add a toast for failure
     } finally {
       setIsRejecting(false);
     }
@@ -182,17 +157,10 @@ const ClockInRequest = () => {
                               className="bg-[#f7fbfe] border-none shadow-md shadow-secondary-bg-light outline-none p-2 flex flex-col gap-2"
                             >
                               <span
-                                className="hover:text-green-700 hover:bg-green-50 border-2 border-[#e9ebec]  py-2 px-5 rounded-lg hover:bg-light-primary-bg dark:hover:bg-dark-secondary-bg font-medium text-sm w-full cursor-pointer flex items-center justify-center"
-                                onClick={() => handleAcceptClockInRequest(item?.id)}
-                              >
-                                {isAccepting ? <FaSpinner className="animate-spin" /> : "Accept"}
-                              </span>
-
-                              <span
-                                onClick={() => handleRejectClockInRequest(item?.id)}
+                                onClick={() => handleCancelClockInRequest(item?.id)}
                                 className="hover:text-red-700 hover:bg-red-50 border-2 border-[#e9ebec]  py-2 px-5 rounded-lg hover:bg-light-primary-bg dark:hover:bg-dark-secondary-bg font-medium text-sm w-full cursor-pointer flex items-center justify-center"
                               >
-                                {isRejecting ? <FaSpinner className="animate-spin" /> : "Reject"}
+                                {isRejecting ? <FaSpinner className="animate-spin" /> : "Cancel"}
                               </span>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -216,9 +184,12 @@ const ClockInRequest = () => {
             </div>
           </>
         )}
+        {/* {clockInData?.metadata.totalPage > 1 && ( */}
+
+        {/* )} */}
       </div>
     </div>
   );
 };
 
-export default ClockInRequest;
+export default UserClockInRequest;

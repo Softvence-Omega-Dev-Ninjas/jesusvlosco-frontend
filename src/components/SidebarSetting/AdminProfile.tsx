@@ -1,8 +1,8 @@
 
 import { BiEditAlt } from "react-icons/bi";
-import google from "../../assets/google.png"
-import facebook from "../../assets/facebook.png"
-import X from "../../assets/x.png"
+// import google from "../../assets/google.png"
+// import facebook from "../../assets/facebook.png"
+// import X from "../../assets/x.png"
 
 import profile from "../../assets/adminprofile.png"
 
@@ -75,7 +75,7 @@ export default function AdminProfile() {
       </div>
 
       {/* Password Section */}
-      <div className=" rounded-2xl border border-gray-200 mb-6">
+      {/* <div className=" rounded-2xl border border-gray-200 mb-6">
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div>
@@ -87,10 +87,10 @@ export default function AdminProfile() {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Link Accounts Section */}
-      <div className=" rounded-2xl  border border-gray-200">
+      {/* <div className=" rounded-2xl  border border-gray-200">
         <div className="p-6">
           <div className="mb-3">
             <h2 className="text-lg font-semibold text-[#484848]">Link accounts</h2>
@@ -98,7 +98,7 @@ export default function AdminProfile() {
           </div>
           
    
-            {/* Facebook */}
+      
             <div className="flex items-center justify-between py-3  rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -114,7 +114,7 @@ export default function AdminProfile() {
               </button>
             </div>
 
-            {/* Twitter */}
+
             <div className="flex items-center justify-between py-3  rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -130,7 +130,7 @@ export default function AdminProfile() {
               </button>
             </div>
 
-            {/* Google */}
+
             <div className="flex items-center justify-between py-3 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
@@ -147,7 +147,7 @@ export default function AdminProfile() {
             </div>
         
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

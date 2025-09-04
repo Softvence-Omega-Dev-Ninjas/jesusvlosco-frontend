@@ -1,5 +1,5 @@
 import AdminProfile from "@/components/SidebarSetting/AdminProfile";
-import ApiIntregration from "@/components/SidebarSetting/ApiIntregration";
+// import ApiIntregration from "@/components/SidebarSetting/ApiIntregration";
 import CompanyDetailsPage from "@/components/SidebarSetting/CompanyDetailsPage";
 import EmployeeManagement from "@/components/SidebarSetting/EmployeeManagement";
 import Notification from "@/components/SidebarSetting/Notification";
@@ -21,8 +21,8 @@ const SidebarSetting: React.FC = () => {
         return <ProjectManagement></ProjectManagement> ;
       case 'Employee Management':
         return <EmployeeManagement></EmployeeManagement>  ;
-      case 'API & Integrations':
-        return  <ApiIntregration></ApiIntregration> ;
+      // case 'API & Integrations':
+      //   return  <ApiIntregration></ApiIntregration> ;
       case 'Notifications':
         return <Notification></Notification> ;
       default:
@@ -31,11 +31,11 @@ const SidebarSetting: React.FC = () => {
   };
 
   const tabs = [
-    'Company Details',
     'Admin Profile',
+    'Company Details',
     'Project Management',
     'Employee Management',
-    'API & Integrations',
+    // 'API & Integrations',
     'Notifications',
   ];
 

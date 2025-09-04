@@ -1,5 +1,5 @@
 // src/components/MapLocation.tsx
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, Marker, Circle, useLoadScript } from "@react-google-maps/api";
 import React, { useEffect, useState } from "react";
 
 const containerStyle = {
@@ -60,15 +60,35 @@ const MapLocation: React.FC = () => {
 
   const [userLocation, setUserLocation] =
     useState<google.maps.LatLngLiteral | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'loading' | 'success' | 'error' | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.watchPosition((position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      });
+      setLocationStatus('loading');
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationError(null);
+          setLocationStatus('success');
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setLocationError("Unable to get your location. Please enable location services.");
+          setLocationStatus('error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000, // 5 minutes
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by this browser.");
+      setLocationStatus('error');
     }
   }, []);
 
@@ -79,10 +99,39 @@ const MapLocation: React.FC = () => {
       <h2 className="text-2xl font-bold mb-6 text-center text-primary">
         Map Location
       </h2>
+
+      {locationError && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-800">{locationError}</p>
+        </div>
+      )}
+
+      {locationStatus === 'loading' && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+            <p className="text-sm text-blue-800">Getting your current location...</p>
+          </div>
+        </div>
+      )}
+
+      {locationStatus === 'success' && userLocation && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-green-800">
+              ✅ Current location detected: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </p>
+            <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+              500m radius
+            </div>
+          </div>
+        </div>
+      )}
+
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={center}
-        zoom={14}
+        center={userLocation || center}
+        zoom={userLocation ? 16 : 14}
         options={{
           styles: mapStyles,
           streetViewControl: true,
@@ -97,19 +146,33 @@ const MapLocation: React.FC = () => {
           mapTypeControl: false,
         }}
       >
-        {/* User Live Location (Red Dot) */}
+        {/* Current Location with 500m Radius Circle */}
         {userLocation && (
-          <Marker
-            position={userLocation}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#FF0000",
-              fillOpacity: 1,
-              strokeWeight: 2,
-              strokeColor: "#ffffff",
-            }}
-          />
+          <>
+            <Marker
+              position={userLocation}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: "#FF0000",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#ffffff",
+              }}
+              title="Your Current Location"
+            />
+            <Circle
+              center={userLocation}
+              radius={300} // 500 meters radius
+              options={{
+                fillColor: "#4285F4",
+                fillOpacity: 0.15,
+                strokeColor: "#4285F4",
+                strokeOpacity: 0.6,
+                strokeWeight: 2,
+              }}
+            />
+          </>
         )}
 
         {/* Custom Location Markers */}
@@ -127,7 +190,17 @@ const MapLocation: React.FC = () => {
           />
         ))}
       </GoogleMap>
-      <div className="mt-4 flex justify-center space-x-8 text-sm text-gray-700">
+      <div className="mt-4 flex flex-wrap justify-center gap-6 text-sm text-gray-700">
+        {/* Current Location Legend */}
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
+            <div className="absolute inset-0 w-4 h-4 border-2 border-blue-500 rounded-full opacity-30"></div>
+          </div>
+          <span>Current Location (500m radius)</span>
+        </div>
+
+        {/* Existing Location Legends */}
         <div className="flex items-center space-x-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +212,6 @@ const MapLocation: React.FC = () => {
             <circle cx="10" cy="10" r="10" fill="#1EBD66" fill-opacity="0.36" />
             <circle cx="10" cy="10" r="6" fill="#06843F" />
           </svg>
-
           <span>Location 1</span>
         </div>
         <div className="flex items-center space-x-2">
@@ -153,7 +225,6 @@ const MapLocation: React.FC = () => {
             <circle cx="10" cy="10" r="10" fill="#AB070F" fill-opacity="0.37" />
             <circle cx="10" cy="10" r="6" fill="#AB070F" />
           </svg>
-
           <span>Location 2</span>
         </div>
         <div className="flex items-center space-x-2">
@@ -167,7 +238,6 @@ const MapLocation: React.FC = () => {
             <circle cx="10" cy="10" r="10" fill="#FFB600" fill-opacity="0.5" />
             <circle cx="10" cy="10" r="6" fill="#FFB600" />
           </svg>
-
           <span>Location 3</span>
         </div>
       </div>
