@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { formatWeekdayShort } from "./formatDateToMDY";
 
 export interface WeekDay {
@@ -48,9 +49,9 @@ export const generateWeekDatesForUserScheduling = () => {
  * @param currentDate - The current date to base the week on
  * @returns Array of week days
  */
-export const generateWeekDatesForWeeklySchedule = () => {
+export const generateWeekDatesForWeeklySchedule = (currentDate: Date) => {
   const days = [];
-  const startDate = new Date();
+  const startDate = currentDate ? new Date(currentDate) : new Date();
   const dayOfWeek = startDate.getDay();
   const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
   startDate.setDate(diff);
@@ -379,5 +380,12 @@ export const isSameDayInTimeZone = (
     return `${p("year")}-${p("month")}-${p("day")}`;
   };
 
-  return toYMD(a) === toYMD(b);
+  return toYMD(a) === toYMD(b); 
+  
 };
+
+export function getShiftDateISOString() {
+  const userTimeZone = userDefaultTimeZone();
+  const dt = DateTime.now().setZone(userTimeZone).startOf("day"); // ✅ normalize to start of day in user tz
+  return dt.toUTC().toISO(); // send start of day in UTC
+}

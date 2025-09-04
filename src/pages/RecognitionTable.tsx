@@ -220,13 +220,14 @@ export default function RecognitionTable() {
 
                     {/* Sent to Column */}
                     <td className="p-4 ">
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center justify-start gap-3">
                         {activity?.recognitionUsers.length === 1 ? (
                           <div className="flex items-center gap-3">
                             <img
                               src={
                                 activity.recognitionUsers[0]?.user?.profile
-                                  ?.profileUrl || "/placeholder.svg"
+                                  ?.profileUrl || "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(`${activity.recognitionUsers[0]?.user?.profile.firstName} ${activity.recognitionUsers[0]?.user?.profile.lastName}`)
                               }
                               alt={
                                 activity.recognitionUsers[0]?.user?.profile
@@ -254,7 +255,8 @@ export default function RecognitionTable() {
                                         key={userIndex}
                                         src={
                                           user?.profile?.profileUrl ||
-                                          "/placeholder.svg"
+                                          "https://ui-avatars.com/api/?name=" +
+                                            encodeURIComponent(`${user?.profile?.firstName} ${user?.profile?.lastName}`)
                                         }
                                         alt={user?.profile?.firstName}
                                         className="w-8 h-8 rounded-full border-2 border-white object-cover"
@@ -282,7 +284,8 @@ export default function RecognitionTable() {
                       <div className="flex items-center justify-center gap-2">
                         {typeof activity?.badge?.iconImage === "string" ? (
                           <img
-                            src={activity?.badge?.iconImage}
+                            src={activity?.badge?.iconImage || "https://ui-avatars.com/api/?name=" +
+                              encodeURIComponent(`${activity?.badge?.title}`)}
                             alt=""
                             className="h-8 w-6"
                           />

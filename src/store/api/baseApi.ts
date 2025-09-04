@@ -36,6 +36,8 @@ export const baseApi = createApi({
     "TASK",
     "CLOCK_IN_OUT",
     "OVERTIME",
+    "CLOCK_SHEET",
+    "NOTIFICATION"
   ],
   endpoints: () => ({}),
 });

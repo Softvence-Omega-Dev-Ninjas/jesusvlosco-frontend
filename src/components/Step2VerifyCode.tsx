@@ -1,24 +1,38 @@
 // src/components/Step2VerifyCode.tsx
 import React, { useState, ChangeEvent, KeyboardEvent } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 
 // Define the types for the component's props
 interface Step2VerifyCodeProps {
   phoneNumber: string;
   onVerify: (code: string) => void;
-  isLoading:boolean
+  isLoading: boolean;
 }
 
 const Step2VerifyCode: React.FC<Step2VerifyCodeProps> = ({
   phoneNumber,
   onVerify,
-  isLoading
+  isLoading,
 }) => {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]); // State for each digit, explicitly an array of strings
 
   const handleChange = (index: number, value: string) => {
     // Ensure only digits are entered
     const numericValue = value.replace(/\D/g, "");
+
+    // Paste handling: if pasting into the first field and length >= 2, distribute
+    if (index === 0 && numericValue.length > 1) {
+      const newCode = Array(6)
+        .fill("")
+        .map((_, i) => numericValue[i] || "");
+      setCode(newCode);
+      // Focus the last filled input
+      const lastIdx = Math.min(numericValue.length - 1, 5);
+      setTimeout(() => {
+        document.getElementById(`code-input-${lastIdx}`)?.focus();
+      }, 0);
+      return;
+    }
 
     // Only update if it's a single digit or empty string (for backspace clearing)
     if (numericValue.length <= 1) {
@@ -58,13 +72,26 @@ const Step2VerifyCode: React.FC<Step2VerifyCodeProps> = ({
             <input
               key={index}
               id={`code-input-${index}`}
-              type="text" // Changed to 'text' to allow initial empty string, but we'll enforce numeric input
-              inputMode="numeric" // Suggests numeric keyboard on mobile
-              pattern="[0-9]" // HTML5 pattern for single digit
-              maxLength={1} // Ensures only one character can be typed
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]"
+              maxLength={1}
               value={digit}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 handleChange(index, e.target.value)
+              }
+              onPaste={
+                index === 0
+                  ? (e) => {
+                      const paste = e.clipboardData
+                        .getData("text")
+                        .replace(/\D/g, "");
+                      if (paste.length > 1) {
+                        e.preventDefault();
+                        handleChange(0, paste);
+                      }
+                    }
+                  : undefined
               }
               onKeyDown={(e: KeyboardEvent<HTMLInputElement>) =>
                 handleKeyDown(index, e)
@@ -74,22 +101,13 @@ const Step2VerifyCode: React.FC<Step2VerifyCodeProps> = ({
             />
           ))}
         </div>
-        <p className="text-sm text-gray-500 mb-4">
-          Didn't get the code?{" "}
-          <button type="button" className="text-blue-600 hover:underline">
-            More options
-          </button>
-        </p>
         <button
           type="submit"
           disabled={isLoading}
           className="w-full disabled:cursor-not-allowed disabled:opacity-70 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 mb-4"
         >
-           {isLoading ? " Verifying..." : " Verify"}
+          {isLoading ? " Verifying..." : " Verify"}
         </button>
-        <Link to={'/email-login'} type="button" className="text-blue-600 hover:underline">
-          Log in using email
-        </Link>
       </form>
     </div>
   );
