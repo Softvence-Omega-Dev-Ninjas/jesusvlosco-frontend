@@ -100,6 +100,11 @@ const navigation: NavigationItem[] = [
         icon: Clock,
         path: "/admin/schedule/clock-in-request",
       },
+      {
+        name: "Overtime Request",
+        icon: Clock,
+        path: "/admin/schedule/overtime-request",
+      },
     ],
   },
   {

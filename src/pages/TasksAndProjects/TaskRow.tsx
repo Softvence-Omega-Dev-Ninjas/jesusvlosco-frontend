@@ -1,18 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { MdOutlineDelete } from "react-icons/md";
 import { StatusBadge } from "./StatusBadge";
 import { UserAvatar } from "./UserAvatar";
-
-// interface Task {
-//   id: string;
-//   name: string;
-//   status: "open" | "draft" | "done";
-//   label: string;
-//   startTime: string;
-//   dueDate: string;
-//   assignedTo: {
-//     name: string;
-//     avatar: string;
-//   };
-// }
+import { useDeleteTaskMutation } from "@/store/api/admin/task-and-projects";
+import { toast } from "sonner";
 
 interface TaskRowProps {
   task: any;
@@ -38,8 +30,23 @@ export const formatCustomDate = (dateString: string) => {
 };
 
 export function TaskRow({ task }: TaskRowProps) {
+  const [deleteTask] = useDeleteTaskMutation();
   //Formate Custom date
-
+  const handleDeleteTask = async (id: string) => {
+    console.log("Task Id=============>", id);
+    try {
+      const result = await deleteTask(id).unwrap();
+      console.log(result);
+      if (result?.success) {
+        toast.success("Task deleted successfully!");
+      }
+    } catch (error: any) {
+      console.error("Error deleting Task:", error);
+      toast.error(error?.data?.message); // Add a toast for failure
+    } finally {
+      // setIsOvertimeLoading(false);
+    }
+  };
   return (
     <tr className="hover:bg-gray-50">
       {/* Checkbox */}
@@ -71,6 +78,17 @@ export function TaskRow({ task }: TaskRowProps) {
       {/* Assigned To */}
       <td className="px-4 py-3">
         <UserAvatar user={task?.assignTo} />
+      </td>
+      {/* Assigned To */}
+      <td className="px-4 py-3">
+        <button
+          className="text-red-500 hover:text-red-700 cursor-pointer"
+          onClick={() => {
+            handleDeleteTask(task?.id);
+          }}
+        >
+          <MdOutlineDelete size={20} />
+        </button>
       </td>
     </tr>
   );
