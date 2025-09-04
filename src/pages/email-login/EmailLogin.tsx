@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/hooks/useRedux";
-import { loginUser } from "@/store/Slices/AuthSlice/authSlice";
+import { loginUser, selectUser } from "@/store/Slices/AuthSlice/authSlice";
 import {
   useEmailLoginMutation,
   usePhoneLoginMutation,
@@ -14,6 +14,8 @@ import VerificationComplete from "./VerificationComplete";
 import { Phone, Mail } from "lucide-react";
 import Step1PhoneNumber from "@/components/Step1PhoneNumber";
 import Step2VerifyCode from "@/components/Step2VerifyCode";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 type EmailFormData = {
   email: string;
@@ -27,6 +29,9 @@ export default function Login() {
     formState: { errors },
     watch,
   } = useForm<EmailFormData>();
+  const user = useSelector(selectUser);
+  const navigate = useNavigate();
+  // console.log(user);
 
   const [login, { isLoading }] = useEmailLoginMutation();
   const [step, setStep] = useState(0); // 👈 start from welcome screen
@@ -94,6 +99,12 @@ export default function Login() {
       toast.error(error?.data?.message || "Something went wrong");
     }
   };
+
+  if(user?.role === "EMPLOYEE"){
+    navigate("/user");
+  }else if(user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"){
+    navigate("/admin");
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-l from-[#767BD5] to-[#4E53B1]">
