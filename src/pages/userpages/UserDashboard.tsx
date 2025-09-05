@@ -37,10 +37,11 @@ const UserDashboard: React.FC = () => {
   // Get shift data from API
   const { data, isLoading, refetch } = useGetClockInOutQuery({});
   const currentApiShift = data?.data?.shift as ApiShiftData | undefined;
+  console.log("Current API Shift:", data);
   const teamMembers = data?.data?.teamMembers as any | undefined;
   const clock = data?.data?.clock as any | undefined;
 
-  const clockStatus: "ACTIVE" | "COMPLETED" = clock?.status || "ACTIVE";
+  const clockStatus: "ACTIVE" | "COMPLETED" | "INACTIVE" = clock?.status || "INACTIVE";
   // console.log(teamMembers, "Team members")
   // console.log(currentApiShift, "Current API Shift Data")
   // console.log("Dashboard Data", data?.data?.data);
