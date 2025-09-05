@@ -7,6 +7,9 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Clock, Calendar, FileText } from "lucide-react";
 import Swal from "sweetalert2";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import logo from "@/assets/logo.jpg";
 
 interface ClockEntry {
   date: string;
@@ -54,6 +57,171 @@ const SingleUserSheet = () => {
   const navigate = useNavigate();
 
   console.log(userSheet);
+
+  const exportToPDF = () => {
+    if (!userSheet?.data) return;
+
+    const { user, payrollSheet, payroll } = userSheet.data;
+    const clockSheetData = payrollSheet?.clockSheet;
+
+    try {
+      const doc = new jsPDF();
+      
+      // Add logo
+      doc.addImage(logo, 'JPEG', 10, 10, 40, 20);
+      
+      // Header
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("Employee Timesheet Review", 60, 25);
+      
+      // Employee Info
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      const employeeName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+      doc.text(`Employee: ${employeeName} (ID: ${payroll?.user?.employeeID})`, 10, 45);
+      doc.text(`Email: ${payroll?.user?.email || 'N/A'}`, 10, 55);
+      doc.text(`Phone: ${payroll?.user?.phone || 'N/A'}`, 10, 65);
+      doc.text(`Report Generated: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 10, 75);
+
+      let currentY = 90;
+
+      // Payment Summary if available
+      if (payrollSheet?.paymentData) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Payment Summary", 10, currentY);
+        currentY += 15;
+
+        const paymentData = [
+          ["Regular Hours", `${payrollSheet.paymentData.totalRegularHour.toFixed(2)}`],
+          ["Overtime Hours", `${payrollSheet.paymentData.totalOvertimeHour.toFixed(2)}`],
+          ["Total Hours", `${(payrollSheet.paymentData.totalRegularHour + payrollSheet.paymentData.totalOvertimeHour).toFixed(2)}`],
+          ["Regular Pay", `$${payrollSheet.paymentData.totalRegularPay.toFixed(2)}`],
+          ["Overtime Pay", `$${payrollSheet.paymentData.totalOvertimePay.toFixed(2)}`],
+          ["Regular Rate", `$${payrollSheet.paymentData.payPerDay.regularPayRate}/hr`],
+          ["Overtime Rate", `$${payrollSheet.paymentData.payPerDay.overTimePayRate}/hr`]
+        ];
+
+        autoTable(doc, {
+          startY: currentY,
+          head: [['Category', 'Amount']],
+          body: paymentData,
+          theme: 'grid',
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [41, 128, 185] },
+          columnStyles: {
+            0: { cellWidth: 'auto' },
+            1: { cellWidth: 'auto' }
+          },
+          margin: { left: 10, right: 10 }
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentY = ((doc as any).lastAutoTable?.finalY || currentY) + 20;
+      }
+
+      // Weekly timesheet data
+      if (clockSheetData?.result && clockSheetData.result.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Weekly Timesheet Data", 10, currentY);
+        currentY += 15;
+
+        clockSheetData.result.forEach((week: WeeklyData, weekIndex: number) => {
+          // Week header
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.text(`Week ${weekIndex + 1}`, 10, currentY);
+          currentY += 10;
+
+          // Prepare week data for table
+          const weekTableData: string[][] = [];
+          
+          week.days.forEach((day: DayData) => {
+            if (day.entries && day.entries.length > 0) {
+              day.entries.forEach((entry: ClockEntry) => {
+                const clockInTime = entry.start ? format(new Date(entry.start), 'HH:mm') : 'N/A';
+                const clockOutTime = entry.end ? format(new Date(entry.end), 'HH:mm') : 'N/A';
+                const totalHours = entry.totalHours ? `${entry.totalHours.toFixed(2)}h` : '0h';
+                const overtimeHours = entry.overtime ? `${entry.overtime.toFixed(2)}h` : '0h';
+                
+                weekTableData.push([
+                  format(new Date(day.date), 'dd/MM/yyyy'),
+                  entry.shift?.title || 'N/A',
+                  clockInTime,
+                  clockOutTime,
+                  totalHours,
+                  overtimeHours
+                ]);
+              });
+            }
+          });
+
+          if (weekTableData.length > 0) {
+            autoTable(doc, {
+              startY: currentY,
+              head: [['Date', 'Shift', 'Clock In', 'Clock Out', 'Hours', 'Overtime']],
+              body: weekTableData,
+              theme: 'striped',
+              styles: { fontSize: 9 },
+              headStyles: { fillColor: [52, 152, 219] },
+              columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { cellWidth: 'auto' },
+                4: { cellWidth: 'auto' },
+                5: { cellWidth: 'auto' }
+              },
+              margin: { left: 10, right: 10 }
+            });
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            currentY = ((doc as any).lastAutoTable?.finalY || currentY) + 15;
+          } else {
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("No clock entries for this week", 15, currentY);
+            currentY += 15;
+          }
+
+          // Add page break if needed
+          if (currentY > 250) {
+            doc.addPage();
+            currentY = 20;
+          }
+        });
+      }
+
+      // Footer with approval status
+      const pageHeight = doc.internal.pageSize.height;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      doc.text("This is an automatically generated timesheet report", 10, pageHeight - 20);
+      
+      // Save the PDF
+      const fileName = `Timesheet_Review_${employeeName.replace(/\s+/g, '_')}_${format(new Date(), 'ddMMyyyy')}.pdf`;
+      doc.save(fileName);
+
+      // Show success message
+      Swal.fire({
+        title: "Success!",
+        text: "PDF has been generated successfully!",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to generate PDF. Please try again.",
+        icon: "error"
+      });
+    }
+  };
 
   const handleAccept = () => {
     const data = {
@@ -189,7 +357,7 @@ const SingleUserSheet = () => {
                 action
               </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex items-center space-x-3">
              {
                 userSheet?.data?.payroll?.status ==="PENDING" ? <>
 
@@ -212,6 +380,14 @@ const SingleUserSheet = () => {
                 <span className="font-semibold">Status: <span className={`${userSheet?.data?.payroll?.status === "APPROVED" ? "bg-green-600" : "bg-red-600"} text-white px-3 py-2 rounded-md`}>{userSheet?.data?.payroll?.status}</span></span>
              </div>
              }
+
+             <button 
+               onClick={exportToPDF}
+               className="flex items-center space-x-2 px-3 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium"
+             >
+               <FileText className="h-6 w-6" /> 
+               <span>Export</span>
+             </button>
             </div>
           </div>
         </section>

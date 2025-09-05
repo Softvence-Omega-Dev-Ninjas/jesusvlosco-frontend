@@ -168,20 +168,20 @@ export default function TimeSheet() {
   const exportToPDF = () => {
     const doc = new jsPDF();
     
-    // Add company logo
+    // Add company logo with standard dimensions
     try {
       // Use the imported logo directly with jsPDF
       // jsPDF can handle image URLs directly
-      doc.addImage(logo, 'JPEG', 20, 15, 60, 30);
+      doc.addImage(logo, 'JPEG', 20, 15, 40, 20);
     } catch (error) {
       console.log('Logo loading failed:', error);
       // Fallback: create a simple logo placeholder
       doc.setDrawColor(52, 73, 94);
       doc.setLineWidth(0.5);
-      doc.rect(20, 15, 55, 25);
+      doc.rect(20, 15, 40, 20);
       doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.text("LOGO", 47.5, 30, { align: "center" });
+      doc.text("LOGO", 40, 27, { align: "center" });
     }
     
     // Company/Header Information with smaller font
@@ -193,7 +193,7 @@ export default function TimeSheet() {
     // Add line under header
     doc.setDrawColor(52, 73, 94);
     doc.setLineWidth(0.5);
-    doc.line(55, 30, 190, 30);
+    doc.line(20, 35, 190, 35);
     
     // Create two-column layout: Employee Info (left) and Pay Summary (right)
     const leftColumnX = 20;
@@ -356,9 +356,9 @@ export default function TimeSheet() {
       tableData.push(['', '', '', '', '', '', '', '']);
     });
     
-    // Add table with enhanced styling
+    // Add table with enhanced styling and full width
     autoTable(doc, {
-      startY: 101,
+      startY: 106,
       head: [], // No main header since we have individual headers per week
       body: tableData,
       theme: 'grid',
@@ -371,23 +371,29 @@ export default function TimeSheet() {
       },
       bodyStyles: {
         fontSize: 8,
-        cellPadding: 2,
+        cellPadding: 3,
         halign: 'center'
       },
       alternateRowStyles: {
         fillColor: [248, 249, 250]
       },
       columnStyles: {
-        0: { cellWidth: 22, halign: 'left' }, // Date
-        1: { cellWidth: 24, halign: 'left' }, // Shift
-        2: { cellWidth: 20 }, // Start
-        3: { cellWidth: 20 }, // End
-        4: { cellWidth: 16 }, // Hours
-        5: { cellWidth: 20 }, // Daily Total
-        6: { cellWidth: 16 }, // Regular
-        7: { cellWidth: 16 }  // Overtime
+        0: { cellWidth: 'auto', halign: 'left' }, // Date - auto width, left align
+        1: { cellWidth: 'auto', halign: 'left' }, // Shift - auto width, left align
+        2: { cellWidth: 'auto', halign: 'center' }, // Start - auto width, center align
+        3: { cellWidth: 'auto', halign: 'center' }, // End - auto width, center align
+        4: { cellWidth: 'auto', halign: 'center' }, // Hours - auto width, center align
+        5: { cellWidth: 'auto', halign: 'center' }, // Daily Total - auto width, center align
+        6: { cellWidth: 'auto', halign: 'center' }, // Regular - auto width, center align
+        7: { cellWidth: 'auto', halign: 'center' }  // Overtime - auto width, center align
       },
-      margin: { left: 20, right: 20 },
+      margin: { left: 15, right: 15 },
+      tableWidth: 'wrap',
+      styles: {
+        overflow: 'linebreak',
+        fontSize: 8,
+        cellPadding: 3
+      },
       didParseCell: function(data) {
         // Handle week header rows
         if (data.row.index >= 0 && data.cell.raw && typeof data.cell.raw === 'object' && 'colSpan' in data.cell.raw) {
@@ -413,7 +419,7 @@ export default function TimeSheet() {
     });
     
     // Add footer section
-    const finalY = (doc as any).lastAutoTable.finalY || 200;
+    const finalY = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 200;
     
     // Add signature section
     if (finalY < 250) {
