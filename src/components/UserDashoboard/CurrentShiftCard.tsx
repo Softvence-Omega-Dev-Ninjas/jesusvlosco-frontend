@@ -12,7 +12,7 @@ import { Shift } from "./types";
 interface CurrentShiftCardProps {
   shift: Shift;
   team: any[];
-  clockStatus: "ACTIVE" | "COMPLETED";
+  clockStatus: "ACTIVE" | "COMPLETED" | "INACTIVE";
   // isClockedIn: boolean;
   isClockedOut: boolean;
   refetch: () => void;
@@ -67,8 +67,9 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   const isClockInButtonDisabled =
     isClocking || clockStatus === "ACTIVE" || shift.startTime === "No shift";
   const isClockOutButtonDisabled =
-    isClockOut || isClockedOut || shift.startTime === "No shift";
+    isClockOut || clockStatus === "INACTIVE" || isClockedOut || shift.startTime === "No shift";
 
+    console.log({ isClockInButtonDisabled, isClockOutButtonDisabled, clockStatus, isClockedOut, shiftStartTime: shift.startTime }, "Button Disabled States");
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
       <div className="flex items-center justify-between mb-5">

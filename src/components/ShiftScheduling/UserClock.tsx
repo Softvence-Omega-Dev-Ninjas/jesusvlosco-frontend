@@ -24,6 +24,7 @@ const TimeTrackingDashboard: React.FC = () => {
   });
   const { data } = useGetAllUserTimeClockQuery(null);
   const clockData = useGetClockInOutQuery({});
+  console.log("Clock Data:", clockData);
   const clock = clockData?.data?.data?.clock;
   // console.log(clock);
   const timeClockRequest = data?.data?.data;
