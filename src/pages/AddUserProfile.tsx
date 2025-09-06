@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import EducationForm from "@/components/AddUserProfile/EducationForm";
 import ExperienceForm from "@/components/AddUserProfile/ExperienceForm";
@@ -5,14 +6,7 @@ import Header from "@/components/AddUserProfile/Header";
 import PayrollForm from "@/components/AddUserProfile/PayrollForm";
 import PersonalInfoForm from "@/components/AddUserProfile/PersonalInfoForm";
 import Tabs from "@/components/AddUserProfile/Tabs";
-import {
-  Education,
-  Experience,
-  type FormData,
-  PayrollData,
-  Tab,
-  TRole,
-} from "@/components/AddUserProfile/types";
+import { Education, Experience, type FormData, PayrollData, Tab, TRole } from "@/components/AddUserProfile/types";
 import {
   useCreateOffdayPayRollMutation,
   useCreateUserEducationMultipleMutation,
@@ -27,24 +21,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const payPeriodOptions = ["Hour", "Day", "Week", "Month"];
-const casualLeaveOptions = [
-  "3 days",
-  "5 days",
-  "10 days",
-  "15 days",
-  "20 days",
-];
+const casualLeaveOptions = ["3 days", "5 days", "10 days", "15 days", "20 days"];
 const sickLeaveOptions = ["10 days", "15 days", "20 days", "30 days"];
 const numberOfDaysOptions = ["Select number here", "1", "2", "3"];
-const offDayOptions = [
-  "SUNDAY",
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-];
+const offDayOptions = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 const breakTimeOptions = [
   { label: "None", value: "NONE" },
   { label: "Half Hour", value: "HALF_HOUR" },
@@ -82,23 +62,13 @@ const departmentOptions = [
   { label: "Finance", value: "FINANCE" },
   { label: "Marketing", value: "MARKETING" },
   { label: "Seals", value: "SEALS" },
+  { label: "Labourer", value: "LABOURER" },
+  { label: "Carpenter", value: "CARPENTER" },
+  { label: "Electrician", value: "ELECTRICIAN" },
+  { label: "Driver", value: "DRIVER" },
 ];
-const cityOptions = [
-  "New York",
-  "Los Angeles",
-  "Chicago",
-  "Houston",
-  "Phoenix",
-  "Philadelphia",
-];
-const stateOptions = [
-  "California",
-  "Texas",
-  "Florida",
-  "New York",
-  "Pennsylvania",
-  "Illinois",
-];
+const cityOptions = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia"];
+const stateOptions = ["California", "Texas", "Florida", "New York", "Pennsylvania", "Illinois"];
 const programOptions = [
   "Bachelor of Science",
   "Bachelor of Arts",
@@ -121,25 +91,18 @@ const institutionOptions = [
 ];
 const AddUserProfile = () => {
   const user = useSelector((state: RootState) => state.user.user);
-  console.log(user)
+  console.log(user);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [params] = useSearchParams();
   console.log();
-  const [selectedRole, setSelectedRole] = useState<TRole>(
-    (params.get("role") as "ADMIN" | "EMPLOYEE" | "SUPER_ADMIN") || "EMPLOYEE"
-  );
+  const [selectedRole, setSelectedRole] = useState<TRole>((params.get("role") as "ADMIN" | "EMPLOYEE" | "SUPER_ADMIN") || "EMPLOYEE");
   const [createUser, { isLoading }] = useCreateUserMutation();
-  const [createUserPayroll, { isLoading: isPayrollLoading }] =
-    useCreateUserPayRollMutation();
+  const [createUserPayroll, { isLoading: isPayrollLoading }] = useCreateUserPayRollMutation();
   const [userId, setUserId] = useState("");
   console.log({ selectedRole });
-  const [
-    createuserMultipleEducation,
-    { isLoading: isCreateUserEducationLoading },
-  ] = useCreateUserEducationMultipleMutation();
-  const [createUserExperience, { isLoading: isCreateUserExperienceLoading }] =
-    useCreateUserExperienceMutation();
+  const [createuserMultipleEducation, { isLoading: isCreateUserEducationLoading }] = useCreateUserEducationMultipleMutation();
+  const [createUserExperience, { isLoading: isCreateUserExperienceLoading }] = useCreateUserExperienceMutation();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -159,9 +122,7 @@ const AddUserProfile = () => {
     dob: "",
   });
 
-  const [educationList, setEducationList] = useState<Education[]>([
-    { id: 1, program: "", institution: "", year: 0 },
-  ]);
+  const [educationList, setEducationList] = useState<Education[]>([{ id: 1, program: "", institution: "", year: 0 }]);
 
   const [experienceList, setExperienceList] = useState<Experience[]>([
     {
@@ -188,17 +149,8 @@ const AddUserProfile = () => {
     breakTime: "HALF_HOUR",
   });
 
-  const yearOptions = Array.from({ length: 50 }, (_, i) =>
-    (new Date().getFullYear() - i).toString()
-  );
-  const jobTypeOptions = [
-    "Full-time",
-    "Part-time",
-    "Contract",
-    "Freelance",
-    "Internship",
-    "Temporary",
-  ];
+  const yearOptions = Array.from({ length: 50 }, (_, i) => (new Date().getFullYear() - i).toString());
+  const jobTypeOptions = ["Full-time", "Part-time", "Contract", "Freelance", "Internship", "Temporary"];
 
   const tabs: Tab[] = [
     { id: "personal", label: "Personal Information" },
@@ -214,32 +166,17 @@ const AddUserProfile = () => {
     }));
   };
 
-  const handleEducationChange = (
-    id: number,
-    field: keyof Education,
-    value: string
-  ): void => {
-    setEducationList((prev) =>
-      prev.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu))
-    );
+  const handleEducationChange = (id: number, field: keyof Education, value: string): void => {
+    setEducationList((prev) => prev.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)));
   };
 
   const addEducation = (): void => {
     const newId = Math.max(...educationList.map((edu) => edu.id)) + 1;
-    setEducationList((prev) => [
-      ...prev,
-      { id: newId, program: "", institution: "", year: 0 },
-    ]);
+    setEducationList((prev) => [...prev, { id: newId, program: "", institution: "", year: 0 }]);
   };
 
-  const handleExperienceChange = (
-    id: number,
-    field: keyof Experience,
-    value: string | boolean
-  ): void => {
-    setExperienceList((prev) =>
-      prev.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp))
-    );
+  const handleExperienceChange = (id: number, field: keyof Experience, value: string | boolean): void => {
+    setExperienceList((prev) => prev.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp)));
   };
 
   const addExperience = (): void => {
@@ -259,10 +196,7 @@ const AddUserProfile = () => {
     ]);
   };
 
-  const handlePayrollChange = (
-    field: keyof PayrollData,
-    value: string
-  ): void => {
+  const handlePayrollChange = (field: keyof PayrollData, value: string): void => {
     setPayrollData((prev) => ({
       ...prev,
       [field]: value,
@@ -298,8 +232,7 @@ const AddUserProfile = () => {
       console.log({ error });
     }
   };
-  const [createOffday, { isLoading: isCreateOffdayLoading }] =
-    useCreateOffdayPayRollMutation();
+  const [createOffday, { isLoading: isCreateOffdayLoading }] = useCreateOffdayPayRollMutation();
   const handleFinalSave = async (data: any) => {
     const offdayData = {
       numberOffDay: 1,
@@ -376,17 +309,17 @@ const AddUserProfile = () => {
   const handlePersonalInfo = async (formData: FormData) => {
     console.log({ formData });
     formData.role = selectedRole;
-    
+
     // Combine dial code and phone number for submission (without + sign)
     const fullPhoneNumber = `${formData.dialCode}${formData.phone}`;
-    
+
     const personalFormData = new FormData();
     // formData.role = selectedRole || 'EMPLOYEE';
     for (const key in formData) {
-      if (key === 'phone') {
+      if (key === "phone") {
         // Submit the full phone number with country code (without + sign)
         personalFormData.append(key, fullPhoneNumber);
-      } else if (key !== 'countryCode' && key !== 'dialCode') {
+      } else if (key !== "countryCode" && key !== "dialCode") {
         // Skip countryCode and dialCode from submission as they're only for UI
         personalFormData.append(key, formData[key as keyof FormData] as string);
       }
@@ -406,9 +339,7 @@ const AddUserProfile = () => {
     // console.log({ personalFormData });
   };
 
-  const hanldeEducationInfo = async (
-    data: { program: string; year: number; institution: string }[]
-  ) => {
+  const hanldeEducationInfo = async (data: { program: string; year: number; institution: string }[]) => {
     console.log({ data });
     const educations = educationList?.map((el) => {
       return {
@@ -439,7 +370,6 @@ const AddUserProfile = () => {
       } else {
         toast.error("An unexpected error occurred");
       }
-     
     }
   };
 
@@ -473,9 +403,7 @@ const AddUserProfile = () => {
       {activeTab === "personal" && (
         <PersonalInfoForm
           formData={formData}
-          handleInputChange={(field: string, value: string) =>
-            handleInputChange(field as keyof FormData, value)
-          }
+          handleInputChange={(field: string, value: string) => handleInputChange(field as keyof FormData, value)}
           genderOptions={genderOptions}
           jobTitleOptions={jobTitleOptions}
           departmentOptions={departmentOptions}
@@ -490,9 +418,7 @@ const AddUserProfile = () => {
       {activeTab === "education" && (
         <EducationForm
           educationList={educationList}
-          handleEducationChange={(id: number, field: string, value: string) =>
-            handleEducationChange(id, field as keyof Education, value)
-          }
+          handleEducationChange={(id: number, field: string, value: string) => handleEducationChange(id, field as keyof Education, value)}
           hanldeEducationInfo={hanldeEducationInfo}
           addEducation={addEducation}
           programOptions={programOptions}
@@ -507,11 +433,9 @@ const AddUserProfile = () => {
       {activeTab === "experience" && (
         <ExperienceForm
           experienceList={experienceList}
-          handleExperienceChange={(
-            id: number,
-            field: string,
-            value: string | boolean
-          ) => handleExperienceChange(id, field as keyof Experience, value)}
+          handleExperienceChange={(id: number, field: string, value: string | boolean) =>
+            handleExperienceChange(id, field as keyof Experience, value)
+          }
           addExperience={addExperience}
           jobTypeOptions={jobTypeOptions}
           setActiveTab={setActiveTab}
@@ -524,9 +448,7 @@ const AddUserProfile = () => {
       {activeTab === "payroll" && (
         <PayrollForm
           payrollData={payrollData}
-          handlePayrollChange={(field: string, value: string) =>
-            handlePayrollChange(field as keyof PayrollData, value)
-          }
+          handlePayrollChange={(field: string, value: string) => handlePayrollChange(field as keyof PayrollData, value)}
           isLoading={isPayrollLoading}
           isOffdayLoadin={isCreateOffdayLoading}
           payPeriodOptions={payPeriodOptions}
