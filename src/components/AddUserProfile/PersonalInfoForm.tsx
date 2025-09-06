@@ -4,12 +4,7 @@ import { FormData } from "./types";
 import { customList } from "country-codes-list";
 
 // Generate array of all country codes
-const countryCodes = Object.values(
-  customList(
-    "countryCode",
-    "{countryCode} | {countryNameEn} | +{countryCallingCode}"
-  )
-).map((item: string) => {
+const countryCodes = Object.values(customList("countryCode", "{countryCode} | {countryNameEn} | +{countryCallingCode}")).map((item: string) => {
   const [code, name, dialCode] = item.split(" | ");
   return { code, name, dialCode: dialCode.replace("+", "") }; // Remove + sign
 });
@@ -38,19 +33,14 @@ const PersonalInfoForm = ({
   formData,
   handleInputChange,
   genderOptions,
-  jobTitleOptions,
   departmentOptions,
-  cityOptions,
-  stateOptions,
   handlePersonalInfo,
   isLoading,
   handleCancel,
 }: PersonalInfoFormProps) => {
   const [genderOpen, setGenderOpen] = useState(false);
-  const [jobTitleOpen, setJobTitleOpen] = useState(false);
   const [departmentOpen, setDepartmentOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
-  const [stateOpen, setStateOpen] = useState(false);
+
 
   // Update dial code when country code changes
   useEffect(() => {
@@ -60,13 +50,10 @@ const PersonalInfoForm = ({
     }
   }, [formData.countryCode, formData.dialCode, handleInputChange]);
 
-
   return (
     <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium text-gray-900">
-          Personal Information
-        </h2>
+        <h2 className="text-lg font-medium text-gray-900">Personal Information</h2>
         <button className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#4E53B1] text-white rounded-lg transition-colors">
           <Edit className="h-4 w-4" />
           Edit
@@ -76,9 +63,7 @@ const PersonalInfoForm = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* First Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            First name
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">First name</label>
           <input
             type="text"
             placeholder="Enter first name"
@@ -90,9 +75,7 @@ const PersonalInfoForm = ({
 
         {/* Last Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last name
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Last name</label>
           <input
             type="text"
             placeholder="Enter last name here"
@@ -104,9 +87,7 @@ const PersonalInfoForm = ({
 
         {/* Phone Number with Country Code */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone number
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Phone number</label>
           <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
             <select
               className="bg-white outline-none pl-3 pr-1 py-2 min-w-fit border-r border-gray-300"
@@ -120,9 +101,7 @@ const PersonalInfoForm = ({
               ))}
             </select>
 
-            <span className="text-gray-500 px-2 whitespace-nowrap">
-              {formData.dialCode}
-            </span>
+            <span className="text-gray-500 px-2 whitespace-nowrap">{formData.dialCode}</span>
 
             <input
               type="tel"
@@ -136,9 +115,7 @@ const PersonalInfoForm = ({
 
         {/* Email ID */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email ID
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email ID</label>
           <input
             type="email"
             placeholder="Enter Email ID here"
@@ -150,9 +127,7 @@ const PersonalInfoForm = ({
 
         {/* Gender */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Gender
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
           <div className="relative">
             <div
               className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
@@ -171,9 +146,7 @@ const PersonalInfoForm = ({
                       setGenderOpen(false);
                     }}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option.label === formData.gender
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-600"
+                      option.label === formData.gender ? "text-blue-600 font-medium" : "text-gray-600"
                     }`}
                   >
                     {option.label}
@@ -186,9 +159,7 @@ const PersonalInfoForm = ({
 
         {/* Employee ID */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Employee ID
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
           <input
             type="text"
             placeholder="Enter employee ID here"
@@ -200,10 +171,8 @@ const PersonalInfoForm = ({
 
         {/* Job Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Job Title
-          </label>
-          <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+          {/* <div className="relative">
             <div
               className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
               onClick={() => setJobTitleOpen(!jobTitleOpen)}
@@ -231,14 +200,19 @@ const PersonalInfoForm = ({
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
+          <input
+            type="text"
+            value={formData.jobTitle}
+            onChange={(e) => handleInputChange("jobTitle", e.target.value)}
+            placeholder="Enter job title here"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         {/* Department */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Department
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
           <div className="relative">
             <div
               className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
@@ -257,9 +231,7 @@ const PersonalInfoForm = ({
                       setDepartmentOpen(false);
                     }}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option.label === formData.department
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-600"
+                      option.label === formData.department ? "text-blue-600 font-medium" : "text-gray-600"
                     }`}
                   >
                     {option.label}
@@ -272,9 +244,7 @@ const PersonalInfoForm = ({
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Address
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
           <input
             type="text"
             placeholder="Enter your address here"
@@ -286,89 +256,35 @@ const PersonalInfoForm = ({
 
         {/* City */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            City
-          </label>
-          <div className="relative">
-            <div
-              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
-              onClick={() => setCityOpen(!cityOpen)}
-            >
-              <span>{formData.city || "Select city"}</span>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-            {cityOpen && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
-                {cityOptions.map((option) => (
-                  <div
-                    key={option}
-                    onClick={() => {
-                      handleInputChange("city", option);
-                      setCityOpen(false);
-                    }}
-                    className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option === formData.city
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {option}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <input
+            type="text"
+            value={formData.city}
+            onChange={(e) => handleInputChange("city", e.target.value)}
+            placeholder="Enter city"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         {/* State */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            State
-          </label>
-          <div className="relative">
-            <div
-              className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-500"
-              onClick={() => setStateOpen(!stateOpen)}
-            >
-              <span>{formData.state || "Select state"}</span>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-            {stateOpen && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
-                {stateOptions.map((option) => (
-                  <div
-                    key={option}
-                    onClick={() => {
-                      handleInputChange("state", option);
-                      setStateOpen(false);
-                    }}
-                    className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      option === formData.state
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {option}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+          <input
+            type="text"
+            value={formData.state}
+            onChange={(e) => handleInputChange("state", e.target.value)}
+            placeholder="Enter state"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         {/* Date of Birth */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Date of birth
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Date of birth</label>
           <div className="relative">
             <input
               type="date"
-              value={
-                formData.dob
-                  ? new Date(formData.dob).toISOString().split("T")[0]
-                  : ""
-              }
+              value={formData.dob ? new Date(formData.dob).toISOString().split("T")[0] : ""}
               onChange={(e) => {
                 // Store as ISO string if needed
                 const dob = e.target.value ? new Date(e.target.value) : null;
