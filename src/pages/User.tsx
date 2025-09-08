@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Columns3, LoaderIcon } from "lucide-react";
+import { LoaderIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { IoFilterOutline } from "react-icons/io5";
 
@@ -16,6 +16,8 @@ import { formatDateToMDY } from "@/utils/formatDateToMDY";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 import Pagination from "@/utils/Pagination";
 import UserActionDropdown from "@/Layout/User/UserActionDropdown";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Define the type for a User
 interface User {
@@ -182,18 +184,12 @@ const User: React.FC = () => {
 
   // ✅ search term state
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // New state for selected user IDs
-  const [showViewByOptionsModal, setShowViewByOptionsModal] =
-    useState<boolean>(false);
+  const [showViewByOptionsModal, setShowViewByOptionsModal] = useState<boolean>(false);
   const [showActionModal, setShowActionModal] = useState<boolean>(false);
-  const [showDepartmentFilterModal, setShowDepartmentFilterModal] =
-    useState<boolean>(false); // New state for department filter modal
+  const [showDepartmentFilterModal, setShowDepartmentFilterModal] = useState<boolean>(false); // New state for department filter modal
   const [isAnyModalOpen, setIsAnyModalOpen] = useState<boolean>(false);
-  const [viewByOptionsModalTopPosition, setViewByOptionsModalTopPosition] =
-    useState<number | null>(null);
-  const [
-    departmentFilterModalTopPosition,
-    setDepartmentFilterModalTopPosition,
-  ] = useState<number | null>(null); // New state for department filter modal position
+  const [viewByOptionsModalTopPosition, setViewByOptionsModalTopPosition] = useState<number | null>(null);
+  const [departmentFilterModalTopPosition, setDepartmentFilterModalTopPosition] = useState<number | null>(null); // New state for department filter modal position
 
   const viewByOptionsModalRef = useRef<HTMLDivElement>(null);
   const actionModalRef = useRef<HTMLDivElement>(null);
@@ -244,32 +240,23 @@ const User: React.FC = () => {
 
   // Effect to update isAnyModalOpen whenever modal states change
   useEffect(() => {
-    setIsAnyModalOpen(
-      showViewByOptionsModal || showActionModal || showDepartmentFilterModal
-    );
+    setIsAnyModalOpen(showViewByOptionsModal || showActionModal || showDepartmentFilterModal);
   }, [showViewByOptionsModal, showActionModal, showDepartmentFilterModal]);
 
-  const toggleViewByOptionsModal = () => {
-    const newState = !showViewByOptionsModal;
-    setShowViewByOptionsModal(newState);
-    if (
-      newState &&
-      tableViewByOptionsButtonRef.current &&
-      mainContainerRef.current
-    ) {
-      const buttonRect =
-        tableViewByOptionsButtonRef.current.getBoundingClientRect();
-      const containerRect = mainContainerRef.current.getBoundingClientRect();
-      setViewByOptionsModalTopPosition(
-        buttonRect.bottom - containerRect.top + 10
-      );
-    } else {
-      setViewByOptionsModalTopPosition(null);
-    }
-    // Close other modals if open
-    if (showActionModal) setShowActionModal(false);
-    if (showDepartmentFilterModal) setShowDepartmentFilterModal(false);
-  };
+  // const toggleViewByOptionsModal = () => {
+  //   const newState = !showViewByOptionsModal;
+  //   setShowViewByOptionsModal(newState);
+  //   if (newState && tableViewByOptionsButtonRef.current && mainContainerRef.current) {
+  //     const buttonRect = tableViewByOptionsButtonRef.current.getBoundingClientRect();
+  //     const containerRect = mainContainerRef.current.getBoundingClientRect();
+  //     setViewByOptionsModalTopPosition(buttonRect.bottom - containerRect.top + 10);
+  //   } else {
+  //     setViewByOptionsModalTopPosition(null);
+  //   }
+  //   // Close other modals if open
+  //   if (showActionModal) setShowActionModal(false);
+  //   if (showDepartmentFilterModal) setShowDepartmentFilterModal(false);
+  // };
 
   const toggleActionModal = () => {
     setShowActionModal(!showActionModal);
@@ -287,9 +274,7 @@ const User: React.FC = () => {
     if (newState && filterButtonRef.current && mainContainerRef.current) {
       const buttonRect = filterButtonRef.current.getBoundingClientRect();
       const containerRect = mainContainerRef.current.getBoundingClientRect();
-      setDepartmentFilterModalTopPosition(
-        buttonRect.bottom - containerRect.top + 10
-      );
+      setDepartmentFilterModalTopPosition(buttonRect.bottom - containerRect.top + 10);
     } else {
       setDepartmentFilterModalTopPosition(null);
     }
@@ -322,9 +307,7 @@ const User: React.FC = () => {
 
   // --- Checkbox selection logic ---
 
-  const handleHeaderCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleHeaderCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       // If header checkbox is checked, select all users in the *filtered* list
       const allFilteredUserIds = filteredUsers.map((user) => user.id);
@@ -335,18 +318,13 @@ const User: React.FC = () => {
     }
   };
 
-  const handleUserCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    userId: string
-  ) => {
+  const handleUserCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, userId: string) => {
     if (event.target.checked) {
       // If user checkbox is checked, add user ID to selectedUserIds
       setSelectedUserIds((prevSelected) => [...prevSelected, userId]);
     } else {
       // If user checkbox is unchecked, remove user ID from selectedUserIds
-      setSelectedUserIds((prevSelected) =>
-        prevSelected.filter((id) => id !== userId)
-      );
+      setSelectedUserIds((prevSelected) => prevSelected.filter((id) => id !== userId));
     }
   };
 
@@ -358,9 +336,7 @@ const User: React.FC = () => {
 
   // Determine if the header checkbox should be indeterminate (some filtered users selected)
   const isHeaderCheckboxIndeterminate =
-    selectedUserIds.length > 0 &&
-    selectedUserIds.length < filteredUsers.length &&
-    filteredUsers.some((user) => selectedUserIds.includes(user.id)); // Ensure at least one currently filtered user is selected
+    selectedUserIds.length > 0 && selectedUserIds.length < filteredUsers.length && filteredUsers.some((user) => selectedUserIds.includes(user.id)); // Ensure at least one currently filtered user is selected
 
   const viewByOptions = [
     { label: "Name", checked: true },
@@ -380,13 +356,7 @@ const User: React.FC = () => {
     {
       label: "Update user details",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -399,13 +369,7 @@ const User: React.FC = () => {
     {
       label: "Create team chat",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -418,13 +382,7 @@ const User: React.FC = () => {
     {
       label: "Send chat message",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -437,13 +395,7 @@ const User: React.FC = () => {
     {
       label: "Send text message",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -456,13 +408,7 @@ const User: React.FC = () => {
     {
       label: "Create task",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -475,13 +421,7 @@ const User: React.FC = () => {
     {
       label: "Delete",
       icon: (
-        <svg
-          className="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -505,39 +445,50 @@ const User: React.FC = () => {
   ];
 
   console.log({ team: searchTerm });
+
+  // Export table as PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["ID", "Name", "Email", "Phone", "Department", "Last Login"];
+    const tableRows: any[] = [];
+
+    if (allUsers && allUsers.length > 0) {
+      allUsers.forEach((user: any) => {
+        tableRows.push([
+          user?.employeeID || "",
+          `${user?.profile?.firstName || ""} ${user?.profile?.lastName || ""}`,
+          user?.email || "",
+          user?.phone || "",
+          user?.profile?.department || "",
+          formatDateToMDY(user?.lastLoginAt) || "",
+        ]);
+      });
+    }
+
+    doc.text("Employee List", 14, 15);
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 9 },
+    });
+    doc.save("employee-list.pdf"); // This will download the PDF to your local machine
+  };
   return (
-    <div
-      ref={mainContainerRef}
-      className="min-h-screen   px-2 font-sans antialiased relative"
-    >
+    <div ref={mainContainerRef} className="min-h-screen   px-2 font-sans antialiased relative">
       {/* Header Section */}
       <header className="flex items-center justify-between p-4  mb-3">
         <div>
-          <h1 className="text-[24px] font-bold text-[#4E53B1]">
-            Employee list
-          </h1>
-          <p className="text-xl text-gray-400">
-            All Employee Information In One Place
-          </p>
+          <h1 className="text-[24px] font-bold text-[#4E53B1]">Employee list</h1>
+          <p className="text-xl text-gray-400">All Employee Information In One Place</p>
         </div>
         <div className="flex gap-3 items-center">
           <Link
             to={"/admin/create-team"}
             className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
           >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              ></path>
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Create Team
           </Link>
@@ -545,22 +496,21 @@ const User: React.FC = () => {
             to={"/admin/add-user?role=EMPLOYEE"}
             className="flex items-center px-4 py-2 bg-[#4E53B1] text-white rounded-lg shadow  focus:outline-none  focus:ring-offset-2 cursor-pointer"
           >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              ></path>
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Add User
           </Link>
+          {/* Export PDF Button */}
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg shadow focus:outline-none focus:ring-offset-2 cursor-pointer"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Export PDF
+          </button>
         </div>
       </header>
 
@@ -575,19 +525,8 @@ const User: React.FC = () => {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              ></path>
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
         </div>
@@ -609,101 +548,74 @@ const User: React.FC = () => {
             </button>
 
             {/* Department Filter Modal */}
-            {showDepartmentFilterModal &&
-              departmentFilterModalTopPosition !== null && (
-                <div
-                  ref={departmentFilterModalRef}
-                  className="absolute right-0 mt-0  w-72 bg-white rounded-lg shadow-lg py-4 z-20 border border-gray-200 opacity-100"
-                  style={{ top: 48 }}
-                >
-                  <div className="px-4">
-                    <h3 className="text-base font-semibold text-gray-900 mb-3">
-                      Department
-                    </h3>
-                    <div className="relative mb-3">
-                      <select className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400 text-gray-700 pr-8 appearance-none">
-                        <option>Select department</option>
-                        {departmentOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg
-                          className="fill-current h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div className="relative mb-3">
-                      <input
-                        type="text"
-                        placeholder="Search"
-                        className="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                      />
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg
-                          className="w-5 h-5 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <button className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none">
-                        <svg
-                          className="w-5 h-5 text-gray-400 hover:text-gray-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          ></path>
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="max-h-48 overflow-y-auto pr-2">
-                      <label className="flex items-center text-sm text-gray-700 py-1">
-                        <input
-                          type="checkbox"
-                          className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2"
-                        />
-                        Select all
-                      </label>
+            {showDepartmentFilterModal && departmentFilterModalTopPosition !== null && (
+              <div
+                ref={departmentFilterModalRef}
+                className="absolute right-0 mt-0  w-72 bg-white rounded-lg shadow-lg py-4 z-20 border border-gray-200 opacity-100"
+                style={{ top: 48 }}
+              >
+                <div className="px-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">Department</h3>
+                  <div className="relative mb-3">
+                    <select className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-400 text-gray-700 pr-8 appearance-none">
+                      <option>Select department</option>
                       {departmentOptions.map((option) => (
-                        <label
-                          key={option.value}
-                          className="flex items-center text-sm text-gray-700 py-1"
-                        >
-                          <input
-                            type="checkbox"
-                            className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2"
-                          />
+                        <option key={option.value} value={option.value}>
                           {option.label}
-                        </label>
+                        </option>
                       ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
                     </div>
                   </div>
+
+                  <div className="relative mb-3">
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      className="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </div>
+                    <button className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none">
+                      <svg
+                        className="w-5 h-5 text-gray-400 hover:text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto pr-2">
+                    <label className="flex items-center text-sm text-gray-700 py-1">
+                      <input type="checkbox" className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2" />
+                      Select all
+                    </label>
+                    {departmentOptions.map((option) => (
+                      <label key={option.value} className="flex items-center text-sm text-gray-700 py-1">
+                        <input type="checkbox" className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2" />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
           </div>
 
           <div className="relative hidden">
@@ -712,13 +624,7 @@ const User: React.FC = () => {
               className="flex items-center px-2 py-2 cursor-pointer bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none"
               onClick={toggleActionModal}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -730,10 +636,7 @@ const User: React.FC = () => {
 
             {/* Dropdown Modal */}
             {showActionModal && (
-              <div
-                ref={actionModalRef}
-                className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-200"
-              >
+              <div ref={actionModalRef} className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-200">
                 <div className="px-1 py-1">
                   {actionOptions.map((option) => (
                     <button
@@ -755,17 +658,10 @@ const User: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div
-        className={` rounded-lg shadow overflow-hidden transition-opacity duration-300 ${
-          isAnyModalOpen ? "opacity-50" : "opacity-100"
-        }`}
-      >
+      <div className={` rounded-lg shadow overflow-hidden transition-opacity duration-300 ${isAnyModalOpen ? "opacity-50" : "opacity-100"}`}>
         {isLoading ? (
           <div className="bg-transparent min-h-[300px] w-full flex justify-center items-center">
-            <LoaderIcon
-              size={52}
-              className="animate-spin text-blue-600 duration-1000"
-            />
+            <LoaderIcon size={52} className="animate-spin text-blue-600 duration-1000" />
           </div>
         ) : (
           <>
@@ -788,21 +684,14 @@ const User: React.FC = () => {
                 </svg>
 
                 {/* Message */}
-                <p className="text-lg font-medium">
-                  No records match your search.
-                </p>
-                <span className="text-sm text-gray-400">
-                  Try adjusting your filters or adding new data.
-                </span>
+                <p className="text-lg font-medium">No records match your search.</p>
+                <span className="text-sm text-gray-400">Try adjusting your filters or adding new data.</span>
               </div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">
                       <input
                         type="checkbox"
                         className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
@@ -815,68 +704,27 @@ const User: React.FC = () => {
                         }}
                       />
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       ID
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Phone
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Department
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Last Login
                     </th>
 
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative rounded-tr-lg"
-                    >
-                      <button
-                        ref={tableViewByOptionsButtonRef}
-                        className="ml-2 flex items-center justify-center p-1 rounded-md hover:bg-gray-100 focus:outline-none cursor-pointer"
-                        onClick={toggleViewByOptionsModal}
-                      >
-                        <Columns3 className="h-5 w-5" />
-                        <svg
-                          className="w-5 h-5 ml-1 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M19 9l-7 7-7-7"
-                          ></path>
-                        </svg>
-                      </button>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative rounded-tr-lg">
+                      Action
                     </th>
                   </tr>
                 </thead>
@@ -888,14 +736,10 @@ const User: React.FC = () => {
                           type="checkbox"
                           className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out rounded-sm"
                           checked={selectedUserIds.includes(user?.id)} // Control checked state
-                          onChange={(e) =>
-                            handleUserCheckboxChange(e, user?.id)
-                          } // Add individual handler
+                          onChange={(e) => handleUserCheckboxChange(e, user?.id)} // Add individual handler
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user?.employeeID}
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user?.employeeID}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -906,9 +750,7 @@ const User: React.FC = () => {
                                 alt={`Avatar of ${user?.profile?.firstName}`}
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).onerror = null;
-                                  (
-                                    e.target as HTMLImageElement
-                                  ).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
+                                  (e.target as HTMLImageElement).src = `https://placehold.co/40x40/cccccc/000000?text=${user.name
                                     .charAt(0)
                                     .toUpperCase()}`;
                                 }}
@@ -925,18 +767,10 @@ const User: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user?.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user?.phone}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user?.profile?.department}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDateToMDY(user?.lastLoginAt)}
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user?.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user?.phone}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user?.profile?.department}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateToMDY(user?.lastLoginAt)}</td>
                       <td className="px-6 py-4  whitespace-nowrap text-sm text-gray-500">
                         <UserActionDropdown
                           id={user?.id}
@@ -956,11 +790,7 @@ const User: React.FC = () => {
         )}
       </div>
       {!isLoading && allUsers?.length !== 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={data?.metadata?.totalPage}
-          onPageChange={handlePageChange}
-        />
+        <Pagination currentPage={currentPage} totalPages={data?.metadata?.totalPage} onPageChange={handlePageChange} />
       )}
       {/* View by Options Modal - now a direct child of the main container, right-aligned */}
       {showViewByOptionsModal && viewByOptionsModalTopPosition !== null && (
@@ -977,33 +807,15 @@ const User: React.FC = () => {
                 className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
             </div>
             <div className="max-h-80 overflow-y-auto pr-2">
               {viewByOptions.map((option) => (
-                <label
-                  key={option.label}
-                  className="flex items-center text-sm text-gray-700 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2"
-                    defaultChecked={option.checked}
-                  />
+                <label key={option.label} className="flex items-center text-sm text-gray-700 py-1">
+                  <input type="checkbox" className="form-checkbox h-4 w-4 text-indigo-600 rounded-sm mr-2" defaultChecked={option.checked} />
                   {option.label}
                 </label>
               ))}
