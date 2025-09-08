@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   HiOutlineBell,
   HiOutlineChevronLeft,
@@ -28,47 +28,12 @@ import { ShiftAPIData, ShiftFormData } from "@/types/shift";
 import { validateShiftData } from "@/utils/validation";
 import { DateTime } from "luxon";
 import { userDefaultTimeZone } from "@/utils/dateUtils"; // you already had this helper
-
-// New interfaces for the project users with shifts data
-interface UserShiftData {
-  id: string;
-  title: string;
-  projectId: string;
-  date: string; // ISO format: "2025-08-27T08:00:00.000Z"
-  startTime: string; // ISO format: "2025-08-27T08:00:00.000Z"
-  endTime: string; // ISO format: "2025-08-27T16:00:00.000Z"
-  shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
-  location: string;
-  lat: number;
-  lng: number;
-  note: string;
-  job: string;
-  allDay: boolean;
-}
-
-interface ProjectUser {
-  user: {
-    id: string;
-    email: string;
-    isAvailable: boolean;
-    firstName: string;
-    lastName: string;
-    profileUrl: string;
-    offDay: string[];
-  };
-  project: {
-    id: string;
-    title: string;
-    location: string;
-  };
-  shifts: UserShiftData[]; // User's assigned shifts
-  allShifts: UserShiftData[]; // All project shifts
-}
+import { ProjectUser, UserShiftData } from "@/types/projectType";
+import EmployeeAvailabilityCard from "./EmployeeAvailabilityCard";
+import { isSameWeek } from "date-fns";
 
 const WeeklyScheduleGrid = () => {
   const timeZone = userDefaultTimeZone();
-  // debug
-  // console.log("Detected timeZone:", timeZone);
 
   const projectIdd = useParams().id;
   const {
@@ -76,11 +41,49 @@ const WeeklyScheduleGrid = () => {
     isLoading,
     refetch,
   } = useGetProjectUsersWithShiftQuery(projectIdd);
-  // console.log(projectInformationNew, "Project Information");
+
   const [deleteShift] = useDeleteShiftMutation();
   const thisProjectInformation = projectInformationNew?.data as
     | ProjectUser[]
     | undefined;
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+
+  // debounce effect (400ms)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // compute filtered list from latest API data + debounced term
+  const filteredUserList = useMemo(() => {
+    const list = thisProjectInformation || [];
+    const term = (debouncedSearchTerm || "").trim().toLowerCase();
+    if (!term) return list;
+
+    return list.filter((pu) => {
+      const u = pu.user;
+      if (!u) return false;
+      const fullName = `${u.firstName || ""} ${u.lastName || ""}`.trim();
+      const candidates = [
+        fullName,
+        u.firstName || "",
+        u.lastName || "",
+        u.email || "",
+        u.jobTitle || "",
+        u.department || "",
+        u.phone || "",
+      ]
+        .filter(Boolean)
+        .map((s) => s.toLowerCase());
+
+      // check if any candidate contains the term
+      return candidates.some((c) => c.includes(term));
+    });
+  }, [thisProjectInformation, debouncedSearchTerm]);
 
   // State
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -97,7 +100,7 @@ const WeeklyScheduleGrid = () => {
       defaultValues: {
         currentUserId: "",
         currentProjectId: projectId || "",
-        date: new Date().toISOString().split("T")[0], // Today's date in YYYY-MM-DD format
+        date: new Date().toISOString().split("T")[0],
         startTime: "",
         endTime: "",
         shiftTitle: "",
@@ -115,8 +118,8 @@ const WeeklyScheduleGrid = () => {
       },
     });
 
-  // Extract users and shifts from the new data structure
-  const userList = thisProjectInformation || [];
+  // Use filtered user list in rendering
+  const userList = filteredUserList;
 
   // Helpers using Luxon
   const toUTCISO = (dateIso: string, timeHHMM: string) => {
@@ -250,7 +253,6 @@ const WeeklyScheduleGrid = () => {
     setIsModalOpen(true);
   };
 
-  // Delete shift
   const handleDeleteShift = async (shiftid: string) => {
     const result = await Swal.fire({
       title: "Delete Shift?",
@@ -285,13 +287,12 @@ const WeeklyScheduleGrid = () => {
     }
   };
 
-  // When adding a new shift from cell -> date may be Date object
   const handleAddShift = (userId: string, date: Date | string) => {
     setSelectedUserId(userId);
 
     const inputDate =
       typeof date === "string" ? new Date(date) : (date as Date);
-    const formattedDate = inputDate.toISOString().split("T")[0]; // YYYY-MM-DD
+    const formattedDate = inputDate.toISOString().split("T")[0];
 
     setValue("userIds", [userId]);
     setValue("date", formattedDate);
@@ -330,11 +331,28 @@ const WeeklyScheduleGrid = () => {
   return (
     <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Weekly Schedule
-          </h3>
+        <div className="flex justify-between items-center gap-4 w-full">
+          <div className="ml-4 mr-4 flex items-center gap-2">
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, email, job, dept or phone..."
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-80"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="text-sm text-gray-500 px-2 py-1 hover:bg-gray-100 rounded border border-gray-300"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
           <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Weekly Schedule
+            </h3>
             <button
               onClick={() => setCurrentDate(goToPreviousWeek(currentDate))}
               className="p-1 rounded-md hover:bg-gray-200 transition-colors"
@@ -397,6 +415,11 @@ const WeeklyScheduleGrid = () => {
               const user = projectUserData.user;
               const userShifts = projectUserData.shifts || [];
 
+              const shiftsOfCurrentWeek = userShifts.filter((shift) => {
+                const shiftDate = new Date(shift.date);
+                return isSameWeek(shiftDate, currentDate);
+              });
+
               if (!user) return null;
 
               return (
@@ -405,18 +428,8 @@ const WeeklyScheduleGrid = () => {
                   className="grid grid-cols-8 gap-2 bg-white rounded-lg p-3 border border-gray-200"
                 >
                   {/* User column */}
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={
-                        user.profileUrl ||
-                        `https://i.pravatar.cc/40?img=${rowIdx + 1}`
-                      }
-                      alt={`${user.firstName} ${user.lastName}`}
-                      className="w-10 h-10 rounded-full object-cover mb-1"
-                    />
-                    <p className="text-xs font-medium text-center text-gray-700">
-                      {user.firstName} {user.lastName}
-                    </p>
+                  <div className="flex items-center justify-center">
+                    <EmployeeAvailabilityCard emp={projectUserData} shifts={shiftsOfCurrentWeek} />
                   </div>
 
                   {/* Day columns */}
@@ -430,13 +443,6 @@ const WeeklyScheduleGrid = () => {
                             shift.date,
                             day.fullDate
                           );
-                          if (isMatch) {
-                            console.log(
-                              `Found shift for ${user.firstName} on`,
-                              day.fullDate,
-                              shift
-                            );
-                          }
                           return isMatch;
                         } catch (err) {
                           console.warn(

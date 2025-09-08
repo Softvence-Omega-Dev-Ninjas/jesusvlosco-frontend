@@ -34,6 +34,10 @@ const ShiftSchedule = () => {
     return { status: 'none-published', color: 'red', icon: AlertCircle };
   };
 
+  if (isLoading || isFetching) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto mt-5">
       {/* Enhanced Header */}
