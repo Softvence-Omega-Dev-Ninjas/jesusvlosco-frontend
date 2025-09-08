@@ -61,10 +61,11 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
   const [activeTab, setActiveTab] = useState<"survey" | "poll">("survey");
 
   // Handle different data structures from API
-  const analyticsData = (data && 'data' in data) ? data.data : data;
+  const analyticsData = data && "data" in data ? data.data : data;
+  console.log("=================>", analyticsData);
 
-  // Handle loading or undefined data
-  if (!analyticsData || !analyticsData.survey || !analyticsData.pool) {
+  // but if data is an empty object, show "No data available" instead of infinite loading.
+  if (data === undefined || data === null) {
     return (
       <div className="rounded-2xl border border-gray-200 p-5">
         <div className="flex items-center justify-center py-12">
@@ -75,7 +76,19 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
         </div>
       </div>
     );
-    
+  }
+
+  // If data is loaded but missing analytics, show "No data available"
+  if (!analyticsData) {
+    return (
+      <div className="rounded-2xl border border-gray-200 p-5">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-gray-500">No survey or poll data available.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -89,9 +102,7 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
           <button
             onClick={() => setActiveTab("survey")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "survey"
-                ? "bg-white text-[#4E53B1] shadow-sm"
-                : "text-gray-600 hover:text-gray-800"
+              activeTab === "survey" ? "bg-white text-[#4E53B1] shadow-sm" : "text-gray-600 hover:text-gray-800"
             }`}
           >
             Survey
@@ -99,9 +110,7 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
           <button
             onClick={() => setActiveTab("poll")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "poll"
-                ? "bg-white text-[#4E53B1] shadow-sm"
-                : "text-gray-600 hover:text-gray-800"
+              activeTab === "poll" ? "bg-white text-[#4E53B1] shadow-sm" : "text-gray-600 hover:text-gray-800"
             }`}
           >
             Poll
@@ -109,11 +118,7 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
         </div>
       </div>
 
-      {activeTab === "survey" ? (
-        <SurveyView survey={analyticsData.survey} />
-      ) : (
-        <PollView poll={analyticsData.pool} />
-      )}
+      {activeTab === "survey" ? <SurveyView survey={analyticsData.survey} /> : <PollView poll={analyticsData.pool} />}
     </div>
   );
 };
@@ -145,17 +150,13 @@ const SurveyView: React.FC<{ survey: SurveyAnalytics }> = ({ survey }) => {
         <div className="bg-green-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-green-600">{survey?.respondedCount || 0}</div>
           <div className="text-sm text-green-700">Responded</div>
-          <div className="text-xs text-green-600 mt-1">
-            {survey?.responsePercentage ? survey.responsePercentage.toFixed(1) : 0}% response rate
-          </div>
+          <div className="text-xs text-green-600 mt-1">{survey?.responsePercentage ? survey.responsePercentage.toFixed(1) : 0}% response rate</div>
         </div>
 
         <div className="bg-red-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-red-600">{survey?.notRespondedCount || 0}</div>
           <div className="text-sm text-red-700">Not Responded</div>
-          <div className="text-xs text-red-600 mt-1">
-            {survey?.notResponsePercentage ? survey.notResponsePercentage.toFixed(1) : 0}% pending
-          </div>
+          <div className="text-xs text-red-600 mt-1">{survey?.notResponsePercentage ? survey.notResponsePercentage.toFixed(1) : 0}% pending</div>
         </div>
 
         <div className="bg-blue-50 p-4 rounded-lg">
