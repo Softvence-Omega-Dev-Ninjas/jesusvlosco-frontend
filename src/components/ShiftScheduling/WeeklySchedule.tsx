@@ -28,42 +28,8 @@ import { ShiftAPIData, ShiftFormData } from "@/types/shift";
 import { validateShiftData } from "@/utils/validation";
 import { DateTime } from "luxon";
 import { userDefaultTimeZone } from "@/utils/dateUtils"; // you already had this helper
-
-// New interfaces for the project users with shifts data
-interface UserShiftData {
-  id: string;
-  title: string;
-  projectId: string;
-  date: string; // ISO format: "2025-08-27T08:00:00.000Z"
-  startTime: string; // ISO format: "2025-08-27T08:00:00.000Z"
-  endTime: string; // ISO format: "2025-08-27T16:00:00.000Z"
-  shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
-  location: string;
-  lat: number;
-  lng: number;
-  note: string;
-  job: string;
-  allDay: boolean;
-}
-
-interface ProjectUser {
-  user: {
-    id: string;
-    email: string;
-    isAvailable: boolean;
-    firstName: string;
-    lastName: string;
-    profileUrl: string;
-    offDay: string[];
-  };
-  project: {
-    id: string;
-    title: string;
-    location: string;
-  };
-  shifts: UserShiftData[]; // User's assigned shifts
-  allShifts: UserShiftData[]; // All project shifts
-}
+import { ProjectUser, UserShiftData } from "@/types/projectType";
+import EmployeeAvailabilityCard from "./EmployeeAvailabilityCard";
 
 const WeeklyScheduleGrid = () => {
   const timeZone = userDefaultTimeZone();
@@ -117,6 +83,7 @@ const WeeklyScheduleGrid = () => {
 
   // Extract users and shifts from the new data structure
   const userList = thisProjectInformation || [];
+  // console.log(userList, "User List");
 
   // Helpers using Luxon
   const toUTCISO = (dateIso: string, timeHHMM: string) => {
@@ -330,7 +297,7 @@ const WeeklyScheduleGrid = () => {
   return (
     <section className="w-full mb-12 bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
+        <div className="flex justify-between items-center gap-4 w-full">
           <h3 className="text-lg font-semibold text-gray-800">
             Weekly Schedule
           </h3>
@@ -405,18 +372,9 @@ const WeeklyScheduleGrid = () => {
                   className="grid grid-cols-8 gap-2 bg-white rounded-lg p-3 border border-gray-200"
                 >
                   {/* User column */}
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={
-                        user.profileUrl ||
-                        `https://i.pravatar.cc/40?img=${rowIdx + 1}`
-                      }
-                      alt={`${user.firstName} ${user.lastName}`}
-                      className="w-10 h-10 rounded-full object-cover mb-1"
-                    />
-                    <p className="text-xs font-medium text-center text-gray-700">
-                      {user.firstName} {user.lastName}
-                    </p>
+                  {/* User column */}
+                  <div className="flex items-center justify-center">
+                    <EmployeeAvailabilityCard emp={projectUserData} />
                   </div>
 
                   {/* Day columns */}

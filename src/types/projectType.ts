@@ -6,7 +6,7 @@ type TTaskLabel = "LOW" | "MEDIUM" | "HIGH";
 
 type TTaskStatus = "OPEN" | "DAFT" | "OVERDUE" | "DONE" | "IN_PROGRESS";
 
-import { TProfile, TPayroll, TShift } from './shared';
+import { TProfile, TPayroll, TShift } from "./shared";
 
 interface TTaskUser {
   id: string;
@@ -95,4 +95,44 @@ export interface TProject {
   manager: TUser;
   projectUsers: TProjectUser[];
   tasks: TTask[];
+}
+
+export interface ProjectUser {
+  user: {
+    id: string;
+    email: string;
+    isAvailable: boolean;
+    firstName: string;
+    lastName: string;
+    jobTitle: string;
+    department: string;
+    phone: string;
+    profileUrl: string;
+    offDay: string[];
+  };
+  project: {
+    id: string;
+    title: string;
+    location: string;
+  };
+  shifts: UserShiftData[]; // User's assigned shifts
+  allShifts: UserShiftData[]; // All project shifts
+}
+
+
+// New interfaces for the project users with shifts data
+export interface UserShiftData {
+  id: string;
+  title: string;
+  projectId: string;
+  date: string; // ISO format: "2025-08-27T08:00:00.000Z"
+  startTime: string; // ISO format: "2025-08-27T08:00:00.000Z"
+  endTime: string; // ISO format: "2025-08-27T16:00:00.000Z"
+  shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
+  location: string;
+  lat: number;
+  lng: number;
+  note: string;
+  job: string;
+  allDay: boolean;
 }
