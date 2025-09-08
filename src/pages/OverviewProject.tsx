@@ -1,29 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import {
-  RefreshCw,
-  UserPlus,
-  MoreHorizontal,
-  LucideCalendarDays,
-  X,
-  ChevronDown,
-  Tally1,
-  LoaderCircle,
-} from "lucide-react";
+import { UserPlus, LoaderCircle } from "lucide-react";
 import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
-
-// Imported local image assets
-import user1 from "../assets/user1.png";
-import user2 from "../assets/user2.png";
-import user3 from "../assets/user3.png";
-import user4 from "../assets/user4.png";
-import user5 from "../assets/user5.png";
-import user6 from "../assets/user6.png";
-
 import { Link, useParams } from "react-router-dom";
 import { useGetUsersQuery } from "@/store/api/admin/shift-sheduling/getAllUser";
 import TimeOffRequests from "@/components/Dashboard/TimeOffRequests";
-import { ShiftNotifications } from "@/components/Dashboard/ShiftNotifications";
 import {
   useApproveTimeOffRequestMutation,
   useDeclineTimeOffRequestMutation,
@@ -34,7 +14,9 @@ import { useGetSingleProjectQuery } from "@/store/api/admin/shift-sheduling/Crea
 const OverviewProject = () => {
   const projectId = useParams().id;
   console.log(projectId, "Project ID from URL");
-  const projectInformation = useGetSingleProjectQuery(projectId as string) as any;
+  const projectInformation = useGetSingleProjectQuery(
+    projectId as string
+  ) as any;
   const projectUsers = projectInformation?.data?.data?.projectUsers || [];
   console.log(projectInformation, "Project Information");
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
@@ -93,104 +75,9 @@ const OverviewProject = () => {
     }
   };
 
-  // State for the calendar modal visibility
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-
-  // States for calendar month and year selection
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(today);
-
-  const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  // Function to generate dates for the current month
-  const generateDatesForMonth = (month: number, year: number) => {
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    const numDays = lastDayOfMonth.getDate();
-    const startDayOfWeek = firstDayOfMonth.getDay();
-
-    const datesArray: (Date | null)[] = [];
-
-    for (let i = 0; i < startDayOfWeek; i++) {
-      datesArray.push(null);
-    }
-
-    for (let i = 1; i <= numDays; i++) {
-      datesArray.push(new Date(year, month, i));
-    }
-    return datesArray;
-  };
-
-  const dates = generateDatesForMonth(currentMonth, currentYear);
-
-  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const [monthName, yearString] = e.target.value.split(" ");
-    const newMonth = monthNames.findIndex((name) => name === monthName);
-    const newYear = parseInt(yearString, 10);
-    setCurrentMonth(newMonth);
-    setCurrentYear(newYear);
-    setSelectedDate(null);
-  };
-
-  const handleDateClick = (date: Date | null) => {
-    setSelectedDate(date);
-  };
-
-  const getYears = () => {
-    const years = [];
-    const currentYr = new Date().getFullYear();
-    for (let i = currentYr - 5; i <= currentYr + 5; i++) {
-      years.push(i);
-    }
-    return years;
-  };
-
   // API call
   const { data, isLoading, error } = useGetUsersQuery({});
   console.log(data);
-
-  // Default avatar images array for fallback
-  const defaultAvatars = [user1, user2, user3, user4, user5, user6];
-
-  // Helper function to get job title display name
-  const getJobTitleDisplay = (jobTitle: string) => {
-    const jobTitleMap: { [key: string]: string } = {
-      FRONT_END_DEVELOPER: "Frontend Developer",
-      BACK_END_DEVELOPER: "Backend Developer",
-      FULL_STACK_DEVELOPER: "Full Stack Developer",
-      PROJECT_MANAGER: "Project Manager",
-      DESIGNER: "Designer",
-      QA_ENGINEER: "QA Engineer",
-      DEVOPS_ENGINEER: "DevOps Engineer",
-      BUSINESS_ANALYST: "Business Analyst",
-      PRODUCT_MANAGER: "Product Manager",
-      SCRUM_MASTER: "Scrum Master",
-    };
-    return (
-      jobTitleMap[jobTitle] ||
-      jobTitle
-        ?.replace(/_/g, " ")
-        ?.toLowerCase()
-        ?.replace(/\b\w/g, (l) => l.toUpperCase()) ||
-      "Employee"
-    );
-  };
 
   if (isLoading) {
     return (
@@ -225,19 +112,13 @@ const OverviewProject = () => {
           {/* Header (will not dim) */}
           <div className="flex items-center justify-between mb-6 px-6 lg:px-0">
             <h1 className="text-xl font-semibold text-primary">
-              Overview of Project {projectInformation?.data?.data?.name}
+              Overview of Project {projectInformation?.data?.data?.title}
             </h1>
-            <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
-              <RefreshCw size={14} />
-              Refresh
-            </button>
           </div>
 
           {/* Assigned Employee Card - This is the only part that should dim */}
           <div
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 transition-opacity duration-300 ${
-              isCalendarModalOpen ? "opacity-30" : "opacity-100"
-            }`}
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 transition-opacity duration-300`}
           >
             {/* Card Header */}
             <div className="flex items-center justify-between p-5">
@@ -245,17 +126,6 @@ const OverviewProject = () => {
                 Assigned Employee
               </h2>
               <div className="flex items-center gap-2">
-                <button
-                  className="flex items-center gap-1 lg:px-4 lg:py-3 px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => setIsCalendarModalOpen(true)}
-                >
-                  <LucideCalendarDays></LucideCalendarDays>
-                  <Tally1 />
-                  <span>
-                    <ChevronDown />
-                  </span>
-                </button>
-
                 <Link to={`/admin/schedule/shift-scheduling/${projectId}`}>
                   <button className="flex items-center gap-2 lg:px-5 lg:py-3 px-3 py-2 bg-primary text-white font-medium rounded-lg transition-colors cursor-pointer">
                     <UserPlus />
@@ -287,96 +157,107 @@ const OverviewProject = () => {
               {/* Table Body */}
               <div>
                 {projectUsers && projectUsers.length > 0 ? (
-                  projectUsers.map(
-                    (employee: any, index: number) => (
+                  projectUsers.map((employee: any, index: number) => (
+                    <div
+                      key={employee.user.id}
+                      className={`px-5 py-4 border-b-2 border-gray-200 ${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      }`}
+                    >
                       <div
-                        key={employee.user.id}
-                        className={`px-5 py-4 border-b-2 border-gray-200 ${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                        }`}
+                        className="grid items-center"
+                        style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
                       >
-                        <div
-                          className="grid items-center"
-                          style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
-                        >
-                          {/* Employee */}
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                                <img
-                                  src={employee.user.profile.profileUrl ||  "https://ui-avatars.com/api/?name=" +
-                        encodeURIComponent(
-                          employee.user.profile.firstName +
-                            " " +
-                            employee.user.profile.lastName
-                        )}
-                                  alt={employee.user.profile.firstName}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src =
-                                      defaultAvatars[
-                                        index % defaultAvatars.length
-                                      ];
-                                  }}
-                                />
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium text-primary">
-                                  {employee.user.profile.firstName}{" "}{employee.user.profile.lastName}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {getJobTitleDisplay(employee.user.profile.jobTitle)}
-                                </div>
-                              </div>
+                        {/* Employee */}
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                              <img
+                                src={
+                                  employee.user.profile.profileUrl ||
+                                  "https://ui-avatars.com/api/?name=" +
+                                    encodeURIComponent(
+                                      employee.user.profile.firstName +
+                                        " " +
+                                        employee.user.profile.lastName
+                                    )
+                                }
+                                alt={employee.user.profile.firstName}
+                                className="w-full h-full object-cover"
+                              />
                             </div>
-                          </div>
-
-                          {/* Project Name */}
-                          <div>
-                            <div className="text-sm text-gray-700">
-                              {projectInformation.data?.data.title || "No Project"}
-                            </div>
-                          </div>
-
-                          {/* Shift */}
-                          <div>
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-gray-500 space-y-2">
-                               {
-                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0 ? "No Shift" : employee.user.shift.map((shift : any) => (
-                                  shift.projectId === projectId ? (
-                                    <div key={shift.id} className="space-y-1 flex flex-col justify-start items-start ">
-                                      <div className="text-xs text-gray-500">
-                                        {shift.shiftTitle}
-                                      </div>
-                                      <div>
-                                        ({formatTimeFromISO(shift.startTime)} - {formatTimeFromISO(shift.endTime)})
-                                      </div>
-                                    </div>
-                                  ) : " "
-                                ))
-                               }
+                            <div>
+                              <div className="text-sm font-medium text-primary">
+                                {employee.user.profile.firstName}{" "}
+                                {employee.user.profile.lastName}
                               </div>
-                            </div>
-                          </div>
-
-                          {/* Date */}
-                          <div>
-                            <div className="text-sm text-gray-700 space-y-3">
-                              {
-                                employee.user.shift.filter((shift: any) => shift.projectId === projectId).length === 0? "No Shift" : employee.user.shift.map((shift: any) => (
-                                  <div key={shift.id} className="space-y-1">
-                                    {formatDateFull(shift.date)}
-                                  </div>
-                                ))
-                              }
+                              <div className="text-xs text-gray-500">
+                                {employee?.user?.profile?.jobTitle ||
+                                  "No Job Title"}
+                              </div>
                             </div>
                           </div>
                         </div>
+
+                        {/* Project Name */}
+                        <div>
+                          <div className="text-sm text-gray-700">
+                            {projectInformation.data?.data.title ||
+                              "No Project"}
+                          </div>
+                        </div>
+
+                        {/* Shift */}
+                        <div>
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-gray-500 space-y-2">
+                              {employee.user.shift.filter(
+                                (shift: any) => shift.projectId === projectId
+                              ).length === 0
+                                ? "No Shift"
+                                : employee.user.shift.map((shift: any) =>
+                                    shift.projectId === projectId ? (
+                                      <div
+                                        key={shift.id}
+                                        className="space-y-1 flex flex-col justify-start items-start "
+                                      >
+                                        <div className="text-xs text-gray-500">
+                                          {shift.shiftTitle}
+                                        </div>
+                                        <div>
+                                          ({formatTimeFromISO(shift.startTime)}{" "}
+                                          - {formatTimeFromISO(shift.endTime)})
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      " "
+                                    )
+                                  )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Date */}
+                        <div>
+                          <div className="text-sm text-gray-700 space-y-3">
+                            {employee.user.shift.filter(
+                              (shift: any) => shift.projectId === projectId
+                            ).length === 0
+                              ? "No Shift"
+                              : employee.user.shift.map((shift: any) =>
+                                  shift.projectId === projectId ? (
+                                    <div key={shift.id} className="space-y-1">
+                                      {formatDateFull(shift.date)}
+                                    </div>
+                                  ) : (
+                                    " "
+                                  )
+                                )}
+                          </div>
+                        </div>
                       </div>
-                    )
-                  )
+                    </div>
+                  ))
                 ) : (
                   <div className="px-5 py-8 text-center text-gray-500">
                     No employees found
@@ -396,137 +277,8 @@ const OverviewProject = () => {
             onApprove={handleApprove}
             onDecline={handleDecline}
           />
-          <ShiftNotifications />
         </div>
       </div>
-
-      {/* Shift Calendar Modal */}
-      {isCalendarModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 mt-10 lg:left-48">
-          {/* Modal Content */}
-          <div className="bg-white rounded-lg shadow-xl lg:w-[500px] p-6 right-0 relative z-10">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Shift Calendar
-                </h3>
-                <p className="text-sm text-gray-500">
-                  View and manage employee shifts for the month
-                </p>
-              </div>
-              <button
-                onClick={() => setIsCalendarModalOpen(false)}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            {/* Date Navigation */}
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                <button
-                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  onClick={() => {
-                    const today = new Date();
-                    setCurrentMonth(today.getMonth());
-                    setCurrentYear(today.getFullYear());
-                    setSelectedDate(today);
-                  }}
-                >
-                  Today
-                </button>
-                <button className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                  Last 8 days
-                </button>
-                <button className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center gap-1">
-                  Last month <MoreHorizontal size={14} />
-                </button>
-              </div>
-
-              {/* Dynamic Month and Year Selector */}
-              <select
-                className="px-2 py-1 text-sm border border-gray-300 rounded-md"
-                value={`${monthNames[currentMonth]} ${currentYear}`}
-                onChange={handleMonthChange}
-              >
-                {getYears().map((year) =>
-                  monthNames.map((monthName) => (
-                    <option
-                      key={`${monthName}-${year}`}
-                      value={`${monthName} ${year}`}
-                    >
-                      {monthName} {year}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            {/* Calendar Grid */}
-            <div className="flex">
-              {/* Days Grid */}
-              <div className="grid grid-cols-7 gap-2 flex-1">
-                {daysOfWeek.map((day) => (
-                  <div
-                    key={day}
-                    className="text-center text-xs font-medium text-gray-500"
-                  >
-                    {day}
-                  </div>
-                ))}
-                {dates.map((date, index) => (
-                  <div
-                    key={index}
-                    className={`text-center text-sm p-1 rounded-md cursor-pointer
-                      ${
-                        date &&
-                        date.toDateString() === selectedDate?.toDateString()
-                          ? "bg-indigo-600 text-white font-semibold"
-                          : date && date.toDateString() === today.toDateString()
-                          ? "bg-yellow-300 text-gray-800 font-semibold"
-                          : "text-gray-800"
-                      }
-                      ${!date ? "text-gray-300 pointer-events-none" : ""}
-                      ${
-                        date &&
-                        (date.getDay() === 0 || date.getDay() === 6) &&
-                        date.toDateString() !== selectedDate?.toDateString()
-                          ? "text-gray-400"
-                          : ""
-                      }
-                    `}
-                    onClick={() => handleDateClick(date)}
-                  >
-                    {date ? date.getDate() : ""}
-                  </div>
-                ))}
-              </div>
-
-              {/* Month Selector Sidebar (Vertical on the right) */}
-              <div className="ml-4 w-20 text-right space-y-1">
-                {monthNames.map((month, index) => (
-                  <div
-                    key={month}
-                    className={`text-sm font-medium cursor-pointer ${
-                      index === currentMonth
-                        ? "text-indigo-600"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                    onClick={() => {
-                      setCurrentMonth(index);
-                      setSelectedDate(null);
-                    }}
-                  >
-                    {month}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
