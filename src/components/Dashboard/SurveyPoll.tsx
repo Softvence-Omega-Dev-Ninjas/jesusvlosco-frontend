@@ -75,6 +75,7 @@ export const SurveyPoll: React.FC<SurveyPollProps> = ({ data }) => {
         </div>
       </div>
     );
+    
   }
 
   return (
