@@ -2,8 +2,15 @@ import { BsStopwatch } from "react-icons/bs";
 import EmployeeCardPopup from "./EmployeeCardPopup";
 import ShiftTemplateDropdown from "./ShiftTemplateDropdown";
 import { ProjectUser } from "@/types/projectType";
+import { TShift } from "@/types/shared";
 
-const EmployeeAvailabilityCard = ({ emp }: { emp: ProjectUser }) => {
+const EmployeeAvailabilityCard = ({
+  emp,
+  shifts,
+}: {
+  emp: ProjectUser;
+  shifts: TShift[];
+}) => {
   const profile = emp.user;
   return (
     <div className="flex flex-col items-center justify-center w-full">
@@ -38,8 +45,8 @@ const EmployeeAvailabilityCard = ({ emp }: { emp: ProjectUser }) => {
       <div className="flex gap-2 items-center justify-center">
         <div className="flex items-center gap-1 text-xs text-gray-600">
           <BsStopwatch className="text-sm" />
-          <ShiftTemplateDropdown shiftTemplates={emp.shifts ?? []} />
-          <span className="text-xs font-medium">{emp.shifts?.length ?? 0}</span>
+          <ShiftTemplateDropdown shiftTemplates={shifts ?? []} />
+          <span className="text-xs font-medium">{shifts?.length ?? 0}</span>
         </div>
 
         <EmployeeCardPopup

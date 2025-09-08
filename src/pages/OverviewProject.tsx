@@ -225,7 +225,7 @@ const OverviewProject = () => {
           {/* Header (will not dim) */}
           <div className="flex items-center justify-between mb-6 px-6 lg:px-0">
             <h1 className="text-xl font-semibold text-primary">
-              Overview Project 1
+              Overview of Project {projectInformation?.data?.data?.name}
             </h1>
             <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
               <RefreshCw size={14} />
