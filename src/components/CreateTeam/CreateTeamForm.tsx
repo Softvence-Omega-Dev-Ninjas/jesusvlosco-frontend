@@ -6,14 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const createTeamSchema = z.object({
   name: z.string().min(2, "Team name is required"),
   description: z.string().min(10, "Write at least 10 characters"),
-  department: z.enum([
-    "IT",
-    "DEVELOPMENT",
-    "HR",
-    "FINANCE",
-    "MARKETING",
-    "SEALS",
-  ]),
+  department: z.enum(["IT", "DEVELOPMENT", "HR", "FINANCE", "MARKETING", "SEALS", "LABOURER", "CARPENTER", "ELECTRICIAN", "DRIVER"]),
   image: z.any().optional(),
 });
 
@@ -21,24 +14,14 @@ export type FormValues = z.infer<typeof createTeamSchema> & {
   image?: FileList | null;
 };
 
-const departmentOptions: FormValues["department"][] = [
-  "IT",
-  "DEVELOPMENT",
-  "HR",
-  "FINANCE",
-  "MARKETING",
-  "SEALS",
-];
+const departmentOptions: string[] = ["IT", "DEVELOPMENT", "HR", "FINANCE", "MARKETING", "SEALS", "LABOURER", "CARPENTER", "ELECTRICIAN", "DRIVER"];
 
 interface CreateTeamFormProps {
   onSubmit: (data: FormValues) => Promise<void> | void;
   defaultValues?: Partial<FormValues>;
 }
 
-const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
-  onSubmit,
-  defaultValues,
-}) => {
+const CreateTeamForm: React.FC<CreateTeamFormProps> = ({ onSubmit, defaultValues }) => {
   const {
     register,
     handleSubmit,
@@ -86,10 +69,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
       shouldValidate: true,
     });
     const after = getValues();
-    console.debug(
-      "[CreateTeamForm] after setValue getValues.image:",
-      after.image
-    );
+    console.debug("[CreateTeamForm] after setValue getValues.image:", after.image);
     if (!files || files.length === 0) {
       if (preview) {
         URL.revokeObjectURL(preview);
@@ -108,32 +88,18 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(internalOnSubmit)}
-      className="space-y-6 min-w-md"
-    >
+    <form onSubmit={handleSubmit(internalOnSubmit)} className="space-y-6 min-w-md">
       <div className="flex flex-col items-center gap-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Team Image Preview
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Team Image Preview</label>
         {/* Preview */}
         {preview ? (
           <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-300 shadow-sm">
-            <img
-              src={preview}
-              alt="Team preview"
-              className="w-full h-full object-cover"
-            />
+            <img src={preview} alt="Team preview" className="w-full h-full object-cover" />
           </div>
         ) : (
           <div className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
             <div className="text-center">
-              <svg
-                className="w-8 h-8 text-gray-400 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-8 h-8 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -156,12 +122,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
             className="sr-only"
             onChange={handleImageChange}
           />
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -173,21 +134,13 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
         </label>
 
         <div className="flex items-center gap-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Team Image
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Team Image</label>
           <div className="flex flex-col items-start gap-4"></div>
-          {selectedFileName && (
-            <p className="text-sm text-gray-600">
-              Selected: {selectedFileName}
-            </p>
-          )}
+          {selectedFileName && <p className="text-sm text-gray-600">Selected: {selectedFileName}</p>}
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Team Name
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Team Name</label>
         <input
           type="text"
           placeholder="e.g. Backend Engineers"
@@ -199,15 +152,11 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
             minLength: { value: 2, message: "Too short" },
           })}
         />
-        {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-        )}
+        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Description
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
         <textarea
           placeholder="Brief description about the team"
           className={`w-full border rounded-md px-4 py-2 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
@@ -218,18 +167,12 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
             minLength: { value: 10, message: "Write at least 10 characters" },
           })}
         />
-        {errors.description && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.description.message}
-          </p>
-        )}
+        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Department
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
           <select
             className={`w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
               errors.department ? "border-red-400" : "border-gray-200"
@@ -243,11 +186,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({
               </option>
             ))}
           </select>
-          {errors.department && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.department.message}
-            </p>
-          )}
+          {errors.department && <p className="text-red-500 text-sm mt-1">{errors.department.message}</p>}
         </div>
       </div>
 
