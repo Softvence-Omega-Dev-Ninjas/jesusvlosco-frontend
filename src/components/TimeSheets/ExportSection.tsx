@@ -2,6 +2,7 @@ import { useState } from "react";
 import { processTimeSheetData } from "@/components/TimeSheets/timeSheetsUtils";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
 import { useLazyGetAllTimeSheetAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
+import { exportDateRangeToPDF } from "./exportSheet";
 
 interface ExportSectionProps {
   timezone: string;
@@ -51,12 +52,7 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone }) => {
     console.log("allEntries", allEntries);
 
     // Export all entries
-    processTimeSheetData.exportToPDF(
-      allEntries,
-      "",
-      `${range.start}-${range.end}`,
-      []
-    );
+    exportDateRangeToPDF(allEntries, range);
 
     setLoading(false);
   };
