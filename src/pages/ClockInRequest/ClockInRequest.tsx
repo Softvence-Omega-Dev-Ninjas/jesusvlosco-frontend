@@ -7,6 +7,7 @@ import { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
+import UpdateClockInRequestModal from "./UpdateClockInRequestModal";
 
 const formatDate = (dateString: any) => {
   if (!dateString) return "N/A";
@@ -49,7 +50,6 @@ const ClockInRequest = () => {
   const [isRejecting, setIsRejecting] = useState(false);
   const [updateClockInStatus] = useUpdateClockInRequestMutation();
   const { data: clockInData, isLoading } = useGetAllClockInRequestForAdminQuery({ currentPage });
-  console.log(clockInData);
   // update metadata after API response
   if (clockInData?.metadata && metadata.total !== clockInData.metadata.total) {
     metadata.total = clockInData.metadata.total;
@@ -136,7 +136,7 @@ const ClockInRequest = () => {
                         Status
                       </th>
                       <th className="px-5 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Employee ID
+                        Employee Name
                       </th>
                       <th className="px-5 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Action
@@ -176,9 +176,9 @@ const ClockInRequest = () => {
                           </span>
                         </td>
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap">{item?.user?.employeeID || "N/A"}</p>
+                          <p className="text-gray-900 whitespace-no-wrap">{(item?.user?.profile?.firstName) + " " + (item?.user?.profile?.lastName)|| "N/A"}</p>
                         </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                           <div className="relative">
                             <DropdownMenu>
                               <DropdownMenuTrigger className="outline-none hover:scale-105 active:scale-95 duration-700 cursor-pointer">
@@ -194,12 +194,14 @@ const ClockInRequest = () => {
                                 >
                                   {isAccepting ? <FaSpinner className="animate-spin" /> : "Accept"}
                                 </span>
-
                                 <span
                                   onClick={() => handleRejectClockInRequest(item?.id)}
                                   className="hover:text-red-700 hover:bg-red-50 border-2 border-[#e9ebec]  py-2 px-5 rounded-lg hover:bg-light-primary-bg dark:hover:bg-dark-secondary-bg font-medium text-sm w-full cursor-pointer flex items-center justify-center"
                                 >
                                   {isRejecting ? <FaSpinner className="animate-spin" /> : "Reject"}
+                                </span>
+                                <span>
+                                  <UpdateClockInRequestModal item={item} />
                                 </span>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -210,6 +212,7 @@ const ClockInRequest = () => {
                   </tbody>
                 </table>
               </div>
+              
               <div className="flex items-center justify-end mt-6 px-2 py-6">
                 <CustomPagination
                   currentPage={currentPage}
