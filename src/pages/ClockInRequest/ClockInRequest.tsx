@@ -7,6 +7,7 @@ import { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
+import UpdateClockInRequestModal from "./UpdateClockInRequestModal";
 
 const formatDate = (dateString: any) => {
   if (!dateString) return "N/A";
@@ -136,7 +137,7 @@ const ClockInRequest = () => {
                         Status
                       </th>
                       <th className="px-5 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Employee ID
+                        Employee Name
                       </th>
                       <th className="px-5 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Action
@@ -176,7 +177,7 @@ const ClockInRequest = () => {
                           </span>
                         </td>
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                          <p className="text-gray-900 whitespace-no-wrap">{item?.user?.employeeID || "N/A"}</p>
+                          <p className="text-gray-900 whitespace-no-wrap">{(item?.user?.profile?.firstName) + " " + (item?.user?.profile?.lastName)|| "N/A"}</p>
                         </td>
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
                           <div className="relative">
@@ -201,6 +202,9 @@ const ClockInRequest = () => {
                                 >
                                   {isRejecting ? <FaSpinner className="animate-spin" /> : "Reject"}
                                 </span>
+                                <span>
+                                  <UpdateClockInRequestModal item={item} />
+                                </span>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -210,6 +214,7 @@ const ClockInRequest = () => {
                   </tbody>
                 </table>
               </div>
+              
               <div className="flex items-center justify-end mt-6 px-2 py-6">
                 <CustomPagination
                   currentPage={currentPage}
