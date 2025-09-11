@@ -1,4 +1,3 @@
-// replace your function with this
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logo from "@/assets/logo.jpg";
@@ -16,14 +15,10 @@ export function exportDateRangeToPDF(
   const margin = 15;
   const headerTop = 15;
 
-  // Helper to draw page header (logo + title + top line)
   function drawHeader() {
     try {
-      // logo at left margin
       doc.addImage(logo, "JPEG", margin, headerTop, 40, 20);
-    } catch (e) {
-      // ignore if logo fails
-    }
+    } catch (e) {}
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(52, 73, 94);
@@ -31,12 +26,10 @@ export function exportDateRangeToPDF(
       align: "center",
     });
 
-    // top line
     doc.setDrawColor(52, 73, 94);
     doc.setLineWidth(0.5);
     doc.line(margin, headerTop + 22, pageWidth - margin, headerTop + 22);
 
-    // small report info box
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     const infoBoxY = headerTop + 25;
@@ -60,11 +53,9 @@ export function exportDateRangeToPDF(
       align: "right",
     });
 
-    // return y where content should start
     return infoBoxY + 30;
   }
 
-  // initial header and starting y
   let currentY = drawHeader();
 
   // Group entries by date
@@ -79,15 +70,16 @@ export function exportDateRangeToPDF(
 
   dates.forEach(([date, entries], idx) => {
     // Before printing a new date header, check vertical space
-    const estimatedNeeded = 30; // header row + a couple rows minimal estimate
+    const estimatedNeeded = 30;
     if (currentY + estimatedNeeded > pageHeight - margin - 40) {
       doc.addPage();
       currentY = drawHeader();
     }
 
-    // Date heading (small gap, no new page unless necessary)
+    // Date heading (smaller gap above, more gap below after summary)
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
+    currentY += 4;
     doc.text(`Date: ${date}`, margin, currentY);
     currentY += 6;
 
@@ -102,7 +94,6 @@ export function exportDateRangeToPDF(
       entry.overTime,
     ]);
 
-    // Draw table
     autoTable(doc, {
       head: [
         [
@@ -116,10 +107,10 @@ export function exportDateRangeToPDF(
         ],
       ],
       body: tableData,
-      startY: currentY + 10,
+      startY: currentY + 2, // LESS gap between date and table
       theme: "striped",
       margin: { left: 15, right: 15 },
-      tableWidth: "auto", 
+      tableWidth: "auto",
       styles: {
         fontSize: 9,
         cellPadding: 4,
@@ -140,15 +131,14 @@ export function exportDateRangeToPDF(
       alternateRowStyles: {
         fillColor: [249, 249, 249],
       },
-      // ✅ Force each column to shrink proportionally within margins
       columnStyles: {
-        0: { cellWidth: 40 }, // Employee Name
-        1: { cellWidth: 25 }, // Shift
-        2: { cellWidth: 25 }, // Clock In
-        3: { cellWidth: 25 }, // Clock Out
-        4: { cellWidth: 20 }, // Total Hours
-        5: { cellWidth: 25 }, // Regular Hours
-        6: { cellWidth: 25 }, // Overtime
+        0: { cellWidth: 40 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 25 },
+        6: { cellWidth: 25 },
       },
     });
 
@@ -160,12 +150,11 @@ export function exportDateRangeToPDF(
     // Summary for this date
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Total Entries: ${entries.length}`, margin, finalY + 8);
+    // LARGER gap below summary before next date
+    doc.text(`Total Entries: ${entries.length}`, margin, finalY + 16);
 
-    // small line gap (no extra blank page)
-    currentY = finalY + 16;
+    currentY = finalY + 28; // LARGER gap before next date
 
-    // If we are too close to bottom, add page and draw header for the next iteration
     if (currentY > pageHeight - margin - 40 && idx < dates.length - 1) {
       doc.addPage();
       currentY = drawHeader();
@@ -196,7 +185,6 @@ export function exportDateRangeToPDF(
     );
   }
 
-  // Save the PDF
   const fileName = `Clock_Sheet_${range.start}_to_${range.end}.pdf`;
   doc.save(fileName);
 
