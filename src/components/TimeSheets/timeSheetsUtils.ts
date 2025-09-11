@@ -271,28 +271,39 @@ export const processTimeSheetData = {
 export const getUniqueUserLocations = (
   filteredTimeSheetData: TimeSheetEntry[]
 ) => {
-  const uniqueUsers = new Map();
-  filteredTimeSheetData.forEach((entry: TimeSheetEntry) => {
+  // Map key: `${userId}-${lat}-${lng}` to ensure uniqueness per location
+  const uniqueUsers = new Map<string, TimeSheetEntry>();
+
+  filteredTimeSheetData.forEach((entry) => {
     const userId = entry.user.id;
-    const userName = entry.user.name;
     const lat = entry.clockInLat;
     const lng = entry.clockInLng;
-    const profileUrl = entry.user.profileUrl;
-    const shiftTitle = entry.shift?.title || "No Shift Assigned";
-    if (lat && lng && !uniqueUsers.has(userId)) {
-      uniqueUsers.set(userId, {
-        id: userId,
-        name: userName,
-        lat: lat,
-        lng: lng,
-        profileUrl: profileUrl,
-        shiftTitle: shiftTitle,
-        clockIn: entry.clockIn,
-        clockOut: entry.clockOut,
-      });
+
+    if (!lat || !lng) return; // skip entries without location
+
+    const key = `${userId}-${lat}-${lng}`;
+
+    // Keep the entry with the latest clockIn for this user-location
+    if (
+      !uniqueUsers.has(key) ||
+      new Date(entry.clockIn) > new Date(uniqueUsers.get(key)!.clockIn)
+    ) {
+      uniqueUsers.set(key, entry);
     }
   });
-  return Array.from(uniqueUsers.values());
+
+  // Map the entries to the desired output format
+  return Array.from(uniqueUsers.values()).map((entry) => ({
+    id: entry.user.id,
+    name: entry.user.name,
+    lat: entry.clockInLat,
+    lng: entry.clockInLng,
+    profileUrl: entry.user.profileUrl,
+    shiftTitle: entry.shift?.title || "No Shift Assigned",
+    clockIn: entry.clockIn,
+    clockOut: entry.clockOut,
+    location: entry.location,
+  }));
 };
 
 export const formatTime = (timeString: string) => {

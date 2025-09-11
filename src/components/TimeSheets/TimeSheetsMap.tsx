@@ -68,7 +68,7 @@ const TimeSheetsMap: React.FC<Props> = ({ uniqueUserLocations, mapRef, formatTim
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {uniqueUserLocations.map((userLocation) => (
+        {uniqueUserLocations.length > 0 && uniqueUserLocations.map((userLocation) => (
           <Marker
             key={userLocation.id}
             position={[userLocation.lat, userLocation.lng]}
@@ -126,10 +126,11 @@ const TimeSheetsMap: React.FC<Props> = ({ uniqueUserLocations, mapRef, formatTim
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <p className="text-xs text-gray-600 font-medium mb-2">
-                        📍 GPS Coordinates
+                        📍 Location
                       </p>
+                      {/* location name */}
                       <p className="text-gray-800 font-mono text-sm break-all">
-                        {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                        {userLocation.location}
                       </p>
                     </div>
                     <div className="bg-blue-50 p-3 rounded-lg">

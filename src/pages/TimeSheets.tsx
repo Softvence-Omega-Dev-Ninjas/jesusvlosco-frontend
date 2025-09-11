@@ -1,11 +1,15 @@
-import  { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   useGetAllTimeClockAdminQuery,
   useGetAllTimeSheetAdminQuery,
 } from "@/store/api/admin/time-clock/timeClockApi";
 import PendingRequestModal from "@/components/TimeSheets/PendingRequestModal";
 import TimeSheetsHeader from "@/components/TimeSheets/TimeSheetsHeader";
-import { formatTime, getUniqueUserLocations, processTimeSheetData } from "@/components/TimeSheets/timeSheetsUtils";
+import {
+  formatTime,
+  getUniqueUserLocations,
+  processTimeSheetData,
+} from "@/components/TimeSheets/timeSheetsUtils";
 import TimeSheetsTable from "@/components/TimeSheets/TimeSheetsTable";
 import TimeSheetsMap from "@/components/TimeSheets/TimeSheetsMap";
 
@@ -35,28 +39,29 @@ export interface TimeSheetEntry {
 }
 
 export default function TimeSheets() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const mapRef = useRef<L.Map | null>(null);
 
   const { data } = useGetAllTimeClockAdminQuery(null);
-  const { data: timeSheetData } = useGetAllTimeSheetAdminQuery(
-    processTimeSheetData.formatDateForAPI(selectedDate)
-  );
-
   const pendingTimeClockRequest = data?.data?.filter(
     (el: { shiftStatus: string }) => el.shiftStatus === "DRAFT"
   );
 
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const { data: timeSheetData } = useGetAllTimeSheetAdminQuery({
+    date: processTimeSheetData.formatDateForAPI(selectedDate),
+    timezone: userTimezone,
+  });
   const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
   const filteredTimeSheetData = processTimeSheetData.filterEntries(
     timeSheetEntries,
     searchQuery
   );
-
   const uniqueUserLocations = getUniqueUserLocations(filteredTimeSheetData);
 
   return (
