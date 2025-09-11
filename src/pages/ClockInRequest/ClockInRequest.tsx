@@ -50,7 +50,6 @@ const ClockInRequest = () => {
   const [isRejecting, setIsRejecting] = useState(false);
   const [updateClockInStatus] = useUpdateClockInRequestMutation();
   const { data: clockInData, isLoading } = useGetAllClockInRequestForAdminQuery({ currentPage });
-  console.log(clockInData);
   // update metadata after API response
   if (clockInData?.metadata && metadata.total !== clockInData.metadata.total) {
     metadata.total = clockInData.metadata.total;
@@ -179,7 +178,7 @@ const ClockInRequest = () => {
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                           <p className="text-gray-900 whitespace-no-wrap">{(item?.user?.profile?.firstName) + " " + (item?.user?.profile?.lastName)|| "N/A"}</p>
                         </td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                           <div className="relative">
                             <DropdownMenu>
                               <DropdownMenuTrigger className="outline-none hover:scale-105 active:scale-95 duration-700 cursor-pointer">
@@ -195,7 +194,6 @@ const ClockInRequest = () => {
                                 >
                                   {isAccepting ? <FaSpinner className="animate-spin" /> : "Accept"}
                                 </span>
-
                                 <span
                                   onClick={() => handleRejectClockInRequest(item?.id)}
                                   className="hover:text-red-700 hover:bg-red-50 border-2 border-[#e9ebec]  py-2 px-5 rounded-lg hover:bg-light-primary-bg dark:hover:bg-dark-secondary-bg font-medium text-sm w-full cursor-pointer flex items-center justify-center"

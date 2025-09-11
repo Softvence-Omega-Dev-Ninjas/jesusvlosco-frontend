@@ -50,7 +50,6 @@ const UpdateClockInRequestModal = ({ item }: { item: TClockInRequest }) => {
     };
   };
 
-//   console.log("===========>", item);
   const {
     register,
     handleSubmit,
