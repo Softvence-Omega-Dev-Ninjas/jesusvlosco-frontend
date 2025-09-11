@@ -12,6 +12,7 @@ import {
 } from "@/components/TimeSheets/timeSheetsUtils";
 import TimeSheetsTable from "@/components/TimeSheets/TimeSheetsTable";
 import TimeSheetsMap from "@/components/TimeSheets/TimeSheetsMap";
+import ExportSection from "@/components/TimeSheets/ExportSection";
 
 export interface TimeSheetEntry {
   id?: string;
@@ -76,6 +77,7 @@ export default function TimeSheets() {
         } transition-all duration-300`}
       >
         <h2 className="text-xl font-semibold mb-4 text-gray-800">Time Clock</h2>
+        <ExportSection timezone={userTimezone} />
         <TimeSheetsHeader
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}

@@ -32,4 +32,5 @@ export const {
   useGetAllTimeClockAdminQuery,
   useUpdateTimeClockAdminMutation,
   useGetAllTimeSheetAdminQuery,
+  useLazyGetAllTimeSheetAdminQuery
 } = timeClockApi;
