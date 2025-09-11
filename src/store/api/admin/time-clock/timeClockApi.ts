@@ -19,8 +19,8 @@ const timeClockApi = baseApi.injectEndpoints({
     }),
 
     getAllTimeSheetAdmin: build.query({
-      query: (date) => ({
-        url: `/admin/time-clock/time-sheet?date=${date}`,
+      query: ({ date, timezone }) => ({
+        url: `/admin/time-clock/time-sheet?date=${date}&timezone=${timezone}`,
         method: "GET",
       }),
       providesTags: ["TIME_CLOCK"],
@@ -28,5 +28,9 @@ const timeClockApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetAllTimeClockAdminQuery, useUpdateTimeClockAdminMutation, useGetAllTimeSheetAdminQuery } =
-  timeClockApi;
+export const {
+  useGetAllTimeClockAdminQuery,
+  useUpdateTimeClockAdminMutation,
+  useGetAllTimeSheetAdminQuery,
+  useLazyGetAllTimeSheetAdminQuery
+} = timeClockApi;
