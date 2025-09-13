@@ -18,6 +18,7 @@ export const baseApi = createApi({
   }),
 
   tagTypes: [
+    "PROJECTS",
     "BLOG",
     "EditedContent",
     "ADMIN_USER",
