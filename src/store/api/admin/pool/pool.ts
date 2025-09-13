@@ -9,15 +9,23 @@ const createPoolApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["survey", "POLL"],
     }),
     getPollStatistics: builder.query({
       query: () => ({
         url: "/pool/pool-response/all",
         method: "GET",
       }),
-      providesTags: ["survey"],
+      providesTags: ["survey", "POLL"],
+    }),
+     deletePoll: builder.mutation({
+      query: (pollId: string) => ({
+        url: `/pool/delete/${pollId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["POLL", "survey"],
     }),
   }),
 });
 
-export const { useCreatePoolMutation, useGetPollStatisticsQuery } = createPoolApi;
+export const { useCreatePoolMutation, useGetPollStatisticsQuery, useDeletePollMutation } = createPoolApi;

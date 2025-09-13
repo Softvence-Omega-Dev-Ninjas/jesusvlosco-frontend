@@ -4,6 +4,8 @@ export interface Shift {
   date: string;
   location: string;
   team: string[];
+  isToday?: boolean;
+  isUpcomming?: boolean;
 }
 
 // Task object from API (upcomingTasks[])
