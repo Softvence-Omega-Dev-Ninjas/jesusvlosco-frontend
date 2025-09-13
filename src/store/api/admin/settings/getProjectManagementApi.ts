@@ -1,6 +1,5 @@
 import { baseApi } from "../../baseApi";
 
-
 const getProjectMangementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProjectManagementData: builder.query({
@@ -8,7 +7,19 @@ const getProjectMangementApi = baseApi.injectEndpoints({
         url: "/admin/settings/projects/all",
         method: "GET",
       }),
+      providesTags: ["PROJECTS"],
+    }),
+
+    manageProjects: builder.mutation({
+      query: (projects) => ({
+        url: "/admin/settings/projects/manage",
+        method: "PATCH",
+        body: { projects },
+      }),
+      invalidatesTags: ["PROJECTS"],
     }),
   }),
 });
-export const { useGetProjectManagementDataQuery } =  getProjectMangementApi
+
+export const { useGetProjectManagementDataQuery, useManageProjectsMutation } =
+  getProjectMangementApi;
