@@ -37,7 +37,7 @@ const UserDashboard: React.FC = () => {
   // Get shift data from API
   const { data, isLoading, refetch } = useGetClockInOutQuery({});
   const currentApiShift = data?.data?.shift as ApiShiftData | undefined;
-  console.log("Current API Shift:", data);
+  // console.log("Current API Shift:", data);
   const teamMembers = data?.data?.teamMembers as any | undefined;
   const clock = data?.data?.clock as any | undefined;
 
@@ -64,12 +64,15 @@ const UserDashboard: React.FC = () => {
 
   // Use the latest shift from today, or fallback to shiftData from clock API
 
+  console.log("Current API Shift:", currentApiShift);
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
     ? {
         startTime: formatTimeFromISO(currentApiShift.startTime), // Convert ISO string to local time
         endTime: formatTimeFromISO(currentApiShift.endTime),
         date: formatDateFromISO(currentApiShift.date),
+        isToday: currentApiShift.date.split("T")[0] === new Date().toISOString().split("T")[0],
+        isUpcomming: new Date(currentApiShift.date) > new Date(),
         location: currentApiShift.location || "",
         team: [], // Team data might need to be fetched separately or processed differently
       }

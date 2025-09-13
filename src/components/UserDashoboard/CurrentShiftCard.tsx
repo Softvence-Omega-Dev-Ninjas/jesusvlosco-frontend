@@ -8,6 +8,7 @@ import {
 } from "@/utils/googleMapsLocation";
 import { AlarmIcon } from "./icons";
 import { Shift } from "./types";
+import Swal from "sweetalert2";
 
 interface CurrentShiftCardProps {
   shift: Shift;
@@ -29,6 +30,11 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   const [isClocking, setIsClocking] = useState(false);
   const [isClockOut, setIsClockOut] = useState(false);
   const [sendUpdateLocation] = useSendUpdateLocationMutation();
+
+  console.log(
+    { shift, team, clockStatus, isClockedOut },
+    "CurrentShiftCard Props"
+  );
 
   // 🔹 Common function for Clock In / Out
   const handleClockAction = async (action: "CLOCK_IN" | "CLOCK_OUT") => {
@@ -55,8 +61,13 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
       );
     } catch (error: any) {
       console.error(`❌ ${action} error:`, error);
-
-      toast.error(error?.data?.message || "Something went wrong");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error?.data?.message || "Something went wrong",
+      });
+      //
+      // toast.error(error?.data?.message || "Something went wrong");
     } finally {
       setIsClocking(false);
       setIsClockOut(false);
@@ -67,15 +78,31 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   const isClockInButtonDisabled =
     isClocking || clockStatus === "ACTIVE" || shift.startTime === "No shift";
   const isClockOutButtonDisabled =
-    isClockOut || clockStatus === "INACTIVE" || isClockedOut || shift.startTime === "No shift";
+    isClockOut ||
+    clockStatus === "INACTIVE" ||
+    isClockedOut ||
+    shift.startTime === "No shift";
 
-    console.log({ isClockInButtonDisabled, isClockOutButtonDisabled, clockStatus, isClockedOut, shiftStartTime: shift.startTime }, "Button Disabled States");
+  console.log(
+    {
+      isClockInButtonDisabled,
+      isClockOutButtonDisabled,
+      clockStatus,
+      isClockedOut,
+      shiftStartTime: shift.startTime,
+    },
+    "Button Disabled States"
+  );
   return (
     <div className="bg-[#EDEEF7] h-full rounded-2xl p-7 mb-6">
       <div className="flex items-center justify-between mb-5">
         <AlarmIcon />
         <button className="text-[#484848] cursor-pointer font-medium">
-          Todays Schedule
+          {shift?.isToday
+            ? "Today's Shift"
+            : shift?.isUpcomming
+            ? "Upcoming Shift"
+            : "Shift History"}
         </button>
       </div>
       <div className="text-center mb-4">
