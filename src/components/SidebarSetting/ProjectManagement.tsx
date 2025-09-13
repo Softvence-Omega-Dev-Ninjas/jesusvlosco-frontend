@@ -4,6 +4,7 @@ import {
 } from "@/store/api/admin/settings/getProjectManagementApi";
 import React, { useState, useEffect } from "react";
 import deleteIcon from "../../assets/delete.png";
+import Swal from "sweetalert2";
 
 interface Project {
   id?: string;
@@ -61,14 +62,33 @@ const ProjectManagement: React.FC = () => {
       }));
 
       await manageProjects(payload).unwrap();
-      alert("Projects updated successfully!");
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Projects updated successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (err) {
       console.error("Error updating projects:", err);
-      alert("Failed to save changes.");
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to save changes.",
+      });
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-600 text-lg font-medium">Loading projects...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 font-sans">
