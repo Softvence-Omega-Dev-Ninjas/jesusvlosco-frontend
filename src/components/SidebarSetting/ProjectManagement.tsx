@@ -4,10 +4,9 @@ import {
 } from "@/store/api/admin/settings/getProjectManagementApi";
 import React, { useState, useEffect } from "react";
 import deleteIcon from "../../assets/delete.png";
-import distanceIcon from "../../assets/distance (1).png";
 
 interface Project {
-  id?: string; // optional because new ones may not have ID yet
+  id?: string;
   projectName: string;
   projectLocation: string;
   managerName: string;
@@ -55,10 +54,10 @@ const ProjectManagement: React.FC = () => {
 
   const handleSaveChanges = async () => {
     try {
-      // Only send id + title (not manager update for now)
       const payload = projects.map((p) => ({
         id: p.id,
         title: p.projectName,
+        projectLocation: p.projectLocation,
       }));
 
       await manageProjects(payload).unwrap();
@@ -73,82 +72,99 @@ const ProjectManagement: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <h1 className="text-2xl text-primary mb-8">
-        Manage Your Project's Location, Titles & Manager
+      <h1 className="text-2xl text-primary mb-8 font-semibold">
+        Manage Your Projects
       </h1>
 
-      <div className="w-full max-w-4xl">
-        <div className="space-y-4 border border-gray-200 p-6 rounded-md ">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="flex flex-col md:flex-row items-center"
+      <div className="w-full max-w-3xl space-y-6">
+        {projects.map((project) => (
+          <div
+            key={project.id}
+            className="relative border border-gray-200 rounded-lg p-5 shadow-sm"
+          >
+            {/* Delete Icon */}
+            <button
+              onClick={() => handleDeleteProject(project.id!)}
+              className="absolute top-3 right-3"
+              aria-label="Delete project"
             >
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 w-full text-[#484848]">
-                {/* Project Title Editable */}
-                <div className="md:col-span-2">
-                  <label
-                    htmlFor={`project-name-${project.id}`}
-                    className="block text-[#484848] text-sm font-semibold mb-1"
-                  >
-                    Project
-                  </label>
+              <img src={deleteIcon} alt="delete" className="w-5 h-5" />
+            </button>
 
-                  <input
-                    id={`project-name-${project.id}`}
-                    type="text"
-                    value={project.projectName}
-                    onChange={(e) =>
-                      handleProjectChange(
-                        project.id!,
-                        "projectName",
-                        e.target.value
-                      )
-                    }
-                    className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
-                  />
-
-                  <div className="flex items-center text-[#484848] gap-2 mt-2">
-                    <img src={distanceIcon} alt="distance" />
-                    <span>{project.projectLocation}</span>
-                  </div>
-                </div>
-
-                {/* Manager stays unchanged for now */}
-                <div className="md:col-span-3 flex items-center gap-2">
-                  <label
-                    htmlFor={`manager-${project.id}`}
-                    className="text-[#484848] text-sm font-semibold mx-6"
-                  >
-                    Manager
-                  </label>
-                  <input
-                    id={`manager-${project.id}`}
-                    type="text"
-                    value={project.managerName}
-                    disabled
-                    className="border border-gray-200 bg-gray-100 rounded-md p-2 flex-1"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleDeleteProject(project.id!)}
-                className="pl-4 "
-                aria-label="Delete project"
+            {/* Project Title */}
+            <div className="mb-4">
+              <label
+                htmlFor={`project-name-${project.id}`}
+                className="block text-sm font-medium text-gray-700 mb-1"
               >
-                <img src={deleteIcon} alt="" />
-              </button>
+                Project Title
+              </label>
+              <input
+                id={`project-name-${project.id}`}
+                type="text"
+                value={project.projectName}
+                onChange={(e) =>
+                  handleProjectChange(
+                    project.id!,
+                    "projectName",
+                    e.target.value
+                  )
+                }
+                className="border border-gray-300 rounded-md p-2 w-full focus:ring-primary focus:border-primary"
+              />
             </div>
-          ))}
-        </div>
+
+            {/* Location */}
+            <div className="mb-4">
+              <label
+                htmlFor={`location-${project.id}`}
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Location
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id={`location-${project.id}`}
+                  type="text"
+                  value={project.projectLocation}
+                  onChange={(e) =>
+                    handleProjectChange(
+                      project.id!,
+                      "projectLocation",
+                      e.target.value
+                    )
+                  }
+                  className="border border-gray-300 rounded-md p-2 flex-1 focus:ring-primary focus:border-primary"
+                  placeholder="Enter location"
+                />
+              </div>
+            </div>
+
+            {/* Manager */}
+            <div>
+              <label
+                htmlFor={`manager-${project.id}`}
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Manager
+              </label>
+              <input
+                id={`manager-${project.id}`}
+                type="text"
+                value={project.managerName}
+                disabled
+                className="border border-gray-200 bg-gray-100 rounded-md p-2 w-full"
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="w-full max-w-4xl flex justify-end mt-8">
+      <div className="w-full max-w-3xl flex justify-end mt-8">
         <button
           onClick={handleSaveChanges}
           disabled={isSaving}
-          className="bg-primary text-white cursor-pointer py-2 px-4 rounded-lg shadow-md transition disabled:opacity-50"
+          className="bg-primary text-white py-2 px-6 rounded-lg shadow-md hover:bg-primary/90 transition disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Changes"}
         </button>
