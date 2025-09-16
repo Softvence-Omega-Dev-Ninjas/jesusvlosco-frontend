@@ -82,13 +82,15 @@ const UpdateTeamModal = ({ updateTeam, setUpdateTeam, refetch }: UpdateTeamModal
   useEffect(() => {
     if (updateTeam) {
       // Transform from {user: {id, profile}} to {id, profile}
-      const transformedMembers = updateTeam.members.map((member) => ({
-        id: member.user.id,
-        profile: {
-          firstName: member.user.profile.firstName,
-          lastName: member.user.profile.lastName,
-        },
-      }));
+      const transformedMembers = updateTeam.members
+        .filter((member) => member.user && member.user.profile)
+        .map((member) => ({
+          id: member.user.id,
+          profile: {
+            firstName: member.user.profile.firstName || '',
+            lastName: member.user.profile.lastName || '',
+          },
+        }));
 
       reset({
         id: updateTeam.id,
@@ -103,9 +105,10 @@ const UpdateTeamModal = ({ updateTeam, setUpdateTeam, refetch }: UpdateTeamModal
   // Filter users for search - only show when there's a search term
   const filteredUsers = searchTerm
     ? users.filter((user: TUser) => {
-        const fullName = `${user.profile.firstName} ${user.profile.lastName}`.toLowerCase();
+        if (!user.profile) return false;
+        const fullName = `${user.profile.firstName || ''} ${user.profile.lastName || ''}`.toLowerCase();
         const existingMembers = currentMembers ?? [];
-        const isNotAlreadyMember = !existingMembers.some((member) => member.id === user.id);
+        const isNotAlreadyMember = !existingMembers.some((member) => member && member.id === user.id);
         return fullName.includes(searchTerm.toLowerCase()) && isNotAlreadyMember;
       })
     : [];
