@@ -102,7 +102,7 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
             ? "Today's Shift"
             : shift?.isUpcomming
             ? "Upcoming Shift"
-            : "Shift History"}
+            : "Latest Shift History"}
         </button>
       </div>
       <div className="text-center mb-4">
@@ -117,7 +117,7 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
       <div className="text-center">
         <p className="text-gray-600 mb-5">Your Team members</p>
         <div className="flex justify-center space-x-2">
-          {team?.map((member: any, index: number) => (
+          {team?.slice(0,3).map((member: any, index: number) => (
             <div
               key={index}
               className="w-14 h-14 bg-[#C8CAE7] rounded-full flex items-center justify-center text-[#484848] font-bold text-2xl"
@@ -132,7 +132,16 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
                 alt="Profile"
               />
             </div>
+           
           ))}
+
+           {
+              team?.length > 3 &&  <div
+              className="w-14 h-14 bg-[#C8CAE7] rounded-full flex items-center justify-center text-[#484848] font-bold text-2xl"
+            >
+              +{team.length - 3}
+            </div>
+            }
         </div>
         <div className="flex items-center justify-center space-x-5 py-5">
           <button
