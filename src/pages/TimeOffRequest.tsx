@@ -25,8 +25,6 @@ const TimeOffRequest: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
-  // console.log(timeOffRequestsAnalysis);
-
   useEffect(() => {
     if (timeOffRequestsAnalysis?.data) {
       const formattedData = timeOffRequestsAnalysis.data.map((user: any) => ({
