@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { toast } from "sonner";
+import { FaSpinner } from "react-icons/fa";
 import { useSendUpdateLocationMutation } from "@/store/api/clockInOut/clockinoutapi";
 import {
   getCurrentLocationWithGoogleMaps,
@@ -37,7 +38,8 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
   );
 
   // 🔹 Common function for Clock In / Out
-  const handleClockAction = async (action: "CLOCK_IN" | "CLOCK_OUT") => {
+  const handleClockAction = async (action: "CLOCK_IN" | "CLOCK_OUT", retryCount = 0) => {
+    const maxRetries = 1;
     if (action === "CLOCK_IN") {
       setIsClocking(true);
     } else {
@@ -61,13 +63,44 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
       );
     } catch (error: any) {
       console.error(`❌ ${action} error:`, error);
+
+      // Retry once for timeout errors
+      if (error?.code === 3 && retryCount < maxRetries) {
+        console.log(`🔄 Retrying ${action} due to timeout (attempt ${retryCount + 1})`);
+        toast.info("Location request timed out. Retrying...");
+        return handleClockAction(action, retryCount + 1);
+      }
+
+      // Provide specific error messages based on error code
+      let errorMessage = "Something went wrong";
+      let errorTitle = "Error";
+
+      if (error?.code) {
+        switch (error.code) {
+          case 1: // PERMISSION_DENIED
+            errorMessage = "Location access was denied. Please enable location permissions and try again.";
+            errorTitle = "Location Access Denied";
+            break;
+          case 2: // POSITION_UNAVAILABLE
+            errorMessage = "Location information is unavailable. Please check your GPS settings and try again.";
+            errorTitle = "Location Unavailable";
+            break;
+          case 3: // TIMEOUT
+            errorMessage = "Location request timed out. Please ensure you're in an open area with good GPS signal and try again.";
+            errorTitle = "Location Timeout";
+            break;
+          default:
+            errorMessage = error?.message || "An unknown location error occurred.";
+        }
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      }
+
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error?.data?.message || "Something went wrong",
+        title: errorTitle,
+        text: errorMessage,
       });
-      //
-      // toast.error(error?.data?.message || "Something went wrong");
     } finally {
       setIsClocking(false);
       setIsClockOut(false);
@@ -147,24 +180,26 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
           <button
             onClick={() => handleClockAction("CLOCK_IN")}
             disabled={isClockInButtonDisabled}
-            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold ${
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-green-500 text-white font-bold flex items-center justify-center space-x-2 ${
               isClockInButtonDisabled || shift.startTime === "No shift"
                 ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}
           >
-            {isClocking ? "Processing..." : "Clock In"}
+            {isClocking && <FaSpinner className="animate-spin" />}
+            <span>{isClocking ? "Getting Location..." : "Clock In"}</span>
           </button>
           <button
             onClick={() => handleClockAction("CLOCK_OUT")}
             disabled={isClockOutButtonDisabled}
-            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold ${
+            className={`px-5 py-3 rounded-md border-1 border-gray-400 bg-red-500 text-white font-bold flex items-center justify-center space-x-2 ${
               isClockOutButtonDisabled || shift.startTime === "No shift"
                 ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}
           >
-            {isClockOut ? "Processing..." : "Clock Out"}
+            {isClockOut && <FaSpinner className="animate-spin" />}
+            <span>{isClockOut ? "Getting Location..." : "Clock Out"}</span>
           </button>
         </div>
       </div>

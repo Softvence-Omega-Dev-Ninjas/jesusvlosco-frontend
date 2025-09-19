@@ -77,7 +77,7 @@ export const getCurrentLocationWithGoogleMaps = (): Promise<LocationResult> => {
     // Use high accuracy geolocation options
     const options: PositionOptions = {
       enableHighAccuracy: true,
-      timeout: 15000, // 15 seconds timeout
+      timeout: 30000, // 30 seconds timeout (increased from 15s)
       maximumAge: 0 // Don't use cached position
     };
 

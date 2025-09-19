@@ -109,10 +109,25 @@ export  const validateShiftData = (apiData: ShiftAPIData): { isValid: boolean; m
       
       // Check if end time is after start time
       const startTimeObj = new Date(startTime);
-      if (endTimeObj <= startTimeObj) {
+      
+      // For overnight shifts, the endTime will naturally be later than startTime
+      // because the toUTCISO function should have already added a day if needed
+      // However, let's add a more lenient check for very short shifts
+      const timeDifferenceMs = endTimeObj.getTime() - startTimeObj.getTime();
+      const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+      
+      // Allow shifts up to 24 hours, but at least 15 minutes
+      if (timeDifferenceMs <= 15 * 60 * 1000) { // Less than 15 minutes
         return {
           isValid: false,
-          message: "End time must be after start time."
+          message: "Shift duration must be at least 15 minutes."
+        };
+      }
+      
+      if (timeDifferenceHours > 24) { // More than 24 hours
+        return {
+          isValid: false,
+          message: "Shift duration cannot exceed 24 hours."
         };
       }
     } catch {
