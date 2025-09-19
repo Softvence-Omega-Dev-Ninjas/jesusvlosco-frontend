@@ -330,10 +330,29 @@ const WeeklyScheduleGrid = () => {
 
   const handleAddShift = (userId: string, date: Date | string) => {
     setSelectedUserId(userId);
+    let inputDate: Date;
+    if (typeof date === "string") {
+      // If it's a localized string like "9/17/2025, 12:00:00 AM", parse it properly
+      if (date.includes(",")) {
+        // Handle localized date string format
+        const [datePart] = date.split(",");
+        const [month, day, year] = datePart.split("/");
+        inputDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        // Handle ISO date string
+        inputDate = new Date(date);
+      }
+    } else {
+      inputDate = date;
+    }
 
-    const inputDate =
-      typeof date === "string" ? new Date(date) : (date as Date);
-    const formattedDate = inputDate.toISOString().split("T")[0];
+    // Format date in local timezone without UTC conversion
+    const year = inputDate.getFullYear();
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
+   
 
     setValue("userIds", [userId]);
     setValue("date", formattedDate);
