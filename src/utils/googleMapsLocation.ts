@@ -135,10 +135,8 @@ export const getCurrentLocationWithGoogleMaps = (): Promise<LocationResult> => {
   });
 };
 
-// Alternative method using Google Maps Places API (if available)
-export const getCurrentLocationWithPlaces = async (): Promise<LocationResult> => {
-  await initializeGoogleMaps();
-
+// Get current location using only browser geolocation (fallback method)
+export const getCurrentLocationFallback = (): Promise<LocationResult> => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject({
@@ -148,41 +146,48 @@ export const getCurrentLocationWithPlaces = async (): Promise<LocationResult> =>
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude, accuracy } = position.coords;
-          
-          // For even more accuracy, you could use Places Nearby Search
-          // to find the nearest place and get a more specific address
-          const address = await reverseGeocode(latitude, longitude);
+    // Use high accuracy geolocation options
+    const options: PositionOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000, // 10 seconds timeout (shorter for fallback)
+      maximumAge: 60000 // Allow cached position for 1 minute
+    };
 
-          resolve({
-            latitude,
-            longitude,
-            address,
-            accuracy,
-            timestamp: Date.now()
-          });
-        } catch (placesError) {
-          console.warn('Places API error:', placesError);
-          reject({
-            code: -1,
-            message: 'Failed to get location details'
-          } as LocationError);
-        }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+
+        const result: LocationResult = {
+          latitude,
+          longitude,
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, // Simple coordinate format
+          accuracy,
+          timestamp: Date.now()
+        };
+
+        resolve(result);
       },
       (error) => {
+        let errorMessage = 'Unknown location error';
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied by user';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out';
+            break;
+        }
+
         reject({
           code: error.code,
-          message: `Geolocation error: ${error.message}`
+          message: errorMessage
         } as LocationError);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0
-      }
+      options
     );
   });
 };

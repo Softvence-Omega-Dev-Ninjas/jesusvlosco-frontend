@@ -5,6 +5,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useSendUpdateLocationMutation } from "@/store/api/clockInOut/clockinoutapi";
 import {
   getCurrentLocationWithGoogleMaps,
+  getCurrentLocationFallback,
   formatLocationForAPI,
 } from "@/utils/googleMapsLocation";
 import { AlarmIcon } from "./icons";
@@ -46,7 +47,19 @@ const CurrentShiftCard: React.FC<CurrentShiftCardProps> = ({
       setIsClockOut(true);
     }
     try {
-      const locationResult = await getCurrentLocationWithGoogleMaps();
+      let locationResult;
+
+      // Try Google Maps first, then fallback
+      try {
+        console.log("Trying Google Maps location method for clock action...");
+        locationResult = await getCurrentLocationWithGoogleMaps();
+        console.log("Google Maps location successful for clock action");
+      } catch (googleMapsError) {
+        console.warn("Google Maps failed for clock action, trying fallback:", googleMapsError);
+        locationResult = await getCurrentLocationFallback();
+        console.log("Fallback location successful for clock action");
+      }
+
       const formattedLocation = formatLocationForAPI(locationResult);
 
       const response = await sendUpdateLocation({

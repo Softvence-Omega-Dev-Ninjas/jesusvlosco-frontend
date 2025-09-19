@@ -5,6 +5,10 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import {
+  getCurrentLocationWithGoogleMaps,
+  getCurrentLocationFallback
+} from "@/utils/googleMapsLocation";
 
 const containerStyle = {
   width: "100%",
@@ -39,90 +43,70 @@ const MapLocation: React.FC = () => {
   const [isWatchingLocation, setIsWatchingLocation] = useState(false);
 
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      setLocationStatus('loading');
-      
-      // Enhanced geolocation options for maximum accuracy
-      const highAccuracyOptions: PositionOptions = {
-        enableHighAccuracy: true,
-        timeout: 15000, // Increased timeout for better accuracy
-        maximumAge: 60000, // Reduced cache time to 1 minute for fresher data
-      };
+  // Function to get location with fallback
+  const getLocationWithFallback = async () => {
+    try {
+      // First try Google Maps method
+      console.log("Trying Google Maps location method...");
+      const googleMapsLocation = await getCurrentLocationWithGoogleMaps();
+      console.log("Google Maps location successful:", googleMapsLocation);
 
-      // First, try to get a quick position
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation([
-            position.coords.latitude,
-            position.coords.longitude,
-          ]);
-          setLocationAccuracy(position.coords.accuracy);
-          setLocationError(null);
-          setLocationStatus('success');
+      setUserLocation([googleMapsLocation.latitude, googleMapsLocation.longitude]);
+      setLocationAccuracy(googleMapsLocation.accuracy || null);
+      setLocationError(null);
+      setLocationStatus('success');
 
-          // If accuracy is poor (> 50 meters), try to get better location
-          if (position.coords.accuracy > 50) {
-            setIsWatchingLocation(true);
-            
-            // Watch for better location
-            const watchId = navigator.geolocation.watchPosition(
-              (betterPosition) => {
-                // Only update if we get significantly better accuracy
-                if (betterPosition.coords.accuracy < position.coords.accuracy * 0.8) {
-                  setUserLocation([
-                    betterPosition.coords.latitude,
-                    betterPosition.coords.longitude,
-                  ]);
-                  setLocationAccuracy(betterPosition.coords.accuracy);
-                }
-                
-                // Stop watching after 30 seconds or when accuracy is good enough
-                if (betterPosition.coords.accuracy <= 20) {
-                  navigator.geolocation.clearWatch(watchId);
-                  setIsWatchingLocation(false);
-                }
-              },
-              (watchError) => {
-                console.error("Watch position error:", watchError);
-                navigator.geolocation.clearWatch(watchId);
-                setIsWatchingLocation(false);
-              },
-              highAccuracyOptions
-            );
+    } catch (googleMapsError) {
+      console.warn("Google Maps location failed, trying fallback method:", googleMapsError);
 
-            // Clear watch after 30 seconds regardless
-            setTimeout(() => {
-              navigator.geolocation.clearWatch(watchId);
-              setIsWatchingLocation(false);
-            }, 30000);
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          
-          // Provide more specific error messages
-          let errorMessage = "Unable to get your location. ";
+      try {
+        // Fallback to simple geolocation
+        console.log("Trying fallback location method...");
+        const fallbackLocation = await getCurrentLocationFallback();
+        console.log("Fallback location successful:", fallbackLocation);
+
+        setUserLocation([fallbackLocation.latitude, fallbackLocation.longitude]);
+        setLocationAccuracy(fallbackLocation.accuracy || null);
+        setLocationError(null);
+        setLocationStatus('success');
+
+        // Show info that we're using fallback
+        console.info("Using fallback location method - address resolution may be limited");
+
+      } catch (fallbackError) {
+        console.error("Both location methods failed:", fallbackError);
+
+        // Handle fallback error
+        let errorMessage = "Unable to get your location. ";
+        if (fallbackError && typeof fallbackError === 'object' && 'code' in fallbackError) {
+          const error = fallbackError as { code: number; message: string };
           switch (error.code) {
-            case error.PERMISSION_DENIED:
+            case 1: // PERMISSION_DENIED
               errorMessage += "Please allow location access and refresh the page.";
               break;
-            case error.POSITION_UNAVAILABLE:
+            case 2: // POSITION_UNAVAILABLE
               errorMessage += "Location information is unavailable. Try moving to an area with better GPS signal.";
               break;
-            case error.TIMEOUT:
+            case 3: // TIMEOUT
               errorMessage += "Location request timed out. Please try again.";
               break;
             default:
               errorMessage += "Please enable location services and try again.";
-              break;
           }
-          
-          setLocationError(errorMessage);
-          setLocationStatus('error');
-        },
-        highAccuracyOptions
-      );
+        } else {
+          errorMessage += "Please enable location services and try again.";
+        }
+
+        setLocationError(errorMessage);
+        setLocationStatus('error');
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      setLocationStatus('loading');
+      getLocationWithFallback();
     } else {
       setLocationError("Geolocation is not supported by this browser. Please use a modern browser with location support.");
       setLocationStatus('error');
@@ -130,7 +114,6 @@ const MapLocation: React.FC = () => {
 
     // Cleanup function
     return () => {
-      // Clear any active watches when component unmounts
       setIsWatchingLocation(false);
     };
   }, []);
@@ -296,23 +279,7 @@ const MapLocation: React.FC = () => {
           </span>
         </div>
 
-        {/* Accuracy Legend */}
-        {locationAccuracy && (
-          <div className="flex items-center space-x-4 text-xs">
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-green-500 rounded-full opacity-30"></div>
-              <span>High (≤20m)</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-orange-500 rounded-full opacity-30"></div>
-              <span>Good (≤50m)</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-red-500 rounded-full opacity-30"></div>
-              <span>Low (&gt;50m)</span>
-            </div>
-          </div>
-        )}
+      
 
         {/* Existing Location Legends */}
         {
