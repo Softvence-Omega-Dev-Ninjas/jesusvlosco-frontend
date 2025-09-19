@@ -429,7 +429,10 @@ const WeeklyScheduleGrid = () => {
                 >
                   {/* User column */}
                   <div className="flex items-center justify-center">
-                    <EmployeeAvailabilityCard emp={projectUserData} shifts={shiftsOfCurrentWeek} />
+                    <EmployeeAvailabilityCard
+                      emp={projectUserData}
+                      shifts={shiftsOfCurrentWeek}
+                    />
                   </div>
 
                   {/* Day columns */}
@@ -547,20 +550,77 @@ const WeeklyScheduleGrid = () => {
               onSubmit={handleSubmit((data) => onSubmit(data, "PUBLISHED"))}
             >
               <div className="space-y-4 text-sm">
-                {/* Date and All Day Toggle */}
-                <div className="flex items-center justify-between">
-                  <label className="font-medium">Date</label>
-                  <Controller
-                    name="date"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="date"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
-                      />
-                    )}
-                  />
+                <div>
+                  <label htmlFor="templete" className="font-medium">Want to use templete?</label>
+                  <select
+                    value={getValues("userIds")[0] || selectedUserId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedUserId(val);
+                      setValue("userIds", [val]);
+                    }}
+                    className="border border-gray-300 px-3 py-2 rounded-md w-full mt-2"
+                  >
+                    <option value="" disabled>Choose Templete</option>
+                      <option value="templete id">
+                        Templete 1
+                      </option>
+                      <option value="templete id">
+                        Templete 2
+                      </option>
+                      <option value="templete id">
+                        Templete 3
+                      </option>
+                 
+                  </select>
+                </div>
+
+                {/* Start and End Time */}
+                <div className="flex gap-4 items-center justify-between">
+                  <div className="flex flex-col justify-start gap-2">
+                    <label className="font-medium">Date</label>
+                    <Controller
+                      name="date"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          {...field}
+                          className="border border-gray-300 px-3 py-2 rounded-md"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col justify-start gap-2">
+                    <label className="font-medium">Start</label>
+                    <Controller
+                      name="startTime"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="time"
+                          {...field}
+                          className="border border-gray-300 px-3 py-2 rounded-md"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-start gap-2">
+                    <label className="font-medium">End</label>
+                    <Controller
+                      name="endTime"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="time"
+                          {...field}
+                          className="border border-gray-300 px-3 py-2 rounded-md"
+                        />
+                      )}
+                    />
+                  </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span>All Day</span>
                     <Controller
@@ -576,35 +636,6 @@ const WeeklyScheduleGrid = () => {
                       )}
                     />
                   </div>
-                </div>
-
-                {/* Start and End Time */}
-                <div className="flex gap-4 items-center">
-                  <label className="font-medium">Start</label>
-                  <Controller
-                    name="startTime"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="time"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
-                      />
-                    )}
-                  />
-                  <label className="font-medium">End</label>
-                  <Controller
-                    name="endTime"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="time"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
-                      />
-                    )}
-                  />
-                  <span className="ml-auto text-gray-600">08:00 Hours</span>
                 </div>
 
                 {/* Shift Title */}
