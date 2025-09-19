@@ -7,9 +7,13 @@ import {
   HiOutlinePencil,
   HiOutlineTrash,
 } from "react-icons/hi";
+import { RxCross2 } from "react-icons/rx";
 import { CiCirclePlus } from "react-icons/ci";
 import { useForm, Controller } from "react-hook-form";
-import { useCreateShiftMutation } from "@/store/api/admin/shift-sheduling/CreateShiftApi";
+import {
+  useCreateShiftMutation,
+  useGetAllShiftTemplatesQuery,
+} from "@/store/api/admin/shift-sheduling/CreateShiftApi";
 import {
   useDeleteShiftMutation,
   useGetProjectUsersWithShiftQuery,
@@ -32,8 +36,24 @@ import { ProjectUser, UserShiftData } from "@/types/projectType";
 import EmployeeAvailabilityCard from "./EmployeeAvailabilityCard";
 import { isSameWeek } from "date-fns";
 
+interface Template {
+  id: string;
+  templateTitle: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  locationLat: number;
+  locationLng: number;
+  job?: string;
+  note?: string;
+}
+
 const WeeklyScheduleGrid = () => {
   const timeZone = userDefaultTimeZone();
+  const {
+    data: alltemplates,
+    isLoading: isLoadingTemplates,
+  } = useGetAllShiftTemplatesQuery({});
 
   const projectIdd = useParams().id;
   const {
@@ -89,6 +109,7 @@ const WeeklyScheduleGrid = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
   // API hooks
   const [createShift] = useCreateShiftMutation();
@@ -121,11 +142,31 @@ const WeeklyScheduleGrid = () => {
   // Use filtered user list in rendering
   const userList = filteredUserList;
 
+  const templates = alltemplates?.data || [];
+
+  console.log("Selected Template:", selectedTemplate);
   // Helpers using Luxon
-  const toUTCISO = (dateIso: string, timeHHMM: string) => {
+  const toUTCISO = (dateIso: string, timeHHMM: string, isEndTime: boolean = false, startTimeHHMM?: string) => {
     // dateIso: "YYYY-MM-DD", timeHHMM: "HH:mm"
     // Interpret in user's timeZone, then convert to UTC ISO string
-    return DateTime.fromISO(`${dateIso}T${timeHHMM}`, { zone: timeZone })
+    let targetDate = dateIso;
+    
+    // If this is an end time and it's earlier than start time, add one day
+    if (isEndTime && startTimeHHMM) {
+      const [startHour, startMin] = startTimeHHMM.split(':').map(Number);
+      const [endHour, endMin] = timeHHMM.split(':').map(Number);
+      
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      
+      // If end time is earlier than start time, it's next day
+      if (endMinutes <= startMinutes) {
+        const nextDay = DateTime.fromISO(dateIso).plus({ days: 1 });
+        targetDate = nextDay.toISODate() || dateIso;
+      }
+    }
+    
+    return DateTime.fromISO(`${targetDate}T${timeHHMM}`, { zone: timeZone })
       .toUTC()
       .toISO();
   };
@@ -161,8 +202,8 @@ const WeeklyScheduleGrid = () => {
         // date as UTC ISO representing start of that local day
         date: startOfLocalDayToUTCISO(data.date) || "",
         shiftStatus: status,
-        startTime: toUTCISO(data.date, data.startTime) || "",
-        endTime: toUTCISO(data.date, data.endTime) || "",
+        startTime: toUTCISO(data.date, data.startTime, false) || "",
+        endTime: toUTCISO(data.date, data.endTime, true, data.startTime) || "",
         shiftTitle: data.shiftTitle,
         allDay: data.allDay,
         job: data.job,
@@ -429,7 +470,10 @@ const WeeklyScheduleGrid = () => {
                 >
                   {/* User column */}
                   <div className="flex items-center justify-center">
-                    <EmployeeAvailabilityCard emp={projectUserData} shifts={shiftsOfCurrentWeek} />
+                    <EmployeeAvailabilityCard
+                      emp={projectUserData}
+                      shifts={shiftsOfCurrentWeek}
+                    />
                   </div>
 
                   {/* Day columns */}
@@ -547,20 +591,127 @@ const WeeklyScheduleGrid = () => {
               onSubmit={handleSubmit((data) => onSubmit(data, "PUBLISHED"))}
             >
               <div className="space-y-4 text-sm">
-                {/* Date and All Day Toggle */}
-                <div className="flex items-center justify-between">
-                  <label className="font-medium">Date</label>
-                  <Controller
-                    name="date"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="date"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
+                <div>
+                  <label htmlFor="templete" className="font-medium">
+                    Want to use template?
+                  </label>
+                  <select
+                    value={selectedTemplate?.id || ""}
+                    onChange={(e) => {
+                      const templateId = e.target.value;
+                      if (templateId) {
+                        const template = templates.find((t: Template) => t.id === templateId);
+                        setSelectedTemplate(template);
+                        console.log("Selected Template:", template);
+                        
+                        // Auto-fill form with template data
+                        if (template) {
+                          setValue("shiftTitle", template.templateTitle || "");
+                          setValue("job", template.job || "");
+                          setValue("note", template.note || "");
+                          setValue("location", template.location || "");
+                          setValue("locationLat", template.locationLat || 0);
+                          setValue("locationLng", template.locationLng || 0);
+                          setValue("locationCoordinates", {
+                            address: template.location || "",
+                            latitude: template.locationLat || 0,
+                            longitude: template.locationLng || 0,
+                          });
+                          
+                          // Convert template times to local time format
+                          if (template.startTime) {
+                            const localStartTime = isoToLocalTime(template.startTime);
+                            setValue("startTime", localStartTime);
+                          }
+                          if (template.endTime) {
+                            const localEndTime = isoToLocalTime(template.endTime);
+                            setValue("endTime", localEndTime);
+                          }
+                        }
+                      } else {
+                        setSelectedTemplate(null);
+                      }
+                    }}
+                    className="border border-gray-300 px-3 py-2 rounded-md w-full mt-2 focus:ring-2 focus:ring-[#4E53B1] focus:border-transparent"
+                  >
+                    <option value="">
+                      Choose Template
+                    </option>
+                    {
+                      templates.length > 0 && !isLoadingTemplates  ? (
+                        templates.map((template: Template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.templateTitle}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No templates available</option>
+                      )
+                    }
+                  </select>
+                  {selectedTemplate && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between gap-5">
+                     <div>
+                       <p className="text-sm font-medium text-blue-800">
+                        Selected Template: {selectedTemplate.templateTitle}
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        📍 {selectedTemplate.location} | 
+                        🕐 {selectedTemplate.startTime && isoToLocalTimeShort(selectedTemplate.startTime)} - {selectedTemplate.endTime && isoToLocalTimeShort(selectedTemplate.endTime)}
+                        {selectedTemplate.job && ` | 💼 ${selectedTemplate.job}`}
+                      </p>
+                     </div>
+                     <button onClick={() => setSelectedTemplate(null)}><RxCross2 /></button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Start and End Time */}
+                <div className="flex gap-4 items-center justify-between">
+                  <div className="flex flex-col justify-start gap-2">
+                    <label className="font-medium">Date</label>
+                    <Controller
+                      name="date"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          {...field}
+                          className="border border-gray-300 px-3 py-2 rounded-md"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col justify-start gap-2">
+                      <label className="font-medium">Start</label>
+                      <Controller
+                        name="startTime"
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            type="time"
+                            {...field}
+                            className="border border-gray-300 px-3 py-2 rounded-md"
+                          />
+                        )}
                       />
-                    )}
-                  />
+                    </div>
+                    <div className="flex flex-col justify-start gap-2">
+                      <label className="font-medium">End</label>
+                      <Controller
+                        name="endTime"
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            type="time"
+                            {...field}
+                            className="border border-gray-300 px-3 py-2 rounded-md"
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span>All Day</span>
                     <Controller
@@ -576,35 +727,6 @@ const WeeklyScheduleGrid = () => {
                       )}
                     />
                   </div>
-                </div>
-
-                {/* Start and End Time */}
-                <div className="flex gap-4 items-center">
-                  <label className="font-medium">Start</label>
-                  <Controller
-                    name="startTime"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="time"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
-                      />
-                    )}
-                  />
-                  <label className="font-medium">End</label>
-                  <Controller
-                    name="endTime"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        type="time"
-                        {...field}
-                        className="border border-gray-300 px-3 py-2 rounded-md"
-                      />
-                    )}
-                  />
-                  <span className="ml-auto text-gray-600">08:00 Hours</span>
                 </div>
 
                 {/* Shift Title */}

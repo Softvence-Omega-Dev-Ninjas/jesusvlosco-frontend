@@ -30,7 +30,7 @@ const TimeTrackingDashboard: React.FC = () => {
   const shift = clockData?.data?.data?.shift;
   const isToday = new Date().toISOString().split("T")[0] === shift?.date.split("T")[0];
   const isUpcomming = new Date(shift?.date) > new Date();
-  const shiftDate = shift && !isToday ? new Date(shift.date).toLocaleDateString("en-US", {
+  const shiftDate = shift && isToday ? new Date(shift.date).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",

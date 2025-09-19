@@ -1,6 +1,14 @@
 // src/components/MapLocation.tsx
-import { GoogleMap, Marker, Circle, useLoadScript } from "@react-google-maps/api";
+import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
+import { ApiShiftData } from "@/utils/shiftUtils";
 import React, { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import {
+  getCurrentLocationWithGoogleMaps,
+  getCurrentLocationFallback
+} from "@/utils/googleMapsLocation";
 
 const containerStyle = {
   width: "100%",
@@ -8,95 +16,113 @@ const containerStyle = {
   borderRadius: "8px",
 };
 
-const center = { lat: 23.785, lng: 90.4008 };
 
-const locations = [
+
+const MapLocation: React.FC = () => {
+  const { data } = useGetClockInOutQuery({});
+  const currentApiShift = data?.data?.shift as ApiShiftData | undefined;
+
+  const locations = [
   {
     id: 1,
-    position: { lat: 23.7785, lng: 90.4008 }, // Mohakhali
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
+    position: { lat: currentApiShift?.locationLat || 23.7785, lng: currentApiShift?.locationLng || 90.4008 }, // Mohakhali
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="95" viewBox="0 0 90 95" fill="none">
       <ellipse opacity="0.5" cx="31.9836" cy="32.6995" rx="31.8703" ry="31.7581" fill="#FFBA5C"/>
       <ellipse opacity="0.5" cx="31.9852" cy="32.6994" rx="21.2469" ry="21.1721" fill="#FF9200"/>
       <ellipse cx="31.9831" cy="32.6993" rx="8.49875" ry="8.46882" fill="#FF9200"/>
     </svg>`,
   },
-  {
-    id: 2,
-    position: { lat: 23.7925, lng: 90.4078 }, // Gulshan
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
-      <ellipse cx="32.0871" cy="32.5882" rx="31.8703" ry="31.7581" fill="#AB070F" fill-opacity="0.37"/>
-      <ellipse cx="32.0887" cy="32.5891" rx="21.2469" ry="21.1721" fill="#AB070F" fill-opacity="0.37"/>
-      <ellipse cx="32.0883" cy="32.589" rx="10.6234" ry="10.586" fill="#AB070F"/>
-    </svg>`,
-  },
-  {
-    id: 3,
-    position: { lat: 23.7945, lng: 90.4043 }, // Banani
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="65" height="64" viewBox="0 0 65 64" fill="none">
-      <ellipse opacity="0.4" cx="32.5598" cy="31.7581" rx="31.8703" ry="31.7581" fill="#1EBD66"/>
-      <ellipse opacity="0.4" cx="32.5613" cy="31.758" rx="21.2469" ry="21.1721" fill="#06843F"/>
-      <ellipse cx="32.5609" cy="31.7579" rx="10.6234" ry="10.586" fill="#06843F"/>
-    </svg>`,
-  },
 ];
 
-// Hide POIs and extra icons
-const mapStyles = [
-  {
-    featureType: "poi",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "transit",
-    elementType: "labels.icon",
-    stylers: [{ visibility: "off" }],
-  },
-];
-
-const MapLocation: React.FC = () => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
-  });
 
   const [userLocation, setUserLocation] =
-    useState<google.maps.LatLngLiteral | null>(null);
+    useState<[number, number] | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationStatus, setLocationStatus] = useState<'loading' | 'success' | 'error' | null>(null);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
+  const [isWatchingLocation, setIsWatchingLocation] = useState(false);
+
+
+  // Function to get location with fallback
+  const getLocationWithFallback = async () => {
+    try {
+      // First try Google Maps method
+      console.log("Trying Google Maps location method...");
+      const googleMapsLocation = await getCurrentLocationWithGoogleMaps();
+      console.log("Google Maps location successful:", googleMapsLocation);
+
+      setUserLocation([googleMapsLocation.latitude, googleMapsLocation.longitude]);
+      setLocationAccuracy(googleMapsLocation.accuracy || null);
+      setLocationError(null);
+      setLocationStatus('success');
+
+    } catch (googleMapsError) {
+      console.warn("Google Maps location failed, trying fallback method:", googleMapsError);
+
+      try {
+        // Fallback to simple geolocation
+        console.log("Trying fallback location method...");
+        const fallbackLocation = await getCurrentLocationFallback();
+        console.log("Fallback location successful:", fallbackLocation);
+
+        setUserLocation([fallbackLocation.latitude, fallbackLocation.longitude]);
+        setLocationAccuracy(fallbackLocation.accuracy || null);
+        setLocationError(null);
+        setLocationStatus('success');
+
+        // Show info that we're using fallback
+        console.info("Using fallback location method - address resolution may be limited");
+
+      } catch (fallbackError) {
+        console.error("Both location methods failed:", fallbackError);
+
+        // Handle fallback error
+        let errorMessage = "Unable to get your location. ";
+        if (fallbackError && typeof fallbackError === 'object' && 'code' in fallbackError) {
+          const error = fallbackError as { code: number; message: string };
+          switch (error.code) {
+            case 1: // PERMISSION_DENIED
+              errorMessage += "Please allow location access and refresh the page.";
+              break;
+            case 2: // POSITION_UNAVAILABLE
+              errorMessage += "Location information is unavailable. Try moving to an area with better GPS signal.";
+              break;
+            case 3: // TIMEOUT
+              errorMessage += "Location request timed out. Please try again.";
+              break;
+            default:
+              errorMessage += "Please enable location services and try again.";
+          }
+        } else {
+          errorMessage += "Please enable location services and try again.";
+        }
+
+        setLocationError(errorMessage);
+        setLocationStatus('error');
+      }
+    }
+  };
 
   useEffect(() => {
     if (navigator.geolocation) {
       setLocationStatus('loading');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationError(null);
-          setLocationStatus('success');
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setLocationError("Unable to get your location. Please enable location services.");
-          setLocationStatus('error');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000, // 5 minutes
-        }
-      );
+      getLocationWithFallback();
     } else {
-      setLocationError("Geolocation is not supported by this browser.");
+      setLocationError("Geolocation is not supported by this browser. Please use a modern browser with location support.");
       setLocationStatus('error');
     }
-  }, []);
 
-  if (!isLoaded) return <p>Loading Map...</p>;
+    // Cleanup function
+    return () => {
+      setIsWatchingLocation(false);
+    };
+  }, []);
 
   return (
     <div className="rounded-2xl py-6 px-8 border mb-20 border-gray-200 mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center text-primary">
+     {
+      userLocation && <div>
+         <h2 className="text-2xl font-bold mb-6 text-center text-primary">
         Map Location
       </h2>
 
@@ -110,7 +136,9 @@ const MapLocation: React.FC = () => {
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-            <p className="text-sm text-blue-800">Getting your current location...</p>
+            <p className="text-sm text-blue-800">
+              {isWatchingLocation ? "Improving location accuracy..." : "Getting your current location..."}
+            </p>
           </div>
         </div>
       )}
@@ -118,58 +146,102 @@ const MapLocation: React.FC = () => {
       {locationStatus === 'success' && userLocation && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-green-800">
-              ✅ Current location detected: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-            </p>
-            <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-              500m radius
+            <div className="flex-1">
+              <p className="text-sm text-green-800">
+                ✅ Current location detected: {userLocation[0].toFixed(6)}, {userLocation[1].toFixed(6)}
+              </p>
+              {locationAccuracy && (
+                <p className="text-xs text-green-600 mt-1">
+                  Accuracy: ±{Math.round(locationAccuracy)}m 
+                  {locationAccuracy <= 20 && " (High precision)"} 
+                  {locationAccuracy > 20 && locationAccuracy <= 50 && " (Good precision)"} 
+                  {locationAccuracy > 50 && " (Low precision)"}
+                  {isWatchingLocation && " • Improving..."}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                500m radius
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs text-green-600 bg-green-100 hover:bg-green-200 px-2 py-1 rounded transition-colors duration-200"
+                title="Refresh location"
+              >
+                🔄 Refresh
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={userLocation || center}
-        zoom={userLocation ? 16 : 14}
-        options={{
-          styles: mapStyles,
-          streetViewControl: true,
-          streetViewControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_CENTER,
-          },
-          zoomControl: true,
-          zoomControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_CENTER,
-          },
-          disableDefaultUI: false,
-          mapTypeControl: false,
-        }}
+      <MapContainer
+        center={userLocation}
+        zoom={14}
+        style={containerStyle}
+        scrollWheelZoom={true}
       >
-        {/* Current Location with 500m Radius Circle */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {/* Current Location with Dynamic Accuracy Circle */}
         {userLocation && (
           <>
             <Marker
               position={userLocation}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: "#FF0000",
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#ffffff",
-              }}
-              title="Your Current Location"
-            />
+              icon={L.divIcon({
+                html: `
+                  <div style="
+                    width: 20px;
+                    height: 20px;
+                    background-color: #FF0000;
+                    border: 3px solid white;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                    position: relative;
+                  ">
+                    <div style="
+                      position: absolute;
+                      top: 50%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                      width: 8px;
+                      height: 8px;
+                      background-color: white;
+                      border-radius: 50%;
+                    "></div>
+                  </div>
+                `,
+                className: "custom-current-location-marker",
+                iconSize: [20, 20],
+                iconAnchor: [10, 10],
+              })}
+            >
+              <Popup>
+                Your Current Location (±{locationAccuracy ? Math.round(locationAccuracy) : 'unknown'}m accuracy)
+              </Popup>
+            </Marker>
             <Circle
               center={userLocation}
-              radius={300} // 500 meters radius
-              options={{
-                fillColor: "#4285F4",
+              radius={500}
+              pathOptions={{
+                color: locationAccuracy && locationAccuracy <= 20 ? "#00AA00" : locationAccuracy && locationAccuracy <= 50 ? "#FF8C00" : "#FF4444",
+                fillColor: locationAccuracy && locationAccuracy <= 20 ? "#00FF00" : locationAccuracy && locationAccuracy <= 50 ? "#FFA500" : "#FF6B6B",
                 fillOpacity: 0.15,
-                strokeColor: "#4285F4",
-                strokeOpacity: 0.6,
-                strokeWeight: 2,
+                weight: 2,
+              }}
+            />
+            {/* Add a smaller inner circle for the exact position */}
+            <Circle
+              center={userLocation}
+              radius={3}
+              pathOptions={{
+                color: "#FF0000",
+                fillColor: "#FF0000",
+                fillOpacity: 0.8,
+                weight: 1,
               }}
             />
           </>
@@ -179,29 +251,39 @@ const MapLocation: React.FC = () => {
         {locations.map((loc) => (
           <Marker
             key={loc.id}
-            position={loc.position}
-            icon={{
-              url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-                loc.svg
-              )}`,
-              scaledSize: new google.maps.Size(64, 64),
-              anchor: new google.maps.Point(32, 32),
-            }}
-          />
+            position={[loc.position.lat, loc.position.lng]}
+            icon={L.divIcon({
+              html: loc.svg,
+              className: "custom-shift-marker",
+              iconSize: [64, 65],
+              iconAnchor: [32, 65],
+            })}
+          >
+            <Popup>Shift Location</Popup>
+          </Marker>
         ))}
-      </GoogleMap>
+      </MapContainer>
       <div className="mt-4 flex flex-wrap justify-center gap-6 text-sm text-gray-700">
         {/* Current Location Legend */}
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
-            <div className="absolute inset-0 w-4 h-4 border-2 border-blue-500 rounded-full opacity-30"></div>
+            <div className={`absolute inset-0 w-4 h-4 border-2 rounded-full opacity-30 ${
+              locationAccuracy && locationAccuracy <= 20 ? 'border-green-500' : 
+              locationAccuracy && locationAccuracy <= 50 ? 'border-orange-500' : 'border-red-500'
+            }`}></div>
           </div>
-          <span>Current Location (500m radius)</span>
+          <span>
+            Current Location 
+            {locationAccuracy && ` (±${Math.round(locationAccuracy)}m accuracy)`}
+          </span>
         </div>
 
+      
+
         {/* Existing Location Legends */}
-        <div className="flex items-center space-x-2">
+        {
+          currentApiShift && <div className="flex items-center space-x-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -209,38 +291,15 @@ const MapLocation: React.FC = () => {
             viewBox="0 0 20 20"
             fill="none"
           >
-            <circle cx="10" cy="10" r="10" fill="#1EBD66" fill-opacity="0.36" />
+            <circle cx="10" cy="10" r="10" fill="#1EBD66" fillOpacity="0.36" />
             <circle cx="10" cy="10" r="6" fill="#06843F" />
           </svg>
-          <span>Location 1</span>
+          <span>Shift Location</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <circle cx="10" cy="10" r="10" fill="#AB070F" fill-opacity="0.37" />
-            <circle cx="10" cy="10" r="6" fill="#AB070F" />
-          </svg>
-          <span>Location 2</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <circle cx="10" cy="10" r="10" fill="#FFB600" fill-opacity="0.5" />
-            <circle cx="10" cy="10" r="6" fill="#FFB600" />
-          </svg>
-          <span>Location 3</span>
-        </div>
+        }
       </div>
+      </div>
+     }
     </div>
   );
 };

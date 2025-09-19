@@ -13,6 +13,7 @@ import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
 import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { formatDateFromISO, formatTimeFromISO } from "@/utils/formatDateToMDY";
 import { useGetUserDashboardDataQuery } from "@/store/api/user/getUserDashboardData";
+import MapLocation from "@/components/Dashboard/MapLocation";
 
 // API Shift Data Interface based on your actual response
 interface ApiShiftData {
@@ -164,6 +165,7 @@ const UserDashboard: React.FC = () => {
 
           <RecognitionUser achievements={recognitions} />
         </div>
+        <MapLocation />
       </div>
     </div>
   );
