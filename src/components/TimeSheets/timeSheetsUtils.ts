@@ -15,8 +15,12 @@ declare module "jspdf" {
 // Format date for API
 export const processTimeSheetData = {
   formatDateForAPI: (dateString: string) => {
+    // const date = new Date(dateString);
     const date = new Date(dateString);
-    return date.toISOString();
+    const now = new Date();
+    const combined = new Date(date.getFullYear(), date.getMonth(), date.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+    const localISOString = new Date(combined.getTime() - combined.getTimezoneOffset() * 60000).toISOString();
+    return localISOString;
   },
   filterEntries: (entries: TimeSheetEntry[], searchQuery: string) => {
     return entries.filter((entry) => {
