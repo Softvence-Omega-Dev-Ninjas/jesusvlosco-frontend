@@ -29,7 +29,6 @@ const TimeSheetsHeader: React.FC<Props> = ({
           className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[150px]"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          max={new Date().toISOString().split("T")[0]}
         />
       </div>
     </div>

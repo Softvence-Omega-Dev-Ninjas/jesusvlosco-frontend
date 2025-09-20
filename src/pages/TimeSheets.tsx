@@ -52,8 +52,9 @@ export default function TimeSheets() {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toLocaleDateString('en-CA')
   );
+  // console.log("Selected Date:", selectedDate);
   const { data: timeSheetData } = useGetAllTimeSheetAdminQuery({
     date: processTimeSheetData.formatDateForAPI(selectedDate),
     timezone: userTimezone,
