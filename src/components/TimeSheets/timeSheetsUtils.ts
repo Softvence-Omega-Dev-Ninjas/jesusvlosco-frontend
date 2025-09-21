@@ -18,7 +18,8 @@ export const processTimeSheetData = {
   formatDateForAPI: (dateString: string, timezone: string) => {
     return DateTime.fromFormat(dateString, "yyyy-MM-dd", { zone: timezone })
       .startOf("day")
-      .toISO();
+      .toUTC() // convert to UTC
+      .toISO(); // returns like "2025-09-22T00:00:00.000Z"
   },
   filterEntries: (entries: TimeSheetEntry[], searchQuery: string) => {
     return entries.filter((entry) => {
