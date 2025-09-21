@@ -310,14 +310,19 @@ export const getUniqueUserLocations = (
   }));
 };
 
-export const formatTime = (timeString: string) => {
-  if (!timeString) return "N/A";
-  const date = new Date(timeString);
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+export const formatTime = (timeString: string | undefined | null) => {
+  if (!timeString || timeString === "undefined" || timeString === "null") return "N/A";
+  try {
+    const date = new Date(timeString);
+    if (isNaN(date.getTime())) return "N/A";
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return "N/A";
+  }
 };
 
 export const createUserIcon = (

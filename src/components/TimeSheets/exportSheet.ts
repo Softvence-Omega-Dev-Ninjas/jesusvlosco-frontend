@@ -18,7 +18,9 @@ export function exportDateRangeToPDF(
   function drawHeader() {
     try {
       doc.addImage(logo, "JPEG", margin, headerTop, 40, 20);
-    } catch (e) {}
+    } catch {
+      // Logo loading failed, continue without logo
+    }
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(52, 73, 94);
@@ -85,13 +87,13 @@ export function exportDateRangeToPDF(
 
     // Prepare table data
     const tableData = entries.map((entry) => [
-      entry.user.name,
-      entry.shift?.title || "N/A",
-      formatTime(entry.clockIn),
-      formatTime(entry.clockOut),
-      entry.totalHours,
-      entry.regularHours,
-      entry.overTime,
+      entry?.user?.name || "N/A",
+      entry?.shift?.title || "N/A",
+      formatTime(entry?.clockIn),
+      formatTime(entry?.clockOut),
+      entry?.totalHours || "0",
+      entry?.regularHours || "0",
+      entry?.overTime || "0",
     ]);
 
     autoTable(doc, {

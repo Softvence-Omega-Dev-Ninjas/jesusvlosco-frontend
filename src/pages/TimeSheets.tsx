@@ -66,6 +66,7 @@ export default function TimeSheets() {
   );
   const uniqueUserLocations = getUniqueUserLocations(filteredTimeSheetData);
 
+  console.log(searchQuery, "searchQuery");
   return (
     <div
       className={`py-4 bg-gray-50 min-h-screen ${
@@ -78,7 +79,7 @@ export default function TimeSheets() {
         } transition-all duration-300`}
       >
         <h2 className="text-xl font-semibold mb-4 text-gray-800">Time Clock</h2>
-        <ExportSection timezone={userTimezone} />
+        <ExportSection search={searchQuery} timezone={userTimezone} />
         <TimeSheetsHeader
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
