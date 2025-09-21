@@ -25,6 +25,14 @@ const timeClockApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TIME_CLOCK"],
     }),
+
+    getTimeSheetByTimeRange: build.query({
+      query: ({ startTime, endTime, search, timezone }) => ({
+        url: `/admin/time-clock/time-sheet/time-range?startTime=${startTime}&endTime=${endTime}&search=${search}&timezone=${timezone}`,
+        method: "GET",
+      }),
+      providesTags: ["TIME_CLOCK"],
+    }),
   }),
 });
 
@@ -32,5 +40,6 @@ export const {
   useGetAllTimeClockAdminQuery,
   useUpdateTimeClockAdminMutation,
   useGetAllTimeSheetAdminQuery,
-  useLazyGetAllTimeSheetAdminQuery
+  useLazyGetAllTimeSheetAdminQuery,
+  useGetTimeSheetByTimeRangeQuery,
 } = timeClockApi;

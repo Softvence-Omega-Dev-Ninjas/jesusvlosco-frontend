@@ -1,32 +1,94 @@
-import { useState } from "react";
-import { processTimeSheetData } from "@/components/TimeSheets/timeSheetsUtils";
+import { useState, useEffect } from "react";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
-import { useLazyGetAllTimeSheetAdminQuery } from "@/store/api/admin/time-clock/timeClockApi";
+import { useGetTimeSheetByTimeRangeQuery } from "@/store/api/admin/time-clock/timeClockApi";
 import { exportDateRangeToPDF } from "./exportSheet";
 import { DateTime } from "luxon";
 
+
 interface ExportSectionProps {
   timezone: string;
+  search: string;
 }
 
-function getDatesInRange(start: string, end: string): string[] {
-  const dates: string[] = [];
-  let current = DateTime.fromISO(start);
-  const last = DateTime.fromISO(end);
-
-  while (current <= last) {
-    dates.push(current.toISODate()!);
-    current = current.plus({ days: 1 });
-  }
-  return dates;
-}
-
-const ExportSection: React.FC<ExportSectionProps> = ({ timezone }) => {
+const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
   const [range, setRange] = useState({ start: "", end: "" });
   const [loading, setLoading] = useState(false);
 
-  const [fetchTimeSheet] = useLazyGetAllTimeSheetAdminQuery();
 
+  const convertToISO = (dateString: string, isStart: boolean = true): string => {
+    // console.log("convertToISO called:", { dateString, isStart, timezone });
+    if (!dateString) {
+      // console.log("convertToISO: dateString is empty");
+      return "";
+    }
+    try {
+      const date = DateTime.fromISO(dateString, { zone: timezone });
+      // console.log("convertToISO: parsed date:", date.toString());
+      if (isStart) {
+        const result = date.startOf('day').toUTC().toISO() || "";
+        // console.log("convertToISO: start result:", result);
+        return result;
+      } else {
+        const result = date.endOf('day').toUTC().toISO() || "";
+        // console.log("convertToISO: end result:", result);
+        return result;
+      }
+    } catch (error) {
+      console.error("convertToISO error:", error);
+      return "";
+    }
+  };
+
+  // Convert ISO string back to date input format for display
+  const convertFromISO = (isoString: string): string => {
+    if (!isoString) return "";
+    return DateTime.fromISO(isoString).toISODate() || "";
+  };
+
+  const start = range.start ? range.start : "";
+  const end = range.end ? range.end : "";
+  const { data: timeSheetData, isLoading } = useGetTimeSheetByTimeRangeQuery({
+    startTime: start,
+    endTime: end,
+    search: search || "",
+    timezone,
+  }, {
+    skip: !range.start || !range.end, // Skip query when dates are empty
+  });
+
+  // console.log("TimeSheet Data:", timeSheetData);
+
+  // // Debug RTK Query
+  // console.log("RTK Query Debug:", {
+  //   isLoading,
+  //   error,
+  //   hasData: !!timeSheetData,
+  //   dataLength: timeSheetData?.data?.length,
+  //   querySkipped: !range.start || !range.end
+  // });
+
+  // Debug logging to verify date conversion
+  // console.log("Date Range Debug:", {
+  //   range,
+  //   startTime: range.start,
+  //   endTime: range.end,
+  //   startType: typeof range.start,
+  //   endType: typeof range.end,
+  //   startLength: range.start?.length,
+  //   endLength: range.end?.length,
+  //   startDisplay: convertFromISO(range.start),
+  //   endDisplay: convertFromISO(range.end),
+  //   timezone
+  // });
+
+  // // More detailed logging for the query
+  // const queryParams = {
+  //   startTime: range.start,
+  //   endTime: range.end,
+  //   search: search || "",
+  //   timezone,
+  // };
+  // console.log("Query Params:", queryParams);
   // Quick range selection
   const setQuickRange = (
     type: "thisWeek" | "lastWeek" | "thisMonth" | "lastMonth"
@@ -56,34 +118,41 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone }) => {
     }
 
     setRange({
-      start: start.toISODate()!,
-      end: end.toISODate()!,
+      start: start.startOf("day").toUTC().toISO() || "",
+      end: end.endOf("day").toUTC().toISO() || "",
     });
   };
 
   const handleExport = async () => {
-    if (!range.start || !range.end) return;
+    if (!range.start || !range.end) {
+      alert("Please select both start and end dates");
+      return;
+    }
+
+    if (!timeSheetData?.data || timeSheetData.data.length === 0) {
+      alert("No timesheet data available for the selected date range");
+      return;
+    }
+
     setLoading(true);
 
-    const dates = getDatesInRange(range.start, range.end);
-    let allEntries: TimeSheetEntry[] = [];
+    try {
+      // Use the data from the query hook directly
+      const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
 
-    const results = await Promise.all(
-      dates.map((date) =>
-        fetchTimeSheet({
-          date: processTimeSheetData.formatDateForAPI(date),
-          timezone,
-        }).unwrap()
-      )
-    );
+      // Format dates for display in PDF
+      const displayRange = {
+        start: convertFromISO(range.start),
+        end: convertFromISO(range.end)
+      };
 
-    results.forEach((res) => {
-      const timeSheetEntries: TimeSheetEntry[] = res?.data || [];
-      allEntries = allEntries.concat(timeSheetEntries);
-    });
-
-    exportDateRangeToPDF(allEntries, range);
-    setLoading(false);
+      exportDateRangeToPDF(timeSheetEntries, displayRange);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export timesheet data");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,11 +176,14 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone }) => {
             <input
               type="date"
               className="border border-gray-300 rounded px-3 py-2"
-              value={range.start}
-              onChange={(e) =>
-                setRange((r) => ({ ...r, start: e.target.value }))
-              }
-              max={range.end || undefined}
+              value={convertFromISO(range.start)}
+              onChange={(e) => {
+                console.log("Start date changed:", e.target.value);
+                const converted = convertToISO(e.target.value, true);
+                console.log("Start date converted:", converted);
+                setRange((r) => ({ ...r, start: converted }));
+              }}
+              max={convertFromISO(range.end) || undefined}
             />
           </div>
           <div>
@@ -121,16 +193,21 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone }) => {
             <input
               type="date"
               className="border border-gray-300 rounded px-3 py-2"
-              value={range.end}
-              onChange={(e) => setRange((r) => ({ ...r, end: e.target.value }))}
-              min={range.start || undefined}
-              max={DateTime.now().toISODate()!}
+              value={convertFromISO(range.end)}
+              onChange={(e) => {
+                console.log("End date changed:", e.target.value);
+                const converted = convertToISO(e.target.value, false);
+                console.log("End date converted:", converted);
+                setRange((r) => ({ ...r, end: converted }));
+              }}
+              min={convertFromISO(range.start) || undefined}
+              // max={DateTime.now().toISODate()!}
             />
           </div>
 
           <button
             onClick={handleExport}
-            disabled={!range.start || !range.end || loading}
+            disabled={!range.start || !range.end || isLoading || loading}
             className="bg-green-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-60"
           >
             {loading ? "Exporting..." : "Export PDF"}
