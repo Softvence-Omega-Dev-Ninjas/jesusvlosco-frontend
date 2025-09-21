@@ -4,6 +4,7 @@ import logo from "@/assets/logo.jpg";
 import Swal from "sweetalert2";
 import L from "leaflet";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
+import { DateTime } from "luxon";
 
 // Extend jsPDF to include autoTable
 declare module "jspdf" {
@@ -14,13 +15,10 @@ declare module "jspdf" {
 
 // Format date for API
 export const processTimeSheetData = {
-  formatDateForAPI: (dateString: string) => {
-    // const date = new Date(dateString);
-    const date = new Date(dateString);
-    const now = new Date();
-    const combined = new Date(date.getFullYear(), date.getMonth(), date.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
-    const localISOString = new Date(combined.getTime() - combined.getTimezoneOffset() * 60000).toISOString();
-    return localISOString;
+  formatDateForAPI: (dateString: string, timezone: string) => {
+    return DateTime.fromFormat(dateString, "yyyy-MM-dd", { zone: timezone })
+      .startOf("day")
+      .toISO();
   },
   filterEntries: (entries: TimeSheetEntry[], searchQuery: string) => {
     return entries.filter((entry) => {
@@ -311,7 +309,8 @@ export const getUniqueUserLocations = (
 };
 
 export const formatTime = (timeString: string | undefined | null) => {
-  if (!timeString || timeString === "undefined" || timeString === "null") return "N/A";
+  if (!timeString || timeString === "undefined" || timeString === "null")
+    return "N/A";
   try {
     const date = new Date(timeString);
     if (isNaN(date.getTime())) return "N/A";

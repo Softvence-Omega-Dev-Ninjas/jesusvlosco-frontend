@@ -54,9 +54,9 @@ export default function TimeSheets() {
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toLocaleDateString('en-CA')
   );
-  // console.log("Selected Date:", selectedDate);
+
   const { data: timeSheetData } = useGetAllTimeSheetAdminQuery({
-    date: processTimeSheetData.formatDateForAPI(selectedDate),
+    date: processTimeSheetData.formatDateForAPI(selectedDate, userTimezone),
     timezone: userTimezone,
   });
   const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
@@ -65,8 +65,6 @@ export default function TimeSheets() {
     searchQuery
   );
   const uniqueUserLocations = getUniqueUserLocations(filteredTimeSheetData);
-
-  console.log(searchQuery, "searchQuery");
   return (
     <div
       className={`py-4 bg-gray-50 min-h-screen ${
