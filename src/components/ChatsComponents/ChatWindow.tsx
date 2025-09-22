@@ -15,7 +15,7 @@ import {
   useGetPrivateChatQuery,
   useSendPrivateMessageMutation,
 } from "@/store/api/private-chat/privateChatApi";
-import { connectPrivateChat } from "@/utils/socket";
+import { connectPrivateChat, loadPrivateConversations } from "@/utils/privateChatSocket";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
 // import { formatDistanceToNow } from "date-fns";
@@ -69,8 +69,6 @@ export interface TChat {
 export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
   function ResponsiveChatWindow(_props, ref) {
     const navigate = useNavigate();
-    // const chatTabs = ["All", "Unread", "Team"];
-    // const [activeChatTab, setActiveChatTab] = useState("All");
     const [selectedChatId, setSelectedChatId] = useState<string>();
     // const [showChatInfo, setShowChatInfo] = useState(false);
     const [showAddMemberModal, setShowMemberModal] = useState(false);
@@ -78,6 +76,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
     // const [searchTerm, setSearchTerm] = useState("");
     const user = useAppSelector(selectUser);
     const [messageInput, setMessageInput] = useState("");
+    const [chatLists, setChatLists] = useState<any[]>([]);
 
     // Add the send message mutation
     const [sendPrivateMessage] = useSendPrivateMessageMutation();
@@ -144,7 +143,21 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
 
     // Connect to the private chat socket when the component mounts
     useEffect(() => {
-      connectPrivateChat(token);
+      const initializeSocket = async () => {
+        try {
+          await connectPrivateChat(token);
+          // Load conversations after successful connection
+          const conversations = await loadPrivateConversations();
+          setChatLists(conversations);
+          console.log("✅ Successfully loaded conversations via socket:", conversations);
+        } catch (error) {
+          console.error("❌ Failed to load conversations via socket:", error);
+        }
+      };
+
+      if (token) {
+        initializeSocket();
+      }
     }, [token]);
 
     // Mobile view state - controls which panel is visible on mobile
@@ -285,6 +298,7 @@ export default forwardRef<{ openChatWithUser: (userId: string) => void }>(
       <div className="flex min-h-[500px] border-0 md:border border-gray-200 rounded-none md:rounded-2xl overflow-hidden">
         {/* Left Sidebar - Chat List */}
         <Chat
+          chatLists={chatLists}
           handleChatSelect={handleChatSelect}
           selectedChatId={selectedChatId}
           className="hidden md:flex"
