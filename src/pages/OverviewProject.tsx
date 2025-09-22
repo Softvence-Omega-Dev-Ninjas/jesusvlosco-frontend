@@ -79,6 +79,17 @@ const OverviewProject = () => {
   const { data, isLoading, error } = useGetUsersQuery({});
   console.log(data);
 
+
+  const getLatestShift = (shifts: any[]) => {
+    const latestShift = shifts
+      .filter((shift: any) => shift.projectId === projectId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      console.log(latestShift, "Latest Shift");
+
+    return latestShift || { date: "No Shift", time: "No Shift" };
+  };
+
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -141,7 +152,7 @@ const OverviewProject = () => {
               <div className="bg-gray-50 px-5 py-3 border border-primary rounded-xl lg:mx-5">
                 <div
                   className="grid items-center"
-                  style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                  style={{ gridTemplateColumns: "3fr 3fr 4fr 2fr" }}
                 >
                   <div className="text-sm font-medium text-primary">
                     Employee
@@ -149,8 +160,8 @@ const OverviewProject = () => {
                   <div className="text-sm font-medium text-primary">
                     Project Name
                   </div>
-                  <div className="text-sm font-medium text-primary">Shift</div>
-                  <div className="text-sm font-medium text-primary">Date</div>
+                  <div className="text-sm font-medium text-primary">Latest Shift</div>
+                  <div className="text-sm font-medium text-primary">Latest Shift Date</div>
                 </div>
               </div>
 
@@ -166,7 +177,7 @@ const OverviewProject = () => {
                     >
                       <div
                         className="grid items-center"
-                        style={{ gridTemplateColumns: "3fr 4fr 2fr 1fr" }}
+                        style={{ gridTemplateColumns: "3fr 3fr 4fr 2fr" }}
                       >
                         {/* Employee */}
                         <div>
@@ -208,31 +219,21 @@ const OverviewProject = () => {
                         </div>
 
                         {/* Shift */}
-                        <div>
+                        <div className="min-w-max">
                           <div className="space-y-1">
                             <div className="text-sm font-medium text-gray-500 space-y-2">
-                              {employee.user.shift.filter(
-                                (shift: any) => shift.projectId === projectId
-                              ).length === 0
-                                ? "No Shift"
-                                : employee.user.shift.map((shift: any) =>
-                                    shift.projectId === projectId ? (
+
                                       <div
-                                        key={shift.id}
                                         className="space-y-1 flex flex-col justify-start items-start "
                                       >
                                         <div className="text-xs text-gray-500">
-                                          {shift.shiftTitle}
+                                          {getLatestShift(employee.user.shift)?.shiftTitle || "No Shift"}
                                         </div>
                                         <div>
-                                          ({formatTimeFromISO(shift.startTime)}{" "}
-                                          - {formatTimeFromISO(shift.endTime)})
+                                          ({formatTimeFromISO(getLatestShift(employee.user.shift)?.startTime)}{" "}
+                                          - {formatTimeFromISO(getLatestShift(employee.user.shift)?.endTime)})
                                         </div>
                                       </div>
-                                    ) : (
-                                      " "
-                                    )
-                                  )}
                             </div>
                           </div>
                         </div>
@@ -240,19 +241,7 @@ const OverviewProject = () => {
                         {/* Date */}
                         <div>
                           <div className="text-sm text-gray-700 space-y-3">
-                            {employee.user.shift.filter(
-                              (shift: any) => shift.projectId === projectId
-                            ).length === 0
-                              ? "No Shift"
-                              : employee.user.shift.map((shift: any) =>
-                                  shift.projectId === projectId ? (
-                                    <div key={shift.id} className="space-y-1">
-                                      {formatDateFull(shift.date)}
-                                    </div>
-                                  ) : (
-                                    " "
-                                  )
-                                )}
+                            {formatDateFull(getLatestShift(employee.user.shift)?.date) || "No Shift"}
                           </div>
                         </div>
                       </div>
