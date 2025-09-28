@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  UsersIcon,
 } from "lucide-react";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { logoutUser } from "@/store/Slices/AuthSlice/authSlice";
@@ -55,18 +56,9 @@ const navigation: NavigationItem[] = [
       },
     ],
   },
-  // {
-  //   name: "User",
-  //   icon: MessageSquare,
-  //   hasSubmenu: true,
-  //   submenu: [
-  //     { name: "User", icon: Award, path: "/admin/user/user" },
-  //     { name: "User Profile", icon: Mail, path: "/admin/user/user-profile" },
-  //   ],
-  // },
   {
-    name: "Users",
-    icon: MessageSquare,
+    name: "User Management",
+    icon: UsersIcon,
     path: "/admin/user/user",
   },
   {

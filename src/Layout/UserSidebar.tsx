@@ -54,7 +54,7 @@ const navigation: NavigationItem[] = [
   },
 
   {
-    name: "User",
+    name: "User Profile",
     icon: User,
     path: "/user/user-profile",
   },
