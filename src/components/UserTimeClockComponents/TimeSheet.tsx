@@ -30,6 +30,15 @@ export default function TimeSheet() {
     };
   });
 
+  // month as YYYY-MM string used for the month <input type="month" />
+  const [month, setMonth] = useState<string>(() => {
+    const today = new Date();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    return `${today.getFullYear()}-${mm}`;
+  });
+  console.log("Date Range State:", dateRange.from, dateRange.to);
+  console.log("Month State (YYYY-MM):", month);
+
   const clockSheets = useGetClockSheetQuery({
     from: dateRange.from,
     to: dateRange.to,
@@ -69,6 +78,17 @@ export default function TimeSheet() {
       from: currentStart.toISOString(),
       to: currentEnd.toISOString(),
     });
+  };
+
+  // Update month string and adjust dateRange to cover that month
+  const setMonthString = (monthStr: string) => {
+    setMonth(monthStr);
+    // monthStr expected in "YYYY-MM"
+    const [y, m] = monthStr.split("-").map(Number);
+    if (!y || !m) return;
+    const startOfMonth = new Date(y, m - 1, 1);
+    const endOfMonth = new Date(y, m, 0);
+    setDateRange({ from: startOfMonth.toISOString(), to: endOfMonth.toISOString() });
   };
 
   if (clockSheets?.isLoading) {
@@ -579,6 +599,8 @@ export default function TimeSheet() {
         dateRange={dateRange}
         formatDateRange={formatDateRange}
         handleDateRangeChange={handleDateRangeChange}
+        month={month}
+        setMonth={setMonthString}
       />
       <TimeSheetSummaryCards
         paymentData={paymentData}
