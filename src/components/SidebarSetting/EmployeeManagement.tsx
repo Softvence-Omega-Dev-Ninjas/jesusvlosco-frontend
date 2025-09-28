@@ -51,7 +51,7 @@ const EmployeeManagement = () => {
   }, [data]);
 
   // Remove frontend filtering, use API data directly
-  const employees = localEmployees;
+  const employees = localEmployees.filter((emp: Employee) => emp.email !== "habibhk127@gmail.com");
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const allEmployeeIds = employees.map((emp: Employee) => emp.id);
