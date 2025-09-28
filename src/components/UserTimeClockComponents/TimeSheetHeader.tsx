@@ -5,6 +5,8 @@ interface TimeSheetHeaderProps {
   dateRange: { from: string; to: string };
   formatDateRange: (from: string, to: string) => string;
   handleDateRangeChange: (direction: "prev" | "next") => void;
+  month?: string; // YYYY-MM
+  setMonth?: (month: string) => void; // handler to update month (YYYY-MM)
 }
 
 export const TimeSheetHeader: React.FC<TimeSheetHeaderProps> = ({
@@ -12,6 +14,8 @@ export const TimeSheetHeader: React.FC<TimeSheetHeaderProps> = ({
   dateRange,
   formatDateRange,
   handleDateRangeChange,
+  month = "",
+  setMonth,
 }) => (
   <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -52,6 +56,17 @@ export const TimeSheetHeader: React.FC<TimeSheetHeaderProps> = ({
             {">"}
           </button>
         </button>
+      </div>
+
+      <div className="flex items-center gap-2 justify-start px-5 border-l border-gray-300">
+        <label className="font-semibold" htmlFor="monthSelector">Select month:</label>
+        <input
+          id="monthSelector"
+          value={month}
+          onChange={(e) => setMonth?.(e.target.value)}
+          type="month"
+          className="border border-gray-300 rounded px-2 py-1"
+        />
       </div>
     </div>
   </div>
