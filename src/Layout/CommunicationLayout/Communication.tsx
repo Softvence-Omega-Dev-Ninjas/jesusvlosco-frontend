@@ -40,7 +40,7 @@ export const Communication = () => {
                     : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                 }`}
               >
-                Team Chat
+                Private Chat
               </button>
 
               <button
