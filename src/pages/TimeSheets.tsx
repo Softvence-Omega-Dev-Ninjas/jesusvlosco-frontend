@@ -15,7 +15,7 @@ import TimeSheetsMap from "@/components/TimeSheets/TimeSheetsMap";
 import ExportSection from "@/components/TimeSheets/ExportSection";
 
 export interface TimeSheetEntry {
-  id?: string;
+  id: string;
   user: {
     id: string;
     name: string;
@@ -48,6 +48,7 @@ export default function TimeSheets() {
     (el: { shiftStatus: string }) => el.shiftStatus === "DRAFT"
   );
 
+  
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -59,6 +60,8 @@ export default function TimeSheets() {
     date: processTimeSheetData.formatDateForAPI(selectedDate, userTimezone),
     timezone: userTimezone,
   });
+
+  console.log("Time sheet data", timeSheetData?.data);
   const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
   const filteredTimeSheetData = processTimeSheetData.filterEntries(
     timeSheetEntries,
