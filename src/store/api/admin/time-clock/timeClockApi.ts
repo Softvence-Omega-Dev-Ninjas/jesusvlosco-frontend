@@ -33,6 +33,13 @@ const timeClockApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TIME_CLOCK"],
     }),
+    deleteTimeClockAdmin: build.mutation({
+      query: (clockid) => ({
+        url: `/admin/time-clock/time-sheet/${clockid}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TIME_CLOCK"],
+    }),
   }),
 });
 
@@ -42,4 +49,5 @@ export const {
   useGetAllTimeSheetAdminQuery,
   useLazyGetAllTimeSheetAdminQuery,
   useGetTimeSheetByTimeRangeQuery,
+  useDeleteTimeClockAdminMutation,
 } = timeClockApi;

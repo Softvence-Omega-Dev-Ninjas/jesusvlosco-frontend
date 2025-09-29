@@ -1,5 +1,8 @@
-import { LocationPinIcon } from "@/components/TimeSheets/Icons";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
+import { useDeleteTimeClockAdminMutation } from "@/store/api/admin/time-clock/timeClockApi";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import { IoLocationOutline } from "react-icons/io5";
+import Swal from "sweetalert2";
 
 interface Props {
   filteredTimeSheetData: TimeSheetEntry[];
@@ -10,6 +13,7 @@ const TimeSheetsTable: React.FC<Props> = ({
   filteredTimeSheetData,
   formatTime,
 }) => {
+  const [deleteTimeClockAdmin] = useDeleteTimeClockAdminMutation();
   // Group entries by user
   const entriesByUser = filteredTimeSheetData.reduce<
     Record<string, TimeSheetEntry[]>
@@ -38,6 +42,48 @@ const TimeSheetsTable: React.FC<Props> = ({
     }
   });
 
+  const handleEdit = (entry: TimeSheetEntry) => {
+    console.log("Edit entry:", entry);
+    Swal.fire(
+      "Edit Feature",
+      "We are working on this feature. Stay tuned!",
+      "info"
+    );
+    // Implement edit functionality here
+  };
+  const handleDelete = async (entry: TimeSheetEntry) => {
+    console.log("Delete entry:", entry);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteTimeClockAdmin(entry.id).unwrap();
+        Swal.fire(
+          "Deleted!",
+          "The time sheet entry has been deleted.",
+          "success"
+        );
+      } catch (error) {
+        console.error("Error deleting time sheet entry:", error);
+        Swal.fire(
+          "Error!",
+          "There was an error deleting the time sheet entry.",
+          "error"
+        );
+      }
+      // Call delete API here
+    }
+    // Implement delete functionality here
+  };
+
   const renderTableRows = (data: TimeSheetEntry[]) =>
     data.map((entry, index) => {
       const userName = entry?.user?.name || "Unknown User";
@@ -50,7 +96,7 @@ const TimeSheetsTable: React.FC<Props> = ({
 
       return (
         <tr key={rowKey} className="hover:bg-gray-50">
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-3 py-4 whitespace-nowrap">
             <div className="flex items-center">
               <div className="flex-shrink-0 h-10 w-10">
                 <img
@@ -66,33 +112,47 @@ const TimeSheetsTable: React.FC<Props> = ({
               </div>
             </div>
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{shiftTitle}</div>
-            <div className="text-sm text-gray-500 flex items-center">
-              <LocationPinIcon className="w-4 h-4 mr-1" />
-              {shiftLocation}
+          <td className="px-3 py-4 space-y-2 max-w-[250px]">
+            <div className="text-sm font-semibold text-gray-900 break-words">
+              {shiftTitle}
+            </div>
+            <div className="text-sm text-gray-500 flex items-start gap-1">
+              <IoLocationOutline className=" text-blue-700 flex-shrink-0 mt-1" />
+              <p className="break-words">{shiftLocation}</p>
             </div>
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {formatTime(entry.clockIn || "")}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {formatTime(entry.clockOut || "")}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {entry.totalHours || "0"} hours
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {entry.regularHours || "0"} hours
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {entry.overTime || "0"} hours
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             N/A
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             ${parseFloat(entry.regularPayment || "0").toFixed(2)}
+          </td>
+          <td className="px-3 py-4 whitespace-nowrap  text-xl text-gray-500">
+            <div className="flex items-center gap-5 justify-center">
+              <FaEdit
+                onClick={() => handleEdit(entry)}
+                className="text-blue-500 hover:text-blue-700 cursor-pointer"
+              />
+              <FaTrashAlt
+                onClick={() => handleDelete(entry)}
+                className="text-red-500 hover:text-red-700 cursor-pointer"
+              />
+            </div>
           </td>
         </tr>
       );
@@ -101,38 +161,41 @@ const TimeSheetsTable: React.FC<Props> = ({
   return (
     <section className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
       <div className="overflow-x-auto">
-        <h3 className="px-6 py-3 text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
+        <h3 className="px-6 text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
           Latest Clock-ins
         </h3>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-white">
+          <thead className="bg-white text-black">
             <tr>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Name
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[200px]">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider max-w-[250px]">
                 Shift
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Clock In
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Clock Out
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Total Hours
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Regular
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Total Overtime
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Paid Time-off
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Regular Payment
+              </th>
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
+                Actions
               </th>
             </tr>
           </thead>
@@ -149,16 +212,16 @@ const TimeSheetsTable: React.FC<Props> = ({
           </tbody>
         </table>
 
-        <h3 className="px-6 py-3 text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
+        <h3 className="px-6  text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
           Previous Clock-ins
         </h3>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
             <tr>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">
+              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider ">
                 Name
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[200px]">
+              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider max-w-[250px]">
                 Shift
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -179,8 +242,11 @@ const TimeSheetsTable: React.FC<Props> = ({
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Paid Time-off
               </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[150px]">
+              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Regular Payment
+              </th>
+              <th className="px-6 py-5 text-left text-xs font-bold uppercase tracking-wider ">
+                Actions
               </th>
             </tr>
           </thead>
