@@ -92,6 +92,14 @@ export default function TimeSheet() {
     setDateRange({ from: startOfMonth.toISOString(), to: endOfMonth.toISOString() });
   };
 
+  // Handler for header date range inputs (expects ISO strings)
+  const handleHeaderDateRangeChange = (range: { from: string; to: string }) => {
+    // Basic validation and ensure ISO strings
+    const fromIso = new Date(range.from).toISOString();
+    const toIso = new Date(range.to).toISOString();
+    setDateRange({ from: fromIso, to: toIso });
+  };
+
   if (clockSheets?.isLoading) {
     return (
       <div className="px-4 lg:px-0 flex justify-center items-center py-12">
@@ -602,6 +610,7 @@ export default function TimeSheet() {
         handleDateRangeChange={handleDateRangeChange}
         month={month}
         setMonth={setMonthString}
+        onDateRangeChange={handleHeaderDateRangeChange}
       />
       <TimeSheetSummaryCards
         paymentData={paymentData}

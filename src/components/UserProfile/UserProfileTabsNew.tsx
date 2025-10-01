@@ -17,6 +17,7 @@ interface PersonalInfoFormData {
   firstName: string;
   lastName: string;
   gender: string;
+  department?: string;
   dob: Date | null;
   email: string;
   phone: string;
@@ -53,6 +54,7 @@ const UserProfileTabsNew: React.FC<UserProfileTabsNewProps> = ({
       firstName: profileFormData.firstName,
       lastName: profileFormData.lastName,
       gender: profileFormData.gender as "MALE" | "FEMALE" | "OTHER",
+  department: profileFormData.department,
       dob: profileFormData.dob?.toISOString(),
       address: profileFormData.address,
       city: profileFormData.state, // Mapping state to city for now
@@ -175,6 +177,7 @@ const UserProfileTabsNew: React.FC<UserProfileTabsNewProps> = ({
               country: userData.profile?.country || '',
               pinCode: '', // Not in API response
               nationality: userData.profile?.nationality || '',
+              department: userData.profile?.department || '',
             }}
             isEditing={isEditing}
             onSave={handleProfileUpdate}
