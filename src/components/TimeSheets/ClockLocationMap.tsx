@@ -1,25 +1,33 @@
 import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { DateTime } from "luxon";
+import { TimeSheetEntry } from "@/pages/TimeSheets";
 
-interface Props {
-  clockInLat: number;
-  clockInLng: number;
-  clockOutLat?: number;
-  clockOutLng?: number;
-  userName?: string;
-}
+export default function ClockLocationMap({ entry }: { entry: TimeSheetEntry }) {
+  const mapId = `clock-location-map-${entry.id}`;
 
-export default function ClockLocationMap({
-  clockInLat,
-  clockInLng,
-  clockOutLat,
-  clockOutLng,
-  userName,
-}: Props) {
+  // custom icons
+  const clockInIcon = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+
+
+  const getAvatarUrl = () =>
+    entry.user.profileUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      entry.user.name
+    )}&background=random`;
+
   useEffect(() => {
-    const map = L.map("clock-location-map", {
-      center: [clockInLat, clockInLng],
+    const map = L.map(mapId, {
+      center: [entry.clockInLat, entry.clockInLng],
       zoom: 13,
     });
 
@@ -29,32 +37,55 @@ export default function ClockLocationMap({
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
 
-    // Clock In Marker
-    L.marker([clockInLat, clockInLng])
-      .addTo(map)
-      .bindPopup(`<b>${userName || "User"}</b><br/>Clock In`)
-      .openPopup();
+    const markers: L.Marker[] = [];
 
-    // Clock Out Marker
-    if (clockOutLat && clockOutLng) {
-      L.marker([clockOutLat, clockOutLng])
-        .addTo(map)
-        .bindPopup(`<b>${userName || "User"}</b><br/>Clock Out`);
+    // Marker
+    if (entry.clockInLat && entry.clockInLng) {
+      const clockInPopup = `
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; min-width:150px;">
+            <img src="${getAvatarUrl()}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;" />
+             <div>
+            <div style="font-weight:600;">${entry.user.name}</div>
+            <div style="font-size:12px; color:#555;">${entry.user.email}</div>
+              </div>
+          </div>
+         
+          <div style="display:flex; align-items:center; gap:10px; min-width:150px;">
+            <div style="margin-top:6px; font-size:13px;">
+              <b>Clock In:</b><br/> ${DateTime.fromISO(
+                entry.clockIn
+              ).toLocaleString(DateTime.DATETIME_MED)}
+            </div>
+            <div style="margin-top:6px; font-size:13px;">
+              <b>Clock Out:</b><br/> ${DateTime.fromISO(
+                entry.clockOut
+              ).toLocaleString(DateTime.DATETIME_MED)}
+            </div>
+           
+          </div>
+           <div style="font-size:13px; margin-top:4px;">
+              <b>Location:</b> ${entry.location || "N/A"}
+            </div>
+        </div>
+      `;
+      markers.push(
+        L.marker([entry.clockInLat, entry.clockInLng], { icon: clockInIcon })
+          .addTo(map)
+          .bindPopup(clockInPopup)
+      );
     }
 
-    // Fit bounds to markers
-    const bounds = L.latLngBounds([
-      [clockInLat, clockInLng],
-      ...(clockOutLat && clockOutLng
-        ? [L.latLng(clockOutLat, clockOutLng)]
-        : []),
-    ]);
-    map.fitBounds(bounds, { padding: [50, 50] });
+    if (markers.length > 0) {
+      const bounds = L.latLngBounds(markers.map((m) => m.getLatLng()));
+      map.fitBounds(bounds, { padding: [50, 50] });
+      markers[0].openPopup();
+    }
 
     return () => {
       map.remove();
     };
-  }, [clockInLat, clockInLng, clockOutLat, clockOutLng, userName]);
+  }, [entry, mapId]);
 
-  return <div id="clock-location-map" className="w-full h-64 rounded-md" />;
+  return <div id={mapId} className="w-full h-64 rounded-md" />;
 }

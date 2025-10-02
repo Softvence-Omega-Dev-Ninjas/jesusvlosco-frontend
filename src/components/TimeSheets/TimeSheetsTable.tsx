@@ -96,7 +96,7 @@ const TimeSheetsTable: React.FC<Props> = ({
       const userName = entry?.user?.name || "Unknown User";
       const profileUrl =
         entry?.user?.profileUrl ||
-        "https://randomuser.me/api/portraits/men/77.jpg";
+       `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
       const shiftTitle = entry?.shift?.title || "No Shift Assigned";
       const shiftLocation = entry?.shift?.location || "No Location";
       const rowKey = entry.id || `${entry.user?.id}-${index}`;

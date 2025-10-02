@@ -51,6 +51,15 @@ export default function UpdateTimeClockModal({
     e.preventDefault();
     if (!entry) return;
 
+    if (!entry.clockOut) {
+      Swal.fire(
+        "Validation",
+        "This entry has not been clocked out yet.",
+        "warning"
+      );
+      return;
+    }
+
     if (!clockInLocal && !clockOutLocal) {
       Swal.fire(
         "Validation",
@@ -95,53 +104,66 @@ export default function UpdateTimeClockModal({
       />
       <form
         onSubmit={handleSubmit}
-        className="relative bg-white rounded-lg shadow-lg w-full max-w-md z-10 p-6"
+        className="relative bg-white rounded-lg shadow-lg w-full max-w-4xl z-10 p-6"
       >
         <h3 className="text-lg font-semibold mb-4">
           Edit Clock-in / Clock-out Time
         </h3>
-
-        {/* user info */}
-        <div className="flex items-center mb-4">
-          <img
-            src={entry?.user?.profileUrl || ""}
-            alt="User Avatar"
-            className="w-12 h-12 rounded-full mr-4"
-          />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
-            <p className="font-semibold">{entry?.user?.name}</p>
-            <p className="text-sm text-gray-600">{entry?.user?.email}</p>
+            {/* user info */}
+            <div className="flex items-center mb-4">
+              <img
+                src={entry?.user?.profileUrl || ""}
+                alt="User Avatar"
+                className="w-12 h-12 rounded-full mr-4"
+              />
+              <div>
+                <p className="font-semibold">{entry?.user?.name}</p>
+                <p className="text-sm text-gray-600">{entry?.user?.email}</p>
+              </div>
+            </div>
+
+            {/* shift info */}
+            <div className="flex items-center mb-4">
+              <div>
+                <p className="font-semibold mb-1 text-gray-600 text-sm">Shift:</p>
+                <p className="font-semibold">{entry?.shift?.title}</p>
+                <p className="text-sm text-gray-600">
+                  {entry?.shift?.location}
+                </p>
+              </div>
+            </div>
+
+            {/* inputs */}
+            <label className="block mb-3">
+              <span className="text-sm text-gray-700">Clock In</span>
+              <input
+                type="datetime-local"
+                value={clockInLocal}
+                onChange={(e) => setClockInLocal(e.target.value)}
+                className="mt-1 block w-full border rounded px-3 py-2"
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="text-sm text-gray-700">Clock Out</span>
+              <input
+                type="datetime-local"
+                value={clockOutLocal}
+                onChange={(e) => setClockOutLocal(e.target.value)}
+                className="mt-1 block w-full border rounded px-3 py-2"
+              />
+            </label>
+          </div>
+
+          {/* Map of clock-in / clock-out location */}
+          <div className="mb-4">
+            <p className="font-semibold mb-2">Clock In Location</p>
+            <ClockLocationMap entry={entry as TimeSheetEntry} />
           </div>
         </div>
-
-        {/* shift info */}
-        <div className="flex items-center mb-4">
-          <div>
-            <p className="font-semibold">{entry?.shift?.title}</p>
-            <p className="text-sm text-gray-600">{entry?.shift?.location}</p>
-          </div>
-        </div>
-
-        <label className="block mb-3">
-          <span className="text-sm text-gray-700">Clock In</span>
-          <input
-            type="datetime-local"
-            value={clockInLocal}
-            onChange={(e) => setClockInLocal(e.target.value)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-          />
-        </label>
-
-        <label className="block mb-4">
-          <span className="text-sm text-gray-700">Clock Out</span>
-          <input
-            type="datetime-local"
-            value={clockOutLocal}
-            onChange={(e) => setClockOutLocal(e.target.value)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-          />
-        </label>
-
+        {/* buttons */}
         <div className="flex justify-end gap-3">
           <button
             type="button"
@@ -158,18 +180,6 @@ export default function UpdateTimeClockModal({
           >
             {loading ? "Saving..." : "Save"}
           </button>
-        </div>
-
-        {/* Location of clock-in / clock-out */}
-        <div className="mb-4">
-          <p className="font-semibold mb-2">Clock Locations</p>
-          <ClockLocationMap
-            clockInLat={entry?.clockInLat || 0}
-            clockInLng={entry?.clockInLng || 0}
-            clockOutLat={entry?.clockOut ? entry?.clockInLat : undefined}
-            clockOutLng={entry?.clockOut ? entry?.clockInLng : undefined}
-            userName={entry?.user?.name}
-          />
         </div>
       </form>
     </div>
