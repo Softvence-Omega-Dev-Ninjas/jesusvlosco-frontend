@@ -7,7 +7,7 @@ import { TimeSheetEntry } from "@/pages/TimeSheets";
 export default function ClockLocationMap({ entry }: { entry: TimeSheetEntry }) {
   const mapId = `clock-location-map-${entry.id}`;
 
-  // custom icons
+  // custom icon (green for clock in)
   const clockInIcon = L.icon({
     iconUrl:
       "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
@@ -17,7 +17,6 @@ export default function ClockLocationMap({ entry }: { entry: TimeSheetEntry }) {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
   });
-
 
   const getAvatarUrl = () =>
     entry.user.profileUrl ||
@@ -39,36 +38,44 @@ export default function ClockLocationMap({ entry }: { entry: TimeSheetEntry }) {
 
     const markers: L.Marker[] = [];
 
-    // Marker
     if (entry.clockInLat && entry.clockInLng) {
-      const clockInPopup = `
-        <div>
-          <div style="display:flex; align-items:center; gap:10px; min-width:150px;">
-            <img src="${getAvatarUrl()}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;" />
-             <div>
-            <div style="font-weight:600;">${entry.user.name}</div>
-            <div style="font-size:12px; color:#555;">${entry.user.email}</div>
-              </div>
+      // build popup HTML
+      const clockOutSection = entry.clockOut
+        ? `
+          <div style="margin-top:6px; font-size:13px;">
+            <b>Clock Out:</b><br/> ${DateTime.fromISO(
+              entry.clockOut
+            ).toLocaleString(DateTime.DATETIME_MED)}
           </div>
-         
-          <div style="display:flex; align-items:center; gap:10px; min-width:150px;">
-            <div style="margin-top:6px; font-size:13px;">
+        `
+        : "";
+
+      const clockInPopup = `
+        <div style="min-width:200px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img src="${getAvatarUrl()}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;" />
+            <div>
+              <div style="font-weight:600;">${entry.user.name}</div>
+              <div style="font-size:12px; color:#555;">${entry.user.email}</div>
+            </div>
+          </div>
+          
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="margin-top:8px; font-size:13px;">
               <b>Clock In:</b><br/> ${DateTime.fromISO(
                 entry.clockIn
               ).toLocaleString(DateTime.DATETIME_MED)}
             </div>
-            <div style="margin-top:6px; font-size:13px;">
-              <b>Clock Out:</b><br/> ${DateTime.fromISO(
-                entry.clockOut
-              ).toLocaleString(DateTime.DATETIME_MED)}
-            </div>
-           
+            ${clockOutSection}
           </div>
-           <div style="font-size:13px; margin-top:4px;">
-              <b>Location:</b> ${entry.location || "N/A"}
-            </div>
+
+
+          <div style="font-size:13px; margin-top:6px;">
+            <b>Location:</b> ${entry.location || "N/A"}
+          </div>
         </div>
       `;
+
       markers.push(
         L.marker([entry.clockInLat, entry.clockInLng], { icon: clockInIcon })
           .addTo(map)
