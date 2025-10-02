@@ -9,11 +9,23 @@ const timeClockApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TIME_CLOCK"],
     }),
+
+    // ✅ Approve/Reject
     updateTimeClockAdmin: build.mutation({
       query: (credentials) => ({
         url: `/admin/time-clock/${credentials?.shiftId}/approve-or-reject`,
         method: "PATCH",
         body: credentials?.data,
+      }),
+      invalidatesTags: ["TIME_CLOCK"],
+    }),
+
+    // ✅ Update Clock In/Out
+    editTimeClockAdmin: build.mutation({
+      query: ({ id, data }) => ({
+        url: `/admin/time-clock/${id}`, // correct backend endpoint
+        method: "PATCH",
+        body: data, // { clockInAt, clockOutAt }
       }),
       invalidatesTags: ["TIME_CLOCK"],
     }),
@@ -33,6 +45,7 @@ const timeClockApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TIME_CLOCK"],
     }),
+
     deleteTimeClockAdmin: build.mutation({
       query: (clockid) => ({
         url: `/admin/time-clock/time-sheet/${clockid}`,
@@ -46,6 +59,7 @@ const timeClockApi = baseApi.injectEndpoints({
 export const {
   useGetAllTimeClockAdminQuery,
   useUpdateTimeClockAdminMutation,
+  useEditTimeClockAdminMutation,
   useGetAllTimeSheetAdminQuery,
   useLazyGetAllTimeSheetAdminQuery,
   useGetTimeSheetByTimeRangeQuery,
