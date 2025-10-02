@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
 import { useDeleteTimeClockAdminMutation } from "@/store/api/admin/time-clock/timeClockApi";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import { IoLocationOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
+import UpdateTimeClockModal from "./UpdateTimeClockModal";
 
 interface Props {
   filteredTimeSheetData: TimeSheetEntry[];
@@ -14,6 +16,13 @@ const TimeSheetsTable: React.FC<Props> = ({
   formatTime,
 }) => {
   const [deleteTimeClockAdmin] = useDeleteTimeClockAdminMutation();
+
+  // modal state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<TimeSheetEntry | null>(
+    null
+  );
+
   // Group entries by user
   const entriesByUser = filteredTimeSheetData.reduce<
     Record<string, TimeSheetEntry[]>
@@ -43,16 +52,16 @@ const TimeSheetsTable: React.FC<Props> = ({
   });
 
   const handleEdit = (entry: TimeSheetEntry) => {
-    console.log("Edit entry:", entry);
-    Swal.fire(
-      "Edit Feature",
-      "We are working on this feature. Stay tuned!",
-      "info"
-    );
-    // Implement edit functionality here
+    setSelectedEntry(entry);
+    setIsEditOpen(true);
   };
+
+  const onModalClose = () => {
+    setIsEditOpen(false);
+    setSelectedEntry(null);
+  };
+
   const handleDelete = async (entry: TimeSheetEntry) => {
-    console.log("Delete entry:", entry);
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -79,9 +88,7 @@ const TimeSheetsTable: React.FC<Props> = ({
           "error"
         );
       }
-      // Call delete API here
     }
-    // Implement delete functionality here
   };
 
   const renderTableRows = (data: TimeSheetEntry[]) =>
@@ -160,6 +167,12 @@ const TimeSheetsTable: React.FC<Props> = ({
 
   return (
     <section className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+      <UpdateTimeClockModal
+        isOpen={isEditOpen}
+        onClose={onModalClose}
+        entry={selectedEntry}
+      />
+
       <div className="overflow-x-auto">
         <h3 className="px-6 text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
           Latest Clock-ins
@@ -204,7 +217,10 @@ const TimeSheetsTable: React.FC<Props> = ({
               renderTableRows(latestEntries)
             ) : (
               <tr>
-                <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                <td
+                  colSpan={10}
+                  className="px-6 py-8 text-center text-gray-500"
+                >
                   No latest clock-in data found
                 </td>
               </tr>
@@ -255,7 +271,10 @@ const TimeSheetsTable: React.FC<Props> = ({
               renderTableRows(previousEntries)
             ) : (
               <tr>
-                <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                <td
+                  colSpan={10}
+                  className="px-6 py-8 text-center text-gray-500"
+                >
                   No previous clock-in data found
                 </td>
               </tr>
