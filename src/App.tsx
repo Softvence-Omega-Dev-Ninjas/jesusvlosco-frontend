@@ -1,5 +1,5 @@
 import { Layout } from "./Layout/Layout"
-
+import 'leaflet/dist/leaflet.css';
 
 function App() {
 

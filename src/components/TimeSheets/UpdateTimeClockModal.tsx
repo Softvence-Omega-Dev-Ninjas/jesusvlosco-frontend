@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
 import { useEditTimeClockAdminMutation } from "@/store/api/admin/time-clock/timeClockApi";
+import ClockLocationMap from "./ClockLocationMap";
 
 interface Props {
   isOpen: boolean;
@@ -87,7 +88,7 @@ export default function UpdateTimeClockModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-1000 flex items-center justify-center px-4">
       <div
         className="absolute inset-0 bg-black opacity-40"
         onClick={() => !loading && onClose()}
@@ -118,18 +119,6 @@ export default function UpdateTimeClockModal({
           <div>
             <p className="font-semibold">{entry?.shift?.title}</p>
             <p className="text-sm text-gray-600">{entry?.shift?.location}</p>
-          </div>
-        </div>
-
-        {/* clock info */}
-        <div className="flex items-center gap-4 mb-4">
-          <div>
-            <p className="font-semibold">Clock In</p>
-            <p className="text-sm text-gray-600">{entry?.clockInLat}</p>
-          </div>
-          <div>
-            <p className="font-semibold">Clock Out</p>
-            <p className="text-sm text-gray-600">{entry?.clockInLng}</p>
           </div>
         </div>
 
@@ -169,6 +158,18 @@ export default function UpdateTimeClockModal({
           >
             {loading ? "Saving..." : "Save"}
           </button>
+        </div>
+
+        {/* Location of clock-in / clock-out */}
+        <div className="mb-4">
+          <p className="font-semibold mb-2">Clock Locations</p>
+          <ClockLocationMap
+            clockInLat={entry?.clockInLat || 0}
+            clockInLng={entry?.clockInLng || 0}
+            clockOutLat={entry?.clockOut ? entry?.clockInLat : undefined}
+            clockOutLng={entry?.clockOut ? entry?.clockInLng : undefined}
+            userName={entry?.user?.name}
+          />
         </div>
       </form>
     </div>
