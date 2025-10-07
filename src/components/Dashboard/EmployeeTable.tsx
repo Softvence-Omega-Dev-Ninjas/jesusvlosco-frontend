@@ -1,12 +1,95 @@
+// src/components/EmployeeTable.tsx
 import React from "react";
+import { DateTime } from "luxon";
 import { Avatar } from "./Avatar";
-import { Employee } from "./dashboard";
+import { useGetAllAssignedUsersQuery } from "@/store/api/admin/dashboard/getAllAssignedUsers";
 
-export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
-  employees,
-}) => {
+type EmployeeRow = {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  project: string;
+  shiftType: string;
+  shiftLocation?: string;
+  date: string; // dd/mm/yyyy
+  time: string; // e.g. 1:00 pm - 9:00 pm
+};
+
+export const EmployeeTable: React.FC = () => {
+  // default to today (YYYY-MM-DD)
+  const todayIsoDate = DateTime.local().toISODate();
+
+  // call the hook directly here, page/limit can be wired to state if needed
+  const {
+    data: assignedUsersData,
+    isLoading,
+    isFetching,
+    error,
+  } = useGetAllAssignedUsersQuery({
+    shiftDate: todayIsoDate,
+    page: 1,
+    limit: 15,
+  });
+
+  // map backend response to UI rows
+  const employees: EmployeeRow[] = React.useMemo(() => {
+    if (!assignedUsersData?.data) return [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return assignedUsersData.data.map((item: any) => {
+      const profile = item.profile ?? {};
+      const shift = item.shift ?? {};
+      const project = item.project ?? {};
+
+      const name =
+        `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() ||
+        "Unknown";
+      const role = (profile.jobTitle ?? "Employee").replace(/_/g, " ");
+      const avatar = profile.profileUrl ?? "";
+
+      // date: format as dd/mm/yyyy using Luxon
+      const date = item.date
+        ? DateTime.fromISO(item.date).toFormat("dd/LL/yyyy")
+        : "";
+
+      // time: start - end using Luxon TIME_SIMPLE
+      const start = shift.startTime
+        ? DateTime.fromISO(shift.startTime).toLocaleString(DateTime.TIME_SIMPLE)
+        : "";
+      const end = shift.endTime
+        ? DateTime.fromISO(shift.endTime).toLocaleString(DateTime.TIME_SIMPLE)
+        : "";
+      const time =
+        start && end
+          ? `${start.toLowerCase()} - ${end.toLowerCase()}`
+          : start || end || "";
+
+      return {
+        id: profile.id || item.id || `${shift.id}-${profile.id}`,
+        name,
+        role,
+        avatar,
+        project: project.title ?? "No Project",
+        shiftType: shift.shiftType ?? "Morning",
+        shiftLocation: shift.location ?? project.location ?? "",
+        date,
+        time,
+      };
+    });
+  }, [assignedUsersData]);
+
   const shouldScroll = employees.length > 5;
-  // console.log(employees, "employees");
+
+  // simple loading / error UI (you can replace with skeletons)
+  if (isLoading || isFetching) {
+    return <div className="p-4">Loading assigned employees...</div>;
+  }
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">Failed to load assigned employees.</div>
+    );
+  }
 
   return (
     <div className="rounded-2xl overflow-hidden w-full">
@@ -28,6 +111,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
             <div>Shift</div>
             <div>Date</div>
           </div>
+
           {employees.map((employee) => (
             <div
               key={employee.id}
@@ -58,12 +142,14 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
               </div>
 
               <div>
-                <div className="text-base font-normal text-[#484848]">
-                  {employee?.shift}
-                </div>
                 <div className="text-sm font-normal text-gray-500 mt-1">
                   {employee.time}
                 </div>
+                {employee.shiftLocation ? (
+                  <div className="text-xs text-gray-400 mt-1">
+                    {employee.shiftLocation}
+                  </div>
+                ) : null}
               </div>
 
               <div className="text-base font-normal text-gray-900">
@@ -98,7 +184,7 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
               </div>
               <div className="text-right">
                 <div className="text-xs font-normal text-[#484848]">
-                  {employee.shift}
+                  {employee.shiftType}
                 </div>
               </div>
             </div>
@@ -110,10 +196,21 @@ export const EmployeeTable: React.FC<{ employees: Employee[] }> = ({
                   {employee.project}
                 </span>
               </div>
+              
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Time:</span>
                 <span className="text-xs text-gray-600">{employee.time}</span>
               </div>
+              
+              {employee.shiftLocation ? (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Location:</span>
+                  <span className="text-xs text-gray-900">
+                    {employee.shiftLocation}
+                  </span>
+                </div>
+              ) : null}
+              
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">Date:</span>
                 <span className="text-xs text-gray-900">{employee.date}</span>
