@@ -2,40 +2,12 @@ import React from "react";
 import { DateTime } from "luxon";
 import { Avatar } from "./Avatar";
 import { useGetAllAssignedUsersQuery } from "@/store/api/admin/dashboard/getAllAssignedUsers";
-import { AssignedUsersResponse, Profile } from "./employeeTableUtils";
-
-// --- Small helpers (timezone-aware) ---
-const formatDate = (iso?: string, zone = "UTC") => {
-  if (!iso) return "";
-  const dt = DateTime.fromISO(iso).setZone(zone);
-  return dt.isValid ? dt.toFormat("dd/LL/yyyy") : "";
-};
-
-const formatTimeRange = (startIso?: string, endIso?: string, zone = "UTC") => {
-  if (!startIso && !endIso) return "";
-  const s = startIso
-    ? DateTime.fromISO(startIso).setZone(zone).toFormat("h:mm a")
-    : "";
-  const e = endIso
-    ? DateTime.fromISO(endIso).setZone(zone).toFormat("h:mm a")
-    : "";
-  return s && e ? `${s.toLowerCase()} - ${e.toLowerCase()}` : s || e;
-};
-
-const humanizeShiftType = (t?: string, startIso?: string, zone = "UTC") => {
-  if (t)
-    return t
-      .toLowerCase()
-      .replace(/_/g, " ")
-      .replace(/(^| )\w/g, (c) => c.toUpperCase());
-  if (startIso)
-    return DateTime.fromISO(startIso).setZone(zone).hour < 12 ? "AM" : "PM";
-  return "Shift";
-};
-
-const joinName = (p?: Profile) =>
-  `${(p?.firstName ?? "").trim()} ${(p?.lastName ?? "").trim()}`.trim() ||
-  "Unknown";
+import {
+  AssignedUsersResponse,
+  formatDate,
+  formatTimeRange,
+  joinName,
+} from "./employeeTableUtils";
 
 // --- Loading skeleton (simple, beautiful) ---
 const LoadingSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) => (
@@ -134,31 +106,29 @@ const EmployeeTable: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-600">Date:</label>
-          <input
-            type="date"
-            value={shiftDate}
-            onChange={onDateChange}
-            className="border px-2 py-1 rounded"
-          />
+        <div className="flex flex-col md:flex-row justify-end items-end gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Date:</label>
+            <input
+              type="date"
+              value={shiftDate}
+              onChange={onDateChange}
+              className="border px-2 py-1 rounded"
+            />
+          </div>
 
-          <label className="text-sm text-gray-600">Show:</label>
-          <select
-            value={limit}
-            onChange={onLimitChange}
-            className="border px-2 py-1 rounded"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={25}>25</option>
-          </select>
-
-          <div className="text-sm text-gray-600">
-            {metadata
-              ? `Page ${metadata.page} / ${totalPages} — ${total} items`
-              : ""}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Show:</label>
+            <select
+              value={limit}
+              onChange={onLimitChange}
+              className="border px-2 py-1 rounded"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={25}>25</option>
+            </select>
           </div>
         </div>
       </div>
@@ -187,11 +157,6 @@ const EmployeeTable: React.FC = () => {
             // render using user's timezone
             const date = formatDate(item.date, zone);
             const time = formatTimeRange(shift.startTime, shift.endTime, zone);
-            const shiftLabel = humanizeShiftType(
-              shift.shiftType,
-              shift.startTime,
-              zone
-            );
             const shiftLocation = shift.location ?? project.location ?? "";
             const id =
               profile.id ||
@@ -229,9 +194,6 @@ const EmployeeTable: React.FC = () => {
 
                 <div className="col-span-2">
                   <div className="flex items-center gap-2">
-                    <div className="px-2 py-1 bg-gray-100 rounded text-sm font-medium text-gray-700">
-                      {shiftLabel}
-                    </div>
                     <div className="text-sm text-gray-600">{time}</div>
                   </div>
 
@@ -286,11 +248,7 @@ const EmployeeTable: React.FC = () => {
           const avatar = profile.profileUrl ?? "";
           const date = formatDate(item.date, zone);
           const time = formatTimeRange(shift.startTime, shift.endTime, zone);
-          const shiftLabel = humanizeShiftType(
-            shift.shiftType,
-            shift.startTime,
-            zone
-          );
+
           const shiftLocation = shift.location ?? project.location ?? "";
           const id =
             profile.id ||
@@ -314,11 +272,6 @@ const EmployeeTable: React.FC = () => {
                 <div className="flex-1">
                   <div className="font-medium text-primary text-sm">{name}</div>
                   <div className="text-xs text-gray-500">{role}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-normal text-[#484848]">
-                    {shiftLabel}
-                  </div>
                 </div>
               </div>
 
