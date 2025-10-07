@@ -10,7 +10,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDateFull } from "@/utils/formatDateToMDY";
 import { Chat } from "../components/Dashboard/Chat";
-import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
+import EmployeeTable from "../components/Dashboard/EmployeeTable";
 import MapLocation from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { RecognitionEngagement } from "../components/Dashboard/RecognitionEngagement";

@@ -2,13 +2,40 @@ import React from "react";
 import { DateTime } from "luxon";
 import { Avatar } from "./Avatar";
 import { useGetAllAssignedUsersQuery } from "@/store/api/admin/dashboard/getAllAssignedUsers";
-import {
-  AssignedUsersResponse,
-  formatDate,
-  formatTimeRange,
-  humanizeShiftType,
-  joinName,
-} from "./employeeTable";
+import { AssignedUsersResponse, Profile } from "./employeeTableUtils";
+
+// --- Small helpers (timezone-aware) ---
+const formatDate = (iso?: string, zone = "UTC") => {
+  if (!iso) return "";
+  const dt = DateTime.fromISO(iso).setZone(zone);
+  return dt.isValid ? dt.toFormat("dd/LL/yyyy") : "";
+};
+
+const formatTimeRange = (startIso?: string, endIso?: string, zone = "UTC") => {
+  if (!startIso && !endIso) return "";
+  const s = startIso
+    ? DateTime.fromISO(startIso).setZone(zone).toFormat("h:mm a")
+    : "";
+  const e = endIso
+    ? DateTime.fromISO(endIso).setZone(zone).toFormat("h:mm a")
+    : "";
+  return s && e ? `${s.toLowerCase()} - ${e.toLowerCase()}` : s || e;
+};
+
+const humanizeShiftType = (t?: string, startIso?: string, zone = "UTC") => {
+  if (t)
+    return t
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(/(^| )\w/g, (c) => c.toUpperCase());
+  if (startIso)
+    return DateTime.fromISO(startIso).setZone(zone).hour < 12 ? "AM" : "PM";
+  return "Shift";
+};
+
+const joinName = (p?: Profile) =>
+  `${(p?.firstName ?? "").trim()} ${(p?.lastName ?? "").trim()}`.trim() ||
+  "Unknown";
 
 // --- Loading skeleton (simple, beautiful) ---
 const LoadingSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) => (
@@ -28,17 +55,33 @@ const LoadingSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) => (
 
 // --- Component ---
 const EmployeeTable: React.FC = () => {
-  const todayIsoDate = DateTime.local().toISODate();
+  // Detect user's timezone (IANA). Fallback to UTC if not available/invalid.
+  const detectedZone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const zone = DateTime.now().setZone(detectedZone).isValid
+    ? detectedZone
+    : "UTC";
+
+  // default date in user's timezone (YYYY-MM-DD for <input type="date">)
+  const todayIsoDate =
+    DateTime.now().setZone(zone).toISODate() || new Date().toISOString();
+
   const [shiftDate, setShiftDate] = React.useState<string>(todayIsoDate);
   const [page, setPage] = React.useState<number>(1);
   const [limit, setLimit] = React.useState<number>(15);
 
+  // Important: pass timezone to backend so server filters using this zone
   const {
     data: assignedUsersData,
     isLoading,
     isFetching,
     error,
-  } = useGetAllAssignedUsersQuery({ shiftDate, page, limit }) as {
+  } = useGetAllAssignedUsersQuery({
+    shiftDate,
+    page,
+    limit,
+    timezone: zone,
+  }) as {
     data?: AssignedUsersResponse;
     isLoading: boolean;
     isFetching: boolean;
@@ -81,7 +124,15 @@ const EmployeeTable: React.FC = () => {
     <div className="rounded-2xl overflow-hidden w-full">
       {/* Header + filters */}
       <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-[#4E53B1]">Assigned Employee</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-[#4E53B1]">
+            Assigned Employee
+          </h2>
+          <div className="text-sm text-gray-500">
+            Times shown in your timezone:{" "}
+            <span className="font-medium">{zone}</span>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <label className="text-sm text-gray-600">Date:</label>
@@ -133,11 +184,13 @@ const EmployeeTable: React.FC = () => {
             const name = joinName(profile);
             const role = profile.jobTitle ?? "Employee";
             const avatar = profile.profileUrl ?? "";
-            const date = formatDate(item.date);
-            const time = formatTimeRange(shift.startTime, shift.endTime);
+            // render using user's timezone
+            const date = formatDate(item.date, zone);
+            const time = formatTimeRange(shift.startTime, shift.endTime, zone);
             const shiftLabel = humanizeShiftType(
               shift.shiftType,
-              shift.startTime
+              shift.startTime,
+              zone
             );
             const shiftLocation = shift.location ?? project.location ?? "";
             const id =
@@ -231,11 +284,12 @@ const EmployeeTable: React.FC = () => {
           const name = joinName(profile);
           const role = profile.jobTitle ?? "Employee";
           const avatar = profile.profileUrl ?? "";
-          const date = formatDate(item.date);
-          const time = formatTimeRange(shift.startTime, shift.endTime);
+          const date = formatDate(item.date, zone);
+          const time = formatTimeRange(shift.startTime, shift.endTime, zone);
           const shiftLabel = humanizeShiftType(
             shift.shiftType,
-            shift.startTime
+            shift.startTime,
+            zone
           );
           const shiftLocation = shift.location ?? project.location ?? "";
           const id =
