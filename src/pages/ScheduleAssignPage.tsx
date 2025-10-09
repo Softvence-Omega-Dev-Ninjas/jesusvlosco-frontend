@@ -22,6 +22,8 @@ interface ProjectFormData {
 }
 
 const ScheduleAssignPage: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  console.log(searchQuery, "Search Query");
   const {
     currentPage,
     goToNext,
@@ -34,7 +36,8 @@ const ScheduleAssignPage: React.FC = () => {
   });
   const { data: allgetProjects, isLoading } = useGetAllProjectsQuery({
     page: currentPage,
-    limit: 5,
+    limit: 8,
+    search: searchQuery,
   });
   const [createProject] = useCreateProjectMutation();
   const teams = useGetAllTeamDataQuery({ limit: 50 });
@@ -63,7 +66,7 @@ const ScheduleAssignPage: React.FC = () => {
 
   const [openMoreModalId, setOpenMoreModalId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  
 
   // Form setup
   const {
@@ -119,13 +122,15 @@ const ScheduleAssignPage: React.FC = () => {
           </button>
         </div>
 
-        <h3 className="text-primary font-semibold mb-4">Active Projects</h3>
+        
 
-        <div className="flex justify-end mb-6">
-          <div className="relative w-full max-w-xs">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-primary text-2xl font-semibold mb-4">Active Projects</h3>
+           <div className="flex items-center gap-4">
+            <div className="relative w-full max-w-md">
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
+              className="w-full min-w-md pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,8 +140,7 @@ const ScheduleAssignPage: React.FC = () => {
               size={18}
             />
           </div>
-        </div>
-        <div className="flex items-center justify-end mt-6 px-2 py-6">
+          <div className="flex items-center justify-end px-6">
           <CustomPagination
             currentPage={currentPage}
             totalPages={metadata.totalPage}
@@ -147,6 +151,10 @@ const ScheduleAssignPage: React.FC = () => {
             goToNext={goToNext}
           />
         </div>
+           </div>
+         
+        </div>
+        
 
         {isLoading ? (
           <div className="flex justify-center items-center h-48">
