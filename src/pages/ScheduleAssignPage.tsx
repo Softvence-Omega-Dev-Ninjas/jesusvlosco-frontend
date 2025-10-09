@@ -4,15 +4,15 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import ProjectCard from "@/components/JobSchedul/ProjectCard";
 // import Modals from "@/components/JobSchedul/Modals";
-import { useGetAllProjectsQuery, useCreateProjectMutation } from "@/store/api/admin/shift-sheduling/CreateProjectapi";
+import {
+  useGetAllProjectsQuery,
+  useCreateProjectMutation,
+} from "@/store/api/admin/shift-sheduling/CreateProjectapi";
 import { TProject } from "@/types/projectType";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
-
-
-
-
-
+import usePagination from "@/hooks/usePagination";
+import CustomPagination from "@/components/shared/CustomPagination/CustomPagination";
 
 interface ProjectFormData {
   projectName: string;
@@ -22,65 +22,94 @@ interface ProjectFormData {
 }
 
 const ScheduleAssignPage: React.FC = () => {
-    const projects = useGetAllProjectsQuery({});
-    const [createProject] = useCreateProjectMutation();
-    const teams = useGetAllTeamDataQuery({limit: 50});
-  const users = useGetAllUserQuery({limit: 1000});
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  console.log(searchQuery, "Search Query");
+  const {
+    currentPage,
+    goToNext,
+    goToPrevious,
+    goToPage,
+    getPageNumbers,
+    metadata,
+  } = usePagination({
+    noOfItemPerPage: 10,
+  });
+  const { data: allgetProjects, isLoading } = useGetAllProjectsQuery({
+    page: currentPage,
+    limit: 8,
+    search: searchQuery,
+  });
+  const [createProject] = useCreateProjectMutation();
+  const teams = useGetAllTeamDataQuery({ limit: 50 });
+  const users = useGetAllUserQuery({ limit: 1000 });
+
+  // Normalize API response shapes that may vary between endpoints
+  const projectsResponse = (allgetProjects as any)?.data;
+  const apiMeta = projectsResponse?.data?.meta || projectsResponse?.meta;
+  const allProjects: TProject[] =
+    projectsResponse?.data?.projects || projectsResponse?.projects || [];
+
+  // update pagination metadata after API response
+  if (!isLoading && apiMeta && metadata.total !== apiMeta.total) {
+    metadata.total = apiMeta.total;
+    metadata.totalPage = apiMeta.pages;
+    metadata.limit = apiMeta.limit ?? metadata.limit;
+  }
+
+  // console.log(metadata, "Metadata");
+
   // Ensure managers is always an array to avoid calling .map on undefined
-  const managers = users.data?.data || []
-   
-    const allTeams = teams.data?.data?.teams || [];
-    console.log(allTeams, "Teams");
+  const managers = users?.data?.data || [];
+
+  const allTeams = teams?.data?.data?.teams || teams?.data?.teams || [];
+  // console.log(allTeams, "Teams");
+
+  const [openMoreModalId, setOpenMoreModalId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
-    const allProjects = (projects as any).data?.data?.projects || [];
 
-    const [openMoreModalId, setOpenMoreModalId] = useState<string | null>(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+  // Form setup
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ProjectFormData>();
 
-    // Form setup
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ProjectFormData>();
+  // toggle handler expected by ProjectCard
+  const toggleMoreModal = (id: string) => {
+    setOpenMoreModalId((prev) => (prev === id ? null : id));
+  };
 
-    // toggle handler expected by ProjectCard
-    const toggleMoreModal = (id: string) => {
-        setOpenMoreModalId((prev) => (prev === id ? null : id));
-    };
+  // Form submission
+  const onSubmit = async (data: ProjectFormData) => {
+    // console.log(data);
+    try {
+      await createProject({
+        title: data.projectName,
+        teamId: data.team,
+        managerId: data.manager,
+        projectLocation: data.projectLocation,
+      }).unwrap();
 
-    // Form submission
-    const onSubmit = async (data: ProjectFormData) => {
-        console.log(data);
-        try {
-            await createProject({
-                title: data.projectName,
-                teamId: data.team,
-                managerId: data.manager,
-                projectLocation: data.projectLocation,
-            }).unwrap();
-            
-            setShowCreateModal(false);
-            reset();
-            // Success notification could be added here
-        } catch (error) {
-            console.error('Failed to create project:', error);
-            // Error notification could be added here
-        }
-    };
+      setShowCreateModal(false);
+      reset();
+      // Success notification could be added here
+    } catch (error) {
+      console.error("Failed to create project:", error);
+      // Error notification could be added here
+    }
+  };
 
-    // Filter projects based on search
-    const filteredProjects = allProjects.filter((project: TProject) =>
-        project.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    console.log(allProjects);
-
-
+  // Filter projects based on search
+  const filteredProjects = allProjects.filter((project: TProject) =>
+    project.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  // console.log(allProjects);
 
   return (
     <div className="min-h-screen relative">
-      <div
-        className={`p-8 relative transition-opacity duration-300`
-        }
-      >
+      <div className={`p-8 relative transition-opacity duration-300`}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-primary">
             Job Scheduling Lobby
@@ -93,13 +122,15 @@ const ScheduleAssignPage: React.FC = () => {
           </button>
         </div>
 
-        <h3 className="text-primary font-semibold mb-4">Active Projects</h3>
+        
 
-        <div className="flex justify-end mb-6">
-          <div className="relative w-full max-w-xs">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-primary text-2xl font-semibold mb-4">Active Projects</h3>
+           <div className="flex items-center gap-4">
+            <div className="relative w-full max-w-md">
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
+              className="w-full min-w-md pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -109,7 +140,27 @@ const ScheduleAssignPage: React.FC = () => {
               size={18}
             />
           </div>
+          <div className="flex items-center justify-end px-6">
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={metadata.totalPage}
+            isLoading={isLoading}
+            getPageNumbers={getPageNumbers}
+            goToPage={goToPage}
+            goToPrevious={goToPrevious}
+            goToNext={goToNext}
+          />
         </div>
+           </div>
+         
+        </div>
+        
+
+        {isLoading ? (
+          <div className="flex justify-center items-center h-48">
+            <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProjects.length ? (
@@ -125,22 +176,23 @@ const ScheduleAssignPage: React.FC = () => {
             <div className="col-span-full text-center text-gray-500 text-lg py-10">
               No projects found matching your search.
             </div>
-          )
-           } 
+          )}
         </div>
       </div>
 
       {/* Create Project Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50">
-          <div 
+          <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowCreateModal(false)}
           />
-          
+
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Create New Project</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Create New Project
+              </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -156,13 +208,17 @@ const ScheduleAssignPage: React.FC = () => {
                   Project Name *
                 </label>
                 <input
-                  {...register("projectName", { required: "Project name is required" })}
+                  {...register("projectName", {
+                    required: "Project name is required",
+                  })}
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter project name"
                 />
                 {errors.projectName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.projectName.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.projectName.message}
+                  </p>
                 )}
               </div>
 
@@ -172,19 +228,21 @@ const ScheduleAssignPage: React.FC = () => {
                   Team *
                 </label>
                 <select
-                  {...register("team", { required: "Team selection is required" })}
+                  {...register("team", {
+                    required: "Team selection is required",
+                  })}
                   className="capitalize w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {
-                    allTeams.map((team: any) => (
-                      <option key={team.id} value={team.id}>
-                        {team.title}
-                      </option>
-                    ))
-                  }
+                  {allTeams.map((team: any) => (
+                    <option key={team.id} value={team.id}>
+                      {team.title}
+                    </option>
+                  ))}
                 </select>
                 {errors.team && (
-                  <p className="text-red-500 text-xs mt-1">{errors.team.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.team.message}
+                  </p>
                 )}
               </div>
 
@@ -194,20 +252,22 @@ const ScheduleAssignPage: React.FC = () => {
                   Manager *
                 </label>
                 <select
-                  {...register("manager", { required: "Manager selection is required" })}
+                  {...register("manager", {
+                    required: "Manager selection is required",
+                  })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a manager</option>
-                 {
-                   managers.map((manager: any) => (
-                     <option key={manager.id} value={manager.id}>
-                       {manager.profile?.firstName} {manager.profile?.lastName}
-                     </option>
-                   ))
-                 }
+                  {managers.map((manager: any) => (
+                    <option key={manager.id} value={manager.id}>
+                      {manager.profile?.firstName} {manager.profile?.lastName}
+                    </option>
+                  ))}
                 </select>
                 {errors.manager && (
-                  <p className="text-red-500 text-xs mt-1">{errors.manager.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.manager.message}
+                  </p>
                 )}
               </div>
 
@@ -217,13 +277,17 @@ const ScheduleAssignPage: React.FC = () => {
                   Project Location *
                 </label>
                 <input
-                  {...register("projectLocation", { required: "Project location is required" })}
+                  {...register("projectLocation", {
+                    required: "Project location is required",
+                  })}
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter project location"
                 />
                 {errors.projectLocation && (
-                  <p className="text-red-500 text-xs mt-1">{errors.projectLocation.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.projectLocation.message}
+                  </p>
                 )}
               </div>
 
@@ -252,4 +316,4 @@ const ScheduleAssignPage: React.FC = () => {
   );
 };
 
-export default ScheduleAssignPage;   
+export default ScheduleAssignPage;

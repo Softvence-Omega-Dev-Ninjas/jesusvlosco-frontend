@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useGetAllTeamDataQuery } from "@/store/api/admin/shift-sheduling/getAllTeamApi";
 import { Edit3, Trash2, Users, FolderOpen, LoaderIcon } from "lucide-react";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
@@ -6,6 +6,8 @@ import Swal from "sweetalert2";
 import { useDeleteTeamMutation } from "@/store/api/admin/team/CreateTeamApi";
 import { useNavigate } from "react-router-dom";
 import UpdateTeamModal from "./UpdateTeamModal";
+import usePagination from "@/hooks/usePagination";
+import CustomPagination from "@/components/shared/CustomPagination/CustomPagination";
 
 interface Team {
   id: string;
@@ -27,32 +29,29 @@ interface Team {
 }
 
 const ManageTeams = () => {
-    const { data: teamsResponse, isLoading, isFetching, refetch, error } = useGetAllTeamDataQuery({ limit: 50 });
+      const { currentPage, goToNext, goToPrevious, goToPage, getPageNumbers, metadata } = usePagination({
+        noOfItemPerPage: 10,
+      });
+    const { data: teams, isLoading, isFetching, refetch, error } = useGetAllTeamDataQuery({ page: currentPage, limit: 10 });
     const [updateTeam, setUpdateTeam] = useState<Team | null>(null);
     const [deleteTeam] = useDeleteTeamMutation();
     const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
     const [hoveredType, setHoveredType] = useState<'members' | 'projects' | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-    // Pagination
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const itemsPerPage = 8;
+const teamsResponse = teams?.data;
+
+    console.log(teamsResponse, "Teams Response");
+
+      // update metadata after API response
+  if (teamsResponse?.meta && metadata.total !== teamsResponse.meta.total) {
+    metadata.total = teamsResponse.meta.total;
+    metadata.totalPage = teamsResponse.meta.pages;
+    metadata.limit = teamsResponse.meta.limit;
+  }
+
+  console.log(metadata, "Metadata");
 
     const navigate = useNavigate();
-    // console.log(teamsResponse, "Teams Response");
-
-    // Sort teams by createdAt (newest first)
-    const sortedTeams = useMemo(() => {
-        const teams = teamsResponse?.data?.teams || [];
-        return [...teams].sort((a: Team, b: Team) => {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-    }, [teamsResponse]);
-
-    // Paginated slice of teams
-    const paginatedTeams = useMemo(() => {
-        const start = (currentPage - 1) * itemsPerPage;
-        return sortedTeams.slice(start, start + itemsPerPage);
-    }, [sortedTeams, currentPage]);
 
     const handleEditTeam = (team: Team) => {
         console.log('Edit team:', team);
@@ -147,7 +146,7 @@ const ManageTeams = () => {
                                 Please try refreshing the page.
                             </span>
                         </div>
-                    ) : sortedTeams.length === 0 ? (
+                    ) : teamsResponse?.teams?.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-10 text-center text-gray-500">
                             <Users className="w-16 h-16 mb-4 text-gray-400" />
                             <p className="text-lg font-medium">No teams found</p>
@@ -198,7 +197,7 @@ const ManageTeams = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200 relative">
-                                {paginatedTeams.map((team: Team) => (
+                                {teamsResponse?.teams?.map((team: Team) => (
                                     <tr key={team.id} className="hover:bg-gray-50 transition-colors">
                                         {/* Team Info */}
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -295,41 +294,18 @@ const ManageTeams = () => {
                         </table>
                     )}
                 </div>
-                {/* Pagination Controls */}
-                {sortedTeams.length > itemsPerPage && (
-                    <div className="flex items-center justify-end p-4">
-                        <div className="flex items-center space-x-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="px-3 py-1 bg-white border rounded disabled:opacity-50"
-                            >
-                                Prev
-                            </button>
-
-                            {Array.from({ length: Math.ceil(sortedTeams.length / itemsPerPage) }).map((_, idx) => {
-                                const page = idx + 1;
-                                return (
-                                    <button
-                                        key={page}
-                                        onClick={() => setCurrentPage(page)}
-                                        className={`px-3 py-1 border rounded ${currentPage === page ? 'bg-[#4E53B1] text-white' : 'bg-white'}`}
-                                    >
-                                        {page}
-                                    </button>
-                                );
-                            })}
-
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(Math.ceil(sortedTeams.length / itemsPerPage), p + 1))}
-                                disabled={currentPage === Math.ceil(sortedTeams.length / itemsPerPage)}
-                                className="px-3 py-1 bg-white border rounded disabled:opacity-50"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                )}
+              
+                 <div className="flex items-center justify-end mt-6 px-2 py-6">
+                              <CustomPagination
+                                currentPage={currentPage}
+                                totalPages={metadata.totalPage}
+                                isLoading={isLoading}
+                                getPageNumbers={getPageNumbers}
+                                goToPage={goToPage}
+                                goToPrevious={goToPrevious}
+                                goToNext={goToNext}
+                              />
+                            </div>
             </div>
 
             {/* Member Names Tooltip */}
@@ -347,7 +323,7 @@ const ManageTeams = () => {
                         <>
                             <div className="font-medium mb-1">Projects:</div>
                             {(() => {
-                                const currentTeam = sortedTeams.find(team => team.id === hoveredTeam);
+                                const currentTeam = teamsResponse?.teams.find((team: { id: string; }) => team.id === hoveredTeam);
                                 const titles = getProjectTitles(currentTeam!);
                                 if (titles.length === 0) {
                                     return <div className="text-gray-300">No projects</div>;
@@ -365,7 +341,7 @@ const ManageTeams = () => {
                         <>
                             <div className="font-medium mb-1">Team Members:</div>
                             {(() => {
-                                const currentTeam = sortedTeams.find(team => team.id === hoveredTeam);
+                                const currentTeam = teamsResponse?.teams.find((team: { id: string; }) => team.id === hoveredTeam);
                                 const memberNames = getTeamMemberNames(currentTeam!);
                                 if (memberNames.length === 0) {
                                     return <div className="text-gray-300">No members assigned</div>;
