@@ -52,21 +52,27 @@ export default function UpdateTimeClockModal({
     e.preventDefault();
     if (!entry) return;
 
-    if (!entry.clockOut) {
+    if (!clockInLocal || !clockOutLocal) {
       Swal.fire(
         "Validation",
-        "This entry has not been clocked out yet.",
+        "Provide at both Clock In and Clock Out Time.",
         "warning"
       );
       return;
     }
 
-    if (!clockInLocal && !clockOutLocal) {
-      Swal.fire(
-        "Validation",
-        "Provide at least one of Clock In or Clock Out.",
-        "warning"
-      );
+    const clockInDate = new Date(clockInLocal);
+    const clockOutDate = new Date(clockOutLocal);
+    const diffMs = clockOutDate.getTime() - clockInDate.getTime();
+
+    if (diffMs < 0) {
+      Swal.fire("Validation", "Clock Out time cannot be earlier than Clock In time.", "warning");
+      return;
+    }
+
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours > 24) {
+      Swal.fire("Validation", "Clock In and Clock Out time difference cannot exceed 24 hours.", "warning");
       return;
     }
 
