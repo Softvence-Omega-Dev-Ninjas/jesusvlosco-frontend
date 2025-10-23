@@ -10,11 +10,15 @@ import autoTable from "jspdf-autotable";
 import logo from "@/assets/logo.jpg";
 import { toast } from "sonner";
 import { useSendOvertimeRequestMutation } from "@/store/api/admin/overtime";
-import { convertUTCToLocalPretty } from "@/utils/dateUtils";
+import {
+  convertUTCToLocalPretty,
+  userDefaultTimeZone,
+} from "@/utils/dateUtils";
 
 import TimeSheetSummaryCards from "./TimeSheetSummaryCards";
 import TimeSheetTable from "./TimeSheetTable";
 import { TimeSheetHeader } from "./TimeSheetHeader";
+import { DateTime } from "luxon";
 
 export default function TimeSheet() {
   const [submitClockSheet] = useSubmitClockSheetMutation();
@@ -23,8 +27,12 @@ export default function TimeSheet() {
   // Date range state for API query
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-    const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    const startOfWeek = new Date(
+      today.setDate(today.getDate() - today.getDay())
+    );
+    const endOfWeek = new Date(
+      today.setDate(today.getDate() - today.getDay() + 6)
+    );
     return {
       from: startOfWeek.toISOString(),
       to: endOfWeek.toISOString(),
@@ -47,21 +55,33 @@ export default function TimeSheet() {
 
   const formatWeekRange = (
     weekStart: string | number | Date,
-    weekEnd: string | number | Date
+    weekEnd: string | number | Date,
+    timeZone: string = userDefaultTimeZone()
   ) => {
-    const start = new Date(weekStart);
-    const end = new Date(weekEnd);
-    return `${start.getDate()}/${start.getMonth() + 1} - ${end.getDate()}/${end.getMonth() + 1}`;
+    const start = DateTime.fromJSDate(new Date(weekStart), {
+      zone: "utc",
+    }).setZone(timeZone);
+    const end = DateTime.fromJSDate(new Date(weekEnd), { zone: "utc" }).setZone(
+      timeZone
+    );
+
+    return `${start.toFormat("dd/MM")} - ${end.toFormat("dd/MM")}`;
   };
 
-  const formatDateRange = (from: string, to: string) => {
-    const startDate = new Date(from);
-    const endDate = new Date(to);
-    const formatDateOnly = (date: Date) => {
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      return `${day}/${month}`;
-    };
+  const formatDateRange = (
+    from: string | Date,
+    to: string | Date,
+    timeZone: string = userDefaultTimeZone()
+  ) => {
+    const startDate = DateTime.fromJSDate(new Date(from), {
+      zone: "utc",
+    }).setZone(timeZone);
+    const endDate = DateTime.fromJSDate(new Date(to), { zone: "utc" }).setZone(
+      timeZone
+    );
+
+    const formatDateOnly = (dt: DateTime) => dt.toFormat("dd/MM");
+
     return `${formatDateOnly(startDate)} to ${formatDateOnly(endDate)}`;
   };
 
@@ -89,7 +109,10 @@ export default function TimeSheet() {
     if (!y || !m) return;
     const startOfMonth = new Date(y, m - 1, 1);
     const endOfMonth = new Date(y, m, 0);
-    setDateRange({ from: startOfMonth.toISOString(), to: endOfMonth.toISOString() });
+    setDateRange({
+      from: startOfMonth.toISOString(),
+      to: endOfMonth.toISOString(),
+    });
   };
 
   // Handler for header date range inputs (expects ISO strings)
