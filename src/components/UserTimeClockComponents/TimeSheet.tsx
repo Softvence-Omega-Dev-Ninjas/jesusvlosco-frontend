@@ -247,7 +247,6 @@ export default function TimeSheet() {
 
     // Add company logo with reasonable dimensions (mm)
     try {
-      // jsPDF accepts data URLs / image elements. If your bundler provides a URL string, addImage can handle it.
       doc.addImage(logo as any, "JPEG", marginLeft, 10, 30, 15);
     } catch (error) {
       console.error("Error adding logo:", error);
@@ -332,10 +331,7 @@ export default function TimeSheet() {
 
     const serverRegular = parseNumber(paymentData?.totalRegularHour || 0);
     const serverOvertime = parseNumber(paymentData?.totalOvertimeHour || 0);
-    // const serverSum = serverRegular + serverOvertime;
 
-    // Decide canonical source for summary: prefer server paymentData if provided,
-    // else fallback to client computed canonical
     const useServerSummary =
       paymentData && (serverRegular !== 0 || serverOvertime !== 0);
 
@@ -382,25 +378,23 @@ export default function TimeSheet() {
     doc.setFont("helvetica", "bold");
     doc.text("Timesheet Details", marginLeft, smallRowY + 30);
 
-    // Build table rows. We'll define 8 columns:
-    // [Date, Shift, Start, End, Hours, Daily Total, Regular, Overtime]
+    // Build table rows. We'll define 7 columns:
+    // [Date, Shift, Start Time, End Time, Hours, Regular, Overtime]
     const tableData: any[] = [];
 
     weeklyData.forEach((week: any) => {
-      // Make week header: include paidTotal when available to avoid overtime ambiguity
       const { paidTotal } = computeWeeklyPaidFromWeek(week);
 
-      // If backend provided weeklyPaidTotal use it; else show computed paidTotal.
       const weekPaidDisplay =
         week.weeklyPaidTotal !== undefined
           ? parseNumber(week.weeklyPaidTotal)
           : paidTotal;
 
-      // Week header as full-width row
+      // Week header as full-width row (colSpan: 7)
       tableData.push([
         {
           content: `WEEK: ${formatWeekRange(week.weekStart, week.weekEnd)}`,
-          colSpan: 8,
+          colSpan: 7,
           styles: {
             fillColor: [52, 73, 94],
             textColor: [255, 255, 255],
@@ -411,13 +405,13 @@ export default function TimeSheet() {
         },
       ]);
 
-      // Week sub-header with paid total on right (new row spanning entire width)
+      // Week sub-header with paid total on right (spanning 7)
       tableData.push([
         {
           content: `Paid Total Hours: ${
             weekPaidDisplay?.toFixed?.(2) ?? "0.00"
           }`,
-          colSpan: 8,
+          colSpan: 7,
           styles: {
             fillColor: [70, 90, 110],
             textColor: [255, 255, 255],
@@ -428,7 +422,7 @@ export default function TimeSheet() {
         },
       ]);
 
-      // Column headers row
+      // Column headers row (7 columns)
       tableData.push([
         {
           content: "Date",
@@ -451,10 +445,6 @@ export default function TimeSheet() {
           styles: { fillColor: [240, 240, 240], fontStyle: "bold" },
         },
         {
-          content: "Daily Total",
-          styles: { fillColor: [240, 240, 240], fontStyle: "bold" },
-        },
-        {
           content: "Regular",
           styles: { fillColor: [240, 240, 240], fontStyle: "bold" },
         },
@@ -464,7 +454,6 @@ export default function TimeSheet() {
         },
       ]);
 
-      // Add rows for days and entries
       const sortedDays = [...(week.days || [])].sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
@@ -474,9 +463,7 @@ export default function TimeSheet() {
           (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
         );
 
-        sortedEntries.forEach((entry: any, entryIndex: number) => {
-          const isFirstEntryOfDay = entryIndex === 0;
-
+        sortedEntries.forEach((entry: any) => {
           // Use convertUTCToLocalPretty to keep consistent formatting
           const startPretty = convertUTCToLocalPretty(entry.start);
           const endPretty = convertUTCToLocalPretty(entry.end);
@@ -487,59 +474,41 @@ export default function TimeSheet() {
             startPretty.time,
             endPretty.time,
             `${parseNumber(entry.totalHours || 0).toFixed(2)}`,
-            isFirstEntryOfDay
-              ? `${parseNumber(day.totalHours || 0).toFixed(2)}`
-              : "",
             `${parseNumber(entry.regular || 0).toFixed(2)}`,
             `${parseNumber(entry.overtime || 0).toFixed(2)}`,
           ]);
         });
 
-        // Optional daily summary row (if multiple entries)
-        if (day.entries && day.entries.length > 1) {
-          tableData.push([
-            "",
-            "",
-            "",
-            "",
-            `Daily Total: ${parseNumber(day.totalHours || 0).toFixed(2)}h`,
-            "",
-            "",
-            "",
-          ]);
-        }
+        // NOTE: removed per-day summary rows (no "Daily Total" row)
       });
 
-      // spacer row between weeks
-      tableData.push(["", "", "", "", "", "", "", ""]);
+      // spacer row between weeks (7 columns)
+      tableData.push(["", "", "", "", "", "", ""]);
     });
 
-    // Configure sensible column widths in mm so total fits inside contentWidth
-    // Total must be <= contentWidth (pageWidth - margins)
-    // We'll allocate widths summing to contentWidth (approx).
-    // Example: Date 24, Shift 50, Start 18, End 18, Hours 16, DailyTotal 20, Regular 18, Overtime 16
-    const colWidths = {
-      0: 24,
-      1: 50,
-      2: 18,
-      3: 18,
-      4: 16,
-      5: 20,
-      6: 18,
-      7: 16,
+    // Configure sensible column widths in mm so total fits inside contentWidth (A4 contentWidth ≈ 180mm)
+    // Chosen widths sum to contentWidth: 28 + 52 + 22 + 22 + 16 + 20 + 20 = 180
+    const colWidths: Record<number, number> = {
+      0: 28, // Date
+      1: 52, // Shift
+      2: 22, // Start Time
+      3: 22, // End Time
+      4: 16, // Hours
+      5: 20, // Regular
+      6: 20, // Overtime
     };
 
-    // If contentWidth differs slightly, scale down proportionally
     const desiredTotal = Object.values(colWidths).reduce((s, v) => s + v, 0);
     if (desiredTotal > contentWidth) {
       const scale = contentWidth / desiredTotal;
-      Object.entries(colWidths).forEach(([k, v]) => {
-        const idx = Number(k) as keyof typeof colWidths;
-        colWidths[idx] = Math.floor(v * scale);
+      Object.keys(colWidths).forEach((k) => {
+        const idx = Number(k);
+        colWidths[idx] = Math.floor(colWidths[idx] * scale);
       });
     }
 
-    autoTable(doc as any, {
+    // Render table using jspdf-autotable (autoTable should be available globally/imported)
+    (autoTable as any)(doc as any, {
       startY: smallRowY + 36,
       head: [], // we embedded headers inside body rows
       body: tableData,
@@ -568,7 +537,6 @@ export default function TimeSheet() {
         4: { cellWidth: colWidths[4], halign: "center" },
         5: { cellWidth: colWidths[5], halign: "center" },
         6: { cellWidth: colWidths[6], halign: "center" },
-        7: { cellWidth: colWidths[7], halign: "center" },
       },
       margin: { left: marginLeft, right: marginRight },
       tableWidth: contentWidth,
@@ -577,8 +545,8 @@ export default function TimeSheet() {
         fontSize: 8,
         cellPadding: 3,
       },
-      didParseCell: function (data) {
-        // Week header rows (we used colSpan: 8)
+      didParseCell: function (data: any) {
+        // Week header rows (we used colSpan: 7)
         if (
           data.cell.raw &&
           typeof data.cell.raw === "object" &&
@@ -590,38 +558,24 @@ export default function TimeSheet() {
           data.cell.styles.halign = "center";
         }
 
-        // Highlight daily total rows (we look for the phrase)
-        if (
-          data.row.raw &&
-          Array.isArray(data.row.raw) &&
-          data.row.raw[4] &&
-          typeof data.row.raw[4] === "string" &&
-          data.row.raw[4].includes("Daily Total:")
-        ) {
-          data.cell.styles.fillColor = [233, 236, 239];
-          data.cell.styles.fontStyle = "bold";
-        }
-
         // Style spacer rows
         if (
           data.row.raw &&
           Array.isArray(data.row.raw) &&
-          data.row.raw.every((cell) => cell === "")
+          data.row.raw.every((cell: any) => cell === "")
         ) {
           data.cell.styles.fillColor = [255, 255, 255];
           data.cell.styles.minCellHeight = 4;
         }
       },
-      willDrawCell: (data) => {
-        // Ensure long shift titles or long text wrap (redundant safety)
+      willDrawCell: (data: any) => {
         data.cell.styles.cellPadding = 3;
       },
     });
 
     // Footer position and signatures
-    const finalY =
-      (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable
-        ?.finalY || 200;
+    const lastAuto = (doc as any).lastAutoTable;
+    const finalY = lastAuto?.finalY || 200;
 
     // Add signature area if space remains
     if (finalY + 60 < doc.internal.pageSize.getHeight() - 30) {
