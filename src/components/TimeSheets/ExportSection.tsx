@@ -55,40 +55,6 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
   }, {
     skip: !range.start || !range.end, // Skip query when dates are empty
   });
-
-  // console.log("TimeSheet Data:", timeSheetData);
-
-  // // Debug RTK Query
-  // console.log("RTK Query Debug:", {
-  //   isLoading,
-  //   error,
-  //   hasData: !!timeSheetData,
-  //   dataLength: timeSheetData?.data?.length,
-  //   querySkipped: !range.start || !range.end
-  // });
-
-  // Debug logging to verify date conversion
-  // console.log("Date Range Debug:", {
-  //   range,
-  //   startTime: range.start,
-  //   endTime: range.end,
-  //   startType: typeof range.start,
-  //   endType: typeof range.end,
-  //   startLength: range.start?.length,
-  //   endLength: range.end?.length,
-  //   startDisplay: convertFromISO(range.start),
-  //   endDisplay: convertFromISO(range.end),
-  //   timezone
-  // });
-
-  // // More detailed logging for the query
-  // const queryParams = {
-  //   startTime: range.start,
-  //   endTime: range.end,
-  //   search: search || "",
-  //   timezone,
-  // };
-  // console.log("Query Params:", queryParams);
   // Quick range selection
   const setQuickRange = (
     type: "thisWeek" | "lastWeek" | "thisMonth" | "lastMonth"
@@ -159,7 +125,7 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
     <section className="bg-white border border-gray-200 rounded-lg p-6 mb-8 mt-4 flex flex-col sm:flex-row justify-between">
       <div>
         <h3 className="text-lg font-semibold mb-4 text-gray-800">
-          Export Timesheets
+          Export Timesheets as PDF for All Employees
         </h3>
         <div className="text-xs text-gray-500 mt-2">
           Select a week or month range (in your timezone: {timezone}) or pick
