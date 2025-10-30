@@ -12,7 +12,7 @@ const UserDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector(selectUser);
-  console.log("Access Token:", user?.accessToken);
+  // console.log("Access Token:", user?.accessToken);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   useEffect(() => {

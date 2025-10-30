@@ -13,6 +13,7 @@ import {
 import TimeSheetsTable from "@/components/TimeSheets/TimeSheetsTable";
 import TimeSheetsMap from "@/components/TimeSheets/TimeSheetsMap";
 import ExportSection from "@/components/TimeSheets/ExportSection";
+import ExportSectionPerUser from "@/components/TimeSheets/ExportSectionPerUser";
 
 export interface TimeSheetEntry {
   id: string;
@@ -48,12 +49,11 @@ export default function TimeSheets() {
     (el: { shiftStatus: string }) => el.shiftStatus === "DRAFT"
   );
 
-  
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toLocaleDateString('en-CA')
+    new Date().toLocaleDateString("en-CA")
   );
 
   const { data: timeSheetData } = useGetAllTimeSheetAdminQuery({
@@ -61,7 +61,7 @@ export default function TimeSheets() {
     timezone: userTimezone,
   });
 
-  console.log("Time sheet data", timeSheetData?.data);
+  // console.log("Time sheet data", timeSheetData?.data);
   const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
   const filteredTimeSheetData = processTimeSheetData.filterEntries(
     timeSheetEntries,
@@ -79,7 +79,7 @@ export default function TimeSheets() {
           isModalOpen ? "opacity-50 pointer-events-none" : ""
         } transition-all duration-300`}
       >
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Time Clock</h2>
+        <ExportSectionPerUser />
         <ExportSection search={searchQuery} timezone={userTimezone} />
         <TimeSheetsHeader
           selectedDate={selectedDate}

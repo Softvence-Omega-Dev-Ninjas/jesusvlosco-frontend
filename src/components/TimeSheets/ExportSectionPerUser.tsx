@@ -1,35 +1,31 @@
 import { useState } from "react";
-import { TimeSheetEntry } from "@/pages/TimeSheets";
-import { useGetTimeSheetByTimeRangeQuery } from "@/store/api/admin/time-clock/timeClockApi";
-import { exportDateRangeToPDF } from "./exportSheet";
+import { useGetTimeSheetByTimeRangePerUserQuery } from "@/store/api/admin/time-clock/timeClockApi";
 import { DateTime } from "luxon";
+import { userDefaultTimeZone } from "@/utils/dateUtils";
+import { toast } from "sonner";
 
-
-interface ExportSectionProps {
-  timezone: string;
-  search: string;
-}
-
-const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
+const ExportSectionPerUser = () => {
   const [range, setRange] = useState({ start: "", end: "" });
   const [loading, setLoading] = useState(false);
+  const timezone = userDefaultTimeZone();
+  const [userId, setUserId] = useState<string>("");
 
-
-  const convertToISO = (dateString: string, isStart: boolean = true): string => {
-    // console.log("convertToISO called:", { dateString, isStart, timezone });
+  const convertToISO = (
+    dateString: string,
+    isStart: boolean = true
+  ): string => {
     if (!dateString) {
-      // console.log("convertToISO: dateString is empty");
       return "";
     }
     try {
       const date = DateTime.fromISO(dateString, { zone: timezone });
       // console.log("convertToISO: parsed date:", date.toString());
       if (isStart) {
-        const result = date.startOf('day').toUTC().toISO() || "";
+        const result = date.startOf("day").toUTC().toISO() || "";
         // console.log("convertToISO: start result:", result);
         return result;
       } else {
-        const result = date.endOf('day').toUTC().toISO() || "";
+        const result = date.endOf("day").toUTC().toISO() || "";
         // console.log("convertToISO: end result:", result);
         return result;
       }
@@ -47,14 +43,20 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
 
   const start = range.start ? range.start : "";
   const end = range.end ? range.end : "";
-  const { data: timeSheetData, isLoading } = useGetTimeSheetByTimeRangeQuery({
-    startTime: start,
-    endTime: end,
-    search: search || "",
-    timezone,
-  }, {
-    skip: !range.start || !range.end, // Skip query when dates are empty
-  });
+  const { data: timeSheetData, isLoading } =
+    useGetTimeSheetByTimeRangePerUserQuery(
+      {
+        from: start,
+        to: end,
+        userId,
+        timezone,
+      },
+      {
+        skip: !range.start || !range.end, // Skip query when dates are empty
+      }
+    );
+
+  console.log(timeSheetData, "timesheetData");
   // Quick range selection
   const setQuickRange = (
     type: "thisWeek" | "lastWeek" | "thisMonth" | "lastMonth"
@@ -91,33 +93,30 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
 
   const handleExport = async () => {
     if (!range.start || !range.end) {
-      alert("Please select both start and end dates");
+      toast.error("Please select both start and end dates");
       return;
     }
 
-    if (!timeSheetData?.data || timeSheetData.data.length === 0) {
-      alert("No timesheet data available for the selected date range");
+    if (!userId) {
+      toast.error("Please select a user");
       return;
     }
-
-    setLoading(true);
 
     try {
-      // Use the data from the query hook directly
-      const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
+      setLoading(true);
 
-      // Format dates for display in PDF
-      const displayRange = {
-        start: convertFromISO(range.start),
-        end: convertFromISO(range.end)
-      };
+      // // Use the data from the query hook directly
+      // const timeSheetEntries: TimeSheetEntry[] = timeSheetData?.data || [];
 
-      exportDateRangeToPDF(timeSheetEntries, displayRange);
+      // // Format dates for display in PDF
+      // const displayRange = {
+      //   start: convertFromISO(range.start),
+      //   end: convertFromISO(range.end),
+      // };
     } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export timesheet data");
-    } finally {
       setLoading(false);
+      console.error("Export failed:", error);
+      toast.error("Failed to export timesheet data");
     }
   };
 
@@ -125,7 +124,7 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
     <section className="bg-white border border-gray-200 rounded-lg p-6 mb-8 mt-4 flex flex-col sm:flex-row justify-between">
       <div>
         <h3 className="text-lg font-semibold mb-4 text-gray-800">
-          Export Timesheets as PDF for All Employees
+          Export Timesheets as PDF Per User
         </h3>
         <div className="text-xs text-gray-500 mt-2">
           Select a week or month range (in your timezone: {timezone}) or pick
@@ -212,4 +211,4 @@ const ExportSection: React.FC<ExportSectionProps> = ({ timezone, search }) => {
   );
 };
 
-export default ExportSection;
+export default ExportSectionPerUser;
