@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import { userDefaultTimeZone } from "@/utils/dateUtils";
 import { toast } from "sonner";
 import { useGetAllUserQuery } from "@/store/api/admin/user/userApi";
+import { exportTimesheetPdf } from "@/utils/exportTimesheet";
 
 // ExportSectionPerUser — improved responsive UI, same theme (neutral gray + green)
 export default function ExportSectionPerUser() {
@@ -172,9 +173,23 @@ export default function ExportSectionPerUser() {
     }
     try {
       setLoading(true);
-      // NOTE: use timeSheetData from hook to build/export PDF
-      // (The actual export logic remains as in your project — keep here a placeholder)
-      await new Promise((r) => setTimeout(r, 700));
+      const userData = timeSheetData?.data?.clockSheet?.user;
+      const rawWeeklyData = timeSheetData?.data?.clockSheet?.result || [];
+      const weeklyData = [...rawWeeklyData].sort(
+        (a, b) =>
+          new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime()
+      );
+      const paymentData = timeSheetData?.data?.paymentData;
+
+      exportTimesheetPdf({
+        userData,
+        weeklyData,
+        paymentData,
+        dateRange: {
+          from: range.start,
+          to: range.end,
+        },
+      });
       toast.success("Export started");
     } catch (error) {
       console.error("Export failed:", error);
