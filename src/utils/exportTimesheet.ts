@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/utils/exportTimesheet.ts
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { DateTime } from "luxon";
@@ -15,7 +14,7 @@ import Swal from "sweetalert2";
  */
 export type ExportTimesheetPayload = {
   userData: any;
-  weeklyData: any[]; // the processed weekly array you already build in the component
+  weeklyData: any[];
   paymentData?: any;
   dateRange: { from: string; to: string };
 };
@@ -105,9 +104,46 @@ const formatWeekRange = (
  * Main export function — generates and saves the PDF
  */
 export function exportTimesheetPdf(payload: ExportTimesheetPayload) {
-  const { userData, weeklyData, paymentData, dateRange } = payload;
+  const { userData, paymentData, dateRange } = payload;
+  let { weeklyData } = payload;
 
-  // Use mm units and explicit A4 sizing
+  // Step 1: Sort weeks by ascending start date
+  weeklyData = [...(weeklyData || [])].sort(
+    (a, b) => new Date(a.weekStart).getTime() - new Date(b.weekStart).getTime()
+  );
+
+  // Step 2: Adjust first & last weeks based on global range
+  const globalStart = DateTime.fromISO(dateRange.from);
+  const globalEnd = DateTime.fromISO(dateRange.to);
+
+  if (weeklyData.length > 0) {
+    const firstWeek = { ...weeklyData[0] };
+    const lastWeek = { ...weeklyData[weeklyData.length - 1] };
+
+    const firstStart = DateTime.fromISO(firstWeek.weekStart);
+    const firstEnd = DateTime.fromISO(firstWeek.weekEnd);
+    const lastEnd = DateTime.fromISO(lastWeek.weekEnd);
+
+    // Single-week case: adjust both start & end within range
+    if (weeklyData.length === 1) {
+      if (firstStart < globalStart) firstWeek.weekStart = globalStart.toISO();
+      if (firstEnd > globalEnd) firstWeek.weekEnd = globalEnd.toISO();
+
+      weeklyData[0] = firstWeek; // ✅ replace immutably
+    } else {
+      // Multi-week case
+      if (firstStart < globalStart) firstWeek.weekStart = globalStart.toISO();
+      if (lastEnd > globalEnd) lastWeek.weekEnd = globalEnd.toISO();
+
+      weeklyData = [
+        { ...firstWeek },
+        ...weeklyData.slice(1, -1),
+        { ...lastWeek },
+      ];
+    }
+  }
+
+  // PDF generation 
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
