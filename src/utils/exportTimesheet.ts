@@ -337,7 +337,7 @@ export function exportTimesheetPdf(payload: ExportTimesheetPayload) {
         styles: { fillColor: [240, 240, 240], fontStyle: "bold" },
       },
       {
-        content: "Hours",
+        content: "Total Hours",
         styles: { fillColor: [240, 240, 240], fontStyle: "bold" },
       },
       {
