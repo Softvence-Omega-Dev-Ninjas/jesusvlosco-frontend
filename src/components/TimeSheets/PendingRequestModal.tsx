@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ActionIcon } from "../TimeOffRequest/Icons";
 import { Chat, ChatConversationModal } from "./ChatConversationModal"; // Import Chat as well
-import { UserIcon } from "./Icons";
+// import { UserIcon } from "./Icons";
 import FormatShift from "./FormatShift";
 import { useUpdateTimeClockAdminMutation } from "@/store/api/admin/time-clock/timeClockApi";
 import { toast } from "sonner";
@@ -208,13 +208,13 @@ const PendingRequestModal: React.FC<PendingRequestModalProps> = ({
               </span>
               <span className="text-sm text-[#484848]">Add Shift</span>
               {/* Add onClick handler here */}
-              <button
+              {/* <button
                 onClick={() => setShowChatConversationModal(true)}
                 className="flex items-center text-[#4E53B1] cursor-pointer text-sm hover:underline"
               >
                 <UserIcon />
                 Chat with user
-              </button>
+              </button> */}
             </div>
 
             {/* Shift Details */}

@@ -1,3 +1,4 @@
+
 import { baseApi } from "../../baseApi";
 
 const shiftApi = baseApi.injectEndpoints({
@@ -21,7 +22,40 @@ const shiftApi = baseApi.injectEndpoints({
       }),
       providesTags: ['ShiftScheduling'],
     }),
+
+    createShiftTemplate: builder.mutation({
+      query: (body) => ({
+        url: "/shift/templates",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ['ShiftScheduling', 'TEMPLATE'],
+    }),
+
+    getAllShiftTemplates: builder.query({
+      query: () => ({
+        url: "/shift/templates/all",
+        method: "GET",
+      }),
+      providesTags: ['TEMPLATE'],
+    }),
+
+    getSingleShiftTemplate: builder.query({
+      query: (id) => ({
+        url: `/shift/templates/${id}`,
+        method: "GET",
+      }),
+      providesTags: ['TEMPLATE'],
+    }),
+
+    deleteShiftTemplate: builder.mutation({
+      query: (id) => ({
+        url: `/shift/templates/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ['TEMPLATE'],
+    }),
   }),
 });
 
-export const { useCreateShiftMutation, useGetAllShiftsQuery } = shiftApi;
+export const { useCreateShiftMutation, useGetAllShiftsQuery, useCreateShiftTemplateMutation, useGetAllShiftTemplatesQuery, useGetSingleShiftTemplateQuery, useDeleteShiftTemplateMutation } = shiftApi;

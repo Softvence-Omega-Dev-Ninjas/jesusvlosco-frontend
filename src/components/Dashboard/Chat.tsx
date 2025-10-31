@@ -2,27 +2,58 @@ import { Settings, Search } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
-import { TChat, TPrivateChat } from "@/types/chatType";
+// import { useGetPrivateChatQuery } from "@/store/api/private-chat/privateChatApi";
+import { TPrivateChat } from "@/types/chatType";
 import { useAppSelector } from "@/hooks/useRedux";
 import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-// import { useAppSelector } from "@/hooks/useRedux";
-// import { selectUser } from "@/store/Slices/AuthSlice/authSlice";
-// import { useGetTeamChatQuery } from "@/store/api/admin/team-chat/teamChatApi";
-// team tab removed - no team API used here
 
 // Chat interface matching ChatWindow types
 
+// Socket chat data interface
+interface SocketChatData {
+  chatId: string;
+  isHead: boolean;
+  lastMessage: {
+    content: string;
+    conversationId: string;
+    sender: {
+    id: string;
+    profile: {
+      profileUrl: string;
+      firstName: string;
+      lastName?: string;
+    };
+  };
+  senderId: string;
+    createdAt: string;
+    file: File | null;
+    fileId: string | null;
+    id: string;
+    isHead: boolean;
+  };
 
+  participant: {
+    id: string;
+    profile: {
+      profileUrl: string;
+      firstName: string;
+      lastName?: string;
+    };
+  };
+  type: string;
+  updatedAt: string;
+  length: number;
+  isRead?: boolean;
+}
 
 // Props interface for the Chat component
 interface ChatProps {
+  chatLists?: SocketChatData[];
   handleChatSelect?: (chatId: string) => void;
   selectedChatId?: string;
-  className?: string; 
-}
-
-export const Chat = ({
+  className?: string;
+}export const Chat = ({
+  chatLists,
   handleChatSelect,
   selectedChatId,
   className = "",
@@ -32,17 +63,96 @@ export const Chat = ({
   const [searchTerm, setSearchTerm] = useState("");
   const user = useAppSelector(selectUser);
   console.log(user);
+  console.log(chatLists, "chatLists using socket");
   // const user = useAppSelector(selectUser);
   // console.log(user)
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = ["All", "Unread"];
 
-  // Fetch private chats using Redux
-  const { data: conversationsData } = useGetPrivateChatQuery([]);
-  const privateChats =
-    conversationsData?.data.filter((chat: TChat) => chat.type !== "team") || [];
-  // console.log(privateChats, "Private Chats Data in Chat");
+  // Use chatLists from socket instead of Redux query
+  const privateChats = chatLists?.map((chat: SocketChatData) => {
+    try {
+      return {
+        ...chat,
+        type: "private" as const,
+        participant: {
+          id: chat.participant?.id || "unknown",
+          profile: {
+            firstName: chat.participant?.profile?.firstName || "Unknown",
+            lastName: chat.participant?.profile?.lastName || "User",
+            profileUrl: chat.participant?.profile?.profileUrl || null,
+          }
+        },
+        lastMessage: chat.lastMessage ? {
+          ...chat.lastMessage,
+          sender: chat.lastMessage.sender ? {
+            ...chat.lastMessage.sender,
+            profile: {
+              ...chat.lastMessage.sender.profile,
+              lastName: chat.lastMessage.sender.profile.lastName || "User",
+            }
+          } : {
+            id: "unknown",
+            profile: {
+              firstName: "Unknown",
+              lastName: "User",
+              profileUrl: null,
+            }
+          }
+        } : {
+          id: "unknown",
+          content: "No message",
+          createdAt: new Date().toISOString(),
+          sender: {
+            id: "unknown",
+            profile: {
+              firstName: "Unknown",
+              lastName: "User",
+              profileUrl: null,
+            }
+          },
+          file: null,
+        },
+        online: false, // Default to offline since socket doesn't provide this
+        unread: !chat.isRead, // Assume unread if isRead is false or undefined
+      };
+    } catch (error) {
+      console.error("Error transforming chat data:", error, chat);
+      // Return a safe fallback chat object
+      return {
+        ...chat,
+        type: "private" as const,
+        participant: {
+          id: "error",
+          profile: {
+            firstName: "Error",
+            lastName: "Loading",
+            profileUrl: null,
+          }
+        },
+        lastMessage: {
+          id: "error",
+          content: "Error loading message",
+          createdAt: new Date().toISOString(),
+          sender: {
+            id: "error",
+            profile: {
+              firstName: "Error",
+              lastName: "Loading",
+              profileUrl: null,
+            }
+          },
+          file: null,
+        },
+        online: false,
+        unread: false,
+      };
+    }
+  }) || [];
+
+  // Console log the transformed chat lists
+  console.log("� Transformed Private Chats from Socket:", privateChats);
 
   // Filter chats based on search term and active tab
   const filteredChats = privateChats.filter((chat: TPrivateChat) => {
@@ -62,6 +172,11 @@ export const Chat = ({
 
     return matchesSearch && matchesTab;
   });
+
+  // Console log filtered chats
+  console.log("🔍 Filtered Chats (after search/filter):", filteredChats);
+  console.log("🔎 Current Search Term:", searchTerm);
+  console.log("📑 Active Tab:", activeTab);
 
   // No team tab - only private chats
 

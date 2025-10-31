@@ -8,9 +8,9 @@ import {
 import { LoaderCircle } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { formatTimeFromISO, formatDateFull } from "@/utils/formatDateToMDY";
+import { formatDateFull } from "@/utils/formatDateToMDY";
 import { Chat } from "../components/Dashboard/Chat";
-import { EmployeeTable } from "../components/Dashboard/EmployeeTable";
+import EmployeeTable from "../components/Dashboard/EmployeeTable";
 import MapLocation from "../components/Dashboard/MapLocation";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { RecognitionEngagement } from "../components/Dashboard/RecognitionEngagement";
@@ -18,13 +18,16 @@ import { RecognitionTable } from "../components/Dashboard/RecognitionTable";
 import { ShiftNotifications } from "../components/Dashboard/ShiftNotifications";
 import { SurveyPoll } from "../components/Dashboard/SurveyPoll";
 import TimeOffRequests from "../components/Dashboard/TimeOffRequests";
-import { useGetAdminDashStatsQuery, useGetLatestSurveyandPollQuery } from "@/store/api/admin/dashboard/adminDashboardStatApi";
+import {
+  useGetAdminDashStatsQuery,
+  useGetLatestSurveyandPollQuery,
+} from "@/store/api/admin/dashboard/adminDashboardStatApi";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [approveTimeOffRequest] = useApproveTimeOffRequestMutation();
   const { data: adminDashStats } = useGetAdminDashStatsQuery({});
-  const {data: latestSurPoll} = useGetLatestSurveyandPollQuery({})
+  const { data: latestSurPoll } = useGetLatestSurveyandPollQuery({});
   const [declineTimeOffRequest] = useDeclineTimeOffRequestMutation();
   console.log("Survey and Poll:", latestSurPoll);
 
@@ -32,49 +35,6 @@ const Dashboard: React.FC = () => {
   const { data: assignedUsersdata } = useGetAllAssignedUsersQuery({
     orderBy: "asc",
   });
-
-const employees = React.useMemo(() => {
-  if (!assignedUsersdata) return [];
-
-  return assignedUsersdata.data.map((user: any) => {
-    const name =
-      `${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`.trim() ||
-      "Unknown";
-
-    const role = user.profile?.jobTitle?.replace(/_/g, " ") || "Employee";
-
-    const avatar = user.profile?.profileUrl || "";
-
-    const project = user.project?.title || "No Project";
-
-    const shift = user.shift?.shiftType || "Morning";
-
-    // Format date as dd/mm/yyyy
-    const dateObj = new Date(user.date);
-    const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(
-      dateObj.getMonth() + 1
-    ).padStart(2, "0")}/${dateObj.getFullYear()}`;
-
-      const start =
-        user.shift && user.shift.length > 0 && user.shift[0].startTime;
-      const end = user.shift && user.shift.length > 0 && user.shift[0].endTime;
-
-      const startFormatted = start ? formatTimeFromISO(start).toLowerCase() : "";
-      const endFormatted = end ? formatTimeFromISO(end).toLowerCase() : "";
-
-      const time = startFormatted && endFormatted ? `${startFormatted}-${endFormatted}` : "";
-      return {
-        id: user.id,
-        name,
-        role,
-        avatar,
-        project,
-        shift,
-        date,
-        time,
-      };
-    });
-  }, [assignedUsersdata]);
 
   //time off data call
   const { data: timeOffRequestsData, refetch } = useGetAllTimeOffRequestsQuery({
@@ -149,7 +109,7 @@ const employees = React.useMemo(() => {
           <div className="lg:col-span-3 space-y-8">
             <QuickActions />
             <SurveyPoll data={latestSurPoll} />
-            <EmployeeTable employees={employees} />
+            <EmployeeTable />
             {/* <RecognitionTable recognitions={recognitions} /> */}
             <RecognitionTable />
             <MapLocation />
@@ -163,8 +123,12 @@ const employees = React.useMemo(() => {
               onApprove={handleApprove}
               onDecline={handleDecline}
             />
-            <ShiftNotifications shiftNotifications={adminDashStats?.data?.shiftNotifications} />
-            <RecognitionEngagement achievements={adminDashStats?.data?.recognitionNotifications} />
+            <ShiftNotifications
+              shiftNotifications={adminDashStats?.data?.shiftNotifications}
+            />
+            <RecognitionEngagement
+              achievements={adminDashStats?.data?.recognitionNotifications}
+            />
           </div>
         </div>
       </div>

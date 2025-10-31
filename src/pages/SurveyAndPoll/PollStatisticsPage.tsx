@@ -1,11 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useGetPollStatisticsQuery } from "@/store/api/admin/pool/pool";
+import { useDeletePollMutation, useGetPollStatisticsQuery } from "@/store/api/admin/pool/pool";
 import TableLoadingSpinner from "@/utils/TableLoadingSpinner";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
+import Swal from "sweetalert2";
+import PollCard from "@/components/Servey-poll/PollCard";
 const PollStatisticsPage = () => {
-  const { data: pollStatesData, isLoading: isPollLoading } = useGetPollStatisticsQuery(null);
+  const { data: pollStatesData, isLoading: isPollLoading, refetch } = useGetPollStatisticsQuery(null);
   const navigate = useNavigate();
+   const [deletePoll] = useDeletePollMutation();
+    const handleDeletePoll = async (pollId: string) => {
+      console.log("Delete poll with ID:", pollId);
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
+      if (result.isConfirmed) {
+        try {
+          await deletePoll(pollId);
+          refetch();
+          Swal.fire("Deleted!", "Poll has been deleted.", "success");
+          
+        } catch (error) {
+          Swal.fire("Error!", "There was an error deleting the poll.", "error");
+        }
+      }
+    };
 
   if (isPollLoading) return <TableLoadingSpinner />;
   return (
@@ -19,27 +44,7 @@ const PollStatisticsPage = () => {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pollStatesData?.data?.map((poll: any, index: number) => (
-            <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-              <h4 className="font-medium text-primary mb-6 text-sm leading-tight">{poll.title}</h4>
-              <div className="mb-6">
-                <h3 className="text-[#949494]">Response:{poll.response}</h3>
-              </div>
-              <div className="space-y-4 text-[#484848]">
-                {poll?.options.map((pollOptions: any, idx: number) => (
-                  <div key={idx} className=" border-b-2 border-gray-300 pb-2 mb-2 ">
-                    <div className="flex items-center justify-between mb-1 ">
-                      <span className="text-sm ">{pollOptions?.option}</span>
-                      <span className="text-sm font-medium ">{pollOptions?.responsePercentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className={`h-2 rounded-full bg-[#4E53B1]`} style={{ width: `${pollOptions?.responsePercentage}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          {pollStatesData?.data?.map((poll: any, index: number) => <PollCard key={index} poll={poll} index={index} handleDeletePoll={handleDeletePoll} />)}
         </div>
       </div>
     </div>

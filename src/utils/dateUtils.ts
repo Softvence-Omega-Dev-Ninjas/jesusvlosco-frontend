@@ -358,6 +358,66 @@ export const convertUTCToLocal = (
 };
 
 /**
+ * Convert UTC ISO string -> local { date: "Fri, Sep 20", time: "h:mm AM/PM" } in `timeZone`.
+ */
+// export const convertUTCToLocalPretty = (
+//   utcISOString: string,
+//   timeZone: string = userDefaultTimeZone()
+// ): { date: string; time: string } => {
+//   const d = new Date(utcISOString);
+
+//   // Date (short weekday + short month + day)
+//   const dtfDate = new Intl.DateTimeFormat("en", {
+//     timeZone,
+//     weekday: "short",
+//     month: "short",
+//     day: "numeric",
+//   });
+
+//   // Time (12-hour with AM/PM)
+//   const dtfTime = new Intl.DateTimeFormat("en", {
+//     timeZone,
+//     hour: "numeric",
+//     minute: "2-digit",
+//     hour12: true,
+//   });
+
+//   return {
+//     date: dtfDate.format(d), // e.g. "Fri, Sep 20"
+//     time: dtfTime.format(d), // e.g. "4:19 AM"
+//   };
+// };
+
+export const convertUTCToLocalPretty = (
+  utcInput: string | Date | null | undefined,
+  timeZone: string = userDefaultTimeZone()
+): { date: string; time: string } => {
+  if (!utcInput) return { date: "", time: "" };
+
+  // accept ISO string or Date
+  let dt =
+    typeof utcInput === "string"
+      ? DateTime.fromISO(utcInput, { zone: "utc" })
+      : DateTime.fromJSDate(new Date(utcInput), { zone: "utc" });
+
+  // Convert to user's timezone
+  dt = dt.setZone(timeZone);
+
+  if (!dt.isValid) {
+    // fallback empty values on invalid input
+    return { date: "", time: "" };
+  }
+
+  // Example formats:
+  // date -> "Fri, Sep 20"
+  // time -> "4:19 AM"
+  const date = dt.toFormat("ccc, LLL dd");
+  const time = dt.toFormat("h:mm a");
+
+  return { date, time };
+};
+
+/**
  * Compare whether two dates represent the same calendar DAY in the provided timeZone.
  * Works with Date | string (ISO) inputs.
  */
@@ -380,12 +440,11 @@ export const isSameDayInTimeZone = (
     return `${p("year")}-${p("month")}-${p("day")}`;
   };
 
-  return toYMD(a) === toYMD(b); 
-  
+  return toYMD(a) === toYMD(b);
 };
 
 export function getShiftDateISOString() {
   const userTimeZone = userDefaultTimeZone();
-  const dt = DateTime.now().setZone(userTimeZone).startOf("day"); // ✅ normalize to start of day in user tz
+  const dt = DateTime.now().setZone(userTimeZone); // ✅ normalize to start of day in user tz
   return dt.toUTC().toISO(); // send start of day in UTC
 }

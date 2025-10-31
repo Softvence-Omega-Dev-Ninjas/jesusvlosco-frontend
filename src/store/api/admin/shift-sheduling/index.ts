@@ -52,6 +52,16 @@ const shiftScheduleApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["CLOCK_IN_OUT"],
     }),
+
+    updateClockInRequestData: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/admin/time-clock/clock-request/update/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["CLOCK_IN_OUT"],
+    }),
+
     cancelClockInRequest: builder.mutation({
       query: ({ id }) => ({
         url: `/employee/request-time-clock/cancel/${id}`,
@@ -66,6 +76,7 @@ export const {
   useAddClockInRequestMutation,
   useGetAllClockInRequestForAdminQuery,
   useUpdateClockInRequestMutation,
+  useUpdateClockInRequestDataMutation,
   useGetAllClockInRequestForUserQuery,
   useCancelClockInRequestMutation,
 } = shiftScheduleApi;

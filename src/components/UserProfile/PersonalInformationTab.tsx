@@ -12,11 +12,25 @@ const genderOptions = [
   { label: "Prefer not to say", value: "PREFER_NOT_TO_SAY" },
 ];
 
+const departmentOptions = [
+  { label: "IT", value: "IT" },
+  { label: "Development", value: "DEVELOPMENT" },
+  { label: "HR", value: "HR" },
+  { label: "Finance", value: "FINANCE" },
+  { label: "Marketing", value: "MARKETING" },
+  { label: "Seals", value: "SEALS" },
+  { label: "Labourer", value: "LABOURER" },
+  { label: "Carpenter", value: "CARPENTER" },
+  { label: "Electrician", value: "ELECTRICIAN" },
+  { label: "Driver", value: "DRIVER" },
+];
+
 // Define the interface for the personal information form data
 interface PersonalInfoFormData {
   firstName: string;
   lastName: string;
   gender: string;
+  department?: string;
 dob: Date | null; // Changed to Date | null
   email: string;
   phone: string;
@@ -139,6 +153,33 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
             />
           )}
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Department
+          </label>
+          {isEditing ? (
+            <select
+              name="department"
+              value={formData.department || ""}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="">Select department</option>
+              {departmentOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={departmentOptions.find(opt => opt.value === formData.department)?.label || formData.department || ""}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
+            />
+          )}
+        </div>
         <DateInput
           label="Date of Birth"
           name="dateOfBirth"
@@ -201,13 +242,6 @@ const PersonalInformationTab: React.FC<PersonalInformationProps> = ({
         />
         {/* The last "Date of Birth" in the UI seems redundant if it's the same as the one above.
             Keeping it for direct UI representation but it's likely a UI design quirk. */}
-        <DateInput
-          label="Date of Birth (Redundant)"
-          name="dateOfBirthRedundant"
-          value={formData.dob} // This will mirror the first DOB field
-          onChange={(date) => handleDateChange(date, "dob")} // Still updates the same field
-          readOnly={!isEditing}
-        />
       </div>
 
       {isEditing && (

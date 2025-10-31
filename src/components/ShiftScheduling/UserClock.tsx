@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useGetClockHistoryQuery, useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { toLocalTimeString } from "@/utils/timeUtils";
 import AddClockInRequestModal from "./AddClockInRequestModal/AddClockInRequestModal";
+// import { is } from "date-fns/locale"; 
 
 interface TimeEntry {
   clockIn: string;
@@ -16,16 +17,26 @@ interface TimeEntry {
 }
 
 const TimeTrackingDashboard: React.FC = () => {
-  const currentDate = new Date().toLocaleDateString("en-US", {
+  // const currentDate = new Date().toLocaleDateString("en-US", {
+  //   weekday: "long",
+  //   year: "numeric",
+  //   month: "long",
+  //   day: "numeric",
+  // });
+  const { data } = useGetAllUserTimeClockQuery(null);
+  const clockData = useGetClockInOutQuery({});
+  console.log("Clock Data:", clockData);
+  const clock = clockData?.data?.data?.clock;
+  const shift = clockData?.data?.data?.shift;
+  const isToday = new Date().toISOString().split("T")[0] === shift?.date.split("T")[0];
+  const isUpcomming = new Date(shift?.date) > new Date();
+  const shiftDate = shift && isToday ? new Date(shift.date).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
-  const { data } = useGetAllUserTimeClockQuery(null);
-  const clockData = useGetClockInOutQuery({});
-  const clock = clockData?.data?.data?.clock;
-  // console.log(clock);
+  }) : "";
+  // console.log(" Clock Data:", clock);
   const timeClockRequest = data?.data?.data;
   // console.log({ timeClockRequest });
   const [deleteTimeCLock] = useDeleteSchedulingRequestMutation();
@@ -84,9 +95,9 @@ const TimeTrackingDashboard: React.FC = () => {
           {/* Current Status */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#4E53B1]">Current Status</h2>
+              <h2 className="text-xl font-semibold text-[#4E53B1]">{isToday ? "Current Status" : (isUpcomming ? "Upcoming Shift" : "Previous Shift")}</h2>
             </div>
-            <p className="text-sm text-gray-600 mb-6">{currentDate}</p>
+            <p className="text-sm text-gray-600 mb-6">{shiftDate ? shiftDate : "No Upcoming/Previous Shift Recorded"}</p>
 
             <div className="grid grid-cols-3 gap-8">
               <div>

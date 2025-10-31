@@ -13,6 +13,7 @@ import { RecognitionUser } from "@/components/UserDashoboard/RecognitionUser";
 import { useGetClockInOutQuery } from "@/store/api/clockInOut/clockinoutapi";
 import { formatDateFromISO, formatTimeFromISO } from "@/utils/formatDateToMDY";
 import { useGetUserDashboardDataQuery } from "@/store/api/user/getUserDashboardData";
+import MapLocation from "@/components/Dashboard/MapLocation";
 
 // API Shift Data Interface based on your actual response
 interface ApiShiftData {
@@ -31,31 +32,48 @@ interface ApiShiftData {
   shiftStatus: "PUBLISHED" | "DRAFT" | "TEMPLATE";
   createdAt: string;
   updatedAt: string;
-  
 }
 
 const UserDashboard: React.FC = () => {
   // Get shift data from API
-  const data = useGetClockInOutQuery({});
-  const currentApiShift = data?.data?.data?.shift as ApiShiftData | undefined;
-  const teamMembers = data?.data?.data?.teamMembers as any | undefined;
-  const clock = data?.data?.data?.clock as any | undefined;
+  const { data, isLoading, refetch } = useGetClockInOutQuery({});
+  const currentApiShift = data?.data?.shift as ApiShiftData | undefined;
+  // console.log("Current API Shift:", data);
+  const teamMembers = data?.data?.teamMembers as any | undefined;
+  const clock = data?.data?.clock as any | undefined;
+
+  const clockStatus: "ACTIVE" | "COMPLETED" | "INACTIVE" = clock?.status || "INACTIVE";
   // console.log(teamMembers, "Team members")
   // console.log(currentApiShift, "Current API Shift Data")
   // console.log("Dashboard Data", data?.data?.data);
-  const isClockedIn = clock?.clockInAt ? true : false;
-  const isClockedOut = clock?.clockOutAt ? true : false;
+  function isValidDateValue(value: any) {
+    return (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      value !== "null" &&
+      value !== "undefined"
+    );
+  }
+
+  const isClockedIn = isValidDateValue(clock?.clockInAt);
+  const isClockedOut = isValidDateValue(clock?.clockOutAt);
+
+  console.log({ isClockedIn, isClockedOut }, "Clocked In/Out Status", clock);
+
   // console.log("isClockedIn", isClockedIn, "isClockedOut", isClockedOut);
 
   // Use the latest shift from today, or fallback to shiftData from clock API
-  
 
+  console.log("Current API Shift:", currentApiShift);
   // Convert API shift data to UI Shift format
   const currentShiftFromApi: Shift | undefined = currentApiShift
     ? {
         startTime: formatTimeFromISO(currentApiShift.startTime), // Convert ISO string to local time
         endTime: formatTimeFromISO(currentApiShift.endTime),
         date: formatDateFromISO(currentApiShift.date),
+        isToday: currentApiShift.date.split("T")[0] === new Date().toISOString().split("T")[0],
+        isUpcomming: new Date(currentApiShift.date) > new Date(),
         location: currentApiShift.location || "",
         team: [], // Team data might need to be fetched separately or processed differently
       }
@@ -76,16 +94,22 @@ const UserDashboard: React.FC = () => {
   const upcomingTasksData = dashboardData?.data?.data?.upcomingTasks ?? [];
   const companyUpdatesData = dashboardData?.data?.data?.companyUpdates ?? [];
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-4">
       <div className="w-full mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            <CurrentShiftCard 
-            shift={currentShiftFromApi || fallbackShift} 
-            team={teamMembers} 
-            isClockedIn={isClockedIn}
-            isClockedOut={isClockedOut}
+            <CurrentShiftCard
+              shift={currentShiftFromApi || fallbackShift}
+              team={teamMembers}
+              // isClockedIn={isClockedIn}
+              isClockedOut={isClockedOut}
+              clockStatus={clockStatus}
+              refetch={refetch}
             />
           </div>
 
@@ -141,6 +165,7 @@ const UserDashboard: React.FC = () => {
 
           <RecognitionUser achievements={recognitions} />
         </div>
+        <MapLocation />
       </div>
     </div>
   );

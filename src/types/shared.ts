@@ -51,6 +51,7 @@ export interface TShift {
   startTime?: string;
   endTime?: string;
   shiftTitle?: string;
+  title?: string;
   allDay?: boolean;
   job?: string;
   shiftStatus?: string;

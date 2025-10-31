@@ -18,6 +18,7 @@ export const baseApi = createApi({
   }),
 
   tagTypes: [
+    "PROJECTS",
     "BLOG",
     "EditedContent",
     "ADMIN_USER",
@@ -35,8 +36,11 @@ export const baseApi = createApi({
     "Like",
     "TASK",
     "CLOCK_IN_OUT",
+    "OVERTIME",
     "CLOCK_SHEET",
-    "NOTIFICATION"
+    "NOTIFICATION",
+    "POLL",
+    "TEMPLATE"
   ],
   endpoints: () => ({}),
 });

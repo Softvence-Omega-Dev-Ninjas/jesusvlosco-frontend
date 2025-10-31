@@ -178,7 +178,7 @@ const AddClockInRequestModal = () => {
                     className={`w-full rounded-md px-3 py-2 border border-gray-300  bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:none] [-webkit-appearance:none] ${
                       errors.startDate ? "border-red-500" : ""
                     }`}
-                    min={new Date().toISOString().slice(0, 10)}
+              
                   />
                   {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
                 </div>
@@ -207,7 +207,6 @@ const AddClockInRequestModal = () => {
                     className={`w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:none] [-webkit-appearance:none] ${
                       errors.endDate ? "border-red-500" : ""
                     }`}
-                    min={new Date().toISOString().slice(0, 10)}
                   />
                   {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
                 </div>

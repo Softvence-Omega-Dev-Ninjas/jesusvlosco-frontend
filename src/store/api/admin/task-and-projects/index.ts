@@ -71,6 +71,14 @@ export const taskAndProjectApi = baseApi.injectEndpoints({
       }),
       providesTags: ["TASK", "PROJECT"],
     }),
+    //  Delete survey
+    deleteTask: builder.mutation({
+      query: (id) => ({
+        url: `/admin/task/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TASK", "PROJECT"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -83,4 +91,5 @@ export const {
   useSubmitTaskMutation,
   useGetProjectDetailsQuery,
   useGetSingleTaskQuery,
+  useDeleteTaskMutation,
 } = taskAndProjectApi;
