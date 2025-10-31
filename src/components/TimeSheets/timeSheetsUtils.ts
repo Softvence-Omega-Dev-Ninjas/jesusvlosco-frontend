@@ -38,6 +38,7 @@ export const processTimeSheetData = {
     timeSheetEntries: TimeSheetEntry[],
     searchQuery: string,
     selectedDate: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     uniqueUserLocations: any[]
   ) => {
     const doc = new jsPDF();
@@ -108,7 +109,7 @@ export const processTimeSheetData = {
         formatTime(entry.clockOut),
         entry.totalHours,
         entry.regularHours,
-        entry.overTime,
+        entry.overtimeHours,
       ]);
     });
 
@@ -184,7 +185,7 @@ export const processTimeSheetData = {
         0
       );
       const totalOvertimeHours = filteredEntries.reduce(
-        (sum, entry) => sum + parseFloat(entry.overTime || "0"),
+        (sum, entry) => sum + parseFloat(entry.overtimeHours || "0"),
         0
       );
       const totalAllHours = filteredEntries.reduce(

@@ -93,7 +93,7 @@ export function exportDateRangeToPDF(
       formatTime(entry?.clockOut),
       entry?.totalHours || "0",
       entry?.regularHours || "0",
-      entry?.overTime || "0",
+      entry?.overtimeHours || "0",
     ]);
 
     autoTable(doc, {

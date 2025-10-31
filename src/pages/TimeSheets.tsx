@@ -34,7 +34,7 @@ export interface TimeSheetEntry {
   location: string;
   totalHours: string;
   regularHours: string;
-  overTime: string;
+  overtimeHours: string;
   regularPayment: string;
   overTimePayment: string;
   totalPayment: string;

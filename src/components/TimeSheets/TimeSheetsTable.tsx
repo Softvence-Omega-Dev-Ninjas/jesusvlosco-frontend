@@ -96,7 +96,7 @@ const TimeSheetsTable: React.FC<Props> = ({
       const userName = entry?.user?.name || "Unknown User";
       const profileUrl =
         entry?.user?.profileUrl ||
-       `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
       const shiftTitle = entry?.shift?.title || "No Shift Assigned";
       const shiftLocation = entry?.shift?.location || "No Location";
       const rowKey = entry.id || `${entry.user?.id}-${index}`;
@@ -135,19 +135,22 @@ const TimeSheetsTable: React.FC<Props> = ({
             {formatTime(entry.clockOut || "")}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {entry.totalHours || "0"} hours
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             {entry.regularHours || "0"} hours
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {entry.overTime || "0"} hours
+            {entry.overtimeHours || "0"} hours
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            N/A
+            {entry.totalHours || "0"} hours
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
             ${parseFloat(entry.regularPayment || "0").toFixed(2)}
+          </td>
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${parseFloat(entry.regularPayment || "0").toFixed(2)}
+          </td>
+          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${parseFloat(entry.totalPayment || "0").toFixed(2)}
           </td>
           <td className="px-3 py-4 whitespace-nowrap  text-xl text-gray-500">
             <div className="flex items-center gap-5 justify-center">
@@ -193,19 +196,22 @@ const TimeSheetsTable: React.FC<Props> = ({
                 Clock Out
               </th>
               <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Total Hours
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Regular
               </th>
               <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Total Overtime
+                Overtime
               </th>
               <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Paid Time-off
+                Total Hours
               </th>
               <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Regular Payment
+                Reg Pay
+              </th>
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
+                Over Pay
+              </th>
+              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
+                Total Pay
               </th>
               <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
                 Actions
@@ -247,19 +253,22 @@ const TimeSheetsTable: React.FC<Props> = ({
                 Clock Out
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Total Hours
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Regular
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Total Overtime
+                Overtime
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Paid Time-off
+                Total Hours
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Regular Payment
+                Reg Pay
+              </th>
+              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Over Pay
+              </th>
+              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Total Pay
               </th>
               <th className="px-6 py-5 text-left text-xs font-bold uppercase tracking-wider ">
                 Actions
