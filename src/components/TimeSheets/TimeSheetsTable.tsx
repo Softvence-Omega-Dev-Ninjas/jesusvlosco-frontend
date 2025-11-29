@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { TimeSheetEntry } from "@/pages/TimeSheets";
 import { useDeleteTimeClockAdminMutation } from "@/store/api/admin/time-clock/timeClockApi";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
@@ -10,6 +10,52 @@ interface Props {
   filteredTimeSheetData: TimeSheetEntry[];
   formatTime: (timeString: string) => string;
 }
+
+// Small reusable empty state
+const EmptyState: React.FC<{ message?: string }> = ({
+  message = "No data available",
+}) => (
+  <tr>
+    <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
+      {message}
+    </td>
+  </tr>
+);
+
+// Table header — reused for both latest & previous tables
+const TableHeader: React.FC<{ compact?: boolean }> = () => (
+  <thead className="bg-white">
+    <tr>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Name
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider max-w-[250px]">
+        Shift
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Clock In
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Clock Out
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Regular
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Overtime
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Total Hours
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+        Payment
+      </th>
+      <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider">
+        Actions
+      </th>
+    </tr>
+  </thead>
+);
 
 const TimeSheetsTable: React.FC<Props> = ({
   filteredTimeSheetData,
@@ -23,83 +69,90 @@ const TimeSheetsTable: React.FC<Props> = ({
     null
   );
 
-  // Group entries by user
-  const entriesByUser = filteredTimeSheetData.reduce<
-    Record<string, TimeSheetEntry[]>
-  >((acc, entry) => {
-    const userId = entry.user?.id || "unknown";
-    if (!acc[userId]) acc[userId] = [];
-    acc[userId].push(entry);
-    return acc;
-  }, {});
+  // memoized grouping and sorting
+  const { latestEntries, previousEntries } = useMemo(() => {
+    const byUser = filteredTimeSheetData.reduce<
+      Record<string, TimeSheetEntry[]>
+    >((acc, entry) => {
+      const id = entry.user?.id ?? "unknown";
+      if (!acc[id]) acc[id] = [];
+      acc[id].push(entry);
+      return acc;
+    }, {});
 
-  // Sort each user's entries by clockIn descending (latest first)
-  Object.keys(entriesByUser).forEach((userId) => {
-    entriesByUser[userId].sort(
-      (a, b) => b.clockIn?.localeCompare(a.clockIn || "") || 0
+    // sort each user's entries by clockIn desc
+    Object.values(byUser).forEach((arr) =>
+      arr.sort((a, b) => (b.clockIn ?? "").localeCompare(a.clockIn ?? ""))
     );
-  });
 
-  // Split into latest and previous
-  const latestEntries: TimeSheetEntry[] = [];
-  const previousEntries: TimeSheetEntry[] = [];
+    const latest: TimeSheetEntry[] = [];
+    const prev: TimeSheetEntry[] = [];
 
-  Object.values(entriesByUser).forEach((userEntries) => {
-    if (userEntries.length > 0) {
-      latestEntries.push(userEntries[0]); // Latest clock-in
-      if (userEntries.length > 1) previousEntries.push(...userEntries.slice(1)); // The rest
-    }
-  });
-
-  const handleEdit = (entry: TimeSheetEntry) => {
-    setSelectedEntry(entry);
-    setIsEditOpen(true);
-  };
-
-  const onModalClose = () => {
-    setIsEditOpen(false);
-    setSelectedEntry(null);
-  };
-
-  const handleDelete = async (entry: TimeSheetEntry) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+    Object.values(byUser).forEach((arr) => {
+      if (arr.length) latest.push(arr[0]);
+      if (arr.length > 1) prev.push(...arr.slice(1));
     });
 
-    if (result.isConfirmed) {
+    return { latestEntries: latest, previousEntries: prev };
+  }, [filteredTimeSheetData]);
+
+  const openEditModal = useCallback((entry: TimeSheetEntry) => {
+    setSelectedEntry(entry);
+    setIsEditOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsEditOpen(false);
+    setSelectedEntry(null);
+  }, []);
+
+  const confirmAndDelete = useCallback(
+    async (entry: TimeSheetEntry) => {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (!result.isConfirmed) return;
+
       try {
         await deleteTimeClockAdmin(entry.id).unwrap();
-        Swal.fire(
+        await Swal.fire(
           "Deleted!",
           "The time sheet entry has been deleted.",
           "success"
         );
-      } catch (error) {
-        console.error("Error deleting time sheet entry:", error);
-        Swal.fire(
+      } catch (err) {
+        console.error("Delete error:", err);
+        await Swal.fire(
           "Error!",
           "There was an error deleting the time sheet entry.",
           "error"
         );
       }
-    }
-  };
+    },
+    [deleteTimeClockAdmin]
+  );
 
-  const renderTableRows = (data: TimeSheetEntry[]) =>
-    data.map((entry, index) => {
-      const userName = entry?.user?.name || "Unknown User";
+  // row renderer extracted for reuse
+  const renderRow = useCallback(
+    (entry: TimeSheetEntry, idx: number) => {
+      const userName = entry?.user?.name ?? "Unknown User";
       const profileUrl =
-        entry?.user?.profileUrl ||
+        entry?.user?.profileUrl ??
         `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
-      const shiftTitle = entry?.shift?.title || "No Shift Assigned";
-      const shiftLocation = entry?.shift?.location || "No Location";
-      const rowKey = entry.id || `${entry.user?.id}-${index}`;
+      const shiftTitle = entry?.shift?.title ?? "No Shift Assigned";
+      const shiftLocation = entry?.shift?.location ?? "No Location";
+      const rowKey = entry.id ?? `${entry.user?.id ?? "unknown"}-${idx}`;
+
+      const formatHours = (val?: string | number) => `${val ?? 0} hours`;
+      const formatPayment = (val?: string | number) =>
+        `$${(parseFloat(String(val ?? 0)) || 0).toFixed(2)}`;
 
       return (
         <tr key={rowKey} className="hover:bg-gray-50">
@@ -107,6 +160,7 @@ const TimeSheetsTable: React.FC<Props> = ({
             <div className="flex items-center">
               <div className="flex-shrink-0 h-10 w-10">
                 <img
+                  loading="lazy"
                   className="h-10 w-10 rounded-full"
                   src={profileUrl}
                   alt={userName}
@@ -119,60 +173,63 @@ const TimeSheetsTable: React.FC<Props> = ({
               </div>
             </div>
           </td>
+
           <td className="px-3 py-4 space-y-2 max-w-[250px]">
             <div className="text-sm font-semibold text-gray-900 break-words">
               {shiftTitle}
             </div>
             <div className="text-sm text-gray-500 flex items-start gap-1">
-              <IoLocationOutline className=" text-blue-700 flex-shrink-0 mt-1" />
+              <IoLocationOutline className="text-blue-700 flex-shrink-0 mt-1" />
               <p className="break-words">{shiftLocation}</p>
             </div>
           </td>
+
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {formatTime(entry.clockIn || "")}
+            {formatTime(entry.clockIn ?? "")}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {formatTime(entry.clockOut || "")}
+            {formatTime(entry.clockOut ?? "")}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {entry.regularHours || "0"} hours
+            {formatHours(entry.regularHours)}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {entry.overtimeHours || "0"} hours
+            {formatHours(entry.overtimeHours)}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            {entry.totalHours || "0"} hours
+            {formatHours(entry.totalHours)}
           </td>
           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            ${parseFloat(entry.regularPayment || "0").toFixed(2)}
+            {formatPayment(entry.totalPayment)}
           </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            ${parseFloat(entry.regularPayment || "0").toFixed(2)}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-            ${parseFloat(entry.totalPayment || "0").toFixed(2)}
-          </td>
-          <td className="px-3 py-4 whitespace-nowrap  text-xl text-gray-500">
+
+          <td className="px-3 py-4 whitespace-nowrap text-xl text-gray-500">
             <div className="flex items-center gap-5 justify-center">
-              <FaEdit
-                onClick={() => handleEdit(entry)}
-                className="text-blue-500 hover:text-blue-700 cursor-pointer"
-              />
-              <FaTrashAlt
-                onClick={() => handleDelete(entry)}
-                className="text-red-500 hover:text-red-700 cursor-pointer"
-              />
+              <button
+                aria-label={`Edit ${userName} entry`}
+                onClick={() => openEditModal(entry)}
+              >
+                <FaEdit className="text-blue-500 hover:text-blue-700 cursor-pointer" />
+              </button>
+              <button
+                aria-label={`Delete ${userName} entry`}
+                onClick={() => confirmAndDelete(entry)}
+              >
+                <FaTrashAlt className="text-red-500 hover:text-red-700 cursor-pointer" />
+              </button>
             </div>
           </td>
         </tr>
       );
-    });
+    },
+    [formatTime, openEditModal, confirmAndDelete]
+  );
 
   return (
     <section className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
       <UpdateTimeClockModal
         isOpen={isEditOpen}
-        onClose={onModalClose}
+        onClose={closeModal}
         entry={selectedEntry}
       />
 
@@ -181,112 +238,26 @@ const TimeSheetsTable: React.FC<Props> = ({
           Latest Clock-ins
         </h3>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-white text-black">
-            <tr>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Name
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider max-w-[250px]">
-                Shift
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Clock In
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Clock Out
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Regular
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Overtime
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Total Hours
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Reg Pay
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Over Pay
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Total Pay
-              </th>
-              <th className="px-3 py-4 text-left text-xs font-bold uppercase tracking-wider ">
-                Actions
-              </th>
-            </tr>
-          </thead>
+          <TableHeader />
           <tbody className="bg-white divide-y divide-gray-200">
             {latestEntries.length ? (
-              renderTableRows(latestEntries)
+              latestEntries.map((e, i) => renderRow(e, i))
             ) : (
-              <tr>
-                <td
-                  colSpan={10}
-                  className="px-6 py-8 text-center text-gray-500"
-                >
-                  No latest clock-in data found
-                </td>
-              </tr>
+              <EmptyState message="No latest clock-in data found" />
             )}
           </tbody>
         </table>
 
-        <h3 className="px-6  text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
+        <h3 className="px-6 text-gray-700 text-lg border-y border-gray-200 font-semibold py-4 text-center">
           Previous Clock-ins
         </h3>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-white">
-            <tr>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider ">
-                Name
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider max-w-[250px]">
-                Shift
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Clock In
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Clock Out
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Regular
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Overtime
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Total Hours
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Reg Pay
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Over Pay
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                Total Pay
-              </th>
-              <th className="px-6 py-5 text-left text-xs font-bold uppercase tracking-wider ">
-                Actions
-              </th>
-            </tr>
-          </thead>
+          <TableHeader />
           <tbody className="bg-white divide-y divide-gray-200">
             {previousEntries.length ? (
-              renderTableRows(previousEntries)
+              previousEntries.map((e, i) => renderRow(e, i))
             ) : (
-              <tr>
-                <td
-                  colSpan={10}
-                  className="px-6 py-8 text-center text-gray-500"
-                >
-                  No previous clock-in data found
-                </td>
-              </tr>
+              <EmptyState message="No previous clock-in data found" />
             )}
           </tbody>
         </table>
